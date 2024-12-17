@@ -4,13 +4,14 @@
 *.pyc
 *.swp
 *.zip
-*.api_config.dart
+lib/core/api/api_config.dart
 .DS_Store
 .atom/
 .buildlog/
 .history
 .svn/
 migrate_working_dir/
+*.md
 
 # IntelliJ related
 *.iml

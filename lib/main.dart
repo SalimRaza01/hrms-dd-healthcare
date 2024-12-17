@@ -5,7 +5,9 @@ import 'package:database_app/presentation/screens/authentication/login_with_phon
 import 'package:database_app/presentation/screens/authentication/splash_screen.dart';
 import 'package:database_app/presentation/screens/home/OnBoarding.dart';
 import 'package:database_app/presentation/screens/home/apply_leave.dart';
+import 'package:database_app/presentation/screens/home/clockin_screen%20copy.dart';
 import 'package:database_app/presentation/screens/home/dashboard_screen.dart';
+import 'package:database_app/presentation/screens/home/leave_screen%20copy.dart';
 import 'package:database_app/presentation/screens/home/leave_screen.dart';
 import 'package:database_app/presentation/screens/home/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +52,9 @@ class MyApp extends StatelessWidget {
         "/BottomNavigation": (context) => BottomNavigation(),
         "/home": (context) => DashboardScreen(),
         "/applyLeave": (context) => ApplyLeave(),
-             "/profileScreen": (context) => ProfileScreen()
+        "/profileScreen": (context) => ProfileScreen(),
+                "/clockSecondScreen": (context) => ClockInScreenSecond(),
+        "/leaveSecondScreen": (context) => LeaveScreenSecond()
       },
     );
   }

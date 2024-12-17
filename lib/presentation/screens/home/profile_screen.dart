@@ -38,23 +38,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(
                 // color: AppColor.mainThemeColor,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColor.primaryThemeColor,
-                      AppColor.secondaryThemeColor2,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.only(bottomRight: Radius.circular(30), bottomLeft: Radius.circular(30))
-                ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColor.primaryThemeColor,
+                        AppColor.secondaryThemeColor2,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.only(
+                        bottomRight: Radius.circular(30),
+                        bottomLeft: Radius.circular(30))),
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                   child: Column(
                     children: [
                       Container(
-                        width: 100,
+                        width: 120,
                         height: height * 0.14,
                         decoration: BoxDecoration(
                           border: Border.all(
@@ -80,6 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                       ),
+                              SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -104,7 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           )
                         ],
                       ),
-                      SizedBox(height: 8),
+                     
                       Text(
                         employee.email,
                         style: TextStyle(
@@ -130,74 +132,116 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   shadowColor: Colors.black.withOpacity(0.1),
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(15),
                     child: Column(children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Personal Information',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: AppColor.mainThemeColor,
-                            ),
+                      Container(
+                        decoration: BoxDecoration(
+                          border:
+                              Border.all(color: AppColor.mainBGColor, width: 2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Personal Information',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: AppColor.mainTextColor2,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              _buildProfileInfo(
+                                  'Gender :', employee.gender, Icons.person),
+                              _buildProfileInfo('Date of Birth :', employee.dob,
+                                  Icons.calendar_today),
+                              _buildProfileInfo('Place of Birth :',
+                                  employee.placeOfBirth, Icons.location_on),
+                              _buildProfileInfo('Marital Status :',
+                                  employee.maritalStatus, Icons.favorite),
+                              _buildProfileInfo('Nationality :',
+                                  employee.nationality, Icons.flag),
+                            ],
                           ),
-                          SizedBox(height: 5),
-                          _buildProfileInfo('Gender', employee.gender),
-                          _buildProfileInfo('Date of Birth', employee.dob),
-                          _buildProfileInfo(
-                              'Place of Birth', employee.placeOfBirth),
-                          _buildProfileInfo(
-                              'Marital Status', employee.maritalStatus),
-                          _buildProfileInfo(
-                              'Nationality', employee.nationality),
-                          SizedBox(height: 10),
-                        ],
+                        ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Contact Information',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: AppColor.mainThemeColor,
-                            ),
+                        SizedBox(
+                height: 15,
+              ),
+                      Container(
+                        decoration: BoxDecoration(
+                          border:
+                              Border.all(color: AppColor.mainBGColor, width: 2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Contact Information',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: AppColor.mainTextColor2,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              _buildProfileInfo('Contact No :',
+                                  employee.contactNo, Icons.phone),
+                              _buildProfileInfo(
+                                  'Email :', employee.email, Icons.email),
+                              _buildProfileInfo(
+                                  'Emergency Contact :',
+                                  employee.emergencyContact,
+                                  Icons.local_hospital),
+                            ],
                           ),
-                          SizedBox(height: 5),
-                          _buildProfileInfo('Contact No', employee.contactNo),
-                          _buildProfileInfo('Email', employee.email),
-                          _buildProfileInfo(
-                              'Emergency Contact', employee.emergencyContact),
-                          SizedBox(height: 10),
-                        ],
+                        ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Work Information',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: AppColor.mainThemeColor,
-                            ),
+                        SizedBox(
+                height: 15,
+              ),
+                      Container(
+                        decoration: BoxDecoration(
+                          border:
+                              Border.all(color: AppColor.mainBGColor, width: 2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Work Information',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: AppColor.mainTextColor2,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              _buildProfileInfo('EmployeeID :',
+                                  employee.employeeId, Icons.badge),
+                              _buildProfileInfo(
+                                  'Date of Joining :', employee.doj, Icons.work),
+                              _buildProfileInfo('Workplace :', employee.workPlace,
+                                  Icons.business),
+                              _buildProfileInfo('Designation :',
+                                  employee.designation, Icons.assignment),
+                            ],
                           ),
-                          SizedBox(height: 5),
-                          _buildProfileInfo('EmployeeID', employee.employeeId),
-                          _buildProfileInfo('Date of Joining', employee.doj),
-                          _buildProfileInfo('Workplace', employee.workPlace),
-                          _buildProfileInfo(
-                              'Designation', employee.designation),
-                        ],
-                      )
+                        ),
+                      ),
                     ]),
                   ),
                 ),
               ),
-              
               InkWell(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -211,7 +255,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     shadowColor: Colors.black.withOpacity(0.1),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
+                          horizontal: 16, vertical: 13),
                       child: Row(
                         children: [
                           Icon(
@@ -224,8 +268,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Text(
                             'Log-Out',
                             style: TextStyle(
-                              fontSize: 16,     fontWeight: FontWeight.w500,
-                         color: AppColor.mainTextColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: AppColor.mainTextColor,
                             ),
                             textAlign: TextAlign.end,
                           ),
@@ -245,11 +290,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileInfo(String label, String value) {
+  Widget _buildProfileInfo(String label, String value, IconData icon) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3.0),
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
             label,
@@ -259,6 +304,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: const Color.fromARGB(139, 0, 0, 0),
             ),
           ),
+          SizedBox(width: 8),
           Expanded(
             child: Text(
               value,

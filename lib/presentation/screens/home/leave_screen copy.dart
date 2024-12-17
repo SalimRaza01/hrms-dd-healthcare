@@ -9,14 +9,14 @@ import 'package:hive/hive.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:intl/intl.dart';
 
-class LeaveScreen extends StatefulWidget {
-  const LeaveScreen({super.key});
+class LeaveScreenSecond extends StatefulWidget {
+  const LeaveScreenSecond({super.key});
 
   @override
-  State<LeaveScreen> createState() => _LeaveScreenState();
+  State<LeaveScreenSecond> createState() => _LeaveScreenState();
 }
 
-class _LeaveScreenState extends State<LeaveScreen> {
+class _LeaveScreenState extends State<LeaveScreenSecond> {
   String? empID;
   int touchedIndex = -1;
   String _selectedText = 'Pending';
@@ -87,9 +87,9 @@ class _LeaveScreenState extends State<LeaveScreen> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
-                              'Leave Summary',
+                              'Leave Balance',
                               style: TextStyle(
-                                  fontSize: height * 0.023,
+                                  fontSize: height * 0.025,
                                   color: Colors.white,
                                   fontWeight: FontWeight.w500),
                             ),
@@ -97,7 +97,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
                               height: 10,
                             ),
                             Text(
-                              'Submit Leave',
+                              'Leave History',
                               style: TextStyle(
                                 fontSize: height * 0.018,
                                 color: Colors.white,
@@ -121,6 +121,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
                   child: SizedBox(
                     height: height * 0.69,
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Card(
                           color: Colors.white,
@@ -135,16 +136,6 @@ class _LeaveScreenState extends State<LeaveScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Leave Balance',
-                                  style: TextStyle(
-                                      fontSize: height * 0.018,
-                                      color: AppColor.mainTextColor,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                                SizedBox(
-                                  height: 7,
-                                ),
                                 FutureBuilder<LeaveBalance>(
                                     future: fetchLeaves(empID!),
                                     builder: (context, snapshot) {
@@ -214,14 +205,14 @@ class _LeaveScreenState extends State<LeaveScreen> {
                           ),
                         ),
                         SizedBox(
-                          height: 15,
+                          height: 20,
                         ),
                         Card(
                           color: Colors.white,
                           elevation: 4,
                           margin: EdgeInsets.all(0),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           shadowColor: Colors.black.withOpacity(0.1),
                           child: Padding(
@@ -240,7 +231,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
                           height: 15,
                         ),
                         SizedBox(
-                          height: height * 0.47,
+                          height: height * 0.49,
                           child: FutureBuilder<List<LeaveHistory>>(
                               future: _leaveHistory,
                               builder: (context, snapshot) {
@@ -262,8 +253,6 @@ class _LeaveScreenState extends State<LeaveScreen> {
                                     itemCount: items.length,
                                     itemBuilder: (context, index) {
                                       final leave = items[index];
-                                      final applyDate =
-                                          DateTime.parse(leave.dateTime);
                                       final startDate =
                                           DateTime.parse(leave.leaveStartDate);
                                       final endDate =
@@ -280,132 +269,114 @@ class _LeaveScreenState extends State<LeaveScreen> {
                                         shadowColor:
                                             Colors.black.withOpacity(0.1),
                                         child: Padding(
-                                          padding: const EdgeInsets.all(16),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 10),
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                DateFormat('dd MMM yyyy')
-                                                    .format(applyDate),
-                                                style: TextStyle(
-                                                  fontSize: height * 0.02,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: AppColor.mainTextColor,
-                                                ),
-                                              ),
-                                              SizedBox(height: 10),
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  color: AppColor.mainBGColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 10),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      // Leave Date Section
-                                                      Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            'Leave Date',
-                                                            style: TextStyle(
-                                                              fontSize: height *
-                                                                  0.016,
-                                                              color: AppColor
-                                                                  .mainTextColor
-                                                                  .withOpacity(
-                                                                      0.7),
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 5),
-                                                          Text(
-                                                            '${DateFormat('dd-MMM-yy').format(startDate)} - ${DateFormat('dd-MMM-yy').format(endDate)}',
-                                                            style: TextStyle(
-                                                              fontSize:
-                                                                  height * 0.02,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              color: AppColor
-                                                                  .mainTextColor,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-
-                                                      Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            'Leave Deducted',
-                                                            style: TextStyle(
-                                                              fontSize: height *
-                                                                  0.016,
-                                                              color: AppColor
-                                                                  .mainTextColor
-                                                                  .withOpacity(
-                                                                      0.7),
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 5),
-                                                          Text(
-                                                            '${leave.leaveType}',
-                                                            style: TextStyle(
-                                                              fontSize:
-                                                                  height * 0.02,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              color: AppColor
-                                                                  .mainTextColor,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(height: 15),
                                               Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
                                                 children: [
-                                                  Icon(
-                                                    Icons.circle,
-                                                    size: height * 0.02,
-                                                    color: leave.status ==
-                                                            'Approved'
-                                                        ? Colors.green
-                                                        : leave.status ==
-                                                                'Pending'
-                                                            ? Colors.orange
-                                                            : Colors.red,
-                                                  ),
-                                                  SizedBox(width: 8),
                                                   Text(
-                                                    leave.status,
+                                                    leave.totalDays == '1'
+                                                        ? 'Full Day Application'
+                                                        : leave.totalDays ==
+                                                                '0.5'
+                                                            ? 'Half-Day Application'
+                                                            : '${leave.totalDays} Days Application',
                                                     style: TextStyle(
-                                                      fontSize: height * 0.016,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: AppColor
-                                                          .mainTextColor,
+                                                        fontSize:
+                                                            height * 0.014,
+                                                        color: Color.fromARGB(
+                                                            141, 0, 0, 0)),
+                                                  ),
+                                                  Container(
+                                                    decoration: BoxDecoration(
+                                                        color: leave.status ==
+                                                                'Pending'
+                                                            ? const Color
+                                                                .fromARGB(116,
+                                                                255, 198, 124)
+                                                            : leave.status ==
+                                                                    'Approved'
+                                                                ? Colors
+                                                                    .lightGreen
+                                                                : Colors
+                                                                    .redAccent,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(5)),
+                                                    child: Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 8,
+                                                          vertical: 5),
+                                                      child: Text(
+                                                        '${leave.status}',
+                                                        style: TextStyle(
+                                                          fontSize:
+                                                              height * 0.014,
+                                                          color: leave.status ==
+                                                                  'Pending'
+                                                              ? const Color
+                                                                  .fromARGB(255,
+                                                                  227, 129, 0)
+                                                              : leave.status ==
+                                                                      'Approved'
+                                                                  ? Colors
+                                                                      .lightGreen
+                                                                  : Colors
+                                                                      .redAccent,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                                      ),
                                                     ),
                                                   ),
                                                 ],
                                               ),
+                                              SizedBox(
+                                                height: 5,
+                                              ),
+                                              Text(
+                                                '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
+                                                style: TextStyle(
+                                                  fontSize: height * 0.02,
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                      AppColor.mainTextColor2,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 5,
+                                              ),
+                                              Text(
+                                                leave.leaveType == 'earnedLeave'
+                                                    ? 'Earned'
+                                                    : leave.leaveType ==
+                                                            'medicalLeave'
+                                                        ? 'Medical'
+                                                        : leave.leaveType ==
+                                                                'casualLeave'
+                                                            ? 'Casual'
+                                                            : leave.leaveType ==
+                                                                    'compoffLeave'
+                                                                ? 'Comp-off'
+                                                                : leave.leaveType ==
+                                                                        'paternityLeave'
+                                                                    ? 'Paternity'
+                                                                    : leave.leaveType ==
+                                                                            'maternityLeave'
+                                                                        ? 'Maternity'
+                                                                        : leave
+                                                                            .leaveType,
+                                                style: TextStyle(
+                                                    color: AppColor
+                                                        .mainThemeColor),
+                                              )
                                             ],
                                           ),
                                         ),
@@ -498,11 +469,11 @@ class _LeaveScreenState extends State<LeaveScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50),
+          borderRadius: BorderRadius.circular(5),
           color: activeColor,
         ),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 5),
+          padding: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 8),
           child: Text(
             text,
             style: TextStyle(
