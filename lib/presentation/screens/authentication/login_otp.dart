@@ -19,7 +19,6 @@ class _LoginOtpState extends State<LoginOtp> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     focusNode = FocusNode();
   }

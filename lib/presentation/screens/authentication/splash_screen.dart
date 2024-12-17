@@ -1,7 +1,6 @@
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:database_app/presentation/screens/authentication/login_screen.dart';
 import 'package:database_app/presentation/screens/home/bottom_navigation.dart';
-
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart'; 
 

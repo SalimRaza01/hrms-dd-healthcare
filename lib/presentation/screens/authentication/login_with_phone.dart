@@ -18,7 +18,7 @@ class _LoginWithPhoneState extends State<LoginWithPhone> {
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: AppColor.bgColor,
-      // ignore: avoid_unnecessary_containers
+ 
       body: Stack(
         alignment: AlignmentDirectional.topCenter,
         children: [
@@ -92,7 +92,7 @@ class _LoginWithPhoneState extends State<LoginWithPhone> {
                                 AppColor.primaryThemeColor,
                                 AppColor.secondaryThemeColor2,
                               ]),
-                          // color: Color.fromARGB(255, 38, 56, 255),
+                      
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Padding(
@@ -119,7 +119,7 @@ class _LoginWithPhoneState extends State<LoginWithPhone> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                            // color: Color(0xFF795FFC),
+                      
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                                 width: 1,
