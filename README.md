@@ -1,6 +1,6 @@
 # DD - HRMS APP
 
-![Group 5](https://github.com/user-attachments/assets/77972528-1dfc-46ed-acfa-c189d0c0a615)
+![Group 5](https://github.com/user-attachments/assets/5e1ac24f-330e-49ad-9833-730e8c84920b)
 
 
 ## 🛠️ Technology Stack
