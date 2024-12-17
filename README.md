@@ -1,16 +1,21 @@
-# database_app
+# DD - HRMS APP
 
-A new Flutter project.
+![Group 5](https://github.com/user-attachments/assets/77972528-1dfc-46ed-acfa-c189d0c0a615)
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
+## 🛠️ Technology Stack
 
-A few resources to get you started if this is your first Flutter project:
+### Flutter
+- Provides a smooth, cross-platform experience on Android and iOS.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Multiprovider
+- Efficient state management using multiple providers in Flutter.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Dio
+- Powerful HTTP client for API interactions, supporting interceptors, global configuration, and network requests.
+
+### Background Service
+- Executes long-running tasks (e.g., data syncing, notifications) even when the app is in the background.
+
+
+---
