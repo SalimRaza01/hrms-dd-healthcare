@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_interpolation_to_compose_strings
+
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/model/models.dart';
 import 'package:database_app/core/theme/app_colors.dart';
@@ -120,9 +122,6 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                             DateTime dateTime = DateTime.parse(item.inTime);
                             DateTime dateTime2 = DateTime.parse(item.outTime);
                             Duration duration = dateTime2.difference(dateTime);
-
-                            print(
-                                'In time: $dateTime, Out time: $dateTime2, Duration: $duration');
 
                             int hours = duration.inHours;
                             int minutes = duration.inMinutes % 60;
@@ -254,7 +253,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                         AppColor.mainTextColor),
                                               ),
                                               SizedBox(
-                                                height: 5,
+                                                height: height * 0.005,
                                               ),
                                               Text(
                                                 'Clock in',
@@ -287,7 +286,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                         AppColor.mainTextColor),
                                               ),
                                               SizedBox(
-                                                height: 5,
+                                                height: height * 0.005,
                                               ),
                                               Text(
                                                 'Clock out',
@@ -318,7 +317,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                 ),
                                               ),
                                               SizedBox(
-                                                height: 5,
+                                                height: height * 0.005,
                                               ),
                                               Text(
                                                 'Total Hrs',
@@ -331,7 +330,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                             ],
                                           ),
                                           SizedBox(
-                                            width: 2,
+                                            width: width * 0.02,
                                           )
                                         ],
                                       ),

@@ -94,7 +94,7 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
                                   fontWeight: FontWeight.w500),
                             ),
                             SizedBox(
-                              height: 10,
+                              height: height* 0.01,
                             ),
                             Text(
                               'Leave History',
@@ -157,36 +157,36 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
                                               leaveWidget(height, width,
                                                   'Casual', leave.casualLeave),
                                               SizedBox(
-                                                width: 10,
+                                                width: width * 0.025,
                                               ),
                                               leaveWidget(
                                                   height,
                                                   width,
                                                   'Medical',
                                                   leave.medicalLeave),
-                                              SizedBox(
-                                                width: 10,
+                                           SizedBox(
+                                                width: width * 0.025,
                                               ),
                                               leaveWidget(height, width,
                                                   'Earned', leave.earnedLeave),
-                                              SizedBox(
-                                                width: 10,
+                                           SizedBox(
+                                                width: width * 0.025,
                                               ),
                                               leaveWidget(
                                                   height,
                                                   width,
                                                   'Maternity',
                                                   leave.maternityLeave),
-                                              SizedBox(
-                                                width: 10,
+                                           SizedBox(
+                                                width: width * 0.025,
                                               ),
                                               leaveWidget(
                                                   height,
                                                   width,
                                                   'Paternity',
                                                   leave.paternityLeave),
-                                              SizedBox(
-                                                width: 10,
+                                           SizedBox(
+                                                width: width * 0.025,
                                               ),
                                               leaveWidget(
                                                   height,
