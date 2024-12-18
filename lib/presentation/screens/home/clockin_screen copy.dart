@@ -96,8 +96,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                     ],
                   ),
                         SizedBox(height: height * 0.01,),
-                  SizedBox(
-                    height: height * 0.7,
+                  Expanded(
+               
                     child: FutureBuilder<List<Attendance>>(
                       future: attendenceLog,
                       builder: (context, snapshot) {
@@ -152,6 +152,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                               String punchOut =
                                   "${dateTime2.hour.toString().padLeft(2, '0')}:${dateTime2.minute.toString().padLeft(2, '0')}";
               
+      
                               return InkWell(
                                   onTap: () {
                                     if (item.punchRecords.isNotEmpty) {

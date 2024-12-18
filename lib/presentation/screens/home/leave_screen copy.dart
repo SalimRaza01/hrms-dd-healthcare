@@ -237,8 +237,8 @@ mainAxisAlignment: MainAxisAlignment.spaceAround,
                     SizedBox(
                       height: 15,
                     ),
-                    SizedBox(
-                      height: height * 0.49,
+               Expanded(
+            
                       child: FutureBuilder<List<LeaveHistory>>(
                           future: _leaveHistory,
                           builder: (context, snapshot) {

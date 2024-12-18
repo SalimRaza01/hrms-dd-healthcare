@@ -1,7 +1,3 @@
-
-
-
-
 // ignore_for_file: unused_import
 
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
@@ -55,7 +51,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       earnedLeave = box.get('earned');
       paternityLeave = box.get('paternity');
 
-      
       leaveList = [
         Leave('Casual Leave', casualLeave!),
         Leave('Medical Leave', medicalLeave!),
@@ -109,7 +104,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               _selectedLeaveType = value.name;
                               startDateController.clear();
                               endDateController.clear();
-                              
                             }
                           });
                         },
@@ -180,153 +174,74 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             SizedBox(
                               height: 15,
                             ),
-                            Column(
-                              children: [
-                                Card(
-                                  color: Colors.white,
-                                  elevation: 4,
-                                  margin: EdgeInsets.all(0),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                            Card(
+                              color: Colors.white,
+                              elevation: 4,
+                              margin: EdgeInsets.all(0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              shadowColor: Colors.black.withOpacity(0.1),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 15),
+                                child: SizedBox(
+                                    height: height * 0.12,
+                                    width: width,
+                                    child: TextFormField(
+                                      textAlignVertical: TextAlignVertical.top,
+                                      keyboardType: TextInputType.multiline,
+                                      maxLines: null,
+                                      expands: true,
+                                      controller: reasonController,
+                                      style: TextStyle(
+                                        overflow: TextOverflow.ellipsis,
+                                        color:
+                                            const Color.fromARGB(255, 0, 0, 0),
+                                      ),
+                                      decoration: InputDecoration(
+                                        filled: false,
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.always,
+                                        enabledBorder: OutlineInputBorder(
+                                            borderSide: BorderSide.none),
+                                        border: OutlineInputBorder(
+                                            borderSide: BorderSide.none),
+                                        focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide.none),
+                                        label: Text('Describe Leave Reason'),
+                                      ),
+                                    )),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            Visibility(
+                              visible: _selectedLeaveType == 'Medical Leave',
+                              child: InkWell(
+                                onTap: () async {},
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColor.mainThemeColor,
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                  shadowColor: Colors.black.withOpacity(0.1),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
-                                        vertical: 15),
-                                    child: SizedBox(
-                                        height: height * 0.12,
-                                        width: width,
-                                        child: TextFormField(
-                                          textAlignVertical:
-                                              TextAlignVertical.top,
-                                          keyboardType: TextInputType.multiline,
-                                          maxLines: null,
-                                          expands: true,
-                                          
-                                          controller: reasonController,
-                                          style: TextStyle(
-                                            overflow: TextOverflow.ellipsis,
-                                            color: const Color.fromARGB(
-                                                255, 0, 0, 0),
-                                          ),
-                                          decoration: InputDecoration(
-                                            filled: false,
-                                            floatingLabelBehavior:
-                                                FloatingLabelBehavior.always,
-                                            enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide.none),
-                                            border: OutlineInputBorder(
-                                                borderSide: BorderSide.none),
-                                            focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide.none),
-                                            label:
-                                                Text('Describe Leave Reason'),
-                                          ),
-                                        )),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Visibility(
-                                  visible:
-                                      _selectedLeaveType == 'Medical Leave',
-                                  child: InkWell(
-                                    onTap: () async {
-                                      
-                                      
-                                      
-                                      
-                                      
-
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: AppColor.mainThemeColor,
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 50, vertical: 10),
-                                        child: Text(
-                                          "Upload Prescription",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 15),
-                                        ),
-                                      ),
+                                        horizontal: 50, vertical: 10),
+                                    child: Text(
+                                      "Upload Prescription",
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 15),
                                     ),
                                   ),
-                                )
-                              ],
+                                ),
+                              ),
                             ),
                             SizedBox(
                               height: 50,
                             ),
                             InkWell(
-                              
-                              
-
-                              
-
-                              
-                              
-                              
-                              
-
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-                              
-
-                              
-                              
                               onTap: () async {
                                 num? totalDays;
                                 print(_selectedLeaveType!);
@@ -454,22 +369,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                     return;
                                   }
                                 }
-
-                                
-                                
-                                
-                                
-                                
-                                
-                                
-                                
-                                
-                                
-                                
-
-                                
                               },
-
                               child: Container(
                                 width: width / 2,
                                 decoration: BoxDecoration(
@@ -480,7 +380,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                         AppColor.primaryThemeColor,
                                         AppColor.secondaryThemeColor2,
                                       ]),
-                                  
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Padding(
@@ -503,7 +402,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
-
                       TextButton(
                           onPressed: () => showCupertinoModalBottomSheet(
                                 expand: true,
@@ -515,7 +413,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                 builder: (context) => LeavePolicyScreen(),
                               ),
                           child: Text('See Leave Policy'))
-                      
                     ],
                   ),
                 ),
@@ -556,8 +453,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                   border: OutlineInputBorder(borderSide: BorderSide.none),
                   focusedBorder:
                       OutlineInputBorder(borderSide: BorderSide.none),
-
-                  
                   hintText: 'Select End Date',
                 ),
                 onTap: () {
@@ -874,8 +769,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                   border: OutlineInputBorder(borderSide: BorderSide.none),
                   focusedBorder:
                       OutlineInputBorder(borderSide: BorderSide.none),
-
-                  
                   hintText: 'Select Time',
                 ),
                 onTap: () {
@@ -884,7 +777,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                     context: context,
                     builder: (context) {
                       return Container(
-                        
                         height: height * 0.3,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
@@ -1009,8 +901,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                   border: OutlineInputBorder(borderSide: BorderSide.none),
                   focusedBorder:
                       OutlineInputBorder(borderSide: BorderSide.none),
-
-                  
                   hintText: 'Select Time',
                 ),
                 onTap: () {
@@ -1019,7 +909,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                     context: context,
                     builder: (context) {
                       return Container(
-                        
                         height: height * 0.3,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
@@ -1143,7 +1032,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       onTap: () {
         setState(() {
           _selectedText = text;
-          
         });
       },
       child: Container(
