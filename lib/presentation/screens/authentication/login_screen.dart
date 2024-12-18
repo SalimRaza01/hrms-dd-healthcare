@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:database_app/presentation/screens/authentication/login_with_phone.dart';
@@ -17,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool showError = false;
+  bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -89,10 +88,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: height * 0.07,
                           child: TextField(
                             controller: _passwordController,
-                            obscureText: true,
+                            obscureText: !_isPasswordVisible, 
                             decoration: InputDecoration(
                               labelText: 'Password',
-                              suffixIcon: Icon(Icons.remove_red_eye),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _isPasswordVisible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: AppColor.mainTextColor,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _isPasswordVisible = !_isPasswordVisible;
+                                  });
+                                },
+                              ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -117,17 +128,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     InkWell(
                       onTap: () async {
-                          if (_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
-                            print('sign in button');
-                            await authProvider.login(
-                                _emailController.text.toString(), _passwordController.text.toString(), context);
-                     
-                          } else {
-                            setState(() {
-                              showError = true;
-                            });
-                          }
-                        },
+                        if (_emailController.text.isNotEmpty &&
+                            _passwordController.text.isNotEmpty) {
+                          print('sign in button');
+                          await authProvider.login(
+                              _emailController.text.toString(),
+                              _passwordController.text.toString(),
+                              context);
+                        } else {
+                          setState(() {
+                            showError = true;
+                          });
+                        }
+                      },
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -144,11 +157,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               horizontal: 52, vertical: 12),
                           child: Center(
                             child: Text(
-                                    'Sign In',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500),
-                                  ),
+                              'Sign In',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500),
+                            ),
                           ),
                         ),
                       ),

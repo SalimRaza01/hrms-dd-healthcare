@@ -72,7 +72,7 @@ class Attendance {
     required this.weekOff,
   });
 
-  // Factory constructor to create an Attendance object from JSON
+
   factory Attendance.fromJson(Map<String, dynamic> json) {
     return Attendance(
       employeeName: json['EmployeeName'] ?? '',
@@ -148,7 +148,7 @@ class LeaveHistory {
     );
   }
 
-  // Convert Attendance object to JSON if needed
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

@@ -1,7 +1,9 @@
 import 'package:database_app/core/theme/app_colors.dart';
+import 'package:database_app/presentation/screens/authentication/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/model/models.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -15,6 +17,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     employeeProfile = fetchEmployeeDetails();
+  }
+
+
+  Future<void> logout() async {
+    var box = await Hive.openBox('authBox');
+    
+box.put('token', null);
+
   }
 
   @override
@@ -36,7 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             final employee = snapshot.data!;
             return ListView(children: [
               Container(
-                // color: AppColor.mainThemeColor,
+                
                 decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -243,6 +253,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               InkWell(
+                onTap: () async {
+                await  logout();
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SplashScreen()));
+                },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Card(

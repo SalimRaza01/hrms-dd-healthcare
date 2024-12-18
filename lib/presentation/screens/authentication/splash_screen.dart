@@ -1,5 +1,5 @@
 import 'package:database_app/core/theme/app_colors.dart';
-import 'package:database_app/presentation/screens/authentication/login_screen.dart';
+import 'package:database_app/presentation/screens/home/OnBoarding.dart';
 import 'package:database_app/presentation/screens/home/bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart'; 
@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
       } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
+          MaterialPageRoute(builder: (context) => OnboardingScreen()),
         );
       }
     });

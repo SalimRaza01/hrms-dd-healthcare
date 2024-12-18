@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+
 
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:database_app/presentation/screens/authentication/login_otp.dart';
@@ -75,7 +75,7 @@ class _LoginWithPhoneState extends State<LoginWithPhone> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          // prefix: Icon(Icons.lock, color: Colors.black87,)
+                          
                         ),
                       ),
                     ),

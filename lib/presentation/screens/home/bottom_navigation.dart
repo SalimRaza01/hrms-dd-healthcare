@@ -1,5 +1,5 @@
 
-// ignore_for_file: prefer_const_constructors
+
 
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:database_app/presentation/screens/home/clockin_screen%20copy.dart';
@@ -47,7 +47,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
               currentPageIndex = index;
             });
           },
-          // indicatorColor: AppColor.mainThemeColor,
+          
           indicatorColor: Colors.transparent,
           selectedIndex: currentPageIndex,
           destinations: <Widget>[

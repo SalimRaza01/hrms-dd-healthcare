@@ -39,7 +39,7 @@ class OnboardingScreen extends StatelessWidget {
         colors: pages.map((p) => p.bgColor).toList(),
         radius: screenWidth * 0.1,
         nextButtonBuilder: (context) => Padding(
-          padding: const EdgeInsets.only(left: 3), // visual center
+          padding: const EdgeInsets.only(left: 3), 
           child: Icon(
             Icons.navigate_next,
             size: screenWidth * 0.08,
@@ -49,16 +49,16 @@ class OnboardingScreen extends StatelessWidget {
         itemBuilder: (index) {
           final page = pages[index % pages.length];
 
-          // Navigate to LoginScreen when the last page is reached
+          
           if (index == pages.length) {
-            // Use addPostFrameCallback to delay the navigation until after the frame is rendered
+            
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => LoginScreen()),
               );
             });
-            return SizedBox(); // Return an empty widget until the navigation occurs
+            return SizedBox(); 
           } else {
             return SafeArea(
               child: _Page(page: page),

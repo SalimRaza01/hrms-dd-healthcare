@@ -8,7 +8,6 @@ import 'package:database_app/presentation/screens/home/apply_leave.dart';
 import 'package:database_app/presentation/screens/home/clockin_screen%20copy.dart';
 import 'package:database_app/presentation/screens/home/dashboard_screen.dart';
 import 'package:database_app/presentation/screens/home/leave_screen%20copy.dart';
-import 'package:database_app/presentation/screens/home/leave_screen.dart';
 import 'package:database_app/presentation/screens/home/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -48,12 +47,11 @@ class MyApp extends StatelessWidget {
         "/Login": (context) => const LoginScreen(),
         "/LoginWithPhone": (context) => LoginWithPhone(),
         "/OTP": (context) => LoginOtp(),
-        "/Leave": (context) => LeaveScreen(),
         "/BottomNavigation": (context) => BottomNavigation(),
         "/home": (context) => DashboardScreen(),
         "/applyLeave": (context) => ApplyLeave(),
         "/profileScreen": (context) => ProfileScreen(),
-                "/clockSecondScreen": (context) => ClockInScreenSecond(),
+        "/clockSecondScreen": (context) => ClockInScreenSecond(),
         "/leaveSecondScreen": (context) => LeaveScreenSecond()
       },
     );

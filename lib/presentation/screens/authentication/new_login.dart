@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+
 
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/theme/app_colors.dart';

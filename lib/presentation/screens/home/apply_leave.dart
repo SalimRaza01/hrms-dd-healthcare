@@ -1,4 +1,8 @@
-// ignore_for_file: unused_element, unrelated_type_equality_checks
+
+
+
+
+// ignore_for_file: unused_import
 
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:database_app/core/api/api.dart';
@@ -6,7 +10,7 @@ import 'package:database_app/core/theme/app_colors.dart';
 import 'package:database_app/presentation/screens/home/leave_policy.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -19,7 +23,7 @@ class ApplyLeave extends StatefulWidget {
 
 class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   String _selectedText = 'Full Day';
-  String? _selectedLeaveType = 'Casual Leave';
+  String? _selectedLeaveType;
   Color? activeColor;
   Color? activeText;
   TextEditingController startDateController = TextEditingController();
@@ -51,7 +55,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       earnedLeave = box.get('earned');
       paternityLeave = box.get('paternity');
 
-      // Populate the leaveList
+      
       leaveList = [
         Leave('Casual Leave', casualLeave!),
         Leave('Medical Leave', medicalLeave!),
@@ -62,54 +66,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       ];
     });
   }
-
-  // Future<void> getleaveBalance() async {
-  //   var box = await Hive.openBox('authBox');
-
-  //   setState(() {
-  //     casualLeave = box.get('casual');
-  //     medicalLeave = box.get('medical');
-  //     maternityLeave = box.get('maternity');
-  //     compoffLeave = box.get('compoff');
-  //     earnedLeave = box.get('earned');
-  //     paternityLeave = box.get('paternity');
-  //   });
-  // }
-  // List<PlatformFile>? _paths;
-
-  // void uplaodPrescription(List<PlatformFile> files) async {
-  //   for (var file in files) {
-  //     if (file.path != null) {
-  //       // setState(() {
-  //       //   _isLoading = true;
-  //       // });
-  //       // var request = http.MultipartRequest(
-  //       //   "POST",
-  //       //   Uri.parse('$patientFileupload/${widget.deviceId}/${widget.uhid}'),
-  //       // );
-  //       // print(widget.userId);
-  //       // request.files.add(await http.MultipartFile.fromPath(
-  //       //   'file',
-  //       //   file.path!,
-  //       // ));
-
-  //       // var response = await request.send();
-  //       // if (response.statusCode == 200) {
-  //       //   print(response.statusCode);
-  //       //   var responseData = await response.stream.bytesToString();
-  //       //   print("File uploaded successfully");
-  //       //   setState(() {
-  //       //     _isLoading = false;
-  //       //   });
-  //       //   print("Server Response: $responseData");
-  //       // } else {
-  //       //   print("Failed to upload file. Status Code: ${response.statusCode}");
-  //       // }
-  //     } else {
-  //       print("File path is null");
-  //     }
-  //   }
-  // }
 
   @override
   void initState() {
@@ -132,6 +88,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                 child: Padding(
                   padding: const EdgeInsets.all(15),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                         'Apply Leave',
@@ -143,18 +100,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                       SizedBox(
                         height: 10,
                       ),
-                      // CustomDropdown<String>(
-
-                      //   hintText: 'Select Leave Type',
-                      //   items: _list,
-                      //   initialItem: _list[0],
-                      //   excludeSelected: false,
-                      //   onChanged: (value) {
-                      //     setState(() {
-                      //       _selectedLeaveType = value!;
-                      //     });
-                      //   },
-                      // ),
                       CustomDropdown<Leave>(
                         hintText: 'Select Leave Type',
                         items: leaveList,
@@ -162,6 +107,9 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                           setState(() {
                             if (value != null) {
                               _selectedLeaveType = value.name;
+                              startDateController.clear();
+                              endDateController.clear();
+                              
                             }
                           });
                         },
@@ -172,350 +120,390 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                           );
                         },
                       ),
-
-                      SizedBox(
-                        height: 15,
-                      ),
                       Visibility(
-                        visible: _selectedLeaveType == 'Casual Leave' ||
-                            _selectedLeaveType == 'Comp-off Leave',
-                        child: Card(
-                          color: Colors.white,
-                          elevation: 4,
-                          margin: EdgeInsets.all(0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          shadowColor: Colors.black.withOpacity(0.1),
-                          child: Padding(
-                            padding: EdgeInsets.all(3),
-                            child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  _selectButton('Full Day', height, width),
-                                  _selectButton('1st Half', height, width),
-                                  _selectButton('2nd Half', height, width),
-                                ]),
-                          ),
-                        ),
-                      ),
-                      Visibility(
-                        visible: _selectedLeaveType == 'Casual Leave' ||
-                            _selectedLeaveType == 'Comp-off Leave',
-                        child: SizedBox(
-                          height: 15,
-                        ),
-                      ),
-
-                      Visibility(
-                          visible: _selectedLeaveType == 'Casual Leave' ||
-                              _selectedLeaveType == 'Comp-off Leave',
-                          child: startDateLeave(height, width, context)),
-
-                      Visibility(
-                          visible: _selectedLeaveType != 'Casual Leave' &&
-                              _selectedLeaveType != 'Comp-off Leave',
-                          child: Column(
-                            children: [
-                              startDateLeave(height, width, context),
-                              SizedBox(
+                        visible: _selectedLeaveType != null,
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 15,
+                            ),
+                            Visibility(
+                              visible: _selectedLeaveType == 'Casual Leave' ||
+                                  _selectedLeaveType == 'Comp-off Leave',
+                              child: Card(
+                                color: Colors.white,
+                                elevation: 4,
+                                margin: EdgeInsets.all(0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                shadowColor: Colors.black.withOpacity(0.1),
+                                child: Padding(
+                                  padding: EdgeInsets.all(3),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        _selectButton(
+                                            'Full Day', height, width),
+                                        _selectButton(
+                                            '1st Half', height, width),
+                                        _selectButton(
+                                            '2nd Half', height, width),
+                                      ]),
+                                ),
+                              ),
+                            ),
+                            Visibility(
+                              visible: _selectedLeaveType == 'Casual Leave' ||
+                                  _selectedLeaveType == 'Comp-off Leave',
+                              child: SizedBox(
                                 height: 15,
                               ),
-                              endDateLeave(height, width, context)
-                            ],
-                          )),
-                      SizedBox(
-                        height: 15,
-                      ),
+                            ),
+                            Visibility(
+                                visible: _selectedLeaveType == 'Casual Leave' ||
+                                    _selectedLeaveType == 'Comp-off Leave',
+                                child: startDateLeave(height, width, context)),
+                            Visibility(
+                                visible: _selectedLeaveType != 'Casual Leave' &&
+                                    _selectedLeaveType != 'Comp-off Leave',
+                                child: Column(
+                                  children: [
+                                    startDateLeave(height, width, context),
+                                    SizedBox(
+                                      height: 15,
+                                    ),
+                                    endDateLeave(height, width, context)
+                                  ],
+                                )),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            Column(
+                              children: [
+                                Card(
+                                  color: Colors.white,
+                                  elevation: 4,
+                                  margin: EdgeInsets.all(0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  shadowColor: Colors.black.withOpacity(0.1),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 15),
+                                    child: SizedBox(
+                                        height: height * 0.12,
+                                        width: width,
+                                        child: TextFormField(
+                                          textAlignVertical:
+                                              TextAlignVertical.top,
+                                          keyboardType: TextInputType.multiline,
+                                          maxLines: null,
+                                          expands: true,
+                                          
+                                          controller: reasonController,
+                                          style: TextStyle(
+                                            overflow: TextOverflow.ellipsis,
+                                            color: const Color.fromARGB(
+                                                255, 0, 0, 0),
+                                          ),
+                                          decoration: InputDecoration(
+                                            filled: false,
+                                            floatingLabelBehavior:
+                                                FloatingLabelBehavior.always,
+                                            enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide.none),
+                                            border: OutlineInputBorder(
+                                                borderSide: BorderSide.none),
+                                            focusedBorder: OutlineInputBorder(
+                                                borderSide: BorderSide.none),
+                                            label:
+                                                Text('Describe Leave Reason'),
+                                          ),
+                                        )),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Visibility(
+                                  visible:
+                                      _selectedLeaveType == 'Medical Leave',
+                                  child: InkWell(
+                                    onTap: () async {
+                                      
+                                      
+                                      
+                                      
+                                      
 
-                      Column(
-                        children: [
-                          Card(
-                            color: Colors.white,
-                            elevation: 4,
-                            margin: EdgeInsets.all(0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            shadowColor: Colors.black.withOpacity(0.1),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              child: SizedBox(
-                                  height: height * 0.12,
-                                  width: width,
-                                  child: TextFormField(
-                                    textAlignVertical: TextAlignVertical.top,
-                                    keyboardType: TextInputType.multiline,
-                                    maxLines: null,
-                                    expands: true,
-                                    // readOnly: true,
-                                    controller: reasonController,
-                                    style: TextStyle(
-                                      overflow: TextOverflow.ellipsis,
-                                      color: const Color.fromARGB(255, 0, 0, 0),
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: AppColor.mainThemeColor,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 50, vertical: 10),
+                                        child: Text(
+                                          "Upload Prescription",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 15),
+                                        ),
+                                      ),
                                     ),
-                                    decoration: InputDecoration(
-                                      filled: false,
-                                      floatingLabelBehavior:
-                                          FloatingLabelBehavior.always,
-                                      enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide.none),
-                                      border: OutlineInputBorder(
-                                          borderSide: BorderSide.none),
-                                      focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide.none),
-                                      label: Text('Describe Leave Reason'),
-                                    ),
-                                  )),
+                                  ),
+                                )
+                              ],
                             ),
-                          ),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          Visibility(
-                            visible: _selectedLeaveType == 'Medical Leave',
-                            child: InkWell(
+                            SizedBox(
+                              height: 50,
+                            ),
+                            InkWell(
+                              
+                              
+
+                              
+
+                              
+                              
+                              
+                              
+
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+                              
+
+                              
+                              
                               onTap: () async {
-                                // FilePickerResult? result =
-                                //     await FilePicker.platform.pickFiles();
-                                // setState(() {
-                                //   _isLoading = true;
-                                // });
+                                num? totalDays;
+                                print(_selectedLeaveType!);
 
-                                // if (result != null) {
-                                //   setState(() {
-                                //     _paths = result.files;
-                                //     uplaodPrescription(result.files);
-                                //   });
-                                // } else {
-                                //   //     setState(() {
-                                //   //   _isLoading = false;
-                                //   // });
-                                // }
+                                Leave selectedLeave = leaveList.firstWhere(
+                                  (leave) => leave.name == _selectedLeaveType,
+                                  orElse: () => Leave('Unknown', '0'),
+                                );
+
+                                if (_selectedLeaveType!.contains('Casual') ||
+                                    _selectedLeaveType!.contains('Comp')) {
+                                  if (_selectedText == 'Full Day') {
+                                    setState(() {
+                                      totalDays = 1;
+                                    });
+                                  } else if (_selectedText == '1st Half' ||
+                                      _selectedText == '2nd Half') {
+                                    setState(() {
+                                      totalDays = 0.5;
+                                    });
+                                  } else {
+                                    totalDays = 1;
+                                  }
+                                } else {
+                                  totalDays = selectedendDate
+                                      .difference(selectedStartDate)
+                                      .inDays;
+                                }
+
+                                if (selectedLeave.balanceInt < totalDays!) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Not enough leave balance for ${selectedLeave.name}'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                DateTime startDate =
+                                    DateTime.parse(startDateController.text);
+                                DateTime now = DateTime.now();
+
+                                if (startDate.day == now.day && now.hour >= 9) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Leave must be applied before 9 AM for today.'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                if (startDate.isAtSameMomentAs(now)) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'leave must be applied for a future date.'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                if (_selectedLeaveType!.contains('Casual') ||
+                                    _selectedLeaveType!.contains('Comp')) {
+                                  DateTime startDate =
+                                      DateTime.parse(startDateController.text);
+                                  DateTime now = DateTime.now();
+
+                                  if (startDate.isAtSameMomentAs(now)) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'leave must be applied for a future date.'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  if (startDate.day == now.day &&
+                                      now.hour >= 9) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Casual/Comp-Off leave must be applied before 9 AM for today.'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                }
+
+                                if (_selectedLeaveType!.contains('Medical')) {
+                                  DateTime startDate =
+                                      DateTime.parse(startDateController.text);
+                                  DateTime endDate =
+                                      DateTime.parse(endDateController.text);
+                                  int medicalLeaveDuration =
+                                      endDate.difference(startDate).inDays;
+
+                                  if (startDate.isAfter(DateTime.now())) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Medical leave can only be applied for past days.'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  if (medicalLeaveDuration < 2 ||
+                                      medicalLeaveDuration > 6) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Medical leave must be between 2 to 6 days.'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                }
+
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+
+                                
                               },
+
                               child: Container(
+                                width: width / 2,
                                 decoration: BoxDecoration(
-                                  color: AppColor.mainThemeColor,
+                                  gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        AppColor.primaryThemeColor,
+                                        AppColor.secondaryThemeColor2,
+                                      ]),
+                                  
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 50, vertical: 10),
-                                  child: Text(
-                                    "Upload Prescription",
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 15),
+                                      horizontal: 20, vertical: 12),
+                                  child: Center(
+                                    child: Text(
+                                      'SUBMIT',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        height: 50,
-                      ),
-                      InkWell(
-                        // onTap: () async {
-                        //   num? totalDays;
-
-                        //   print(_selectedLeaveType!);
-
-                        //   Leave selectedLeave = leaveList.firstWhere(
-                        //     (leave) => leave.name == _selectedLeaveType,
-                        //     orElse: () => Leave('Unknown', '0'),
-                        //   );
-
-                        //   if (_selectedLeaveType!.contains('Casual') ||
-                        //       _selectedLeaveType!.contains('Comp')) {
-                        //     if (_selectedText == 'Full Day') {
-                        //       setState(() {
-                        //         totalDays = 1;
-                        //       });
-                        //     } else if (_selectedText == '1st Half' ||
-                        //         _selectedText == '1st Half') {
-                        //       setState(() {
-                        //         totalDays = 0.5;
-                        //       });
-                        //     } else {}
-                        //   } else {
-                        //     totalDays = selectedendDate
-                        //         .difference(selectedStartDate)
-                        //         .inDays;
-                        //   }
-
-                        //   if (selectedLeave.balanceInt < totalDays!) {
-                        //     ScaffoldMessenger.of(context).showSnackBar(
-                        //       SnackBar(
-                        //         content: Text(
-                        //             'Not enough leave balance for ${selectedLeave.name}'),
-                        //         backgroundColor: Colors.red,
-                        //       ),
-                        //     );
-                        //     return;
-                        //   }
-
-                        //   await applyLeave(
-                        //     context,
-                        //     _selectedLeaveType!,
-                        //     startDateController.text,
-                        //     _selectedLeaveType!.contains('Casual') ||
-                        //             _selectedLeaveType!.contains('Comp')
-                        //         ? startDateController.text
-                        //         : endDateController.text,
-                        //     totalDays.toString(),
-                        //     reasonController.text,
-                        //   );
-
-                        //   // Navigator.pop(context);
-                        // },
-                        onTap: () async {
-                          num? totalDays;
-                          print(_selectedLeaveType!);
-
-                          Leave selectedLeave = leaveList.firstWhere(
-                            (leave) => leave.name == _selectedLeaveType,
-                            orElse: () => Leave('Unknown', '0'),
-                          );
-
-                          if (_selectedLeaveType!.contains('Casual') ||
-                              _selectedLeaveType!.contains('Comp')) {
-                            if (_selectedText == 'Full Day') {
-                              setState(() {
-                                totalDays = 1;
-                              });
-                            } else if (_selectedText == '1st Half' ||
-                                _selectedText == '2nd Half') {
-                              setState(() {
-                                totalDays = 0.5;
-                              });
-                            } else {
-                              totalDays = 1;
-                            }
-                          } else {
-                            totalDays = selectedendDate
-                                .difference(selectedStartDate)
-                                .inDays;
-                          }
-
-                          if (selectedLeave.balanceInt < totalDays!) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    'Not enough leave balance for ${selectedLeave.name}'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                            return;
-                          }
-
-                          if (_selectedLeaveType!.contains('Casual') ||
-                              _selectedLeaveType!.contains('Comp')) {
-                            DateTime startDate =
-                                DateTime.parse(startDateController.text);
-                            DateTime now = DateTime.now();
-
-                            if (startDate.isAtSameMomentAs(now)) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      'Casual/Comp-Off leave must be applied for a future date.'),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                              return;
-                            }
-
-                            if (startDate.day == now.day && now.hour >= 9) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      'Casual/Comp-Off leave must be applied before 9 AM for today.'),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                              return;
-                            }
-                          }
-
-                          if (_selectedLeaveType!.contains('Medical')) {
-                            DateTime startDate =
-                                DateTime.parse(startDateController.text);
-                            DateTime endDate =
-                                DateTime.parse(endDateController.text);
-                            int medicalLeaveDuration =
-                                endDate.difference(startDate).inDays;
-
-                            if (startDate.isAfter(DateTime.now())) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      'Medical leave can only be applied for past dates.'),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                              return;
-                            }
-
-                            if (medicalLeaveDuration < 2 ||
-                                medicalLeaveDuration > 6) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      'Medical leave must be between 2 to 6 days.'),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                              return;
-                            }
-                          }
-
-                          // await applyLeave(
-                          //   context,
-                          //   _selectedLeaveType!,
-                          //   startDateController.text,
-                          //   _selectedLeaveType!.contains('Casual') ||
-                          //           _selectedLeaveType!.contains('Comp')
-                          //       ? startDateController.text
-                          //       : endDateController.text,
-                          //   totalDays.toString(),
-                          //   reasonController.text,
-                          // );
-
-                          // Navigator.pop(context);
-                        },
-
-                        child: Container(
-                          width: width / 2,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  AppColor.primaryThemeColor,
-                                  AppColor.secondaryThemeColor2,
-                                ]),
-                            // color: Color.fromARGB(255, 38, 56, 255),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            child: Center(
-                              child: Text(
-                                'SUBMIT',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500),
-                              ),
+                            SizedBox(
+                              height: 10,
                             ),
-                          ),
+                          ],
                         ),
                       ),
-                      SizedBox(
-                        height: 10,
-                      ),
+
                       TextButton(
                           onPressed: () => showCupertinoModalBottomSheet(
                                 expand: true,
@@ -527,7 +515,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                 builder: (context) => LeavePolicyScreen(),
                               ),
                           child: Text('See Leave Policy'))
-                      // final difference = endDate.difference(startDate).inDays;
+                      
                     ],
                   ),
                 ),
@@ -569,7 +557,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                   focusedBorder:
                       OutlineInputBorder(borderSide: BorderSide.none),
 
-                  // border: InputBorder.none,
+                  
                   hintText: 'Select End Date',
                 ),
                 onTap: () {
@@ -887,7 +875,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                   focusedBorder:
                       OutlineInputBorder(borderSide: BorderSide.none),
 
-                  // border: InputBorder.none,
+                  
                   hintText: 'Select Time',
                 ),
                 onTap: () {
@@ -896,7 +884,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                     context: context,
                     builder: (context) {
                       return Container(
-                        // color: Colors.white,
+                        
                         height: height * 0.3,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
@@ -1022,7 +1010,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                   focusedBorder:
                       OutlineInputBorder(borderSide: BorderSide.none),
 
-                  // border: InputBorder.none,
+                  
                   hintText: 'Select Time',
                 ),
                 onTap: () {
@@ -1031,7 +1019,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                     context: context,
                     builder: (context) {
                       return Container(
-                        // color: Colors.white,
+                        
                         height: height * 0.3,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
@@ -1155,7 +1143,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       onTap: () {
         setState(() {
           _selectedText = text;
-          // Debug print
+          
         });
       },
       child: Container(

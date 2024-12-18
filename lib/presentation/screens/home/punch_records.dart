@@ -40,7 +40,7 @@ class PunchRecordScreen extends StatelessWidget {
 
                   return Container(
                     decoration: BoxDecoration(
-                        // color: AppColor.mainBGColor,
+                        
                         border: Border.all(color: AppColor.mainBGColor, width: 1),
                         borderRadius: BorderRadius.circular(5)),
                     child: Padding(
