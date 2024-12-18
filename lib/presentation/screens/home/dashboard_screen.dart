@@ -13,7 +13,6 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   String? empName;
-  String? empID;
   String? empDesign;
   String? empGender;
 
@@ -28,7 +27,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> checkEmployeeId() async {
     var box = await Hive.openBox('authBox');
     setState(() {
-      empID = box.get('employeeId');
       empDesign = box.get('employeeDesign');
       empName = box.get('employeeName');
       empGender = box.get('gender');
@@ -83,14 +81,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                empName!,
+                                empName != null ? empName! : '',
                                 style: TextStyle(
                                     fontSize: height * 0.022,
                                     color: AppColor.mainTextColor,
                                     fontWeight: FontWeight.w500),
                               ),
                               Text(
-                                empDesign!,
+                                empDesign != null ? empDesign! : '',
                                 style: TextStyle(
                                     fontSize: height * 0.015,
                                     color: AppColor.mainTextColor2,
@@ -119,7 +117,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Column(
                     children: [
                       FutureBuilder<ShiftTimeModel>(
-                          future: fetchShiftTime(empID!),
+                          future: fetchShiftTime(),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -147,10 +145,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         Text(
                                           'Shift Time',
                                           style: TextStyle(
-                                            fontSize: height * 0.015,
-                                            color: AppColor.mainTextColor,
-                                            fontWeight: FontWeight.bold
-                                          ),
+                                              fontSize: height * 0.015,
+                                              color: AppColor.mainTextColor,
+                                              fontWeight: FontWeight.bold),
                                         ),
                                         Row(
                                           children: [
@@ -158,21 +155,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               shift.startTime,
                                               style: TextStyle(
                                                 fontSize: height * 0.015,
-                                        color:  Color.fromARGB(141, 0, 0, 0),
+                                                color: Color.fromARGB(
+                                                    141, 0, 0, 0),
                                               ),
                                             ),
                                             Text(
                                               '  -  ',
                                               style: TextStyle(
                                                 fontSize: height * 0.015,
-                                             color:  Color.fromARGB(141, 0, 0, 0),
+                                                color: Color.fromARGB(
+                                                    141, 0, 0, 0),
                                               ),
                                             ),
                                             Text(
                                               shift.endTime,
                                               style: TextStyle(
                                                 fontSize: height * 0.015,
-                                            color:  Color.fromARGB(141, 0, 0, 0),
+                                                color: Color.fromARGB(
+                                                    141, 0, 0, 0),
                                               ),
                                             ),
                                           ],
@@ -242,7 +242,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 height: 10,
                               ),
                               FutureBuilder<LeaveBalance>(
-                                  future: fetchLeaves(empID!),
+                                  future: fetchLeaves(),
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {

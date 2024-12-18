@@ -146,7 +146,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
                                   height: 7,
                                 ),
                                 FutureBuilder<LeaveBalance>(
-                                    future: fetchLeaves(empID!),
+                                    future: fetchLeaves(),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState ==
                                           ConnectionState.waiting) {

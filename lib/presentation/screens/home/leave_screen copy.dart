@@ -17,6 +17,7 @@ class LeaveScreenSecond extends StatefulWidget {
 }
 
 class _LeaveScreenState extends State<LeaveScreenSecond> {
+  final Box _authBox = Hive.box('authBox');
   String? empID;
   int touchedIndex = -1;
   String _selectedText = 'Pending';
@@ -26,7 +27,6 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
 
   @override
   void initState() {
-    checkEmployeeId();
     _leaveHistory = fetchLeaveHistory(_selectedText);
     super.initState();
   }
@@ -94,7 +94,7 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
                                   fontWeight: FontWeight.w500),
                             ),
                             SizedBox(
-                              height: height* 0.01,
+                              height: height * 0.01,
                             ),
                             Text(
                               'Leave History',
@@ -137,7 +137,7 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 FutureBuilder<LeaveBalance>(
-                                    future: fetchLeaves(empID!),
+                                    future: fetchLeaves(),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState ==
                                           ConnectionState.waiting) {
@@ -147,6 +147,19 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
                                         return Center(child: Text('Error:'));
                                       } else if (snapshot.hasData) {
                                         final leave = snapshot.data!;
+
+                                        _authBox.put(
+                                            'casual', leave.casualLeave);
+                                        _authBox.put(
+                                            'medical', leave.medicalLeave);
+                                        _authBox.put(
+                                            'maternity', leave.maternityLeave);
+                                        _authBox.put(
+                                            'compoff', leave.compOffLeave);
+                                        _authBox.put(
+                                            'earned', leave.earnedLeave);
+                                        _authBox.put(
+                                            'paternity', leave.paternityLeave);
 
                                         return SingleChildScrollView(
                                           scrollDirection: Axis.horizontal,
@@ -164,12 +177,12 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
                                                   width,
                                                   'Medical',
                                                   leave.medicalLeave),
-                                           SizedBox(
+                                              SizedBox(
                                                 width: width * 0.025,
                                               ),
                                               leaveWidget(height, width,
                                                   'Earned', leave.earnedLeave),
-                                           SizedBox(
+                                              SizedBox(
                                                 width: width * 0.025,
                                               ),
                                               leaveWidget(
@@ -177,7 +190,7 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
                                                   width,
                                                   'Maternity',
                                                   leave.maternityLeave),
-                                           SizedBox(
+                                              SizedBox(
                                                 width: width * 0.025,
                                               ),
                                               leaveWidget(
@@ -185,7 +198,7 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
                                                   width,
                                                   'Paternity',
                                                   leave.paternityLeave),
-                                           SizedBox(
+                                              SizedBox(
                                                 width: width * 0.025,
                                               ),
                                               leaveWidget(

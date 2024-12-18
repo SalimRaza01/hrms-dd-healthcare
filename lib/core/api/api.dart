@@ -9,7 +9,6 @@ import 'package:intl/intl.dart';
 final Box _authBox = Hive.box('authBox');
 final Dio dio = Dio();
 
-
 Future<List<Attendance>> fetchAttendence() async {
   String empID = _authBox.get('employeeId');
   final dateTo = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -32,7 +31,8 @@ Future<List<Attendance>> fetchAttendence() async {
   }
 }
 
-Future<LeaveBalance> fetchLeaves(String empID) async {
+Future<LeaveBalance> fetchLeaves() async {
+  String empID = _authBox.get('employeeId');
   try {
     final response = await dio.get('$getEmployeeData/$empID');
 
@@ -46,7 +46,8 @@ Future<LeaveBalance> fetchLeaves(String empID) async {
   }
 }
 
-Future<ShiftTimeModel> fetchShiftTime(String empID) async {
+Future<ShiftTimeModel> fetchShiftTime() async {
+  String empID = _authBox.get('employeeId');
   try {
     final response = await dio.get('$getEmployeeData/$empID');
 
@@ -91,8 +92,7 @@ class AuthProvider with ChangeNotifier {
 
         print('successfull');
       } else {
- 
-      print('failed ${response.statusMessage}');
+        print('failed ${response.statusMessage}');
       }
     } catch (e) {
       print(e.toString());
@@ -101,48 +101,64 @@ class AuthProvider with ChangeNotifier {
 }
 
 Future<void> applyLeave(
+  BuildContext context,
   String leaveType,
   String startDate,
   String endDate,
   String totalDays,
   String reason,
 ) async {
-  try {
-    String mgrId = _authBox.get('managerId');
-    String empID = _authBox.get('employeeId');
-    String token = _authBox.get('token');
-    print('managerId $mgrId');
+  String mgrId = _authBox.get('managerId');
+  String empID = _authBox.get('employeeId');
+  String token = _authBox.get('token');
+  print('managerId $mgrId');
 
-    final response = await dio.post('$employeeApplyLeave/$empID',
-        options: Options(headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token"
-        }),
-        data: {
-          "leaveType": leaveType == 'Comp-off Leave'
-              ? 'compOffLeave'
-              : leaveType == 'Casual Leave'
-                  ? 'casualLeave'
-                  : leaveType == 'Medical Leave'
-                      ? 'medicalLeave'
-                      : leaveType == 'Earned Leave'
-                          ? 'earnedLeave'
-                          : null,
-          "leaveStartDate":  startDate,
-          "leaveEndDate": endDate,
-          "totalDays": totalDays,
-          "reason": reason,
-          "approvedBy": mgrId
-        });
-    print('successfull response $response');
-    if (response.statusCode == 200) {
-      print('successfull');
-    } else {
-      print('failed ${response.statusMessage}');
-    }
-  } catch (e) {
-    print(e.toString());
-  }
+try {
+  final response = await dio.post('$employeeApplyLeave/$empID',
+      options: Options(headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      }),
+      data: {
+        "leaveType": leaveType == 'Comp-off Leave'
+            ? 'compOffLeave'
+            : leaveType == 'Casual Leave'
+                ? 'casualLeave'
+                : leaveType == 'Medical Leave'
+                    ? 'medicalLeave'
+                    : leaveType == 'Earned Leave'
+                        ? 'earnedLeave'
+                        : null,
+        "leaveStartDate": startDate,
+        "leaveEndDate": endDate,
+        "totalDays": totalDays,
+        "reason": reason,
+        "approvedBy": mgrId
+      });
+  if (response.statusCode == 201) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Leave request submitted successfully'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error: ${response}'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  } 
+} on DioException catch (e) {
+  print('Dio Exception: ${e.message}');
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Request failed: ${e.message}'),
+      backgroundColor: Colors.red,
+    ),
+  );
+}
 }
 
 Future<List<LeaveHistory>> fetchLeaveHistory(String status) async {
@@ -170,15 +186,14 @@ Future<List<LeaveHistory>> fetchLeaveHistory(String status) async {
   }
 }
 
+Future<EmployeeProfile> fetchEmployeeDetails() async {
+  String empID = _authBox.get('employeeId');
+  Dio dio = Dio();
+  try {
+    final response = await dio.get('$getEmployeeData/$empID');
 
-  Future<EmployeeProfile> fetchEmployeeDetails() async {
-      String empID = _authBox.get('employeeId');
-    Dio dio = Dio();
-    try {
-       final response = await dio.get('$getEmployeeData/$empID');
-
-      return EmployeeProfile.fromJson(response.data['data']);
-    } catch (e) {
-      throw Exception('Failed to load employee profile');
-    }
+    return EmployeeProfile.fromJson(response.data['data']);
+  } catch (e) {
+    throw Exception('Failed to load employee profile');
   }
+}
