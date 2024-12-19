@@ -197,3 +197,5 @@ Future<EmployeeProfile> fetchEmployeeDetails() async {
     throw Exception('Failed to load employee profile');
   }
 }
+
+
