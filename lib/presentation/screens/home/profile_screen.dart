@@ -1,4 +1,5 @@
 import 'package:database_app/core/theme/app_colors.dart';
+import 'package:database_app/presentation/animations/profile_shimmer.dart';
 import 'package:database_app/presentation/screens/authentication/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:database_app/core/api/api.dart';
@@ -37,9 +38,9 @@ box.put('token', null);
         future: employeeProfile,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return ProfileShimmerAnimation();
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(child: Text('Please check your internet connection, try again'));
           } else if (!snapshot.hasData) {
             return Center(child: Text('No data found'));
           } else {

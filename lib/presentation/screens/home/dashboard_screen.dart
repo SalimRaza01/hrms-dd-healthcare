@@ -1,11 +1,10 @@
-
-
 import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/model/models.dart';
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -122,13 +121,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
+                            return _shimmerEffectshiftTime(height, width);
                           } else if (snapshot.hasError) {
-                            return Center(
-                                child: Text('Error: ${snapshot.error}'));
+                            return Card(
+                                color: Colors.white,
+                                elevation: 4,
+                                margin: EdgeInsets.all(0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                shadowColor: Colors.black.withOpacity(0.1),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                    child: Text(
+                                        'Please check your internect connection')),
+                              ),
+                            );
                           } else if (snapshot.hasData) {
                             final shift = snapshot.data!;
-              
+
                             return Card(
                                 color: Colors.white,
                                 elevation: 4,
@@ -156,24 +168,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             shift.startTime,
                                             style: TextStyle(
                                               fontSize: height * 0.015,
-                                              color: Color.fromARGB(
-                                                  141, 0, 0, 0),
+                                              color:
+                                                  Color.fromARGB(141, 0, 0, 0),
                                             ),
                                           ),
                                           Text(
                                             '  -  ',
                                             style: TextStyle(
                                               fontSize: height * 0.015,
-                                              color: Color.fromARGB(
-                                                  141, 0, 0, 0),
+                                              color:
+                                                  Color.fromARGB(141, 0, 0, 0),
                                             ),
                                           ),
                                           Text(
                                             shift.endTime,
                                             style: TextStyle(
                                               fontSize: height * 0.015,
-                                              color: Color.fromARGB(
-                                                  141, 0, 0, 0),
+                                              color:
+                                                  Color.fromARGB(141, 0, 0, 0),
                                             ),
                                           ),
                                         ],
@@ -247,15 +259,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {
-                                    return Center(
-                                        child: CircularProgressIndicator());
+                                    return _shimmerEffectForLeaveBalance(
+                                        height, width);
                                   } else if (snapshot.hasError) {
                                     return Center(
-                                        child:
-                                            Text('Error: ${snapshot.error}'));
+                                        child: Text(
+                                            'Please check your internect connection'));
                                   } else if (snapshot.hasData) {
                                     final leave = snapshot.data!;
-              
+
                                     return SingleChildScrollView(
                                       scrollDirection: Axis.horizontal,
                                       child: Row(
@@ -267,8 +279,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           SizedBox(
                                             width: 10,
                                           ),
-                                          leaveWidget(height, width,
-                                              'Medical', leave.medicalLeave),
+                                          leaveWidget(height, width, 'Medical',
+                                              leave.medicalLeave),
                                           SizedBox(
                                             width: 10,
                                           ),
@@ -293,8 +305,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           SizedBox(
                                             width: 10,
                                           ),
-                                          leaveWidget(height, width,
-                                              'CompOff', leave.compOffLeave),
+                                          leaveWidget(height, width, 'CompOff',
+                                              leave.compOffLeave),
                                         ],
                                       ),
                                     );
@@ -306,171 +318,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
-              
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-              
-                    
-                    
-                    
-                    
-              
-                    
-                    
-                    
-                    
-              
-                    
-                    
-                    
-                    
-              
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
                     SizedBox(
                       height: 15,
                     ),
@@ -510,16 +357,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Container(
                               decoration: BoxDecoration(
                                   border: Border.all(
-                                      color:
-                                          const Color.fromARGB(14, 0, 0, 0)),
+                                      color: const Color.fromARGB(14, 0, 0, 0)),
                                   color: AppColor.mainBGColor,
                                   borderRadius: BorderRadius.circular(10)),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 10, vertical: 12),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       children: [
@@ -629,7 +474,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ClipRRect(
                                 borderRadius: BorderRadius.circular(5),
                                 child: Image.asset(
-                  
                                     'assets/image/annoucementImage.png')),
                           ],
                         ),
@@ -713,6 +557,72 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ],
                 ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  SizedBox _shimmerEffectForLeaveBalance(double height, double width) {
+    return SizedBox(
+      height: height * 0.1,
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey.shade300,
+        highlightColor: Colors.grey.shade100,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: 5,
+          itemBuilder: (context, index) {
+            return Container(
+              height: height * 0.15,
+              color: Colors.white,
+              width: width * 0.2,
+              margin: EdgeInsets.symmetric(horizontal: 5),
+            );
+          },
+          separatorBuilder: (context, index) => SizedBox(height: 10),
+        ),
+      ),
+    );
+  }
+
+  SizedBox _shimmerEffectshiftTime(double height, double width) {
+    return SizedBox(
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey.shade300,
+        highlightColor: Colors.grey.shade100,
+        child: Container(
+          color: Colors.white,
+          width: width,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    '      ',
+                    style: TextStyle(
+                      fontSize: height * 0.02,
+                      color: Color.fromARGB(141, 0, 0, 0),
+                    ),
+                  ),
+                  Text(
+                    '  -  ',
+                    style: TextStyle(
+                      fontSize: height * 0.02,
+                      color: Color.fromARGB(141, 0, 0, 0),
+                    ),
+                  ),
+                  Text(
+                    '           ',
+                    style: TextStyle(
+                      fontSize: height * 0.02,
+                      color: Color.fromARGB(141, 0, 0, 0),
+                    ),
+                  ),
+                ],
               )
             ],
           ),

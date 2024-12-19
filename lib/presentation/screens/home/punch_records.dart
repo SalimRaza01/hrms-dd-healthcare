@@ -23,183 +23,181 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
         (widget.punchRecords?.split(',') ?? []).toSet().toList();
     // ..sort();
 
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: AppColor.mainBGColor,
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text(
-            'Apply Regularization',
-            style: TextStyle(
-              fontSize: height * 0.02,
-              fontWeight: FontWeight.w500,
-              color: AppColor.mainTextColor,
-            ),
+    return Scaffold(
+      backgroundColor: AppColor.mainBGColor,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          'Apply Regularization',
+          style: TextStyle(
+            fontSize: height * 0.02,
+            fontWeight: FontWeight.w500,
+            color: AppColor.mainTextColor,
           ),
-          backgroundColor: AppColor.mainBGColor,
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Card(
-                color: Colors.white,
-                elevation: 4,
-                margin: EdgeInsets.all(0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                shadowColor: Colors.black.withOpacity(0.1),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: SizedBox(
-                      height: height * 0.12,
-                      width: width,
-                      child: TextFormField(
-                        textAlignVertical: TextAlignVertical.top,
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        expands: true,
-                        controller: reasonController,
-                        style: TextStyle(
-                          overflow: TextOverflow.ellipsis,
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                        ),
-                        decoration: InputDecoration(
-                          filled: false,
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                          enabledBorder:
-                              OutlineInputBorder(borderSide: BorderSide.none),
-                          border:
-                              OutlineInputBorder(borderSide: BorderSide.none),
-                          focusedBorder:
-                              OutlineInputBorder(borderSide: BorderSide.none),
-                          label: Text('Describe Reason'),
-                        ),
-                      )),
-                ),
+        backgroundColor: AppColor.mainBGColor,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Card(
+              color: Colors.white,
+              elevation: 4,
+              margin: EdgeInsets.all(0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-              SizedBox(height: height * 0.03),
-              InkWell(
-                onTap: () {},
-                child: Center(
-                  child: Container(
-                    width: width / 2,
-                    decoration: BoxDecoration(
-                      color: AppColor.mainThemeColor,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                      child: Center(
-                        child: Text(
-                          'SUBMIT',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.w500),
-                        ),
+              shadowColor: Colors.black.withOpacity(0.1),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                child: SizedBox(
+                    height: height * 0.12,
+                    width: width,
+                    child: TextFormField(
+                      textAlignVertical: TextAlignVertical.top,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      expands: true,
+                      controller: reasonController,
+                      style: TextStyle(
+                        overflow: TextOverflow.ellipsis,
+                        color: const Color.fromARGB(255, 0, 0, 0),
+                      ),
+                      decoration: InputDecoration(
+                        filled: false,
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        enabledBorder:
+                            OutlineInputBorder(borderSide: BorderSide.none),
+                        border:
+                            OutlineInputBorder(borderSide: BorderSide.none),
+                        focusedBorder:
+                            OutlineInputBorder(borderSide: BorderSide.none),
+                        label: Text('Describe Reason'),
+                      ),
+                    )),
+              ),
+            ),
+            SizedBox(height: height * 0.03),
+            InkWell(
+              onTap: () {},
+              child: Center(
+                child: Container(
+                  width: width / 2,
+                  decoration: BoxDecoration(
+                    color: AppColor.mainThemeColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    child: Center(
+                      child: Text(
+                        'SUBMIT',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.w500),
                       ),
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: height * 0.03),
-              Text(
-                'Punch Records',
-                style: TextStyle(
-                  fontSize: height * 0.018,
-                  fontWeight: FontWeight.w500,
-                  color: AppColor.mainTextColor,
-                ),
+            ),
+            SizedBox(height: height * 0.03),
+            Text(
+              'Punch Records',
+              style: TextStyle(
+                fontSize: height * 0.018,
+                fontWeight: FontWeight.w500,
+                color: AppColor.mainTextColor,
               ),
-              SizedBox(height: height * 0.016),
-              Expanded(
-                child: ListView.separated(
-                  itemCount: punches.length ~/ 2,
-                  itemBuilder: (context, index) {
-                    String punchIn = punches[index * 2];
-                    String punchOut = punches[index * 2 + 1];
-
-                    String punchInTime =
-                        punchIn.substring(0, min(5, punchIn.length));
-                    String punchOutTime =
-                        punchOut.substring(0, min(5, punchOut.length));
-
-                    return Card(
-                      color: Colors.white,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadowColor: Colors.black.withOpacity(0.1),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: IntrinsicHeight(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Clock In',
-                                    style: TextStyle(
-                                      fontSize: height * 0.014,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColor.mainTextColor,
-                                    ),
+            ),
+            SizedBox(height: height * 0.016),
+            Expanded(
+              child: ListView.separated(
+                itemCount: punches.length ~/ 2,
+                itemBuilder: (context, index) {
+                  String punchIn = punches[index * 2];
+                  String punchOut = punches[index * 2 + 1];
+    
+                  String punchInTime =
+                      punchIn.substring(0, min(5, punchIn.length));
+                  String punchOutTime =
+                      punchOut.substring(0, min(5, punchOut.length));
+    
+                  return Card(
+                    color: Colors.white,
+                    elevation: 4,
+                    margin: EdgeInsets.all(0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    shadowColor: Colors.black.withOpacity(0.1),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Clock In',
+                                  style: TextStyle(
+                                    fontSize: height * 0.014,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColor.mainTextColor,
                                   ),
-                                  SizedBox(height: height * 0.005),
-                                  Text(
-                                    punchInTime,
-                                    style: TextStyle(
-                                      fontSize: height * 0.02,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColor.mainTextColor,
-                                    ),
+                                ),
+                                SizedBox(height: height * 0.005),
+                                Text(
+                                  punchInTime.isNotEmpty ? punchInTime : '--/--',
+                                  style: TextStyle(
+                                    fontSize: height * 0.02,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColor.mainTextColor,
                                   ),
-                                ],
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Clock Out',
-                                    style: TextStyle(
-                                      fontSize: height * 0.014,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColor.mainTextColor,
-                                    ),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Clock Out',
+                                  style: TextStyle(
+                                    fontSize: height * 0.014,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColor.mainTextColor,
                                   ),
-                                  SizedBox(height: height * 0.005),
-                                  Text(
-                                    punchOutTime,
-                                    style: TextStyle(
-                                      fontSize: height * 0.02,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColor.mainTextColor,
-                                    ),
+                                ),
+                                SizedBox(height: height * 0.005),
+                                Text(
+                                   punchOutTime.isNotEmpty ? punchOutTime : '--/--',
+                                  style: TextStyle(
+                                    fontSize: height * 0.02,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColor.mainTextColor,
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  },
-                  separatorBuilder: (context, index) {
-                    return SizedBox(height: 10);
-                  },
-                ),
-              )
-            ],
-          ),
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return SizedBox(height: 10);
+                },
+              ),
+            )
+          ],
         ),
       ),
     );

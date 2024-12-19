@@ -156,6 +156,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                               return InkWell(
                                   onTap: () {
                                     if (item.punchRecords.isNotEmpty) {
+                                      // Navigator.push(context, MaterialPageRoute(builder: (context)=> PunchRecordScreen(punchRecords: item.punchRecords)));
                                       showCupertinoModalBottomSheet(
                                         expand: true,
                                         context: context,

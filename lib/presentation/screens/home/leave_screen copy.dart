@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
 class LeaveScreenSecond extends StatefulWidget {
   const LeaveScreenSecond({super.key});
@@ -76,7 +77,7 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
               Padding(
                 padding: const EdgeInsets.all(15),
                 child: Column(
-mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -136,10 +137,9 @@ mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {
-                                    return Center(
-                                        child: CircularProgressIndicator());
+                                    return _shimmerLoader(height, width);
                                   } else if (snapshot.hasError) {
-                                    return Center(child: Text('Error:'));
+                                    return Center(child: Text('Internet connection error'));
                                   } else if (snapshot.hasData) {
                                     final leave = snapshot.data!;
                     
@@ -202,10 +202,10 @@ mainAxisAlignment: MainAxisAlignment.spaceAround,
                                               'CompOff',
                                               leave.compOffLeave),
                                         ],
-                                      ),
+                                      )
                                     );
                                   } else {
-                                    return Text('No data Found');
+                                    return Center(child: Text('No Data Found'));
                                   }
                                 }),
                           ],
@@ -244,16 +244,15 @@ mainAxisAlignment: MainAxisAlignment.spaceAround,
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
-                              return Center(child: CircularProgressIndicator());
+                              return _shimmerhistoryLoader(height, width);
                             } else if (snapshot.hasError) {
-                              return Center(
-                                  child: Text('Error: ${snapshot.error}'));
+                              return Center(child: Text('Please check your internet connection, try again'));
                             } else if (!snapshot.hasData ||
                                 snapshot.data!.isEmpty) {
                               return Center(child: Text('No History Found'));
                             } else {
                               List<LeaveHistory> items = snapshot.data!;
-
+      
                               return ListView.separated(
                                 itemCount: items.length,
                                 itemBuilder: (context, index) {
@@ -262,7 +261,7 @@ mainAxisAlignment: MainAxisAlignment.spaceAround,
                                       DateTime.parse(leave.leaveStartDate);
                                   final endDate =
                                       DateTime.parse(leave.leaveEndDate);
-
+      
                                   return Card(
                                     color: Colors.white,
                                     elevation: 4,
@@ -474,6 +473,50 @@ mainAxisAlignment: MainAxisAlignment.spaceAround,
               fontSize: height * 0.015,
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  SizedBox _shimmerLoader(double height, double width) {
+    return SizedBox(
+      height: height * 0.1,
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey.shade300,
+        highlightColor: Colors.grey.shade100,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: 5,
+          itemBuilder: (context, index) {
+            return Container(
+              height: height * 0.15,
+              color: Colors.white,
+              width: width * 0.2,
+              margin: EdgeInsets.symmetric(horizontal: 5),
+            );
+          },
+          separatorBuilder: (context, index) => SizedBox(height: 10),
+        ),
+      ),
+    );
+  }
+  SizedBox _shimmerhistoryLoader(double height, double width) {
+    return SizedBox(
+      height: height * 0.1,
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey.shade300,
+        highlightColor: Colors.grey.shade100,
+        child: ListView.separated(
+          itemCount: 5,
+          itemBuilder: (context, index) {
+            return Container(
+              height: height * 0.15,
+              color: Colors.white,
+              width: width * 0.9,
+              margin: EdgeInsets.symmetric(vertical: 5),
+            );
+          },
+          separatorBuilder: (context, index) => SizedBox(height: 10),
         ),
       ),
     );
