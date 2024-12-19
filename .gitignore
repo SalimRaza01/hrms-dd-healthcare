@@ -4,7 +4,7 @@
 *.pyc
 *.swp
 *.zip
-/lib/core/api/api_config.dart
+./lib/core/api/api_config.dart
 .DS_Store
 .atom/
 .buildlog/
