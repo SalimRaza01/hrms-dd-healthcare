@@ -3,7 +3,7 @@ import 'package:database_app/core/model/models.dart';
 import 'package:database_app/presentation/screens/home/bottom_navigation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 
 final Box _authBox = Hive.box('authBox');
