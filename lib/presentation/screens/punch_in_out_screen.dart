@@ -28,12 +28,12 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
   @override
   void initState() {
     super.initState();
-    checkEmployeeId();
+    _checkEmployeeId();
     _initializeCamera();
     _getCurrentLocation();
   }
 
-  Future<void> checkEmployeeId() async {
+  Future<void> _checkEmployeeId() async {
     var box = await Hive.openBox('authBox');
     setState(() {
       empName = box.get('employeeName');
@@ -99,6 +99,9 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
     var box = await Hive.openBox('authBox');
     box.put('punchInStatus', status);
     box.put('punchInTime', punchInTime);
+    Future.delayed(Duration(seconds: 1), () {
+      _checkEmployeeId();
+    });
   }
 
   Future<void> _takeSelfie() async {
@@ -130,7 +133,6 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
       request.fields['status'] = _isPunchIn ? "punch_in" : "punch_out";
 
       var response = await request.send();
-
       setState(() {
         _isLoading = false;
       });
@@ -140,7 +142,11 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
           _isPunchIn = !_isPunchIn;
         });
 
-        await _savePunchInStatus(_isPunchIn, _punchInTime);
+        if (_isPunchIn == false) {
+          await _savePunchInStatus(_isPunchIn, null);
+        } else {
+          await _savePunchInStatus(_isPunchIn, DateTime.now());
+        }
 
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(_isPunchIn
@@ -173,6 +179,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
     Duration duration = _punchInTime != null
         ? DateTime.now().difference(_punchInTime!)
         : Duration(hours: 0, minutes: 0);
+
     int hours = duration.inHours;
     int minutes = duration.inMinutes % 60;
     String formattedDuration = hours == 0 && minutes == 0
