@@ -1,10 +1,16 @@
+// ignore_for_file: sort_child_properties_last
+
 import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/model/models.dart';
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
+
+import 'holiday_list.dart';
+import 'notification_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -13,6 +19,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  late Future<List<HolidayModel>> holidayList;
   String? empName;
   String? empDesign;
   String? empGender;
@@ -23,6 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     checkEmployeeId();
+    holidayList = fetchHolidayList();
   }
 
   Future<void> checkEmployeeId() async {
@@ -42,76 +50,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final width = MediaQuery.of(context).size.width;
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+
+          leading: CircleAvatar(
+            child: Image.asset(
+              empGender == 'Male'
+                  ? 'assets/image/MaleAvatar.png'
+                  : 'assets/image/FemaleAvatar.png', height: height * 0.045,
+            ),
+      
+            backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+          ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                empName != null ? empName! : '',
+                style: TextStyle(
+                    fontSize: height * 0.02,
+                    color: AppColor.mainTextColor,
+                    fontWeight: FontWeight.w500),
+              ),
+              Text(
+                empDesign != null ? empDesign! : '',
+                style: TextStyle(
+                    fontSize: height * 0.014,
+                    color: AppColor.mainTextColor2,
+                    ),
+              )
+            ],
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => NotificationScreen()));
+              },
+              icon: Icon(
+                Icons.notifications_rounded,
+                color: AppColor.mainThemeColor,
+                size: height * 0.035,
+              ),
+            ),
+          ],
+        ),
         backgroundColor: AppColor.mainBGColor,
         body: SingleChildScrollView(
           child: Column(
             children: [
-              Card(
-                color: Colors.white,
-                elevation: 4,
-                margin: EdgeInsets.all(0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(0),
-                ),
-                shadowColor: Colors.black.withOpacity(0.1),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          SizedBox(
-                            height: 48,
-                            child: CircleAvatar(
-                              child: Image.asset(
-                                empGender == 'Male'
-                                    ? 'assets/image/MaleAvatar.png'
-                                    : 'assets/image/FemaleAvatar.png',
-                              ),
-                              radius: 28,
-                              backgroundColor: Colors.grey[200],
-                            ),
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                empName != null ? empName! : '',
-                                style: TextStyle(
-                                    fontSize: height * 0.022,
-                                    color: AppColor.mainTextColor,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              Text(
-                                empDesign != null ? empDesign! : '',
-                                style: TextStyle(
-                                    fontSize: height * 0.015,
-                                    color: AppColor.mainTextColor2,
-                                    fontWeight: FontWeight.w500),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.circle_notifications_rounded,
-                            color: AppColor.mainThemeColor,
-                            size: height * 0.045,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
               Padding(
                 padding: const EdgeInsets.all(15),
                 child: Column(
@@ -124,13 +114,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             return _shimmerEffectshiftTime(height, width);
                           } else if (snapshot.hasError) {
                             return Card(
-                                color: Colors.white,
-                                elevation: 4,
-                                margin: EdgeInsets.all(0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                shadowColor: Colors.black.withOpacity(0.1),
+                              color: Colors.white,
+                              elevation: 4,
+                              margin: EdgeInsets.all(0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              shadowColor: Colors.black.withOpacity(0.1),
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Center(
@@ -335,6 +325,173 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
+                              'Upcoming Holiday',
+                              style: TextStyle(
+                                  fontSize: height * 0.018,
+                                  color: AppColor.mainTextColor,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            FutureBuilder<List<HolidayModel>>(
+                              future: holidayList,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                      child: CircularProgressIndicator());
+                                } else if (snapshot.hasError) {
+                                  return Center(
+                                      child: Text(
+                                          'Please check your internet connection'));
+                                } else if (!snapshot.hasData ||
+                                    snapshot.data!.isEmpty) {
+                                  return Center(
+                                      child: Text('No Holiday available.'));
+                                } else {
+                                  List<HolidayModel> items = snapshot.data!;
+
+                                  HolidayModel item = items[0];
+
+                                  return InkWell(
+                                    onTap: () => showCupertinoModalBottomSheet(
+                                      expand: true,
+                                      context: context,
+                                      barrierColor:
+                                          const Color.fromARGB(130, 0, 0, 0),
+                                      backgroundColor: Colors.transparent,
+                                      builder: (context) => HolidayList(),
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                  color:
+                                                      AppColor.mainThemeColor,
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                    Radius.circular(15),
+                                                  )),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 20,
+                                                  vertical: 8,
+                                                ),
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceAround,
+                                                  children: [
+                                                    Text(
+                                                      item.holidayDate
+                                                          .replaceAll(' ', '')
+                                                          .substring(0, 2),
+                                                      style: TextStyle(
+                                                        fontSize: height * 0.02,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      item.holidayDate
+                                                          .replaceAll(' ', '')
+                                                          .substring(2, 5),
+                                                      style: TextStyle(
+                                                          fontSize:
+                                                              height * 0.014,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.white),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 10,
+                                                      horizontal: 20),
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    item.holidayName.replaceAll(
+                                                        new RegExp(r"[0-9]+"),
+                                                        ""),
+                                                    style: TextStyle(
+                                                        fontSize: height * 0.02,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: AppColor
+                                                            .mainTextColor),
+                                                  ),
+                                                  SizedBox(
+                                                    height: height * 0.005,
+                                                  ),
+                                                  Text(
+                                                    item.holidayDescription
+                                                        .replaceAll(
+                                                            new RegExp(
+                                                                r"[0-9]+"),
+                                                            ""),
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            height * 0.014,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        color: AppColor
+                                                            .mainTextColor),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Icon(
+                                          Icons.arrow_forward_ios,
+                                          color: AppColor.mainTextColor,
+                                        )
+                                      ],
+                                    ),
+                                  );
+                                }
+                              },
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Card(
+                      color: Colors.white,
+                      elevation: 4,
+                      margin: EdgeInsets.all(0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      shadowColor: Colors.black.withOpacity(0.1),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
                               'Today Task ',
                               style: TextStyle(
                                   fontSize: height * 0.018,
@@ -479,82 +636,82 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Card(
-                      color: Colors.white,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadowColor: Colors.black.withOpacity(0.1),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Today Task',
-                              style: TextStyle(
-                                  fontSize: height * 0.018,
-                                  color: AppColor.mainTextColor,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              'The tasks assigned to you for today',
-                              style: TextStyle(
-                                fontSize: height * 0.015,
-                                color: AppColor.mainTextColor2,
-                              ),
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Center(
-                                child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(5),
-                                    child: Image.asset(
-                                      'assets/image/Frame.png',
-                                      height: height * 0.08,
-                                    )),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Center(
-                              child: Text(
-                                'No Tasks Assigned',
-                                style: TextStyle(
-                                    fontSize: height * 0.018,
-                                    color: AppColor.mainTextColor,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Text(
-                              'It looks like you don’t have any tasks assigned to you right now. Don’t worry, this space will be updated as new tasks become available.',
-                              style: TextStyle(
-                                fontSize: height * 0.012,
-                                color: AppColor.mainTextColor2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
+                    // SizedBox(
+                    //   height: 15,
+                    // ),
+                    // Card(
+                    //   color: Colors.white,
+                    //   elevation: 4,
+                    //   margin: EdgeInsets.all(0),
+                    //   shape: RoundedRectangleBorder(
+                    //     borderRadius: BorderRadius.circular(10),
+                    //   ),
+                    //   shadowColor: Colors.black.withOpacity(0.1),
+                    //   child: Padding(
+                    //     padding: const EdgeInsets.all(10),
+                    //     child: Column(
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         Text(
+                    //           'Today Task',
+                    //           style: TextStyle(
+                    //               fontSize: height * 0.018,
+                    //               color: AppColor.mainTextColor,
+                    //               fontWeight: FontWeight.w500),
+                    //         ),
+                    //         SizedBox(
+                    //           height: 5,
+                    //         ),
+                    //         Text(
+                    //           'The tasks assigned to you for today',
+                    //           style: TextStyle(
+                    //             fontSize: height * 0.015,
+                    //             color: AppColor.mainTextColor2,
+                    //           ),
+                    //         ),
+                    //         SizedBox(
+                    //           height: 10,
+                    //         ),
+                    //         Padding(
+                    //           padding: const EdgeInsets.all(12),
+                    //           child: Center(
+                    //             child: ClipRRect(
+                    //                 borderRadius: BorderRadius.circular(5),
+                    //                 child: Image.asset(
+                    //                   'assets/image/Frame.png',
+                    //                   height: height * 0.08,
+                    //                 )),
+                    //           ),
+                    //         ),
+                    //         SizedBox(
+                    //           height: 10,
+                    //         ),
+                    //         Center(
+                    //           child: Text(
+                    //             'No Tasks Assigned',
+                    //             style: TextStyle(
+                    //                 fontSize: height * 0.018,
+                    //                 color: AppColor.mainTextColor,
+                    //                 fontWeight: FontWeight.w500),
+                    //           ),
+                    //         ),
+                    //         SizedBox(
+                    //           height: 10,
+                    //         ),
+                    //         Text(
+                    //           'It looks like you don’t have any tasks assigned to you right now. Don’t worry, this space will be updated as new tasks become available.',
+                    //           style: TextStyle(
+                    //             fontSize: height * 0.012,
+                    //             color: AppColor.mainTextColor2,
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // SizedBox(
+                    //   height: 15,
+                    // ),
                   ],
                 ),
               )

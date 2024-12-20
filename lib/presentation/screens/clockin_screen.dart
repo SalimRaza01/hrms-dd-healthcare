@@ -1,10 +1,12 @@
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/model/models.dart';
 import 'package:database_app/core/theme/app_colors.dart';
-import 'package:database_app/presentation/screens/home/punch_records.dart';
+import 'package:database_app/presentation/screens/punch_in_out_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+
+import 'punch_records.dart';
 
 class ClockInScreenSecond extends StatefulWidget {
   const ClockInScreenSecond({super.key});
@@ -381,7 +383,20 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
             )
           ],
         ),
-      ),
+      floatingActionButton: FloatingActionButton.extended(
+            backgroundColor: AppColor.mainThemeColor,
+            onPressed: () => showCupertinoModalBottomSheet(
+              expand: true,
+              context: context,
+              barrierColor: const Color.fromARGB(130, 0, 0, 0),
+              backgroundColor: Colors.transparent,
+              builder: (context) => PunchInOutScreen(),
+            ),
+            label: const Text(
+              'Clock-In',
+              style: TextStyle(color: Colors.white),
+            ),
+          )),
     );
   }
 }

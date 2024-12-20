@@ -1,10 +1,11 @@
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:database_app/presentation/animations/profile_shimmer.dart';
-import 'package:database_app/presentation/screens/authentication/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/model/models.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
+import 'splash_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override

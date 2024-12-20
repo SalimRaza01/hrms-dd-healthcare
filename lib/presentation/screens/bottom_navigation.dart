@@ -1,10 +1,11 @@
 
 import 'package:database_app/core/theme/app_colors.dart';
-import 'package:database_app/presentation/screens/home/clockin_screen%20copy.dart';
-import 'package:database_app/presentation/screens/home/dashboard_screen.dart';
-import 'package:database_app/presentation/screens/home/leave_screen%20copy.dart';
-import 'package:database_app/presentation/screens/home/profile_screen.dart';
 import 'package:flutter/material.dart';
+
+import 'clockin_screen.dart';
+import 'dashboard_screen.dart';
+import 'leave_screen.dart';
+import 'profile_screen.dart';
 
 class BottomNavigation extends StatefulWidget {
 

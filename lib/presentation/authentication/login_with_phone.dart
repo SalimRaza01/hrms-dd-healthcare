@@ -1,7 +1,7 @@
 
 
 import 'package:database_app/core/theme/app_colors.dart';
-import 'package:database_app/presentation/screens/authentication/login_otp.dart';
+import 'package:database_app/presentation/authentication/login_otp.dart';
 import 'package:flutter/material.dart';
 
 class LoginWithPhone extends StatefulWidget {

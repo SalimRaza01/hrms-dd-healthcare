@@ -1,10 +1,11 @@
 import 'package:database_app/core/api/api_config.dart';
 import 'package:database_app/core/model/models.dart';
-import 'package:database_app/presentation/screens/home/bottom_navigation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+
+import '../../presentation/screens/bottom_navigation.dart';
 
 final Box _authBox = Hive.box('authBox');
 final Dio dio = Dio();
@@ -113,52 +114,52 @@ Future<void> applyLeave(
   String token = _authBox.get('token');
   print('managerId $mgrId');
 
-try {
-  final response = await dio.post('$employeeApplyLeave/$empID',
-      options: Options(headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      }),
-      data: {
-        "leaveType": leaveType == 'Comp-off Leave'
-            ? 'compOffLeave'
-            : leaveType == 'Casual Leave'
-                ? 'casualLeave'
-                : leaveType == 'Medical Leave'
-                    ? 'medicalLeave'
-                    : leaveType == 'Earned Leave'
-                        ? 'earnedLeave'
-                        : null,
-        "leaveStartDate": startDate,
-        "leaveEndDate": endDate,
-        "totalDays": totalDays,
-        "reason": reason,
-        "approvedBy": mgrId
-      });
-  if (response.statusCode == 201) {
+  try {
+    final response = await dio.post('$employeeApplyLeave/$empID',
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }),
+        data: {
+          "leaveType": leaveType == 'Comp-off Leave'
+              ? 'compOffLeave'
+              : leaveType == 'Casual Leave'
+                  ? 'casualLeave'
+                  : leaveType == 'Medical Leave'
+                      ? 'medicalLeave'
+                      : leaveType == 'Earned Leave'
+                          ? 'earnedLeave'
+                          : null,
+          "leaveStartDate": startDate,
+          "leaveEndDate": endDate,
+          "totalDays": totalDays,
+          "reason": reason,
+          "approvedBy": mgrId
+        });
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Leave request submitted successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${response}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } on DioException catch (e) {
+    print('Dio Exception: ${e.message}');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Leave request submitted successfully'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error: ${response}'),
+        content: Text('Request failed: ${e.message}'),
         backgroundColor: Colors.red,
       ),
     );
-  } 
-} on DioException catch (e) {
-  print('Dio Exception: ${e.message}');
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('Request failed: ${e.message}'),
-      backgroundColor: Colors.red,
-    ),
-  );
-}
+  }
 }
 
 Future<List<LeaveHistory>> fetchLeaveHistory(String status) async {
@@ -198,4 +199,18 @@ Future<EmployeeProfile> fetchEmployeeDetails() async {
   }
 }
 
+Future<List<HolidayModel>> fetchHolidayList() async {
 
+  try {
+    final response = await dio.get(getHolidayList,);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data['data'];
+      return data.map((item) => HolidayModel.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load Holiday data');
+    }
+  } catch (e) {
+    throw Exception('Error fetching data: $e');
+  }
+}

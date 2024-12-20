@@ -72,7 +72,6 @@ class Attendance {
     required this.weekOff,
   });
 
-
   factory Attendance.fromJson(Map<String, dynamic> json) {
     return Attendance(
       employeeName: json['EmployeeName'] ?? '',
@@ -91,7 +90,6 @@ class Attendance {
     );
   }
 
-
   Map<String, dynamic> toJson() {
     return {
       'EmployeeName': employeeName,
@@ -104,7 +102,7 @@ class Attendance {
       'Status': status,
       'Duration': duration,
       'PunchRecords': punchRecords,
-            'LateBy': lateby,
+      'LateBy': lateby,
       'EarlyBy': earlyBy,
       'WeeklyOff': weekOff,
     };
@@ -147,7 +145,6 @@ class LeaveHistory {
       dateTime: json['dateTime'] ?? '',
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -260,4 +257,35 @@ class EmployeeProfile {
       employeePhoto: json['employeePhoto'],
     );
   }
+}
+
+class HolidayModel {
+  final String holidayName;
+  final String holidayDate;
+  final String holidayDescription;
+
+  HolidayModel({
+    required this.holidayName,
+    required this.holidayDate,
+    required this.holidayDescription,
+  });
+
+  factory HolidayModel.fromJson(Map<String, dynamic> json) {
+    return HolidayModel(
+      holidayName: json['holidayName'],
+      holidayDate: json['holidayDate'],
+      holidayDescription: json['description'],
+    );
+  }
+
+Map<String, dynamic> toJson() {
+    return {
+      'holidayName': holidayName,
+      'holidayDate': holidayDate,
+      'description': holidayDescription,
+     
+    };
+  }
+
+
 }

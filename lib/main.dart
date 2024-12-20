@@ -1,18 +1,23 @@
-import 'package:database_app/core/api/api.dart';
-import 'package:database_app/presentation/screens/authentication/login_otp.dart';
-import 'package:database_app/presentation/screens/authentication/login_screen.dart';
-import 'package:database_app/presentation/screens/authentication/login_with_phone.dart';
-import 'package:database_app/presentation/screens/authentication/splash_screen.dart';
-import 'package:database_app/presentation/screens/home/OnBoarding.dart';
-import 'package:database_app/presentation/screens/home/apply_leave.dart';
-import 'package:database_app/presentation/screens/home/clockin_screen%20copy.dart';
-import 'package:database_app/presentation/screens/home/dashboard_screen.dart';
-import 'package:database_app/presentation/screens/home/leave_screen%20copy.dart';
-import 'package:database_app/presentation/screens/home/profile_screen.dart';
+
+import 'package:database_app/presentation/screens/punch_in_out_screen.dart';
+
+import 'core/api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
-import 'presentation/screens/home/bottom_navigation.dart';
+import 'presentation/authentication/login_otp.dart';
+import 'presentation/authentication/login_screen.dart';
+import 'presentation/authentication/login_with_phone.dart';
+import 'presentation/screens/OnBoarding.dart';
+import 'presentation/screens/apply_leave.dart';
+import 'presentation/screens/bottom_navigation.dart';
+import 'presentation/screens/clockin_screen.dart';
+import 'presentation/screens/dashboard_screen.dart';
+import 'presentation/screens/holiday_list.dart';
+import 'presentation/screens/leave_screen.dart';
+import 'presentation/screens/notification_screen.dart';
+import 'presentation/screens/profile_screen.dart';
+import 'presentation/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,7 +57,10 @@ class MyApp extends StatelessWidget {
         "/applyLeave": (context) => ApplyLeave(),
         "/profileScreen": (context) => ProfileScreen(),
         "/clockSecondScreen": (context) => ClockInScreenSecond(),
-        "/leaveSecondScreen": (context) => LeaveScreenSecond()
+        "/leaveSecondScreen": (context) => LeaveScreenSecond(),
+             "/holidayList": (context) => HolidayList(),
+                 "/notificationScreen": (context) => NotificationScreen(),
+                    "/punchinout": (context) => PunchInOutScreen()
       },
     );
   }

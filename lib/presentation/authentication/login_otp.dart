@@ -1,9 +1,11 @@
 
 
-import 'package:database_app/core/theme/app_colors.dart';
-import 'package:database_app/presentation/screens/home/bottom_navigation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
+
+import '../../core/theme/app_colors.dart';
+import '../screens/bottom_navigation.dart';
 
 class LoginOtp extends StatefulWidget {
   const LoginOtp({super.key});

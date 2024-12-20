@@ -1,6 +1,6 @@
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/theme/app_colors.dart';
-import 'package:database_app/presentation/screens/authentication/login_with_phone.dart';
+import 'package:database_app/presentation/authentication/login_with_phone.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
