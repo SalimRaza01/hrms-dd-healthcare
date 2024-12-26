@@ -111,7 +111,7 @@ box.put('token', null);
                           ),
                           Icon(
                             Icons.circle,
-                            color: employee.employeeStatus == 'Working'
+                            color: employee.employeeStatus == 'Present'
                                 ? Colors.green
                                 : Colors.red,
                             size: height * .015,

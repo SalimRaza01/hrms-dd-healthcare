@@ -240,14 +240,14 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
                     ),
                Expanded(
             
-                      child: FutureBuilder<List<LeaveHistory>>(
+                      child: FutureBuilder<List<LeaveHistory>>( 
                           future: _leaveHistory,
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
                               return _shimmerhistoryLoader(height, width);
                             } else if (snapshot.hasError) {
-                              return Center(child: Text('Please check your internet connection, try again'));
+                              return Center(child: Text('No History Found'));
                             } else if (!snapshot.hasData ||
                                 snapshot.data!.isEmpty) {
                               return Center(child: Text('No History Found'));
@@ -301,8 +301,8 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
                                                             116, 255, 198, 124)
                                                         : leave.status ==
                                                                 'Approved'
-                                                            ? Colors.lightGreen
-                                                            : Colors.redAccent,
+                                                            ? const Color.fromARGB(255, 226, 255, 193)
+                                                            : const Color.fromARGB(255, 249, 177, 177),
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                             5)),
@@ -322,10 +322,8 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
                                                               255, 227, 129, 0)
                                                           : leave.status ==
                                                                   'Approved'
-                                                              ? Colors
-                                                                  .lightGreen
-                                                              : Colors
-                                                                  .redAccent,
+                                                              ? const Color.fromARGB(255, 113, 163, 56)
+                                                              : const Color.fromARGB(255, 229, 45, 45),
                                                       fontWeight:
                                                           FontWeight.w500,
                                                     ),
@@ -367,7 +365,7 @@ class _LeaveScreenState extends State<LeaveScreenSecond> {
                                                                         'maternityLeave'
                                                                     ? 'Maternity'
                                                                     : leave
-                                                                        .leaveType,
+                                                                        .leaveType == 'regularized' ? 'Regularization' : leave.leaveType,
                                             style: TextStyle(
                                                 color: AppColor.mainThemeColor),
                                           )

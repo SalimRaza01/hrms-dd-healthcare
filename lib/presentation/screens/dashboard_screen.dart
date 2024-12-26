@@ -6,6 +6,7 @@ import 'package:database_app/core/model/models.dart';
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -155,7 +156,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       Row(
                                         children: [
                                           Text(
-                                            shift.startTime,
+                                            '${shift.startTime} AM ',
                                             style: TextStyle(
                                               fontSize: height * 0.015,
                                               color:
@@ -163,7 +164,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             ),
                                           ),
                                           Text(
-                                            '  -  ',
+                                            '- ',
                                             style: TextStyle(
                                               fontSize: height * 0.015,
                                               color:
@@ -171,7 +172,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             ),
                                           ),
                                           Text(
-                                            shift.endTime,
+                                              '${shift.endTime} PM',
                                             style: TextStyle(
                                               fontSize: height * 0.015,
                                               color:
@@ -354,6 +355,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                                   HolidayModel item = items[0];
 
+                                  final newDate = DateTime.parse(item.holidayDate);
+
+
                                   return InkWell(
                                     onTap: () => showCupertinoModalBottomSheet(
                                       expand: true,
@@ -391,9 +395,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                           .spaceAround,
                                                   children: [
                                                     Text(
-                                                      item.holidayDate
-                                                          .replaceAll(' ', '')
-                                                          .substring(0, 2),
+                                                   DateFormat('dd').format(newDate).toString(),
                                                       style: TextStyle(
                                                         fontSize: height * 0.02,
                                                         fontWeight:
@@ -402,9 +404,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                       ),
                                                     ),
                                                     Text(
-                                                      item.holidayDate
-                                                          .replaceAll(' ', '')
-                                                          .substring(2, 5),
+                                                            DateFormat('EEE').format(newDate).toString(),
                                                       style: TextStyle(
                                                           fontSize:
                                                               height * 0.014,
@@ -429,9 +429,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    item.holidayName.replaceAll(
-                                                        new RegExp(r"[0-9]+"),
-                                                        ""),
+                                                    item.holidayName,
                                                     style: TextStyle(
                                                         fontSize: height * 0.02,
                                                         fontWeight:
@@ -439,23 +437,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                         color: AppColor
                                                             .mainTextColor),
                                                   ),
-                                                  SizedBox(
-                                                    height: height * 0.005,
-                                                  ),
-                                                  Text(
-                                                    item.holidayDescription
-                                                        .replaceAll(
-                                                            new RegExp(
-                                                                r"[0-9]+"),
-                                                            ""),
-                                                    style: TextStyle(
-                                                        fontSize:
-                                                            height * 0.014,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        color: AppColor
-                                                            .mainTextColor),
-                                                  ),
+                                                  // SizedBox(
+                                                  //   height: height * 0.005,
+                                                  // ),
+                                                  // Text(
+                                                  //   item.holidayDescription
+                                                  //    ,
+                                                  //   style: TextStyle(
+                                                  //       fontSize:
+                                                  //           height * 0.014,
+                                                  //       fontWeight:
+                                                  //           FontWeight.w500,
+                                                  //       color: AppColor
+                                                  //           .mainTextColor),
+                                                  // ),
                                                 ],
                                               ),
                                             ),

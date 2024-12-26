@@ -1,9 +1,10 @@
+// ignore_for_file: unused_field
+
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
 import 'OnBoarding.dart';
-import 'bottom_navigation.dart'; 
+import 'bottom_navigation.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,50 +13,65 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
   final Box _authBox = Hive.box('authBox');
+  late Animation<double> _fadeAnim;
+  late AnimationController _controller;
+  
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
 
- 
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
+
+        _fadeAnim = Tween<double>(begin: 1.0, end: 0.0).animate(_controller);
+
+        _animationController = AnimationController(vsync: this);
+
     Future.delayed(Duration(seconds: 2), () {
-      final token = _authBox.get('token'); 
+ 
+      _controller.forward().then((_) {
 
-
-      if (token != null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => BottomNavigation()), 
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => OnboardingScreen()),
-        );
-      }
+        if (_authBox.get('token') != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => BottomNavigation()),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => OnboardingScreen()),
+          );
+        }
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColor.primaryThemeColor,
-              AppColor.secondaryThemeColor2,
-            ],
+      body: FadeTransition(
+        opacity: _fadeAnim,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppColor.primaryThemeColor,
+                AppColor.secondaryThemeColor2,
+              ],
+            ),
           ),
-        ),
-        child: Center(
-          child: Image.asset(
-            'assets/image/DDLOGO.png',
-            height: 60,
+          child: Center(
+            child: Image.asset(
+              'assets/image/DDLOGO.png',
+              height: 60,
+            ),
           ),
         ),
       ),

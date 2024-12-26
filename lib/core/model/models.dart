@@ -55,7 +55,7 @@ class Attendance {
   final int lateby;
   final int earlyBy;
   final int weekOff;
-
+  final int isHoliday;
   Attendance({
     required this.employeeName,
     required this.employeeCode,
@@ -70,6 +70,7 @@ class Attendance {
     required this.lateby,
     required this.earlyBy,
     required this.weekOff,
+    required this.isHoliday
   });
 
   factory Attendance.fromJson(Map<String, dynamic> json) {
@@ -87,6 +88,7 @@ class Attendance {
       lateby: json['LateBy'] ?? 0,
       earlyBy: json['EarlyBy'] ?? 0,
       weekOff: json['WeeklyOff'] ?? '',
+      isHoliday: json['Holiday'] ?? 0
     );
   }
 
@@ -105,6 +107,7 @@ class Attendance {
       'LateBy': lateby,
       'EarlyBy': earlyBy,
       'WeeklyOff': weekOff,
+      'Holiday': isHoliday,
     };
   }
 }

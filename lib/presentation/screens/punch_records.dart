@@ -1,11 +1,13 @@
 import 'dart:math';
+import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class PunchRecordScreen extends StatefulWidget {
   final String? punchRecords;
+  final String? regularizationDate;
 
-  PunchRecordScreen({required this.punchRecords});
+  PunchRecordScreen( {required this.punchRecords, required this.regularizationDate});
 
   @override
   State<PunchRecordScreen> createState() => _PunchRecordScreenState();
@@ -81,7 +83,17 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
             ),
             SizedBox(height: height * 0.03),
             InkWell(
-              onTap: () {},
+         onTap: () async {
+                        if (reasonController.text.isNotEmpty) {
+                          print('sign in button');
+                          await applyRegularize(context, widget.regularizationDate!, reasonController.text
+                             );
+                        } else {
+                          // setState(() {
+                          //   showError = true;
+                          // });
+                        }
+                      },
               child: Center(
                 child: Container(
                   width: width / 2,

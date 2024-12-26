@@ -2,6 +2,7 @@ import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/model/models.dart';
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class HolidayList extends StatefulWidget {
   const HolidayList({super.key});
@@ -62,9 +63,8 @@ class _HolidayListState extends State<HolidayList> {
                       itemBuilder: (context, index) {
                         HolidayModel item = items[index];
                       
-                        print(item.holidayDate
-                            .replaceAll(' ', '')
-                            .substring(0, 2));
+    final newDate = DateTime.parse(item.holidayDate);
+
                       
                         return Card(
                           color: Colors.white,
@@ -92,41 +92,38 @@ class _HolidayListState extends State<HolidayList> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: [
-                                      Text(
-                                        item.holidayDate
-                                            .replaceAll(' ', '')
-                                            .substring(0, 2),
-                                        style: TextStyle(
-                                          fontSize: height * 0.025,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      Text(
-                                        item.holidayDate
-                                            .replaceAll(' ', '')
-                                            .substring(2, 5),
-                                        style: TextStyle(
-                                          fontSize: height * 0.014,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
+                                     Text(
+                                                   DateFormat('dd').format(newDate).toString(),
+                                                      style: TextStyle(
+                                                        fontSize: height * 0.02,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                            DateFormat('EEE').format(newDate).toString(),
+                                                      style: TextStyle(
+                                                          fontSize:
+                                                              height * 0.014,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.white),
+                                                    ),
                                     ],
                                   ),
                                 ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 20),
+                                    vertical: 10, horizontal: 15),
                                 child: Column(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      item.holidayName.replaceAll(
-                                          new RegExp(r"[0-9]+"), ""),
+                                      item.holidayName,
                                       style: TextStyle(
                                           fontSize: height * 0.02,
                                           fontWeight: FontWeight.bold,
@@ -136,8 +133,7 @@ class _HolidayListState extends State<HolidayList> {
                                       height: height * 0.005,
                                     ),
                                     Text(
-                                      item.holidayDescription.replaceAll(
-                                          new RegExp(r"[0-9]+"), ""),
+                                       DateFormat('MMMM').format(newDate).toString(),
                                       style: TextStyle(
                                           fontSize: height * 0.014,
                                           fontWeight: FontWeight.w500,

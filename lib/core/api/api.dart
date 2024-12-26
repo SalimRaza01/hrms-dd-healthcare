@@ -23,6 +23,7 @@ Future<List<Attendance>> fetchAttendence() async {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data['data'];
+print('attendence data $data');
       return data.map((item) => Attendance.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load attendance data');
@@ -80,6 +81,8 @@ class AuthProvider with ChangeNotifier {
         final employeeName = responseData['data']['employeeName'];
         final employeeDesign = responseData['data']['designation'];
         final email = responseData['data']['email'];
+        final gender = responseData['data']['gender'];
+        final role = responseData['data']['role'];
 
         // Save the token in Hive
         await _authBox.put('token', token);
@@ -87,6 +90,8 @@ class AuthProvider with ChangeNotifier {
         await _authBox.put('employeeName', employeeName);
         await _authBox.put('employeeDesign', employeeDesign);
         await _authBox.put('email', email);
+        await _authBox.put('gender', gender);
+        await _authBox.put('role', role);
 
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => BottomNavigation()));
@@ -165,7 +170,7 @@ Future<void> applyLeave(
 Future<List<LeaveHistory>> fetchLeaveHistory(String status) async {
   String empID = _authBox.get('employeeId');
   String token = _authBox.get('token');
-  print('status $status');
+  print('status $token');
   try {
     final response = await dio.get('$getLeaveHistory/$empID',
         options: Options(headers: {
@@ -194,23 +199,70 @@ Future<EmployeeProfile> fetchEmployeeDetails() async {
     final response = await dio.get('$getEmployeeData/$empID');
 
     return EmployeeProfile.fromJson(response.data['data']);
+
   } catch (e) {
     throw Exception('Failed to load employee profile');
   }
 }
 
 Future<List<HolidayModel>> fetchHolidayList() async {
-
   try {
-    final response = await dio.get(getHolidayList,);
+    final response = await dio.get(
+      getHolidayList,
+    );
 
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data['data'];
+
       return data.map((item) => HolidayModel.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load Holiday data');
     }
   } catch (e) {
     throw Exception('Error fetching data: $e');
+  }
+}
+
+Future<void> applyRegularize(
+  BuildContext context,
+  String startDate,
+  String reason,
+) async {
+  String empID = _authBox.get('employeeId');
+  String token = _authBox.get('token');
+
+  try {
+    final response = await dio.post('$applyRegularization/$empID',
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }),
+        data: {
+          "leaveType": 'regularized',
+          "leaveStartDate": startDate,
+          "reason": reason,
+        });
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Request submitted successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Something Wrong : ${response.statusMessage}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } on DioException {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Request failed: No regularization available'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 }

@@ -148,6 +148,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
               
                               String attendDay =
                                   DateFormat('EEE').format(date);
+
+                                  String regularizationDate = DateFormat('yyyy-MM-dd').format(date);
               
                               String punchIn =
                                   "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
@@ -168,7 +170,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                             const Color.fromARGB(0, 0, 0, 0),
                                         builder: (context) =>
                                             PunchRecordScreen(
-                                          punchRecords: item.punchRecords,
+                                          punchRecords: item.punchRecords, regularizationDate: regularizationDate
                                         ),
                                       );
                                     } else {
@@ -200,8 +202,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                           children: [
                                             Card(
                                               color: attendDay == 'Sun' ||
-                                                      attendDay == 'Sat'
-                                                  ? AppColor.mainBGColor
+                                                      attendDay == 'Sat' 
+                                                  ? AppColor.mainBGColor : item.isHoliday != 0 ? Colors.green
                                                   : AppColor.mainThemeColor,
                                               elevation: 4,
                                               margin: EdgeInsets.all(0),
