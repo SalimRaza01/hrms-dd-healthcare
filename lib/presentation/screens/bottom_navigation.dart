@@ -1,10 +1,12 @@
 
 import 'package:database_app/core/theme/app_colors.dart';
+import 'package:database_app/presentation/screens/leave_screen_employee.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'clockin_screen.dart';
 import 'dashboard_screen.dart';
-import 'leave_screen.dart';
+import 'leave_screen_manager.dart';
 import 'profile_screen.dart';
 
 class BottomNavigation extends StatefulWidget {
@@ -18,13 +20,23 @@ class BottomNavigation extends StatefulWidget {
 
 class _BottomNavigationState extends State<BottomNavigation> {
   int currentPageIndex = 0;
+    String? role;
 
 
   @override
   void initState() {
     super.initState();
+        checkEmployeeId();
   }
+  Future<void> checkEmployeeId() async {
+    var box = await Hive.openBox('authBox');
+    setState(() {
+      role = box.get('role');
 
+    });
+
+    print('Stored Employee ID: $role');
+  }
 
 
   @override
@@ -98,7 +110,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
       ),
       body: <Widget>[
         DashboardScreen(),
-        LeaveScreenSecond(),
+       role == 'Employee' ? LeaveScreenEmployee() :  LeaveScreenManager(),
         ClockInScreenSecond(),
         ProfileScreen()
       ][currentPageIndex],

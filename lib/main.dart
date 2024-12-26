@@ -14,7 +14,7 @@ import 'presentation/screens/bottom_navigation.dart';
 import 'presentation/screens/clockin_screen.dart';
 import 'presentation/screens/dashboard_screen.dart';
 import 'presentation/screens/holiday_list.dart';
-import 'presentation/screens/leave_screen.dart';
+import 'presentation/screens/leave_screen_manager.dart';
 import 'presentation/screens/notification_screen.dart';
 import 'presentation/screens/profile_screen.dart';
 import 'presentation/screens/splash_screen.dart';
@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
         "/applyLeave": (context) => ApplyLeave(),
         "/profileScreen": (context) => ProfileScreen(),
         "/clockSecondScreen": (context) => ClockInScreenSecond(),
-        "/leaveSecondScreen": (context) => LeaveScreenSecond(),
+        "/leaveSecondScreen": (context) => LeaveScreenManager(),
              "/holidayList": (context) => HolidayList(),
                  "/notificationScreen": (context) => NotificationScreen(),
                     "/punchinout": (context) => PunchInOutScreen()

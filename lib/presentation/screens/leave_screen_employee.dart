@@ -9,14 +9,14 @@ import 'package:shimmer/shimmer.dart';
 
 import 'apply_leave.dart';
 
-class LeaveScreenSecond extends StatefulWidget {
-  const LeaveScreenSecond({super.key});
+class LeaveScreenEmployee extends StatefulWidget {
+  const LeaveScreenEmployee({super.key});
 
   @override
-  State<LeaveScreenSecond> createState() => _LeaveScreenState();
+  State<LeaveScreenEmployee> createState() => _LeaveScreenState();
 }
 
-class _LeaveScreenState extends State<LeaveScreenSecond> {
+class _LeaveScreenState extends State<LeaveScreenEmployee> {
   final Box _authBox = Hive.box('authBox');
   String? empID;
   int touchedIndex = -1;

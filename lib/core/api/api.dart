@@ -16,14 +16,12 @@ Future<List<Attendance>> fetchAttendence() async {
   final dateFrom = DateFormat('yyyy-MM-dd')
       .format(DateTime.now().subtract(Duration(days: 365)));
 
-  print('fromDate $dateFrom toDate $dateTo');
   try {
     final response = await dio.get('$getAttendenceData/$empID',
         queryParameters: {"dateFrom": dateFrom, "dateTo": dateTo, "page": 1});
 
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data['data'];
-print('attendence data $data');
       return data.map((item) => Attendance.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load attendance data');
@@ -199,7 +197,6 @@ Future<EmployeeProfile> fetchEmployeeDetails() async {
     final response = await dio.get('$getEmployeeData/$empID');
 
     return EmployeeProfile.fromJson(response.data['data']);
-
   } catch (e) {
     throw Exception('Failed to load employee profile');
   }
@@ -261,6 +258,64 @@ Future<void> applyRegularize(
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Request failed: No regularization available'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+Future<List<LeaveRequests>> fetchLeaveRequest() async {
+  String token = _authBox.get('token');
+  print('status $token');
+  try {
+    final response = await dio.get(getLeaveRequest,
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = response.data['data'];
+
+      return data
+          .map((leaveData) => LeaveRequests.fromJson(leaveData))
+          .toList();
+    } else {
+      throw Exception('Failed to load leave history');
+    }
+  } catch (e) {
+    throw Exception('Error fetching data: $e');
+  }
+}
+
+Future<void> leaveAction(
+  BuildContext context,
+  String action,
+  String id,
+) async {
+  try {
+    final response =
+        await dio.put('$leaveActionApi/$id', data: {"status": action});
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Request Approved'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Request Declined'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } on DioException catch (e) {
+    print('Dio Exception: ${e.message}');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('failed: ${e.message}'),
         backgroundColor: Colors.red,
       ),
     );

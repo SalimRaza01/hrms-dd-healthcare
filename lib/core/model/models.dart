@@ -292,3 +292,61 @@ Map<String, dynamic> toJson() {
 
 
 }
+
+
+
+class LeaveRequests {
+  final String id;
+  final String leaveType;
+  final String leaveStartDate;
+  final String leaveEndDate;
+  final String totalDays;
+  final String reason;
+  final String status;
+  final String approvedBy;
+  final String dateTime;
+  final String employeeName;
+
+  LeaveRequests({
+    required this.id,
+    required this.leaveType,
+    required this.leaveStartDate,
+    required this.leaveEndDate,
+    required this.totalDays,
+    required this.reason,
+    required this.status,
+    required this.approvedBy,
+    required this.dateTime,
+    required this.employeeName
+  });
+
+  factory LeaveRequests.fromJson(Map<String, dynamic> json) {
+    return LeaveRequests(
+      id: json['_id'] ?? '',
+      leaveType: json['leaveType'] ?? '',
+      leaveStartDate: json['leaveStartDate'] ?? '',
+      leaveEndDate: json['leaveEndDate'] ?? '',
+      totalDays: json['totalDays'] ?? '',
+      reason: json['reason'] ?? '',
+      status: json['status'] ?? '',
+      approvedBy: json['approvedBy'] ?? '',
+      dateTime: json['dateTime'] ?? '',
+            employeeName: json['employeeInfo']['employeeName'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'leaveType': leaveType,
+      'leaveStartDate': leaveStartDate,
+      'leaveEndDate': leaveEndDate,
+      'totalDays': totalDays,
+      'reason': reason,
+      'status': status,
+      'approvedBy': approvedBy,
+      'dateTime': dateTime,
+      'employeeName' : employeeName
+    };
+  }
+}
