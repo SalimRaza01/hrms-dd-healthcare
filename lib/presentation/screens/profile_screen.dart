@@ -98,7 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            employee.employeeName,
+                          employee.employeeName,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,

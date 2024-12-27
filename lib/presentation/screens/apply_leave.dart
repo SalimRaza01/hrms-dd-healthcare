@@ -147,15 +147,13 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               ),
                             ),
                             Visibility(
-                              visible: _selectedLeaveType == 'Casual Leave', 
-                     
+                              visible: _selectedLeaveType == 'Casual Leave',
                               child: SizedBox(
                                 height: 15,
                               ),
                             ),
                             Visibility(
                                 visible: _selectedLeaveType == 'Casual Leave',
-                    
                                 child: startDateLeave(height, width, context)),
                             Visibility(
                                 visible: _selectedLeaveType != 'Casual Leave',
@@ -471,9 +469,19 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                     brightness: Brightness.light,
                                   ),
                                   child: CupertinoDatePicker(
+                                
                                     mode: CupertinoDatePickerMode.date,
                                     use24hFormat: false,
-                                    minimumDate: DateTime.now(),
+                                    maximumDate: _selectedLeaveType!
+                                                  .contains('Medical')
+                                              ? DateTime.now()
+                                                  
+                                              : null,
+                                             minimumDate: _selectedLeaveType!
+                                                  .contains('Medical')
+                                              ? DateTime.now()
+                                                  .subtract(Duration(days: 5))
+                                              : DateTime.now(),
                                     onDateTimeChanged: (DateTime newDate) {
                                       selectedendDate = newDate;
                                     },
@@ -630,7 +638,12 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                       ? CupertinoDatePicker(
                                           mode: CupertinoDatePickerMode.date,
                                           use24hFormat: false,
-                                          minimumDate: _selectedLeaveType!
+                                         maximumDate: _selectedLeaveType!
+                                                  .contains('Medical')
+                                              ? DateTime.now()
+                                                  
+                                              : null,
+                                             minimumDate: _selectedLeaveType!
                                                   .contains('Medical')
                                               ? DateTime.now()
                                                   .subtract(Duration(days: 5))

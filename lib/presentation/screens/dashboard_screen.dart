@@ -69,14 +69,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          leading: CircleAvatar(
-            child: Image.asset(
-              empGender == 'Male'
-                  ? 'assets/image/MaleAvatar.png'
-                  : 'assets/image/FemaleAvatar.png',
-              height: height * 0.045,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 15),
+            child: CircleAvatar(
+              child: Image.asset(
+                empGender == 'Male'
+                    ? 'assets/image/MaleAvatar.png'
+                    : 'assets/image/FemaleAvatar.png',
+                height: height * 0.045,
+              ),
+              backgroundColor: const Color.fromARGB(255, 255, 255, 255),
             ),
-            backgroundColor: const Color.fromARGB(255, 255, 255, 255),
           ),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

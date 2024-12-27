@@ -50,179 +50,191 @@ class _LoginOtpState extends State<LoginOtp> {
     return Scaffold(
       backgroundColor:  AppColor.bgColor,
       
-      body: Stack(
-        alignment: AlignmentDirectional.topCenter,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 160),
-            child: Image.asset(
-              'assets/image/DDLOGO.png',
-              height: height * 0.07,
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.centerRight,
+            colors: [
+              AppColor.secondaryThemeColor2,
+              AppColor.primaryThemeColor,
+            ],
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            heightFactor: height * .08,
-            child: Stack(
-              clipBehavior: Clip.none,
-                alignment: Alignment.topCenter,
-                children: [
-                  Container(
-                    height: height * 0.5,
-                    width: width,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(30),
-                            topRight: Radius.circular(30))),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            height: 25,
-                          ),
-                          Column(
-                            children: [
-                              Text(
-                                'Sign in',
-                                style: TextStyle(
-                                    fontSize: height * 0.035,
-                                                  color: AppColor.mainTextColor,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(
-                                height: 5,
-                              ),
-                              Text(
-                                'Sign in code has been sent to +91 7272092415, check your inbox to continue the sign in process.',
-                                style: TextStyle(
-                                    fontSize: height * 0.017,
-                                              color: AppColor.mainTextColor2,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          ),
-                          Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: Pinput(
-                              controller: pinController,
-
-                              focusNode: focusNode,
-                              defaultPinTheme: defaultPinTheme,
-
-                              separatorBuilder: (index) =>
-                                  const SizedBox(width: 8),
-                              hapticFeedbackType:
-                                  HapticFeedbackType.lightImpact,
-                              onCompleted: (pin) async {},
-                              onChanged: (value) {
-                                debugPrint('onChanged: $value');
-                              },
-                              cursor: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Container(
-                                    margin: const EdgeInsets.only(bottom: 9),
-                                    width: 22,
-                                    height: 1,
-                                    color: focusedBorderColor,
-                                  ),
-                                ],
-                              ),
-                              focusedPinTheme: defaultPinTheme.copyWith(
-                                decoration:
-                                    defaultPinTheme.decoration!.copyWith(
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                      color: showerror
-                                          ? errorfocusedBorderColor
-                                          : focusedBorderColor),
-                                ),
-                              ),
-                              submittedPinTheme: defaultPinTheme.copyWith(
-                                decoration:
-                                    defaultPinTheme.decoration!.copyWith(
-                                  color: fillColor,
-                                  borderRadius: BorderRadius.circular(19),
-                                  border: Border.all(
-                                      color: showerror
-                                          ? errorfocusedBorderColor
-                                          : focusedBorderColor),
-                                ),
-                              ),
-                              
-                              
-                              
+        ),
+        child: Stack(
+          alignment: AlignmentDirectional.topCenter,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 160),
+              child: Image.asset(
+                'assets/image/DDLOGO.png',
+                height: height * 0.07,
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              heightFactor: height * .08,
+              child: Stack(
+                clipBehavior: Clip.none,
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Container(
+                      height: height * 0.5,
+                      width: width,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(30),
+                              topRight: Radius.circular(30))),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              height: 25,
                             ),
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                "Haven't received OTP? ",
-                                style: TextStyle(
-                                    fontSize: height * 0.017,
-                                                   color: AppColor.mainTextColor2,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              Text(
-                                ' Resend OTP.',
-                                style: TextStyle(
-                                    color:     AppColor.secondaryThemeColor2,
-                                    fontWeight: FontWeight.w500),
-                              )
-                            ],
-                          ),
-                          InkWell(
-                
-                                         onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=> BottomNavigation()));
-                      },
-                            
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      AppColor.primaryThemeColor,
-                                               AppColor.secondaryThemeColor2,
-                                    ]),
+                            Column(
+                              children: [
+                                Text(
+                                  'Sign in',
+                                  style: TextStyle(
+                                      fontSize: height * 0.035,
+                                                    color: AppColor.mainTextColor,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Text(
+                                  'Sign in code has been sent to +91 7272092415, check your inbox to continue the sign in process.',
+                                  style: TextStyle(
+                                      fontSize: height * 0.017,
+                                                color: AppColor.mainTextColor2,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                            Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: Pinput(
+                                controller: pinController,
+        
+                                focusNode: focusNode,
+                                defaultPinTheme: defaultPinTheme,
+        
+                                separatorBuilder: (index) =>
+                                    const SizedBox(width: 8),
+                                hapticFeedbackType:
+                                    HapticFeedbackType.lightImpact,
+                                onCompleted: (pin) async {},
+                                onChanged: (value) {
+                                  debugPrint('onChanged: $value');
+                                },
+                                cursor: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Container(
+                                      margin: const EdgeInsets.only(bottom: 9),
+                                      width: 22,
+                                      height: 1,
+                                      color: focusedBorderColor,
+                                    ),
+                                  ],
+                                ),
+                                focusedPinTheme: defaultPinTheme.copyWith(
+                                  decoration:
+                                      defaultPinTheme.decoration!.copyWith(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                        color: showerror
+                                            ? errorfocusedBorderColor
+                                            : focusedBorderColor),
+                                  ),
+                                ),
+                                submittedPinTheme: defaultPinTheme.copyWith(
+                                  decoration:
+                                      defaultPinTheme.decoration!.copyWith(
+                                    color: fillColor,
+                                    borderRadius: BorderRadius.circular(19),
+                                    border: Border.all(
+                                        color: showerror
+                                            ? errorfocusedBorderColor
+                                            : focusedBorderColor),
+                                  ),
+                                ),
                                 
-                                borderRadius: BorderRadius.circular(20),
+                                
+                                
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 52, vertical: 12),
-                                child: Center(
-                                  child: Text(
-                                    'Submit',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500),
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  "Haven't received OTP? ",
+                                  style: TextStyle(
+                                      fontSize: height * 0.017,
+                                                     color: AppColor.mainTextColor2,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                                Text(
+                                  ' Resend OTP.',
+                                  style: TextStyle(
+                                      color:     AppColor.secondaryThemeColor2,
+                                      fontWeight: FontWeight.w500),
+                                )
+                              ],
+                            ),
+                            InkWell(
+                  
+                                           onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=> BottomNavigation()));
+                        },
+                              
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        AppColor.primaryThemeColor,
+                                                 AppColor.secondaryThemeColor2,
+                                      ]),
+                                  
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 52, vertical: 12),
+                                  child: Center(
+                                    child: Text(
+                                      'Submit',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                        ],
+                            SizedBox(
+                              height: 10,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    top: -45,
-                    child: Image.asset(
-                      'assets/image/OTPLOGO.png',
-                      height: height * 0.13,
+                    Positioned(
+                      top: -45,
+                      child: Image.asset(
+                        'assets/image/OTPLOGO.png',
+                        height: height * 0.13,
+                      ),
                     ),
-                  ),
-                ]),
-          ),
-        ],
+                  ]),
+            ),
+          ],
+        ),
       ),
     );
   }

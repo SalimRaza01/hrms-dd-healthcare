@@ -36,6 +36,7 @@ class OnboardingScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: ConcentricPageView(
+        duration: Duration(milliseconds: 800),
         colors: pages.map((p) => p.bgColor).toList(),
         radius: screenWidth * 0.1,
         nextButtonBuilder: (context) => Padding(
