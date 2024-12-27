@@ -27,9 +27,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? empGender;
   DateTime today = DateTime.now();
 
-  List<String> _images = [
-    'assets/image/MaleAvatar.png',
-    'assets/image/FemaleAvatar.png',
+  List<Widget> _images = [
+    CircleAvatar(
+      backgroundColor: AppColor.mainBGColor,
+      child: Icon(Icons.person, color:AppColor.mainThemeColor,),
+    ),
+    CircleAvatar(
+      backgroundColor: AppColor.mainBGColor,
+      child: Icon(Icons.person, color:AppColor.mainThemeColor,),
+    ),
+  ];
+
+  List<String> name = [
+    'Shiv,',
+    'Sofia',
   ];
 
   @override
@@ -251,15 +262,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               SizedBox(
                                 height: 10,
                               ),
-                              FlutterImageStack(
-                                imageSource: ImageSource.asset,
-                                imageList: _images,
+                              FlutterImageStack.widgets(
+                                children: _images,
                                 showTotalCount: true,
                                 totalCount: _images.length,
-                                itemRadius: 50,
-                                itemCount: _images.length,
-                                itemBorderWidth: 3,
+                                itemRadius: 50, 
+                                itemCount:
+                                  _images.length,
+                                  itemBorderColor: Colors.white,
+                         
                               ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: SizedBox(
+                                  width: width,
+                                  height: height * 0.02,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: name.length,
+                                    itemBuilder: (context, index) {
+                                      final item = name[index];
+                                      return Text(
+                                        '$item ',
+                                      );
+                                    },
+                                  ),
+                                ),
+                              )
                             ],
                           ),
                         ),

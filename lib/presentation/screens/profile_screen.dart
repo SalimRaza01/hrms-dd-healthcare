@@ -1,6 +1,5 @@
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:database_app/presentation/animations/profile_shimmer.dart';
-import 'package:database_app/presentation/authentication/login_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:database_app/core/api/api.dart';

@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'presentation/authentication/login_otp.dart';
 import 'presentation/authentication/login_screen.dart';
 import 'presentation/authentication/login_with_phone.dart';
-import 'presentation/screens/OnBoarding.dart';
+import 'presentation/screens/onboarding_screen.dart';
 import 'presentation/screens/apply_leave.dart';
 import 'presentation/screens/bottom_navigation.dart';
 import 'presentation/screens/clockin_screen.dart';

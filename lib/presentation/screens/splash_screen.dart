@@ -3,7 +3,7 @@
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'OnBoarding.dart';
+import 'onboarding_screen.dart';
 import 'bottom_navigation.dart';
 
 class SplashScreen extends StatefulWidget {
