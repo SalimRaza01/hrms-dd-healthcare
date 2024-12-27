@@ -1,5 +1,7 @@
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:database_app/presentation/animations/profile_shimmer.dart';
+import 'package:database_app/presentation/authentication/login_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/model/models.dart';
@@ -21,12 +23,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     employeeProfile = fetchEmployeeDetails();
   }
 
-
   Future<void> logout() async {
     var box = await Hive.openBox('authBox');
-    
-box.put('token', null);
 
+    box.put('token', null);
   }
 
   @override
@@ -41,14 +41,15 @@ box.put('token', null);
           if (snapshot.connectionState == ConnectionState.waiting) {
             return ProfileShimmerAnimation();
           } else if (snapshot.hasError) {
-            return Center(child: Text('Please check your internet connection, try again'));
+            return Center(
+                child:
+                    Text('Please check your internet connection, try again'));
           } else if (!snapshot.hasData) {
             return Center(child: Text('No data found'));
           } else {
             final employee = snapshot.data!;
             return ListView(children: [
               Container(
-                
                 decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -93,7 +94,7 @@ box.put('token', null);
                           ),
                         ),
                       ),
-                              SizedBox(height: 10),
+                      SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -118,7 +119,6 @@ box.put('token', null);
                           )
                         ],
                       ),
-                     
                       Text(
                         employee.email,
                         style: TextStyle(
@@ -170,19 +170,17 @@ box.put('token', null);
                                   'Gender :', employee.gender, Icons.person),
                               _buildProfileInfo('Date of Birth :', employee.dob,
                                   Icons.calendar_today),
-                              _buildProfileInfo('Place of Birth :',
-                                  employee.placeOfBirth, Icons.location_on),
                               _buildProfileInfo('Marital Status :',
                                   employee.maritalStatus, Icons.favorite),
-                              _buildProfileInfo('Nationality :',
-                                  employee.nationality, Icons.flag),
+                              _buildProfileInfo('Address :',
+                                  employee.permanentAddress, Icons.flag),
                             ],
                           ),
                         ),
                       ),
-                        SizedBox(
-                height: 15,
-              ),
+                      SizedBox(
+                        height: 15,
+                      ),
                       Container(
                         decoration: BoxDecoration(
                           border:
@@ -215,9 +213,9 @@ box.put('token', null);
                           ),
                         ),
                       ),
-                        SizedBox(
-                height: 15,
-              ),
+                      SizedBox(
+                        height: 15,
+                      ),
                       Container(
                         decoration: BoxDecoration(
                           border:
@@ -240,12 +238,14 @@ box.put('token', null);
                               SizedBox(height: 5),
                               _buildProfileInfo('EmployeeID :',
                                   employee.employeeId, Icons.badge),
-                              _buildProfileInfo(
-                                  'Date of Joining :', employee.doj, Icons.work),
-                              _buildProfileInfo('Workplace :', employee.workPlace,
-                                  Icons.business),
+                              _buildProfileInfo('Date of Joining :',
+                                  employee.doj, Icons.work),
+                              _buildProfileInfo('Workplace :',
+                                  employee.workPlace, Icons.business),
                               _buildProfileInfo('Designation :',
                                   employee.designation, Icons.assignment),
+                              _buildProfileInfo('Employee Type :',
+                                  employee.employmentType, Icons.assignment),
                             ],
                           ),
                         ),
@@ -256,8 +256,43 @@ box.put('token', null);
               ),
               InkWell(
                 onTap: () async {
-                await  logout();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => SplashScreen()));
+                  showDialog<void>(
+                    barrierColor: Colors.black38,
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (BuildContext context) {
+                      return CupertinoAlertDialog(
+                        title: Text(
+                          'Confirm Logout',
+                        ),
+                        actions: [
+                          CupertinoDialogAction(
+                            onPressed: () async {
+                              await logout();
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SplashScreen()));
+                            },
+                            child: Text(
+                              "Yes",
+                            ),
+                          ),
+                          CupertinoDialogAction(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              "No",
+                            ),
+                          ),
+                        ],
+                        content: Text(
+                          'Are you sure want to logout?',
+                        ),
+                      );
+                    },
+                  );
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -311,6 +346,7 @@ box.put('token', null);
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,

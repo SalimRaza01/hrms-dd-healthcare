@@ -214,7 +214,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                         attendDay == 'Sat'
                                                     ? AppColor.mainBGColor
                                                     : item.isHoliday != 0
-                                                        ? Colors.green
+                                                        ? Colors.amber
                                                         : AppColor
                                                             .mainThemeColor,
                                                 elevation: 4,

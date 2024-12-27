@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:camera/camera.dart';
@@ -70,7 +71,8 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
     if (permissionStatus.isGranted) {
       try {
         Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
+          locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
+          // desiredAccuracy: LocationAccuracy.high,
         );
         setState(() {
           _currentLocation = LatLng(position.latitude, position.longitude);
@@ -205,26 +207,45 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
               children: [
                 FlutterMap(
                   options: MapOptions(
-                    initialCenter: LatLng(28.704060, 77.102493),
-                    initialZoom: 16.2,
-                  ),
+                      initialCenter: _currentLocation!, initialZoom: 16.0),
                   children: [
-                    CircleLayer(
-                      circles: [
-                        CircleMarker(
-                          borderStrokeWidth: 5.0,
-                          borderColor: Colors.deepOrange,
-                          color: Colors.red,
-                          point: LatLng(28.704060, 77.102493),
-                          radius: 1000,
-                          useRadiusInMeter: false,
-                        ),
-                      ],
-                    ),
+                    // MarkerLayer(
+                    //   markers: [
+                    //     Marker(
+                    //       height: 500,
+                    //       width: 500,
+                    //       child: Icon(
+                    //         Icons.person,
+                    //         size: 50.0,
+                    //         color: Colors.red,
+                    //       ),
+                    //       // borderStrokeWidth: 5.0,
+                    //       // borderColor: Colors.red,
+                    //       // color: Colors.red,
+                    //       point: _currentLocation!,
+                    //       // radius: 5.0,
+                    //       // useRadiusInMeter: true,
+                    //     ),
+                    //   ],
+                    // ),
+                    // MarkerLayer(
+                    //   markers: [
+                    //     Marker(
+                    //       point: _currentLocation!,
+                    //       width: 80,
+                    //       height: 80,
+                    //       child: FlutterLogo(),
+                    //     ),
+                    //   ],
+                    // ),
+
                     TileLayer(
                       urlTemplate:
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'dev.fleaflet.flutter_map.example',
+                    ),
+                    CurrentLocationLayer(
+                      style: LocationMarkerStyle( markerSize: Size.fromRadius(10), accuracyCircleColor :const Color.fromARGB(120, 64, 195, 255)),
                     ),
                   ],
                 ),

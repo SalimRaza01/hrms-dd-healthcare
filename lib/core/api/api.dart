@@ -74,6 +74,7 @@ class AuthProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final responseData = response.data;
+        print('Login Response $responseData');
         final token = responseData['token'];
         final employeeId = responseData['data']['employeeId'];
         final employeeName = responseData['data']['employeeName'];
@@ -195,7 +196,7 @@ Future<EmployeeProfile> fetchEmployeeDetails() async {
   Dio dio = Dio();
   try {
     final response = await dio.get('$getEmployeeData/$empID');
-
+    print(empID);
     return EmployeeProfile.fromJson(response.data['data']);
   } catch (e) {
     throw Exception('Failed to load employee profile');
@@ -210,6 +211,8 @@ Future<List<HolidayModel>> fetchHolidayList() async {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data['data'];
+      // final List<dynamic> data = response.data['data'].where((date) => DateTime.parse(date['holidayDate']).day < DateTime.now().day)
+      //     .toList();
 
       return data.map((item) => HolidayModel.fromJson(item)).toList();
     } else {

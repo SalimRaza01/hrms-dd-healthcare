@@ -108,15 +108,22 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                         controller: _tabController,
                         indicatorColor: Colors.white,
                         labelColor: Colors.white,
-                        unselectedLabelColor: Colors.grey,
+                        unselectedLabelColor: const Color.fromARGB(206, 255, 255, 255),
+                   
                         tabs: [
                           Tab(
-                            icon: Icon(Icons.person),
-                            text: 'Self',
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [Icon(Icons.person), Text('Self')],
+                            ),
+                            // text: 'Self',
                           ),
                           Tab(
-                            icon: Icon(Icons.group),
-                            text: 'Team',
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [Icon(Icons.person), Text('Team')],
+                            ),
+                            // text: 'Self',
                           ),
                         ]),
                     SizedBox(
@@ -182,7 +189,6 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                           _authBox.put('casual', leave.casualLeave);
                           _authBox.put('medical', leave.medicalLeave);
                           _authBox.put('maternity', leave.maternityLeave);
-                          _authBox.put('compoff', leave.compOffLeave);
                           _authBox.put('earned', leave.earnedLeave);
                           _authBox.put('paternity', leave.paternityLeave);
 
@@ -214,11 +220,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                   ),
                                   leaveWidget(height, width, 'Paternity',
                                       leave.paternityLeave),
-                                  SizedBox(
-                                    width: width * 0.025,
-                                  ),
-                                  leaveWidget(height, width, 'CompOff',
-                                      leave.compOffLeave),
+  
                                 ],
                               ));
                         } else {
@@ -357,9 +359,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                           ? 'Medical'
                                           : leave.leaveType == 'casualLeave'
                                               ? 'Casual'
-                                              : leave.leaveType ==
-                                                      'compoffLeave'
-                                                  ? 'Comp-off'
+                                           
                                                   : leave.leaveType ==
                                                           'paternityLeave'
                                                       ? 'Paternity'
@@ -503,13 +503,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                   : leave.totalDays == '0.5'
                                                       ? 'Casual - Half-Day Application'
                                                       : 'Casual - ${leave.totalDays} Days Application'
-                                              : leave.leaveType ==
-                                                      'compOffLeave'
-                                                  ? leave.totalDays == '1'
-                                                      ? 'Comp-Off - Full Day Application'
-                                                      : leave.totalDays == '0.5'
-                                                          ? 'Comp-Off - Half-Day Application'
-                                                          : 'Comp-Off - ${leave.totalDays} Days Application'
+
                                                   : leave.leaveType ==
                                                           'paternityLeave'
                                                       ? leave.totalDays == '1'
@@ -552,7 +546,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                   ),
                                 ),
                                 Visibility(
-                                  // visible: leave.status == 'Pending',
+                                  visible: leave.status == 'Pending',
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 10),
                                     child: Row(
@@ -589,7 +583,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                           ),
                                         ),
                                         GestureDetector(
-                                   onTap: () async {
+                                          onTap: () async {
                                             await leaveAction(
                                                 context, 'Reject', leave.id);
                                             _leaveRequest = fetchLeaveRequest();

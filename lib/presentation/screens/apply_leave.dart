@@ -33,7 +33,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   DateTime? fromtime;
   DateTime? toTime;
   String? casualLeave;
-  String? compoffLeave;
   String? earnedLeave;
   String? medicalLeave;
   String? maternityLeave;
@@ -48,7 +47,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       casualLeave = box.get('casual');
       medicalLeave = box.get('medical');
       maternityLeave = box.get('maternity');
-      compoffLeave = box.get('compoff');
       earnedLeave = box.get('earned');
       paternityLeave = box.get('paternity');
 
@@ -58,7 +56,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         Leave('Earned Leave', earnedLeave!),
         Leave('Maternity Leave', maternityLeave!),
         Leave('Paternity Leave', paternityLeave!),
-        Leave('Comp-off Leave', compoffLeave!),
       ];
     });
   }
@@ -150,19 +147,18 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               ),
                             ),
                             Visibility(
-                              visible: _selectedLeaveType == 'Casual Leave' ||
-                                  _selectedLeaveType == 'Comp-off Leave',
+                              visible: _selectedLeaveType == 'Casual Leave', 
+                     
                               child: SizedBox(
                                 height: 15,
                               ),
                             ),
                             Visibility(
-                                visible: _selectedLeaveType == 'Casual Leave' ||
-                                    _selectedLeaveType == 'Comp-off Leave',
+                                visible: _selectedLeaveType == 'Casual Leave',
+                    
                                 child: startDateLeave(height, width, context)),
                             Visibility(
-                                visible: _selectedLeaveType != 'Casual Leave' &&
-                                    _selectedLeaveType != 'Comp-off Leave',
+                                visible: _selectedLeaveType != 'Casual Leave',
                                 child: Column(
                                   children: [
                                     startDateLeave(height, width, context),
@@ -331,7 +327,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
-                                            'Casual/Comp-Off leave must be applied before 9 AM for today.'),
+                                            'leave must be applied before 9 AM for today.'),
                                         backgroundColor: Colors.red,
                                       ),
                                     );

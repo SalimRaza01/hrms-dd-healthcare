@@ -47,7 +47,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
 
     return SafeArea(
       child: Scaffold(
-        extendBodyBehindAppBar : true,
+          extendBodyBehindAppBar: true,
           backgroundColor: AppColor.mainBGColor,
           body: Stack(
             children: [
@@ -78,7 +78,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
               Padding(
                 padding: const EdgeInsets.all(15),
                 child: Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -140,71 +140,56 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                                       ConnectionState.waiting) {
                                     return _shimmerLoader(height, width);
                                   } else if (snapshot.hasError) {
-                                    return Center(child: Text('Internet connection error'));
+                                    return Center(
+                                        child:
+                                            Text('Internet connection error'));
                                   } else if (snapshot.hasData) {
                                     final leave = snapshot.data!;
-                    
-                                    _authBox.put(
-                                        'casual', leave.casualLeave);
-                                    _authBox.put(
-                                        'medical', leave.medicalLeave);
+
+                                    _authBox.put('casual', leave.casualLeave);
+                                    _authBox.put('medical', leave.medicalLeave);
                                     _authBox.put(
                                         'maternity', leave.maternityLeave);
-                                    _authBox.put(
-                                        'compoff', leave.compOffLeave);
-                                    _authBox.put(
-                                        'earned', leave.earnedLeave);
+                                    _authBox.put('earned', leave.earnedLeave);
                                     _authBox.put(
                                         'paternity', leave.paternityLeave);
-                    
+
                                     return SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          leaveWidget(height, width,
-                                              'Casual', leave.casualLeave),
-                                          SizedBox(
-                                            width: width * 0.025,
-                                          ),
-                                          leaveWidget(
-                                              height,
-                                              width,
-                                              'Medical',
-                                              leave.medicalLeave),
-                                          SizedBox(
-                                            width: width * 0.025,
-                                          ),
-                                          leaveWidget(height, width,
-                                              'Earned', leave.earnedLeave),
-                                          SizedBox(
-                                            width: width * 0.025,
-                                          ),
-                                          leaveWidget(
-                                              height,
-                                              width,
-                                              'Maternity',
-                                              leave.maternityLeave),
-                                          SizedBox(
-                                            width: width * 0.025,
-                                          ),
-                                          leaveWidget(
-                                              height,
-                                              width,
-                                              'Paternity',
-                                              leave.paternityLeave),
-                                          SizedBox(
-                                            width: width * 0.025,
-                                          ),
-                                          leaveWidget(
-                                              height,
-                                              width,
-                                              'CompOff',
-                                              leave.compOffLeave),
-                                        ],
-                                      )
-                                    );
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            leaveWidget(height, width, 'Casual',
+                                                leave.casualLeave),
+                                            SizedBox(
+                                              width: width * 0.025,
+                                            ),
+                                            leaveWidget(height, width,
+                                                'Medical', leave.medicalLeave),
+                                            SizedBox(
+                                              width: width * 0.025,
+                                            ),
+                                            leaveWidget(height, width, 'Earned',
+                                                leave.earnedLeave),
+                                            SizedBox(
+                                              width: width * 0.025,
+                                            ),
+                                            leaveWidget(
+                                                height,
+                                                width,
+                                                'Maternity',
+                                                leave.maternityLeave),
+                                            SizedBox(
+                                              width: width * 0.025,
+                                            ),
+                                            leaveWidget(
+                                                height,
+                                                width,
+                                                'Paternity',
+                                                leave.paternityLeave),
+                                          ],
+                                        ));
                                   } else {
                                     return Center(child: Text('No Data Found'));
                                   }
@@ -213,9 +198,9 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                         ),
                       ),
                     ),
-                     SizedBox(
-                                  height: height * 0.02,
-                                ),
+                    SizedBox(
+                      height: height * 0.02,
+                    ),
                     Card(
                       color: Colors.white,
                       elevation: 4,
@@ -238,9 +223,8 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                     SizedBox(
                       height: 15,
                     ),
-               Expanded(
-            
-                      child: FutureBuilder<List<LeaveHistory>>( 
+                    Expanded(
+                      child: FutureBuilder<List<LeaveHistory>>(
                           future: _leaveHistory,
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
@@ -253,7 +237,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                               return Center(child: Text('No History Found'));
                             } else {
                               List<LeaveHistory> items = snapshot.data!;
-      
+
                               return ListView.separated(
                                 itemCount: items.length,
                                 itemBuilder: (context, index) {
@@ -262,7 +246,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                                       DateTime.parse(leave.leaveStartDate);
                                   final endDate =
                                       DateTime.parse(leave.leaveEndDate);
-      
+
                                   return Card(
                                     color: Colors.white,
                                     elevation: 4,
@@ -301,8 +285,12 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                                                             116, 255, 198, 124)
                                                         : leave.status ==
                                                                 'Approved'
-                                                            ? const Color.fromARGB(255, 226, 255, 193)
-                                                            : const Color.fromARGB(255, 249, 177, 177),
+                                                            ? const Color
+                                                                .fromARGB(255,
+                                                                226, 255, 193)
+                                                            : const Color
+                                                                .fromARGB(255,
+                                                                249, 177, 177),
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                             5)),
@@ -322,8 +310,12 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                                                               255, 227, 129, 0)
                                                           : leave.status ==
                                                                   'Approved'
-                                                              ? const Color.fromARGB(255, 113, 163, 56)
-                                                              : const Color.fromARGB(255, 229, 45, 45),
+                                                              ? const Color
+                                                                  .fromARGB(255,
+                                                                  113, 163, 56)
+                                                              : const Color
+                                                                  .fromARGB(255,
+                                                                  229, 45, 45),
                                                       fontWeight:
                                                           FontWeight.w500,
                                                     ),
@@ -356,16 +348,16 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                                                             'casualLeave'
                                                         ? 'Casual'
                                                         : leave.leaveType ==
-                                                                'compoffLeave'
-                                                            ? 'Comp-off'
+                                                                'paternityLeave'
+                                                            ? 'Paternity'
                                                             : leave.leaveType ==
-                                                                    'paternityLeave'
-                                                                ? 'Paternity'
+                                                                    'maternityLeave'
+                                                                ? 'Maternity'
                                                                 : leave.leaveType ==
-                                                                        'maternityLeave'
-                                                                    ? 'Maternity'
+                                                                        'regularized'
+                                                                    ? 'Regularization'
                                                                     : leave
-                                                                        .leaveType == 'regularized' ? 'Regularization' : leave.leaveType,
+                                                                        .leaveType,
                                             style: TextStyle(
                                                 color: AppColor.mainThemeColor),
                                           )
@@ -405,7 +397,6 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
   SizedBox leaveWidget(
       double height, double width, String leave, String leaveCount) {
     return SizedBox(
-
       width: width * 0.2,
       child: Card(
         color: AppColor.mainBGColor,
@@ -499,6 +490,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
       ),
     );
   }
+
   SizedBox _shimmerhistoryLoader(double height, double width) {
     return SizedBox(
       height: height * 0.1,
@@ -521,5 +513,3 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
     );
   }
 }
-
-

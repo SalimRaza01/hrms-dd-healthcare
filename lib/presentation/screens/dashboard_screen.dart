@@ -1,10 +1,11 @@
-// ignore_for_file: sort_child_properties_last
+// ignore_for_file: sort_child_properties_last, prefer_final_fields
 
 import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/model/models.dart';
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_stack/flutter_image_stack.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -24,8 +25,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? empName;
   String? empDesign;
   String? empGender;
-
   DateTime today = DateTime.now();
+
+  List<String> _images = [
+    'assets/image/MaleAvatar.png',
+    'assets/image/FemaleAvatar.png',
+  ];
 
   @override
   void initState() {
@@ -53,14 +58,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-
           leading: CircleAvatar(
             child: Image.asset(
               empGender == 'Male'
                   ? 'assets/image/MaleAvatar.png'
-                  : 'assets/image/FemaleAvatar.png', height: height * 0.045,
+                  : 'assets/image/FemaleAvatar.png',
+              height: height * 0.045,
             ),
-      
             backgroundColor: const Color.fromARGB(255, 255, 255, 255),
           ),
           title: Column(
@@ -77,9 +81,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                 empDesign != null ? empDesign! : '',
                 style: TextStyle(
-                    fontSize: height * 0.014,
-                    color: AppColor.mainTextColor2,
-                    ),
+                  fontSize: height * 0.014,
+                  color: AppColor.mainTextColor2,
+                ),
               )
             ],
           ),
@@ -172,7 +176,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             ),
                                           ),
                                           Text(
-                                              '${shift.endTime} PM',
+                                            '${shift.endTime} PM',
                                             style: TextStyle(
                                               fontSize: height * 0.015,
                                               color:
@@ -216,6 +220,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           activeDayColor: Colors.white,
                           activeBackgroundDayColor: AppColor.mainThemeColor,
                           locale: 'en_ISO',
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: Card(
+                        color: Colors.white,
+                        elevation: 4,
+                        margin: EdgeInsets.all(0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        shadowColor: Colors.black.withOpacity(0.1),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'On Leave Today',
+                                style: TextStyle(
+                                    fontSize: height * 0.018,
+                                    color: AppColor.mainTextColor,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              FlutterImageStack(
+                                imageSource: ImageSource.asset,
+                                imageList: _images,
+                                showTotalCount: true,
+                                totalCount: _images.length,
+                                itemRadius: 50,
+                                itemCount: _images.length,
+                                itemBorderWidth: 3,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -293,11 +339,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               width,
                                               'Paternity',
                                               leave.paternityLeave),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          leaveWidget(height, width, 'CompOff',
-                                              leave.compOffLeave),
                                         ],
                                       ),
                                     );
@@ -355,8 +396,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                                   HolidayModel item = items[0];
 
-                                  final newDate = DateTime.parse(item.holidayDate);
+                                  final newDate =
+                                      DateTime.parse(item.holidayDate);
 
+                                  print(newDate.day < DateTime.now().day);
 
                                   return InkWell(
                                     onTap: () => showCupertinoModalBottomSheet(
@@ -386,7 +429,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               child: Padding(
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                  horizontal: 20,
+                                                  horizontal: 15,
                                                   vertical: 8,
                                                 ),
                                                 child: Column(
@@ -395,7 +438,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                           .spaceAround,
                                                   children: [
                                                     Text(
-                                                   DateFormat('dd').format(newDate).toString(),
+                                                      DateFormat('dd')
+                                                          .format(newDate)
+                                                          .toString(),
                                                       style: TextStyle(
                                                         fontSize: height * 0.02,
                                                         fontWeight:
@@ -404,7 +449,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                       ),
                                                     ),
                                                     Text(
-                                                            DateFormat('EEE').format(newDate).toString(),
+                                                      DateFormat('EEE')
+                                                          .format(newDate)
+                                                          .toString(),
                                                       style: TextStyle(
                                                           fontSize:
                                                               height * 0.014,
