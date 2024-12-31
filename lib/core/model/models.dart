@@ -307,6 +307,7 @@ class LeaveRequests {
   final String approvedBy;
   final String dateTime;
   final String employeeName;
+  final String location;
 
   LeaveRequests({
     required this.id,
@@ -318,7 +319,8 @@ class LeaveRequests {
     required this.status,
     required this.approvedBy,
     required this.dateTime,
-    required this.employeeName
+    required this.employeeName,
+    required this.location
   });
 
   factory LeaveRequests.fromJson(Map<String, dynamic> json) {
@@ -333,6 +335,7 @@ class LeaveRequests {
       approvedBy: json['approvedBy'] ?? '',
       dateTime: json['dateTime'] ?? '',
             employeeName: json['employeeInfo']['employeeName'] ?? '',
+            location: json['location']
     );
   }
 
@@ -347,7 +350,8 @@ class LeaveRequests {
       'status': status,
       'approvedBy': approvedBy,
       'dateTime': dateTime,
-      'employeeName' : employeeName
+      'employeeName' : employeeName,
+      'location' : location
     };
   }
 }

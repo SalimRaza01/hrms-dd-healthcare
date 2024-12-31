@@ -9,7 +9,7 @@ import 'package:shimmer/shimmer.dart';
 import 'apply_leave.dart';
 
 class LeaveScreenManager extends StatefulWidget {
-    final String empID;
+  final String empID;
   const LeaveScreenManager(this.empID);
 
   @override
@@ -20,7 +20,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
     with SingleTickerProviderStateMixin {
   final Box _authBox = Hive.box('authBox');
 
- late String? empID;
+  late String? empID;
   bool isLoading = true;
   int touchedIndex = -1;
   String _selectedText = 'Pending';
@@ -54,8 +54,6 @@ class _LeaveScreenState extends State<LeaveScreenManager>
       }
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -103,8 +101,8 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                         controller: _tabController,
                         indicatorColor: Colors.white,
                         labelColor: Colors.white,
-                        unselectedLabelColor: const Color.fromARGB(206, 255, 255, 255),
-                   
+                        unselectedLabelColor:
+                            const Color.fromARGB(206, 255, 255, 255),
                         tabs: [
                           Tab(
                             child: Row(
@@ -215,7 +213,6 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                   ),
                                   leaveWidget(height, width, 'Paternity',
                                       leave.paternityLeave),
-  
                                 ],
                               ));
                         } else {
@@ -354,17 +351,16 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                           ? 'Medical'
                                           : leave.leaveType == 'casualLeave'
                                               ? 'Casual'
-                                           
+                                              : leave.leaveType ==
+                                                      'paternityLeave'
+                                                  ? 'Paternity'
                                                   : leave.leaveType ==
-                                                          'paternityLeave'
-                                                      ? 'Paternity'
+                                                          'maternityLeave'
+                                                      ? 'Maternity'
                                                       : leave.leaveType ==
-                                                              'maternityLeave'
-                                                          ? 'Maternity'
-                                                          : leave.leaveType ==
-                                                                  'regularized'
-                                                              ? 'Regularization'
-                                                              : leave.leaveType,
+                                                              'regularized'
+                                                          ? 'Regularization'
+                                                          : leave.leaveType,
                                   style:
                                       TextStyle(color: AppColor.mainThemeColor),
                                 )
@@ -498,28 +494,25 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                   : leave.totalDays == '0.5'
                                                       ? 'Casual - Half-Day Application'
                                                       : 'Casual - ${leave.totalDays} Days Application'
-
+                                              : leave.leaveType ==
+                                                      'paternityLeave'
+                                                  ? leave.totalDays == '1'
+                                                      ? 'Paternity - Full Day Application'
+                                                      : leave.totalDays == '0.5'
+                                                          ? 'Paternity - Half-Day Application'
+                                                          : 'Paternity - ${leave.totalDays} Days Application'
                                                   : leave.leaveType ==
-                                                          'paternityLeave'
+                                                          'maternityLeave'
                                                       ? leave.totalDays == '1'
-                                                          ? 'Paternity - Full Day Application'
+                                                          ? 'Maternity - Full Day Application'
                                                           : leave.totalDays ==
                                                                   '0.5'
-                                                              ? 'Paternity - Half-Day Application'
-                                                              : 'Paternity - ${leave.totalDays} Days Application'
+                                                              ? 'Maternity - Half-Day Application'
+                                                              : 'Maternity - ${leave.totalDays} Days Application'
                                                       : leave.leaveType ==
-                                                              'maternityLeave'
-                                                          ? leave.totalDays ==
-                                                                  '1'
-                                                              ? 'Maternity - Full Day Application'
-                                                              : leave.totalDays ==
-                                                                      '0.5'
-                                                                  ? 'Maternity - Half-Day Application'
-                                                                  : 'Maternity - ${leave.totalDays} Days Application'
-                                                          : leave.leaveType ==
-                                                                  'regularized'
-                                                              ? 'Regularization'
-                                                              : leave.leaveType,
+                                                              'regularized'
+                                                          ? 'Regularization'
+                                                          : leave.leaveType,
                                   style: TextStyle(
                                       color: AppColor.mainThemeColor,
                                       fontWeight: FontWeight.bold),
@@ -538,6 +531,44 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(leave.reason),
+                                  ),
+                                ),
+                                Visibility(
+                                  visible: leave.location.isNotEmpty,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 5),
+                                    child: Container(
+                                      width: width,
+                                      height: height * 0.05,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: AppColor.mainBGColor,
+                                              width: 2.0),
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.file_copy_rounded,
+                                              color: Colors.blue,
+                                              size: height * 0.02,
+                                            ),
+                                            SizedBox(
+                                              width: width * 0.03,
+                                            ),
+                                            Text(
+                                              'IMG_45544871.JPG',
+                                              style: TextStyle(
+                                                  color:
+                                                      AppColor.mainTextColor2,
+                                                  fontSize: 15),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 Visibility(

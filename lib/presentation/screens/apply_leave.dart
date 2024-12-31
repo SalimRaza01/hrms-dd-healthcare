@@ -1,14 +1,18 @@
 // ignore_for_file: unused_import
 
+import 'dart:convert';
+import 'dart:io';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:database_app/core/api/api.dart';
+import 'package:database_app/core/api/api_config.dart';
 import 'package:database_app/core/theme/app_colors.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-
+import 'package:file_picker/file_picker.dart';
 import 'leave_policy.dart';
 
 class ApplyLeave extends StatefulWidget {
@@ -37,7 +41,9 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   String? medicalLeave;
   String? maternityLeave;
   String? paternityLeave;
-
+  List<PlatformFile>? _paths;
+  bool _isLoading = false;
+  String? empID;
   List<Leave> leaveList = [];
 
   Future<void> getleaveBalance() async {
@@ -49,6 +55,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       maternityLeave = box.get('maternity');
       earnedLeave = box.get('earned');
       paternityLeave = box.get('paternity');
+      empID = box.get('employeeId');
 
       leaveList = [
         Leave('Casual Leave', casualLeave!),
@@ -64,6 +71,51 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   void initState() {
     getleaveBalance();
     super.initState();
+  }
+
+  String? get uploadURL => '$documentUpload/$empID';
+  Future<void> uploadPrescription(List<PlatformFile> files) async {
+    final dio = Dio();
+    setState(() {
+      _isLoading = true;
+    });
+
+    for (var file in files) {
+      if (file.path != null) {
+        try {
+          var formData = FormData.fromMap({
+            'file':
+                await MultipartFile.fromFile(file.path!, filename: file.name),
+          });
+
+          Response response = await dio.post(uploadURL!, data: formData);
+
+          if (response.statusCode == 200) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text('Prescription Uploaded'),
+                  backgroundColor: Colors.green),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text('Failed to Upload Prescription'),
+                  backgroundColor: Colors.red),
+            );
+          }
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          );
+        }
+      } else {
+        print("File path is null");
+      }
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -212,24 +264,89 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             SizedBox(
                               height: 15,
                             ),
-                            Visibility(
-                              visible: _selectedLeaveType == 'Medical Leave',
-                              child: InkWell(
-                                onTap: () async {},
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: AppColor.mainThemeColor,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 50, vertical: 10),
-                                    child: Text(
-                                      "Upload Prescription",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 15),
-                                    ),
-                                  ),
+                            Builder(
+                              builder: (BuildContext context) => _isLoading
+                                  ? Center(child: CircularProgressIndicator())
+                                  : _paths == null
+                                      ? SizedBox()
+                                      : ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: _paths?.length ?? 0,
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            final file = _paths![index];
+                                            return Card(
+                                              color: Colors.white,
+                                              elevation: 5,
+                                              margin: EdgeInsets.all(0),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(15),
+                                              ),
+                                              shadowColor: Colors.black
+                                                  .withOpacity(0.1),
+                                              child: ListTile(
+                                                leading: Icon(
+                                                  Icons.file_copy_rounded,
+                                                  color: Colors.blue,
+                                                ),
+                                                title: Text(
+                                                  file.name,
+                                                  style: TextStyle(
+                                                      color: AppColor
+                                                          .mainTextColor2,
+                                                      fontSize: 15),
+                                                ),
+                                                trailing: IconButton(
+                                                  icon: Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red,
+                                                  ),
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      _paths!.removeAt(index);
+                                                    });
+                                                  },
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            InkWell(
+                              onTap: () async {
+                                FilePickerResult? result =
+                                    await FilePicker.platform.pickFiles();
+                            
+                                setState(() {
+                                  _isLoading = true;
+                                });
+                            
+                                if (result != null) {
+                                  setState(() {
+                                    _paths = result.files;
+                                    uploadPrescription(result.files);
+                                  });
+                                } else {
+                                  setState(() {
+                                    _isLoading = false;
+                                  });
+                                }
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 50, vertical: 10),
+                                child: Text(
+                                  "Upload Prescription",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 15),
                                 ),
                               ),
                             ),
@@ -363,6 +480,15 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                     );
                                     return;
                                   }
+                                  if (_paths == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Please Upload Prescription First'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
                                 }
                               },
                               child: Container(
@@ -469,19 +595,18 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                     brightness: Brightness.light,
                                   ),
                                   child: CupertinoDatePicker(
-                                
                                     mode: CupertinoDatePickerMode.date,
                                     use24hFormat: false,
-                                    maximumDate: _selectedLeaveType!
-                                                  .contains('Medical')
-                                              ? DateTime.now()
-                                                  
-                                              : null,
-                                             minimumDate: _selectedLeaveType!
-                                                  .contains('Medical')
-                                              ? DateTime.now()
-                                                  .subtract(Duration(days: 5))
-                                              : DateTime.now(),
+                                    maximumDate:
+                                        _selectedLeaveType!.contains('Medical')
+                                            ? DateTime.now()
+                                                .subtract(Duration(days: 1))
+                                            : null,
+                                    minimumDate:
+                                        _selectedLeaveType!.contains('Medical')
+                                            ? DateTime.now()
+                                                .subtract(Duration(days: 5))
+                                            : DateTime.now(),
                                     onDateTimeChanged: (DateTime newDate) {
                                       selectedendDate = newDate;
                                     },
@@ -638,15 +763,15 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                       ? CupertinoDatePicker(
                                           mode: CupertinoDatePickerMode.date,
                                           use24hFormat: false,
-                                         maximumDate: _selectedLeaveType!
+                                          maximumDate: _selectedLeaveType!
                                                   .contains('Medical')
                                               ? DateTime.now()
-                                                  
+                                                  .subtract(Duration(days: 2))
                                               : null,
-                                             minimumDate: _selectedLeaveType!
+                                          minimumDate: _selectedLeaveType!
                                                   .contains('Medical')
                                               ? DateTime.now()
-                                                  .subtract(Duration(days: 5))
+                                                  .subtract(Duration(days: 6))
                                               : DateTime.now(),
                                           onDateTimeChanged:
                                               (DateTime newDate) {
