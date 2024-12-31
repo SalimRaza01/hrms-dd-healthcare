@@ -9,7 +9,8 @@ import 'package:shimmer/shimmer.dart';
 import 'apply_leave.dart';
 
 class LeaveScreenManager extends StatefulWidget {
-  const LeaveScreenManager({super.key});
+    final String empID;
+  const LeaveScreenManager(this.empID);
 
   @override
   State<LeaveScreenManager> createState() => _LeaveScreenState();
@@ -18,7 +19,8 @@ class LeaveScreenManager extends StatefulWidget {
 class _LeaveScreenState extends State<LeaveScreenManager>
     with SingleTickerProviderStateMixin {
   final Box _authBox = Hive.box('authBox');
-  String? empID;
+
+ late String? empID;
   bool isLoading = true;
   int touchedIndex = -1;
   String _selectedText = 'Pending';
@@ -31,7 +33,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
 
   @override
   void initState() {
-    _leaveHistory = fetchLeaveHistory(_selectedText);
+    _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
     _leaveRequest = fetchLeaveRequest();
     _tabController = TabController(vsync: this, length: 3);
     _tabController.addListener(_handleTabSelection);
@@ -43,7 +45,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
       switch (_tabController.index) {
         case 0:
           updateUser = 'Self';
-          _leaveHistory = fetchLeaveHistory(_selectedText);
+          _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
           break;
         case 1:
           updateUser = 'Team';
@@ -53,14 +55,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
     });
   }
 
-  Future<void> checkEmployeeId() async {
-    var box = await Hive.openBox('authBox');
 
-    setState(() {
-      empID = box.get('employeeId');
-    });
-    print('Stored Employee ID: $empID');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +170,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   FutureBuilder<LeaveBalance>(
-                      future: fetchLeaves(),
+                      future: fetchLeaves(widget.empID),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -585,7 +580,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                         GestureDetector(
                                           onTap: () async {
                                             await leaveAction(
-                                                context, 'Reject', leave.id);
+                                                context, 'Rejected', leave.id);
                                             _leaveRequest = fetchLeaveRequest();
                                           },
                                           child: Container(
@@ -680,7 +675,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
       onTap: () {
         setState(() {
           _selectedText = text;
-          _leaveHistory = fetchLeaveHistory(_selectedText);
+          _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
         });
       },
       child: Container(

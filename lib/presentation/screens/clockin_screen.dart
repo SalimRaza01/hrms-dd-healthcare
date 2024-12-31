@@ -9,22 +9,21 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'punch_records.dart';
 
 class ClockInScreenSecond extends StatefulWidget {
-  const ClockInScreenSecond({super.key});
+    final String empID;
+  const ClockInScreenSecond(this.empID);
   @override
   State<ClockInScreenSecond> createState() => _ClockInScreenSecondState();
 }
 
 class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
   late Future<List<Attendance>> attendenceLog;
-  ScrollController scrollController = ScrollController();
 
+late String empID;
   @override
   void initState() {
     super.initState();
-    attendenceLog = fetchAttendence();
-    scrollController.addListener(() {
-      attendenceLog = fetchAttendence();
-    });
+    attendenceLog = fetchAttendence(widget.empID);
+
   }
 
   @override
@@ -124,7 +123,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                             List<Attendance> items = snapshot.data!;
 
                             return ListView.separated(
-                              controller: scrollController,
+                      
                               itemCount: items.length,
                               itemBuilder: (context, index) {
                                 Attendance item = items[index];

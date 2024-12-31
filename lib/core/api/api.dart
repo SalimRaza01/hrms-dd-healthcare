@@ -10,8 +10,8 @@ import '../../presentation/screens/bottom_navigation.dart';
 final Box _authBox = Hive.box('authBox');
 final Dio dio = Dio();
 
-Future<List<Attendance>> fetchAttendence() async {
-  String empID = _authBox.get('employeeId');
+Future<List<Attendance>> fetchAttendence(String empID) async {
+
   final dateTo = DateFormat('yyyy-MM-dd').format(DateTime.now());
   final dateFrom = DateFormat('yyyy-MM-dd')
       .format(DateTime.now().subtract(Duration(days: 365)));
@@ -31,8 +31,8 @@ Future<List<Attendance>> fetchAttendence() async {
   }
 }
 
-Future<LeaveBalance> fetchLeaves() async {
-  String empID = _authBox.get('employeeId');
+Future<LeaveBalance> fetchLeaves(String empID) async {
+
   try {
     final response = await dio.get('$getEmployeeData/$empID');
 
@@ -46,8 +46,8 @@ Future<LeaveBalance> fetchLeaves() async {
   }
 }
 
-Future<ShiftTimeModel> fetchShiftTime() async {
-  String empID = _authBox.get('employeeId');
+Future<ShiftTimeModel> fetchShiftTime(String empID) async {
+
   try {
     final response = await dio.get('$getEmployeeData/$empID');
 
@@ -166,8 +166,7 @@ Future<void> applyLeave(
   }
 }
 
-Future<List<LeaveHistory>> fetchLeaveHistory(String status) async {
-  String empID = _authBox.get('employeeId');
+Future<List<LeaveHistory>> fetchLeaveHistory(String status, String empID) async {
   String token = _authBox.get('token');
   print('status $token');
   try {
@@ -191,8 +190,7 @@ Future<List<LeaveHistory>> fetchLeaveHistory(String status) async {
   }
 }
 
-Future<EmployeeProfile> fetchEmployeeDetails() async {
-  String empID = _authBox.get('employeeId');
+Future<EmployeeProfile> fetchEmployeeDetails(String empID) async {
   Dio dio = Dio();
   try {
     final response = await dio.get('$getEmployeeData/$empID');
@@ -322,5 +320,25 @@ Future<void> leaveAction(
         backgroundColor: Colors.red,
       ),
     );
+  }
+}
+
+Future<List<EmployeeProfile>> fetchTeamList() async {
+  String token = _authBox.get('token');
+  Dio dio = Dio();
+  try {
+    final response = await dio.get(getTeamMemberList,
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }));
+
+    List<EmployeeProfile> employeeList = [];
+    for (var employee in response.data['data']) {
+      employeeList.add(EmployeeProfile.fromJson(employee));
+    }
+    return employeeList;
+  } catch (e) {
+    throw Exception('Failed to load employee profiles');
   }
 }

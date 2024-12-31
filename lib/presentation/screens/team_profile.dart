@@ -4,18 +4,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/model/models.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
-import 'splash_screen.dart';
-
-class ProfileScreen extends StatefulWidget {
-    final String empID;
-    ProfileScreen(this.empID);
+class TeamProfile extends StatefulWidget {
+  final String empID;
+  TeamProfile(this.empID);
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  _TeamProfileState createState() => _TeamProfileState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _TeamProfileState extends State<TeamProfile> {
   late Future<EmployeeProfile> employeeProfile;
   late String empID;
 
@@ -23,12 +20,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     employeeProfile = fetchEmployeeDetails(widget.empID);
-  }
-
-  Future<void> logout() async {
-    var box = await Hive.openBox('authBox');
-
-    box.put('token', null);
   }
 
   @override
@@ -62,46 +53,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                     borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(30),
-                        bottomLeft: Radius.circular(30))),
+                        bottomRight: Radius.circular(10),
+                        bottomLeft: Radius.circular(10))),
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                  child: Column(
+                  child: Row(
                     children: [
-                      Container(
-                        width: 120,
-                        height: height * 0.14,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            width: width * 0.01,
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              spreadRadius: 2,
-                              blurRadius: 10,
-                              color: Colors.black.withOpacity(0.1),
-                              offset: Offset(0, 10),
-                            ),
-                          ],
-                          shape: BoxShape.circle,
-                        ),
-                        child: CircleAvatar(
-                          radius: 50,
-                          child: Image.asset(
-                            employee.gender == 'Male'
-                                ? 'assets/image/MaleAvatar.png'
-                                : 'assets/image/FemaleAvatar.png',
-                          ),
+                      CircleAvatar(
+                        radius: 30,
+                        child: Image.asset(
+                          employee.gender == 'Male'
+                              ? 'assets/image/MaleAvatar.png'
+                              : 'assets/image/FemaleAvatar.png',
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      SizedBox(width: 20),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                          employee.employeeName,
+                            employee.employeeName,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -110,30 +82,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             textAlign: TextAlign.center,
                           ),
                           SizedBox(
-                            width: 5,
+                            height: 5,
                           ),
-                          Icon(
-                            Icons.circle,
-                            color: employee.employeeStatus == 'Present'
-                                ? Colors.green
-                                : Colors.red,
-                            size: height * .015,
-                          )
+                          Text(
+                            employee.email,
+                            style: TextStyle(
+                                fontSize: 16,
+                                color:
+                                    const Color.fromARGB(255, 224, 224, 224)),
+                            textAlign: TextAlign.center,
+                          ),
                         ],
-                      ),
-                      Text(
-                        employee.email,
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: const Color.fromARGB(255, 224, 224, 224)),
-                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
                 ),
-              ),
-              SizedBox(
-                height: 10,
               ),
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -253,83 +216,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                     ]),
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: () async {
-                  showDialog<void>(
-                    barrierColor: Colors.black38,
-                    context: context,
-                    barrierDismissible: true,
-                    builder: (BuildContext context) {
-                      return CupertinoAlertDialog(
-                        title: Text(
-                          'Confirm Logout',
-                        ),
-                        actions: [
-                          CupertinoDialogAction(
-                            onPressed: () async {
-                              await logout();
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => SplashScreen()));
-                            },
-                            child: Text(
-                              "Yes",
-                            ),
-                          ),
-                          CupertinoDialogAction(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text(
-                              "No",
-                            ),
-                          ),
-                        ],
-                        content: Text(
-                          'Are you sure want to logout?',
-                        ),
-                      );
-                    },
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Card(
-                    color: Colors.white,
-                    elevation: 4,
-                    margin: EdgeInsets.all(0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    shadowColor: Colors.black.withOpacity(0.1),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 13),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.logout_rounded,
-                            color: AppColor.mainThemeColor,
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            'Log-Out',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: AppColor.mainTextColor,
-                            ),
-                            textAlign: TextAlign.end,
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                 ),
               ),

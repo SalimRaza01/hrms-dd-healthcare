@@ -1,6 +1,6 @@
 
 import 'package:database_app/presentation/screens/punch_in_out_screen.dart';
-
+import 'package:database_app/presentation/screens/team_screen.dart';
 import 'core/api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -17,7 +17,6 @@ import 'presentation/screens/holiday_list.dart';
 import 'presentation/screens/leave_screen_manager.dart';
 import 'presentation/screens/notification_screen.dart';
 import 'presentation/screens/profile_screen.dart';
-import 'presentation/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,19 +44,19 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       darkTheme: ThemeData(brightness: Brightness.dark),
       debugShowCheckedModeBanner: false,
-      initialRoute: "/SplashScreen",
+      initialRoute: "/BottomNavigation",
       routes: {
-        "/SplashScreen": (context) => SplashScreen(),
+        "/SplashScreen": (context) => TeamScreen(),
         "/OnBoarding": (context) => OnboardingScreen(),
         "/Login": (context) => const LoginScreen(),
         "/LoginWithPhone": (context) => LoginWithPhone(),
         "/OTP": (context) => LoginOtp(),
         "/BottomNavigation": (context) => BottomNavigation(),
-        "/home": (context) => DashboardScreen(),
+        "/home": (context) => DashboardScreen(''),
         "/applyLeave": (context) => ApplyLeave(),
-        "/profileScreen": (context) => ProfileScreen(),
-        "/clockSecondScreen": (context) => ClockInScreenSecond(),
-        "/leaveSecondScreen": (context) => LeaveScreenManager(),
+        "/profileScreen": (context) => ProfileScreen(''),
+        "/clockSecondScreen": (context) => ClockInScreenSecond(''),
+        "/leaveSecondScreen": (context) => LeaveScreenManager(''),
              "/holidayList": (context) => HolidayList(),
                  "/notificationScreen": (context) => NotificationScreen(),
                     "/punchinout": (context) => PunchInOutScreen()

@@ -194,6 +194,7 @@ class EmployeeProfile {
   final String managerId;
   final String teamLeadId;
   final String employeePhoto;
+  bool isExpanded = false;
 
   EmployeeProfile({
     required this.employeeId,
@@ -350,3 +351,4 @@ class LeaveRequests {
     };
   }
 }
+

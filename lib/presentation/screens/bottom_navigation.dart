@@ -1,17 +1,14 @@
-
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:database_app/presentation/screens/leave_screen_employee.dart';
+import 'package:database_app/presentation/screens/team_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
 import 'clockin_screen.dart';
 import 'dashboard_screen.dart';
 import 'leave_screen_manager.dart';
 import 'profile_screen.dart';
 
 class BottomNavigation extends StatefulWidget {
-
-
   const BottomNavigation({super.key});
 
   @override
@@ -20,44 +17,42 @@ class BottomNavigation extends StatefulWidget {
 
 class _BottomNavigationState extends State<BottomNavigation> {
   int currentPageIndex = 0;
-    String? role;
-
+  String? role;
+  String? empID;
 
   @override
   void initState() {
     super.initState();
-        checkEmployeeId();
+    checkEmployeeId();
   }
+
   Future<void> checkEmployeeId() async {
     var box = await Hive.openBox('authBox');
     setState(() {
       role = box.get('role');
-
+       empID = box.get('employeeId');
     });
 
     print('Stored Employee ID: $role');
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.mainBGColor,
       bottomNavigationBar: ClipRRect(
-         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30), 
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
           topRight: Radius.circular(30),
         ),
         child: NavigationBar(
-          shadowColor:Colors.transparent,
-           
+          shadowColor: Colors.transparent,
           backgroundColor: Colors.white,
           onDestinationSelected: (int index) {
             setState(() {
               currentPageIndex = index;
             });
           },
-          
           indicatorColor: Colors.transparent,
           selectedIndex: currentPageIndex,
           destinations: <Widget>[
@@ -94,6 +89,20 @@ class _BottomNavigationState extends State<BottomNavigation> {
               ),
               label: 'Clock-In',
             ),
+             Visibility(
+    visible: role == 'Manager',
+               child: NavigationDestination(
+                selectedIcon: Image.asset(
+                  'assets/image/TeamScreen2.png',
+                  height: 25,
+                ),
+                icon: Image.asset(
+                  'assets/image/TeamScreen.png',
+                  height: 25,
+                ),
+                label: 'Team',
+                           ),
+             ),
             NavigationDestination(
               selectedIcon: Image.asset(
                 'assets/image/Profile.png',
@@ -109,10 +118,14 @@ class _BottomNavigationState extends State<BottomNavigation> {
         ),
       ),
       body: <Widget>[
-        DashboardScreen(),
-       role == 'Employee' ? LeaveScreenEmployee() :  LeaveScreenManager(),
-        ClockInScreenSecond(),
-        ProfileScreen()
+        DashboardScreen(empID!),
+
+        role == 'Employee'
+            ? LeaveScreenEmployee(empID!)
+            : LeaveScreenManager(empID!),
+        ClockInScreenSecond(empID!),
+                Visibility(visible: role == 'Manager', child: TeamScreen()),
+        ProfileScreen(empID!)
       ][currentPageIndex],
     );
   }

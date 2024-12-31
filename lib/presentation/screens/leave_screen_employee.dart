@@ -10,7 +10,8 @@ import 'package:shimmer/shimmer.dart';
 import 'apply_leave.dart';
 
 class LeaveScreenEmployee extends StatefulWidget {
-  const LeaveScreenEmployee({super.key});
+  final String empID;
+  const LeaveScreenEmployee(this.empID);
 
   @override
   State<LeaveScreenEmployee> createState() => _LeaveScreenState();
@@ -18,7 +19,7 @@ class LeaveScreenEmployee extends StatefulWidget {
 
 class _LeaveScreenState extends State<LeaveScreenEmployee> {
   final Box _authBox = Hive.box('authBox');
-  String? empID;
+  late String? empID;
   int touchedIndex = -1;
   String _selectedText = 'Pending';
   Color? activeColor;
@@ -27,17 +28,8 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
 
   @override
   void initState() {
-    _leaveHistory = fetchLeaveHistory(_selectedText);
+    _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
     super.initState();
-  }
-
-  Future<void> checkEmployeeId() async {
-    var box = await Hive.openBox('authBox');
-
-    setState(() {
-      empID = box.get('employeeId');
-    });
-    print('Stored Employee ID: $empID');
   }
 
   @override
@@ -134,7 +126,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             FutureBuilder<LeaveBalance>(
-                                future: fetchLeaves(),
+                                future: fetchLeaves(widget.empID),
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {
@@ -446,7 +438,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
       onTap: () {
         setState(() {
           _selectedText = text;
-          _leaveHistory = fetchLeaveHistory(_selectedText);
+          _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
         });
       },
       child: Container(

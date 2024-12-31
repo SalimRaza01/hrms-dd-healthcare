@@ -15,13 +15,15 @@ import 'holiday_list.dart';
 import 'notification_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+    final String empID;
+  const DashboardScreen(this.empID);
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
   late Future<List<HolidayModel>> holidayList;
+  late String? empID;
   String? empName;
   String? empDesign;
   String? empGender;
@@ -40,7 +42,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   List<String> name = [
     'Shiv,',
-    'Sofia',
+    'Sofiya',
   ];
 
   @override
@@ -126,7 +128,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Column(
                   children: [
                     FutureBuilder<ShiftTimeModel>(
-                        future: fetchShiftTime(),
+                        future: fetchShiftTime(widget.empID),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -327,7 +329,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               height: 10,
                             ),
                             FutureBuilder<LeaveBalance>(
-                                future: fetchLeaves(),
+                                future: fetchLeaves(widget.empID),
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {
