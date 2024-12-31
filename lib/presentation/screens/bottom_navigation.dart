@@ -30,7 +30,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
     var box = await Hive.openBox('authBox');
     setState(() {
       role = box.get('role');
-       empID = box.get('employeeId');
+      empID = box.get('employeeId');
     });
 
     print('Stored Employee ID: $role');
@@ -39,94 +39,152 @@ class _BottomNavigationState extends State<BottomNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.mainBGColor,
-      bottomNavigationBar: ClipRRect(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-        child: NavigationBar(
-          shadowColor: Colors.transparent,
-          backgroundColor: Colors.white,
-          onDestinationSelected: (int index) {
-            setState(() {
-              currentPageIndex = index;
-            });
-          },
-          indicatorColor: Colors.transparent,
-          selectedIndex: currentPageIndex,
-          destinations: <Widget>[
-            NavigationDestination(
-              selectedIcon: Image.asset(
-                'assets/image/Home2.png',
-                height: 25,
-              ),
-              icon: Image.asset(
-                'assets/image/Home.png',
-                height: 25,
-              ),
-              label: 'Home',
-            ),
-            NavigationDestination(
-              selectedIcon: Image.asset(
-                'assets/image/Leave.png',
-                height: 25,
-              ),
-              icon: Image.asset(
-                'assets/image/Leave2.png',
-                height: 25,
-              ),
-              label: 'Leaves',
-            ),
-            NavigationDestination(
-              selectedIcon: Image.asset(
-                'assets/image/ClockIn2.png',
-                height: 25,
-              ),
-              icon: Image.asset(
-                'assets/image/ClockIn.png',
-                height: 25,
-              ),
-              label: 'Clock-In',
-            ),
-             Visibility(
-    visible: role == 'Manager',
-               child: NavigationDestination(
-                selectedIcon: Image.asset(
-                  'assets/image/TeamScreen2.png',
-                  height: 25,
+        backgroundColor: AppColor.mainBGColor,
+        bottomNavigationBar: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+          child: role == 'Manager'
+              ? NavigationBar(
+                  shadowColor: Colors.transparent,
+                  backgroundColor: Colors.white,
+                  onDestinationSelected: (int index) {
+                    setState(() {
+                      currentPageIndex = index;
+                    });
+                  },
+                  indicatorColor: Colors.transparent,
+                  selectedIndex: currentPageIndex,
+                  destinations: <Widget>[
+                    NavigationDestination(
+                      selectedIcon: Image.asset(
+                        'assets/image/Home2.png',
+                        height: 25,
+                      ),
+                      icon: Image.asset(
+                        'assets/image/Home.png',
+                        height: 25,
+                      ),
+                      label: 'Home',
+                    ),
+                    NavigationDestination(
+                      selectedIcon: Image.asset(
+                        'assets/image/Leave.png',
+                        height: 25,
+                      ),
+                      icon: Image.asset(
+                        'assets/image/Leave2.png',
+                        height: 25,
+                      ),
+                      label: 'Leaves',
+                    ),
+                    NavigationDestination(
+                      selectedIcon: Image.asset(
+                        'assets/image/ClockIn2.png',
+                        height: 25,
+                      ),
+                      icon: Image.asset(
+                        'assets/image/ClockIn.png',
+                        height: 25,
+                      ),
+                      label: 'Clock-In',
+                    ),
+                    NavigationDestination(
+                      selectedIcon: Image.asset(
+                        'assets/image/TeamScreen2.png',
+                        height: 25,
+                      ),
+                      icon: Image.asset(
+                        'assets/image/TeamScreen.png',
+                        height: 25,
+                      ),
+                      label: 'Team',
+                    ),
+                    NavigationDestination(
+                      selectedIcon: Image.asset(
+                        'assets/image/Profile.png',
+                        height: 25,
+                      ),
+                      icon: Image.asset(
+                        'assets/image/Profile2.png',
+                        height: 25,
+                      ),
+                      label: 'Profile',
+                    ),
+                  ],
+                )
+              : NavigationBar(
+                  shadowColor: Colors.transparent,
+                  backgroundColor: Colors.white,
+                  onDestinationSelected: (int index) {
+                    setState(() {
+                      currentPageIndex = index;
+                    });
+                  },
+                  indicatorColor: Colors.transparent,
+                  selectedIndex: currentPageIndex,
+                  destinations: <Widget>[
+                    NavigationDestination(
+                      selectedIcon: Image.asset(
+                        'assets/image/Home2.png',
+                        height: 25,
+                      ),
+                      icon: Image.asset(
+                        'assets/image/Home.png',
+                        height: 25,
+                      ),
+                      label: 'Home',
+                    ),
+                    NavigationDestination(
+                      selectedIcon: Image.asset(
+                        'assets/image/Leave.png',
+                        height: 25,
+                      ),
+                      icon: Image.asset(
+                        'assets/image/Leave2.png',
+                        height: 25,
+                      ),
+                      label: 'Leaves',
+                    ),
+                    NavigationDestination(
+                      selectedIcon: Image.asset(
+                        'assets/image/ClockIn2.png',
+                        height: 25,
+                      ),
+                      icon: Image.asset(
+                        'assets/image/ClockIn.png',
+                        height: 25,
+                      ),
+                      label: 'Clock-In',
+                    ),
+                    NavigationDestination(
+                      selectedIcon: Image.asset(
+                        'assets/image/Profile.png',
+                        height: 25,
+                      ),
+                      icon: Image.asset(
+                        'assets/image/Profile2.png',
+                        height: 25,
+                      ),
+                      label: 'Profile',
+                    ),
+                  ],
                 ),
-                icon: Image.asset(
-                  'assets/image/TeamScreen.png',
-                  height: 25,
-                ),
-                label: 'Team',
-                           ),
-             ),
-            NavigationDestination(
-              selectedIcon: Image.asset(
-                'assets/image/Profile.png',
-                height: 25,
-              ),
-              icon: Image.asset(
-                'assets/image/Profile2.png',
-                height: 25,
-              ),
-              label: 'Profile',
-            ),
-          ],
         ),
-      ),
-      body: <Widget>[
-        DashboardScreen(empID!),
-
-        role == 'Employee'
-            ? LeaveScreenEmployee(empID!)
-            : LeaveScreenManager(empID!),
-        ClockInScreenSecond(empID!),
-                Visibility(visible: role == 'Manager', child: TeamScreen()),
-        ProfileScreen(empID!)
-      ][currentPageIndex],
-    );
+        body: role == 'Manager'
+            ? <Widget>[
+                DashboardScreen(empID!),
+                LeaveScreenManager(empID!),
+                ClockInScreenSecond(empID!),
+                TeamScreen(),
+                ProfileScreen(empID!)
+              ][currentPageIndex]
+            : <Widget>[
+                DashboardScreen(empID!),
+                LeaveScreenEmployee(empID!),
+                ClockInScreenSecond(empID!),
+                ProfileScreen(empID!),
+              ][currentPageIndex]);
   }
 }

@@ -2,12 +2,14 @@ import 'dart:math';
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class PunchRecordScreen extends StatefulWidget {
   final String? punchRecords;
   final String? regularizationDate;
 
-  PunchRecordScreen( {required this.punchRecords, required this.regularizationDate});
+  PunchRecordScreen(
+      {required this.punchRecords, required this.regularizationDate});
 
   @override
   State<PunchRecordScreen> createState() => _PunchRecordScreenState();
@@ -15,6 +17,22 @@ class PunchRecordScreen extends StatefulWidget {
 
 class _PunchRecordScreenState extends State<PunchRecordScreen> {
   TextEditingController reasonController = TextEditingController();
+  String? maxRegularization;
+
+  @override
+  void initState() {
+    super.initState();
+    checkEmployeeId();
+  }
+
+  Future<void> checkEmployeeId() async {
+    var box = await Hive.openBox('authBox');
+    setState(() {
+      maxRegularization = box.get('maxRegularization');
+    });
+
+    print('Stored maxRegularization Count: $maxRegularization');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,8 +90,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         enabledBorder:
                             OutlineInputBorder(borderSide: BorderSide.none),
-                        border:
-                            OutlineInputBorder(borderSide: BorderSide.none),
+                        border: OutlineInputBorder(borderSide: BorderSide.none),
                         focusedBorder:
                             OutlineInputBorder(borderSide: BorderSide.none),
                         label: Text('Describe Reason'),
@@ -82,18 +99,29 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
               ),
             ),
             SizedBox(height: height * 0.03),
+            Center(
+              child: Text(
+                'Regularization Limit - $maxRegularization',
+                style: TextStyle(
+                  fontSize: height * 0.015,
+                  fontWeight: FontWeight.w400,
+                  color: AppColor.mainTextColor,
+                ),
+              ),
+            ),
+            SizedBox(height: height * 0.01),
             InkWell(
-         onTap: () async {
-                        if (reasonController.text.isNotEmpty) {
-                          print('sign in button');
-                          await applyRegularize(context, widget.regularizationDate!, reasonController.text
-                             );
-                        } else {
-                          // setState(() {
-                          //   showError = true;
-                          // });
-                        }
-                      },
+              onTap: () async {
+                if (reasonController.text.isNotEmpty) {
+                  print('sign in button');
+                  await applyRegularize(context, widget.regularizationDate!,
+                      reasonController.text);
+                } else {
+                  // setState(() {
+                  //   showError = true;
+                  // });
+                }
+              },
               child: Center(
                 child: Container(
                   width: width / 2,
@@ -131,12 +159,12 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                 itemBuilder: (context, index) {
                   String punchIn = punches[index * 2];
                   String punchOut = punches[index * 2 + 1];
-    
+
                   String punchInTime =
                       punchIn.substring(0, min(5, punchIn.length));
                   String punchOutTime =
                       punchOut.substring(0, min(5, punchOut.length));
-    
+
                   return Card(
                     color: Colors.white,
                     elevation: 4,
@@ -166,7 +194,9 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                                 ),
                                 SizedBox(height: height * 0.005),
                                 Text(
-                                  punchInTime.isNotEmpty ? punchInTime : '--/--',
+                                  punchInTime.isNotEmpty
+                                      ? punchInTime
+                                      : '--/--',
                                   style: TextStyle(
                                     fontSize: height * 0.02,
                                     fontWeight: FontWeight.bold,
@@ -189,7 +219,9 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                                 ),
                                 SizedBox(height: height * 0.005),
                                 Text(
-                                   punchOutTime.isNotEmpty ? punchOutTime : '--/--',
+                                  punchOutTime.isNotEmpty
+                                      ? punchOutTime
+                                      : '--/--',
                                   style: TextStyle(
                                     fontSize: height * 0.02,
                                     fontWeight: FontWeight.bold,

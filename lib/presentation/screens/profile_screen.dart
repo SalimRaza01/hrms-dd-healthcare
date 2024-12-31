@@ -9,8 +9,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'splash_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-    final String empID;
-    ProfileScreen(this.empID);
+  final String empID;
+  ProfileScreen(this.empID);
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
@@ -101,7 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                          employee.employeeName,
+                            employee.employeeName,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,

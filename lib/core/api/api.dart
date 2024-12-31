@@ -37,6 +37,8 @@ Future<LeaveBalance> fetchLeaves(String empID) async {
     final response = await dio.get('$getEmployeeData/$empID');
 
     if (response.statusCode == 200) {
+            String maxRegularization = response.data['data']['maxRegularization'];
+      await _authBox.put('maxRegularization', maxRegularization);
       return LeaveBalance.fromJson(response.data['data']['leaveBalance']);
     } else {
       throw Exception('Failed to load leave data');

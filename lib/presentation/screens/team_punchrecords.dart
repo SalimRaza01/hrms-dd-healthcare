@@ -5,18 +5,16 @@ import 'package:flutter/material.dart';
 class TeamPunchrecords extends StatefulWidget {
   final String? punchRecords;
 
-  TeamPunchrecords( {required this.punchRecords});
+  const TeamPunchrecords({super.key, required this.punchRecords});
 
   @override
   State<TeamPunchrecords> createState() => _TeamPunchrecordsState();
 }
 
 class _TeamPunchrecordsState extends State<TeamPunchrecords> {
-
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    final width = MediaQuery.of(context).size.width;
 
     List<String> punches =
         (widget.punchRecords?.split(',') ?? []).toSet().toList();
@@ -41,21 +39,18 @@ class _TeamPunchrecordsState extends State<TeamPunchrecords> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
-           
-         
             Expanded(
               child: ListView.separated(
                 itemCount: punches.length ~/ 2,
                 itemBuilder: (context, index) {
                   String punchIn = punches[index * 2];
                   String punchOut = punches[index * 2 + 1];
-    
+
                   String punchInTime =
                       punchIn.substring(0, min(5, punchIn.length));
                   String punchOutTime =
                       punchOut.substring(0, min(5, punchOut.length));
-    
+
                   return Card(
                     color: Colors.white,
                     elevation: 4,
@@ -85,7 +80,9 @@ class _TeamPunchrecordsState extends State<TeamPunchrecords> {
                                 ),
                                 SizedBox(height: height * 0.005),
                                 Text(
-                                  punchInTime.isNotEmpty ? punchInTime : '--/--',
+                                  punchInTime.isNotEmpty
+                                      ? punchInTime
+                                      : '--/--',
                                   style: TextStyle(
                                     fontSize: height * 0.02,
                                     fontWeight: FontWeight.bold,
@@ -108,7 +105,9 @@ class _TeamPunchrecordsState extends State<TeamPunchrecords> {
                                 ),
                                 SizedBox(height: height * 0.005),
                                 Text(
-                                   punchOutTime.isNotEmpty ? punchOutTime : '--/--',
+                                  punchOutTime.isNotEmpty
+                                      ? punchOutTime
+                                      : '--/--',
                                   style: TextStyle(
                                     fontSize: height * 0.02,
                                     fontWeight: FontWeight.bold,

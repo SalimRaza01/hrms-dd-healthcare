@@ -156,9 +156,7 @@ class _TeamScreenState extends State<TeamScreen> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Center(
-                              child: Text(
-                                  'Loading'));
+                          return Center(child: Text('Loading'));
                         } else if (snapshot.hasError) {
                           return Center(
                               child: Text(
@@ -230,7 +228,7 @@ class _TeamScreenState extends State<TeamScreen> {
                                             duration:
                                                 Duration(milliseconds: 300),
                                             height: employee.isExpanded
-                                                ? height * 0.125
+                                                ? height * 0.12
                                                 : 0,
                                             child: SingleChildScrollView(
                                               padding:
@@ -239,6 +237,84 @@ class _TeamScreenState extends State<TeamScreen> {
                                               child: Column(
                                                 spacing: 2.0,
                                                 children: [
+                                                  FutureBuilder<LeaveBalance>(
+                                                      future: fetchLeaves(
+                                                          employee.employeeId),
+                                                      builder:
+                                                          (context, snapshot) {
+                                                        if (snapshot
+                                                                .connectionState ==
+                                                            ConnectionState
+                                                                .waiting) {
+                                                          return SizedBox();
+                                                        } else if (snapshot
+                                                            .hasError) {
+                                                          return Center(
+                                                              child: Text(
+                                                                  'Please check your internect connection'));
+                                                        } else if (snapshot
+                                                            .hasData) {
+                                                          final leave =
+                                                              snapshot.data!;
+
+                                                          return SingleChildScrollView(
+                                                            scrollDirection:
+                                                                Axis.horizontal,
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceEvenly,
+                                                              children: [
+                                                                leaveWidget(
+                                                                    height,
+                                                                    width,
+                                                                    'Casual',
+                                                                    leave
+                                                                        .casualLeave),
+                                                                SizedBox(
+                                                                  width: 5,
+                                                                ),
+                                                                leaveWidget(
+                                                                    height,
+                                                                    width,
+                                                                    'Medical',
+                                                                    leave
+                                                                        .medicalLeave),
+                                                                SizedBox(
+                                                                  width: 5,
+                                                                ),
+                                                                leaveWidget(
+                                                                    height,
+                                                                    width,
+                                                                    'Earned',
+                                                                    leave
+                                                                        .earnedLeave),
+                                                                SizedBox(
+                                                                  width: 5,
+                                                                ),
+                                                                leaveWidget(
+                                                                    height,
+                                                                    width,
+                                                                    'Maternity',
+                                                                    leave
+                                                                        .maternityLeave),
+                                                                SizedBox(
+                                                                  width: 5,
+                                                                ),
+                                                                leaveWidget(
+                                                                    height,
+                                                                    width,
+                                                                    'Paternity',
+                                                                    leave
+                                                                        .paternityLeave),
+                                                              ],
+                                                            ),
+                                                          );
+                                                        } else {
+                                                          return Text(
+                                                              'No data Found');
+                                                        }
+                                                      }),
                                                   InkWell(
                                                     onTap: () {
                                                       showCupertinoModalBottomSheet(
@@ -251,7 +327,8 @@ class _TeamScreenState extends State<TeamScreen> {
                                                         backgroundColor:
                                                             Colors.transparent,
                                                         builder: (context) =>
-                                                            TeamProfile(employee.employeeId),
+                                                            TeamProfile(employee
+                                                                .employeeId),
                                                       );
                                                     },
                                                     child: Container(
@@ -282,31 +359,6 @@ class _TeamScreenState extends State<TeamScreen> {
                                                                   FontWeight
                                                                       .w300),
                                                         ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Container(
-                                                    width: width,
-                                                    decoration: BoxDecoration(
-                                                      color:
-                                                          const Color.fromARGB(
-                                                              255,
-                                                              242,
-                                                              242,
-                                                              242),
-                                                    ),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: Text(
-                                                        'Leaves',
-                                                        style: TextStyle(
-                                                            fontSize:
-                                                                height * 0.015,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w300),
                                                       ),
                                                     ),
                                                   ),
@@ -381,6 +433,30 @@ class _TeamScreenState extends State<TeamScreen> {
                       }),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  leaveWidget(double height, double width, String leave, String leaveCount) {
+    return Container(
+      decoration: BoxDecoration(
+  
+          color: AppColor.primaryThemeColor,
+          borderRadius: BorderRadius.circular(5)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+        child: Row(
+          children: [
+            Text(
+              '${leave} - ',
+              style: TextStyle(color: Colors.white, fontSize: height * 0.013),
+            ),
+            Text(
+              leaveCount,
+              style: TextStyle(color: Colors.white, fontSize: height * 0.015),
             ),
           ],
         ),
