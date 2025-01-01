@@ -1,13 +1,12 @@
-
 import 'package:database_app/presentation/screens/punch_in_out_screen.dart';
 import 'package:database_app/presentation/screens/team_screen.dart';
 import 'core/api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
-import 'presentation/authentication/login_otp.dart';
+import 'presentation/authentication/otp_screen.dart';
 import 'presentation/authentication/login_screen.dart';
-import 'presentation/authentication/login_with_phone.dart';
+import 'presentation/authentication/create_new_pass.dart';
 import 'presentation/screens/onboarding_screen.dart';
 import 'presentation/screens/apply_leave.dart';
 import 'presentation/screens/bottom_navigation.dart';
@@ -44,22 +43,22 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       darkTheme: ThemeData(brightness: Brightness.dark),
       debugShowCheckedModeBanner: false,
-      initialRoute: "/BottomNavigation",
+      initialRoute: "/Login",
       routes: {
         "/SplashScreen": (context) => TeamScreen(),
         "/OnBoarding": (context) => OnboardingScreen(),
         "/Login": (context) => const LoginScreen(),
-        "/LoginWithPhone": (context) => LoginWithPhone(),
-        "/OTP": (context) => LoginOtp(),
+        "/CreateNewPassword": (context) => CreateNewPassword(''),
+        "/OTP": (context) => OTPScren(""),
         "/BottomNavigation": (context) => BottomNavigation(),
         "/home": (context) => DashboardScreen(''),
         "/applyLeave": (context) => ApplyLeave(),
         "/profileScreen": (context) => ProfileScreen(''),
         "/clockSecondScreen": (context) => ClockInScreenSecond(''),
         "/leaveSecondScreen": (context) => LeaveScreenManager(''),
-             "/holidayList": (context) => HolidayList(),
-                 "/notificationScreen": (context) => NotificationScreen(),
-                    "/punchinout": (context) => PunchInOutScreen()
+        "/holidayList": (context) => HolidayList(),
+        "/notificationScreen": (context) => NotificationScreen(),
+        "/punchinout": (context) => PunchInOutScreen()
       },
     );
   }

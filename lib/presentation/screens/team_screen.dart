@@ -199,8 +199,8 @@ class _TeamScreenState extends State<TeamScreen> {
                                           ListTile(
                                             leading: CircleAvatar(
                                               backgroundColor:
-                                                  const Color.fromARGB(
-                                                      255, 242, 242, 242),
+                                                const Color.fromARGB(
+                                                      255, 235, 244, 254),
                                               child: Text(
                                                 employee.employeeName[0],
                                                 style: TextStyle(
@@ -341,9 +341,9 @@ class _TeamScreenState extends State<TeamScreen> {
                                                                 topRight: Radius
                                                                     .circular(
                                                                         0)),
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 242, 242, 242),
+                                                        color: 
+                                                  const Color.fromARGB(
+                                                      255, 235, 244, 254),
                                                       ),
                                                       width: width,
                                                       child: Padding(
@@ -357,7 +357,7 @@ class _TeamScreenState extends State<TeamScreen> {
                                                                   0.015,
                                                               fontWeight:
                                                                   FontWeight
-                                                                      .w300),
+                                                                      .w400),
                                                         ),
                                                       ),
                                                     ),
@@ -391,9 +391,8 @@ class _TeamScreenState extends State<TeamScreen> {
                                                                     Radius
                                                                         .circular(
                                                                             15)),
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 242, 242, 242),
+                                                        color:    const Color.fromARGB(
+                                                      255, 235, 244, 254),
                                                       ),
                                                       child: Padding(
                                                         padding:
@@ -406,7 +405,7 @@ class _TeamScreenState extends State<TeamScreen> {
                                                                   0.015,
                                                               fontWeight:
                                                                   FontWeight
-                                                                      .w300),
+                                                                      .w400),
                                                         ),
                                                       ),
                                                     ),

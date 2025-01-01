@@ -1,27 +1,55 @@
+// ignore_for_file: unused_field
+
+import 'package:flutter/material.dart';
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/theme/app_colors.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class CreateNewPassword extends StatefulWidget {
+  final String email;
+  const CreateNewPassword(this.email);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<CreateNewPassword> createState() => _CreateNewPasswordState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool showError = false;
+class _CreateNewPasswordState extends State<CreateNewPassword> {
+  TextEditingController passController = TextEditingController();
+  TextEditingController confirmPassController = TextEditingController();
+
+  late String email;
+  final _formKey = GlobalKey<FormState>();
+
+  final String _passwordPattern = r'^[A-Za-z0-9]{8,}$'; 
+  
   bool _isPasswordVisible = false;
+  bool _isConfirmPasswordErrorVisible = false;
+
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password cannot be empty';
+    }
+    if (!RegExp(_passwordPattern).hasMatch(value)) {
+      return 'Must be at least 8 characters, contains letter & digit';
+    }
+    return null;
+  }
+
+
+  String? validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please confirm your password';
+    }
+    if (value != passController.text) {
+      return 'Passwords do not match';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-
+    
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -38,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
           alignment: AlignmentDirectional.topCenter,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 120),
+              padding: const EdgeInsets.only(top: 200),
               child: Image.asset(
                 'assets/image/DDLOGO.png',
                 height: height * 0.07,
@@ -47,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                height: height * 0.7,
+                height: height * 0.45,
                 width: width,
                 decoration: BoxDecoration(
                     color: Colors.white,
@@ -63,41 +91,30 @@ class _LoginScreenState extends State<LoginScreen> {
                       Column(
                         children: [
                           Text(
-                            'Sign in',
+                            'Create New Password',
                             style: TextStyle(
-                                fontSize: height * 0.035,
+                                fontSize: height * 0.025,
                                 color: AppColor.mainTextColor,
                                 fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 5),
+                          SizedBox(height: 10),
                           Text(
-                            'Sign in to my account',
+                            'Your new password must be different from previously used passwords.',
                             style: TextStyle(
-                                fontSize: height * 0.02,
-                                color: AppColor.mainTextColor,
-                                fontWeight: FontWeight.w500),
+                              fontSize: height * 0.0165,
+                              color: AppColor.mainTextColor2,
+                            ),
                           ),
                         ],
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          SizedBox(
-                            height: height * 0.07,
-                            child: TextField(
-                              controller: _emailController,
-                              decoration: InputDecoration(
-                                labelText: 'Email',
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          SizedBox(
-                            height: height * 0.07,
-                            child: TextField(
-                              controller: _passwordController,
+                      SizedBox(height: 10),
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+         
+                            TextFormField(
+                              controller: passController,
                               obscureText: !_isPasswordVisible,
                               decoration: InputDecoration(
                                 labelText: 'Password',
@@ -106,7 +123,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                     _isPasswordVisible
                                         ? Icons.visibility
                                         : Icons.visibility_off,
-                                    color: AppColor.mainTextColor,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -118,30 +134,66 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                            ),
-                          ),
-                          TextButton(
-                              onPressed: () async {
-                                await sendPasswordOTP(
-                                    context, _emailController.text.toString());
-                   
+                              validator: validatePassword,
+                              onChanged: (value) {
+                      
+                                setState(() {
+                                  _formKey.currentState?.validate();
+                                  // _isConfirmPasswordErrorVisible = false;
+                                });
                               },
-                              child: Text('Forgot Password ?'))
-                        ],
+                            ),
+                            SizedBox(height: 15),
+                            
+              
+                            TextFormField(
+                              controller: confirmPassController,
+                              obscureText: !_isPasswordVisible,
+                              decoration: InputDecoration(
+                                labelText: 'Confirm Password',
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _isPasswordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _isPasswordVisible = !_isPasswordVisible;
+                                    });
+                                  },
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              validator: (value) {
+                                String? error = validateConfirmPassword(value);
+                                if (error != null) {
+                                  setState(() {
+                                    _isConfirmPasswordErrorVisible = true;
+                                  });
+                                } else {
+                                  setState(() {
+                                    _isConfirmPasswordErrorVisible = false;
+                                  });
+                                }
+                                return error;
+                              },
+                              onChanged: (value) {
+                                _formKey.currentState?.validate();
+                              },
+                            ),
+                          ],
+                        ),
                       ),
+                      SizedBox(height: 20),
+                      
+                      // Submit Button
                       InkWell(
                         onTap: () async {
-                          if (_emailController.text.isNotEmpty &&
-                              _passwordController.text.isNotEmpty) {
-                            print('sign in button');
-                            await authProvider.login(
-                                _emailController.text.toString(),
-                                _passwordController.text.toString(),
-                                context);
-                          } else {
-                            setState(() {
-                              showError = true;
-                            });
+                          if (_formKey.currentState?.validate() ?? false) {
+                            await createNewPass(context, passController.text, widget.email);
                           }
                         },
                         child: Container(
@@ -160,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 horizontal: 52, vertical: 12),
                             child: Center(
                               child: Text(
-                                'Sign In',
+                                'SUBMIT',
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w500),

@@ -1,20 +1,18 @@
-
-
-
+import 'package:database_app/core/api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
-
 import '../../core/theme/app_colors.dart';
-import '../screens/bottom_navigation.dart';
 
-class LoginOtp extends StatefulWidget {
-  const LoginOtp({super.key});
+class OTPScren extends StatefulWidget {
+  final String emailController;
+  const OTPScren(this.emailController);
 
   @override
-  State<LoginOtp> createState() => _LoginOtpState();
+  State<OTPScren> createState() => _OTPScrenState();
 }
 
-class _LoginOtpState extends State<LoginOtp> {
+class _OTPScrenState extends State<OTPScren> {
+  late String emailController;
   TextEditingController pinController = TextEditingController();
   late final FocusNode focusNode;
   bool showerror = false;
@@ -27,7 +25,7 @@ class _LoginOtpState extends State<LoginOtp> {
 
   @override
   Widget build(BuildContext context) {
-    Color? focusedBorderColor =     Color(0xFFA787FF);
+    Color? focusedBorderColor = Color(0xFFA787FF);
     Color? fillColor = Color.fromARGB(0, 68, 93, 252);
     Color? borderColor = Color.fromRGBO(172, 172, 172, 1);
     Color? errorfocusedBorderColor = Colors.redAccent;
@@ -48,8 +46,7 @@ class _LoginOtpState extends State<LoginOtp> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
-      backgroundColor:  AppColor.bgColor,
-      
+      backgroundColor: AppColor.bgColor,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -75,7 +72,7 @@ class _LoginOtpState extends State<LoginOtp> {
               alignment: Alignment.bottomCenter,
               heightFactor: height * .08,
               child: Stack(
-                clipBehavior: Clip.none,
+                  clipBehavior: Clip.none,
                   alignment: Alignment.topCenter,
                   children: [
                     Container(
@@ -100,18 +97,29 @@ class _LoginOtpState extends State<LoginOtp> {
                                   'Sign in',
                                   style: TextStyle(
                                       fontSize: height * 0.035,
-                                                    color: AppColor.mainTextColor,
+                                      color: AppColor.mainTextColor,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 SizedBox(
-                                  height: 5,
+                                  height: 10,
                                 ),
-                                Text(
-                                  'Sign in code has been sent to +91 7272092415, check your inbox to continue the sign in process.',
-                                  style: TextStyle(
-                                      fontSize: height * 0.017,
-                                                color: AppColor.mainTextColor2,
-                                      fontWeight: FontWeight.w500),
+                                RichText(
+                                  text: TextSpan(
+                                    style: TextStyle(
+                                      fontSize: height * 0.0165,
+                                      color: AppColor.mainTextColor2,
+                                    ),
+                                    children: <TextSpan>[
+                                      TextSpan(text: 'OTP has been sent to '),
+                                      TextSpan(
+                                          text: widget.emailController,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                      TextSpan(
+                                          text:
+                                              ', check your inbox to continue the sign in process.'),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
@@ -119,18 +127,19 @@ class _LoginOtpState extends State<LoginOtp> {
                               textDirection: TextDirection.ltr,
                               child: Pinput(
                                 controller: pinController,
-        
                                 focusNode: focusNode,
                                 defaultPinTheme: defaultPinTheme,
-        
                                 separatorBuilder: (index) =>
                                     const SizedBox(width: 8),
                                 hapticFeedbackType:
                                     HapticFeedbackType.lightImpact,
-                                onCompleted: (pin) async {},
-                                onChanged: (value) {
-                                  debugPrint('onChanged: $value');
+                                onCompleted: (pin) async {
+                                  await verifyPasswordOTP(context, pin, widget.emailController);
+                                 
                                 },
+                                // onChanged: (value) {
+                                //   debugPrint('onChanged: $value');
+                                // },
                                 cursor: Column(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
@@ -163,9 +172,6 @@ class _LoginOtpState extends State<LoginOtp> {
                                             : focusedBorderColor),
                                   ),
                                 ),
-                                
-                                
-                                
                               ),
                             ),
                             Row(
@@ -174,23 +180,22 @@ class _LoginOtpState extends State<LoginOtp> {
                                   "Haven't received OTP? ",
                                   style: TextStyle(
                                       fontSize: height * 0.017,
-                                                     color: AppColor.mainTextColor2,
+                                      color: AppColor.mainTextColor2,
                                       fontWeight: FontWeight.w500),
                                 ),
                                 Text(
                                   ' Resend OTP.',
                                   style: TextStyle(
-                                      color:     AppColor.secondaryThemeColor2,
+                                      color: AppColor.secondaryThemeColor2,
                                       fontWeight: FontWeight.w500),
                                 )
                               ],
                             ),
                             InkWell(
-                  
-                                           onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=> BottomNavigation()));
-                        },
-                              
+                              onTap: () async {
+                                       await verifyPasswordOTP(context, pinController.text.toString(),  widget.emailController);
+                                
+                              },
                               child: Container(
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
@@ -198,9 +203,8 @@ class _LoginOtpState extends State<LoginOtp> {
                                       end: Alignment.bottomCenter,
                                       colors: [
                                         AppColor.primaryThemeColor,
-                                                 AppColor.secondaryThemeColor2,
+                                        AppColor.secondaryThemeColor2,
                                       ]),
-                                  
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Padding(

@@ -1,5 +1,8 @@
 import 'package:database_app/core/api/api_config.dart';
 import 'package:database_app/core/model/models.dart';
+import 'package:database_app/presentation/authentication/create_new_pass.dart';
+import 'package:database_app/presentation/authentication/login_screen.dart';
+import 'package:database_app/presentation/authentication/otp_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -11,7 +14,6 @@ final Box _authBox = Hive.box('authBox');
 final Dio dio = Dio();
 
 Future<List<Attendance>> fetchAttendence(String empID) async {
-
   final dateTo = DateFormat('yyyy-MM-dd').format(DateTime.now());
   final dateFrom = DateFormat('yyyy-MM-dd')
       .format(DateTime.now().subtract(Duration(days: 365)));
@@ -32,12 +34,11 @@ Future<List<Attendance>> fetchAttendence(String empID) async {
 }
 
 Future<LeaveBalance> fetchLeaves(String empID) async {
-
   try {
     final response = await dio.get('$getEmployeeData/$empID');
 
     if (response.statusCode == 200) {
-            String maxRegularization = response.data['data']['maxRegularization'];
+      String maxRegularization = response.data['data']['maxRegularization'];
       await _authBox.put('maxRegularization', maxRegularization);
       return LeaveBalance.fromJson(response.data['data']['leaveBalance']);
     } else {
@@ -49,7 +50,6 @@ Future<LeaveBalance> fetchLeaves(String empID) async {
 }
 
 Future<ShiftTimeModel> fetchShiftTime(String empID) async {
-
   try {
     final response = await dio.get('$getEmployeeData/$empID');
 
@@ -168,7 +168,8 @@ Future<void> applyLeave(
   }
 }
 
-Future<List<LeaveHistory>> fetchLeaveHistory(String status, String empID) async {
+Future<List<LeaveHistory>> fetchLeaveHistory(
+    String status, String empID) async {
   String token = _authBox.get('token');
   print('status $token');
   try {
@@ -279,7 +280,7 @@ Future<List<LeaveRequests>> fetchLeaveRequest() async {
 
     if (response.statusCode == 200) {
       List<dynamic> data = response.data['data'];
-print("Team Leave Request Data $data");
+      print("Team Leave Request Data $data");
       return data
           .map((leaveData) => LeaveRequests.fromJson(leaveData))
           .toList();
@@ -342,5 +343,115 @@ Future<List<EmployeeProfile>> fetchTeamList() async {
     return employeeList;
   } catch (e) {
     throw Exception('Failed to load employee profiles');
+  }
+}
+
+Future<void> sendPasswordOTP(
+  BuildContext context,
+  String email,
+) async {
+  final response = await dio.post(sentOTP, data: {
+    "email": email,
+  });
+  if (response.statusCode == 200) {
+    print(response.data);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('OTP sent successfully'),
+        backgroundColor: Colors.green,
+      ),
+    );
+    Future.delayed(Duration(seconds: 1), () {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => OTPScren(email)));
+    });
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Something Wrong ${response}'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+  // } on DioException {
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content: Text('Failed to send OTP ${}'),
+  //       backgroundColor: Colors.red,
+  //     ),
+  //   );
+  // }
+}
+
+Future<void> verifyPasswordOTP(
+    BuildContext context, String otp, String email) async {
+  try {
+    final response = await dio.post(verifyOTP, data: {
+      "otp": otp,
+    });
+    if (response.statusCode == 200) {
+      print(response.data);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('OTP Verified Successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Future.delayed(Duration(seconds: 1), () {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => CreateNewPassword(email)));
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('You have entered wrong OTP'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } on DioException {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Something Went Wrong'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+Future<void> createNewPass(
+    BuildContext context, String newPassword, String email) async {
+  try {
+    final response = await dio.put(setNewPass, data: {
+      "email": email,
+      "loginPassword": newPassword,
+    });
+    if (response.statusCode == 200) {
+      print(response.data);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password Created Successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Future.delayed(Duration(seconds: 1), () {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => LoginScreen()));
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Something Went Wrong'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } on DioException {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Something Went Wrong'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 }

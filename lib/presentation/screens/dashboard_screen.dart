@@ -15,7 +15,7 @@ import 'holiday_list.dart';
 import 'notification_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-    final String empID;
+  final String empID;
   const DashboardScreen(this.empID);
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -32,11 +32,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Widget> _images = [
     CircleAvatar(
       backgroundColor: AppColor.mainBGColor,
-      child: Icon(Icons.person, color:AppColor.mainThemeColor,),
+      child: Icon(
+        Icons.person,
+        color: AppColor.mainThemeColor,
+      ),
     ),
     CircleAvatar(
       backgroundColor: AppColor.mainBGColor,
-      child: Icon(Icons.person, color:AppColor.mainThemeColor,),
+      child: Icon(
+        Icons.person,
+        color: AppColor.mainThemeColor,
+      ),
     ),
   ];
 
@@ -271,11 +277,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 children: _images,
                                 showTotalCount: true,
                                 totalCount: _images.length,
-                                itemRadius: 50, 
-                                itemCount:
-                                  _images.length,
-                                  itemBorderColor: Colors.white,
-                         
+                                itemRadius: 50,
+                                itemCount: _images.length,
+                                itemBorderColor: Colors.white,
                               ),
                               SizedBox(
                                 height: 5,
@@ -305,85 +309,80 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     SizedBox(
                       height: 15,
                     ),
-                    Card(
-                      color: Colors.white,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadowColor: Colors.black.withOpacity(0.1),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Leave Balance',
-                              style: TextStyle(
-                                  fontSize: height * 0.018,
-                                  color: AppColor.mainTextColor,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            FutureBuilder<LeaveBalance>(
-                                future: fetchLeaves(widget.empID),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return _shimmerEffectForLeaveBalance(
-                                        height, width);
-                                  } else if (snapshot.hasError) {
-                                    return Center(
-                                        child: Text(
-                                            'Please check your internect connection'));
-                                  } else if (snapshot.hasData) {
-                                    final leave = snapshot.data!;
-
-                                    return SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          leaveWidget(height, width, 'Casual',
-                                              leave.casualLeave),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          leaveWidget(height, width, 'Medical',
-                                              leave.medicalLeave),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          leaveWidget(height, width, 'Earned',
-                                              leave.earnedLeave),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          leaveWidget(
-                                              height,
-                                              width,
-                                              'Maternity',
-                                              leave.maternityLeave),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          leaveWidget(
-                                              height,
-                                              width,
-                                              'Paternity',
-                                              leave.paternityLeave),
-                                        ],
-                                      ),
-                                    );
-                                  } else {
-                                    return Text('No data Found');
-                                  }
-                                }),
-                          ],
+                    SizedBox(
+                      width: width,
+                      child: Card(
+                        color: Colors.white,
+                        elevation: 4,
+                        margin: EdgeInsets.all(0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        shadowColor: Colors.black.withOpacity(0.1),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Leave Balance',
+                                style: TextStyle(
+                                    fontSize: height * 0.018,
+                                    color: AppColor.mainTextColor,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              FutureBuilder<LeaveBalance>(
+                                  future: fetchLeaves(widget.empID),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return _shimmerEffectForLeaveBalance(
+                                          height, width);
+                                    } else if (snapshot.hasError) {
+                                      return Center(
+                                          child: Text(
+                                              'Please check your internect connection'));
+                                    } else if (snapshot.hasData) {
+                                      final leave = snapshot.data!;
+                      
+                                      return SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            leaveWidget(height, width, 'Casual',
+                                                leave.casualLeave),
+                                           SizedBox(width: 10,),
+                                            leaveWidget(height, width, 'Medical',
+                                                leave.medicalLeave),
+                                           SizedBox(width: 10,),
+                                            leaveWidget(height, width, 'Earned',
+                                                leave.earnedLeave),
+                                           SizedBox(width: 10,),
+                                            leaveWidget(
+                                                height,
+                                                width,
+                                                'Maternity',
+                                                leave.maternityLeave),
+                                           SizedBox(width: 10,),
+                                            leaveWidget(
+                                                height,
+                                                width,
+                                                'Paternity',
+                                                leave.paternityLeave),
+                                          ],
+                                        ),
+                                      );
+                                    } else {
+                                      return Text('No data Found');
+                                    }
+                                  }),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -866,6 +865,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+
+  // leaveWidget(double height, double width, String leave, String leaveCount) {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
+  //     child: Column(
+  //       children: [
+  //         Stack(
+  //           alignment: AlignmentDirectional.center,
+  //           children: [
+  //             Text(
+  //               leaveCount,
+  //               style: TextStyle(
+  //                   color: Color.fromARGB(141, 0, 0, 0),
+  //                   fontSize: height * 0.022),
+  //             ),
+  //             CircularProgressIndicator(
+  //               value: 1.0,
+  //               strokeWidth: 3.0,
+  //               color: AppColor.mainThemeColor,
+  //             ),
+  //           ],
+  //         ),
+  //         SizedBox(
+  //           height: 10,
+  //         ),
+  //         Text(
+  //           leave,
+  //           style: TextStyle(color: AppColor.mainTextColor2),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   SizedBox leaveWidget(
       double height, double width, String leave, String leaveCount) {
