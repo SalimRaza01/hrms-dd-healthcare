@@ -283,8 +283,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 borderRadius:
                                                     BorderRadius.circular(15),
                                               ),
-                                              shadowColor: Colors.black
-                                                  .withOpacity(0.1),
+                                              shadowColor:
+                                                  Colors.black.withOpacity(0.1),
                                               child: ListTile(
                                                 leading: Icon(
                                                   Icons.file_copy_rounded,
@@ -320,11 +320,11 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               onTap: () async {
                                 FilePickerResult? result =
                                     await FilePicker.platform.pickFiles();
-                            
+
                                 setState(() {
                                   _isLoading = true;
                                 });
-                            
+
                                 if (result != null) {
                                   setState(() {
                                     _paths = result.files;

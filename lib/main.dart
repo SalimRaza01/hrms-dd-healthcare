@@ -1,5 +1,5 @@
 import 'package:database_app/presentation/screens/punch_in_out_screen.dart';
-import 'package:database_app/presentation/screens/team_screen.dart';
+import 'package:database_app/presentation/screens/splash_screen.dart';
 import 'core/api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -43,9 +43,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       darkTheme: ThemeData(brightness: Brightness.dark),
       debugShowCheckedModeBanner: false,
-      initialRoute: "/Login",
+      initialRoute: "/SplashScreen",
       routes: {
-        "/SplashScreen": (context) => TeamScreen(),
+        "/SplashScreen": (context) => SplashScreen(),
         "/OnBoarding": (context) => OnboardingScreen(),
         "/Login": (context) => const LoginScreen(),
         "/CreateNewPassword": (context) => CreateNewPassword(''),

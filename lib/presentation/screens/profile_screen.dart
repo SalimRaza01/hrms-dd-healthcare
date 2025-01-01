@@ -1,10 +1,19 @@
+// ignore_for_file: unused_element
+
+import 'dart:io';
+
+import 'package:database_app/core/api/api_config.dart';
 import 'package:database_app/core/theme/app_colors.dart';
 import 'package:database_app/presentation/animations/profile_shimmer.dart';
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:database_app/core/api/api.dart';
 import 'package:database_app/core/model/models.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'splash_screen.dart';
 
@@ -18,6 +27,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late Future<EmployeeProfile> employeeProfile;
   late String empID;
+  File? _image;
+  String? filepath;
 
   @override
   void initState() {
@@ -29,6 +40,187 @@ class _ProfileScreenState extends State<ProfileScreen> {
     var box = await Hive.openBox('authBox');
 
     box.put('token', null);
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    PermissionStatus permissionStatus;
+
+    permissionStatus = await Permission.camera.request();
+
+    if (permissionStatus.isGranted) {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: source);
+      if (pickedFile != null) {
+        setState(() {
+          _image = File(pickedFile.path);
+          filepath = pickedFile.path;
+          print('This is my set image $_image');
+        });
+
+        // Get the file size
+        final fileSize = await _image!.length();
+
+        // Pass the required size parameter
+        uploadPrescription([
+          PlatformFile(
+            path: filepath,
+            name: pickedFile.name,
+            size: fileSize, // Provide the size of the file
+          ),
+        ]);
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Permission not granted')),
+      );
+    }
+  }
+
+  Future<void> _filepicker(ImageSource source) async {
+    PermissionStatus permissionStatus = await Permission.storage.request();
+
+    if (permissionStatus.isGranted) {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: source);
+
+      if (pickedFile != null) {
+        setState(() {
+          _image = File(pickedFile.path);
+          filepath = pickedFile.path;
+          print('This is my set image $_image');
+        });
+
+        // Get the file size
+        final fileSize = await _image!.length();
+
+        // Pass the required size parameter
+        uploadPrescription([
+          PlatformFile(
+            path: filepath,
+            name: pickedFile.name,
+            size: fileSize, // Provide the size of the file
+          ),
+        ]);
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Permission not granted for storage')),
+      );
+    }
+  }
+
+  String? get uploadURL => '$profileImageUpload/${widget.empID}';
+  Future<void> uploadPrescription(List<PlatformFile> files) async {
+    final dio = Dio();
+
+    for (var file in files) {
+      if (file.path != null) {
+        try {
+          var formData = FormData.fromMap({
+            'file':
+                await MultipartFile.fromFile(file.path!, filename: file.name),
+          });
+
+          Response response = await dio.post(uploadURL!, data: formData);
+
+          if (response.statusCode == 200) {
+            print(response);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text('Avatar Updated'),
+                  backgroundColor: Colors.green),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text('Failed to Update Avatar'),
+                  backgroundColor: Colors.red),
+            );
+          }
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          );
+        }
+      } else {
+        print("File path is null");
+      }
+    }
+  }
+
+  void _showPicker(BuildContext context) {
+    showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoActionSheet(
+          actions: <Widget>[
+            ListTile(
+              leading:
+                  Icon(Icons.photo_library, color: AppColor.mainTextColor2),
+              title: Text(
+                'Photo Library',
+                style: TextStyle(color: AppColor.mainTextColor2),
+              ),
+              onTap: () {
+                _filepicker(ImageSource.gallery);
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.photo_camera, color: AppColor.mainTextColor2),
+              title: Text(
+                'Camera',
+                style: TextStyle(color: AppColor.mainTextColor2),
+              ),
+              onTap: () {
+                _pickImage(ImageSource.camera);
+                Navigator.of(context).pop();
+              },
+            ),
+            Visibility(
+              visible: _image != null,
+              child: ListTile(
+                leading: Icon(
+                  Icons.cancel,
+                  color: Colors.red,
+                ),
+                title: Text(
+                  'Remove Current Profile',
+                  style: TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
+                onTap: () {
+                  // setState(() {
+                  //   _image = null;
+                  // });
+                  //  SharedPrefsHelper()
+                  //     .putImageFile('profileImage', _image!);
+
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.cancel,
+                color: Colors.red,
+              ),
+              title: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.red,
+                ),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -69,30 +261,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                   child: Column(
                     children: [
-                      Container(
-                        width: 120,
-                        height: height * 0.14,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            width: width * 0.01,
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              spreadRadius: 2,
-                              blurRadius: 10,
-                              color: Colors.black.withOpacity(0.1),
-                              offset: Offset(0, 10),
+                      InkWell(
+                        onTap: () {
+                          _showPicker(context);
+                        },
+                        child: Container(
+                          width: 120,
+                          height: height * 0.14,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              width: width * 0.01,
+                              color: Theme.of(context).scaffoldBackgroundColor,
                             ),
-                          ],
-                          shape: BoxShape.circle,
-                        ),
-                        child: CircleAvatar(
-                          radius: 50,
-                          child: Image.asset(
-                            employee.gender == 'Male'
-                                ? 'assets/image/MaleAvatar.png'
-                                : 'assets/image/FemaleAvatar.png',
+                            boxShadow: [
+                              BoxShadow(
+                                spreadRadius: 2,
+                                blurRadius: 10,
+                                color: Colors.black.withOpacity(0.1),
+                                offset: Offset(0, 10),
+                              ),
+                            ],
+                            shape: BoxShape.circle,
+                          ),
+                          child: CircleAvatar(
+                            backgroundImage: employee.employeePhoto.isEmpty
+                                ? AssetImage(
+                                    employee.gender == 'Male'
+                                        ? 'assets/image/MaleAvatar.png'
+                                        : 'assets/image/FemaleAvatar.png',
+                                  )
+                                : NetworkImage(employee.employeePhoto),
+                            radius: 50,
                           ),
                         ),
                       ),
