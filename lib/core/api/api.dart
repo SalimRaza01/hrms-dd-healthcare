@@ -1,8 +1,8 @@
-import 'package:database_app/core/api/api_config.dart';
-import 'package:database_app/core/model/models.dart';
-import 'package:database_app/presentation/authentication/create_new_pass.dart';
-import 'package:database_app/presentation/authentication/login_screen.dart';
-import 'package:database_app/presentation/authentication/otp_screen.dart';
+import 'package:hrms/core/api/api_config.dart';
+import 'package:hrms/core/model/models.dart';
+import 'package:hrms/presentation/authentication/create_new_pass.dart';
+import 'package:hrms/presentation/authentication/login_screen.dart';
+import 'package:hrms/presentation/authentication/otp_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';

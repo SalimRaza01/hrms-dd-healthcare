@@ -1,4 +1,4 @@
-package com.example.database_app
+package com.ddhealthcare.hrms_app
 
 import io.flutter.embedding.android.FlutterActivity
 

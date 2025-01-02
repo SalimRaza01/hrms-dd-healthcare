@@ -1,8 +1,8 @@
 // ignore_for_file: sort_child_properties_last
 
-import 'package:database_app/core/api/api.dart';
-import 'package:database_app/core/model/models.dart';
-import 'package:database_app/core/theme/app_colors.dart';
+import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/model/models.dart';
+import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';

@@ -1,8 +1,8 @@
-import 'package:database_app/core/api/api.dart';
-import 'package:database_app/core/model/models.dart';
-import 'package:database_app/core/theme/app_colors.dart';
-import 'package:database_app/presentation/screens/team_clockin_screen.dart';
-import 'package:database_app/presentation/screens/team_profile.dart';
+import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/model/models.dart';
+import 'package:hrms/core/theme/app_colors.dart';
+import 'package:hrms/presentation/screens/team_clockin_screen.dart';
+import 'package:hrms/presentation/screens/team_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 

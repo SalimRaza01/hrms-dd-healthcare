@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <application
-        android:label="database_app"
+        android:label="hrms"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

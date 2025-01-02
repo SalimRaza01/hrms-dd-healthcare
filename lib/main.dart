@@ -1,5 +1,5 @@
-import 'package:database_app/presentation/screens/punch_in_out_screen.dart';
-import 'package:database_app/presentation/screens/splash_screen.dart';
+import 'package:hrms/presentation/screens/punch_in_out_screen.dart';
+import 'package:hrms/presentation/screens/splash_screen.dart';
 import 'core/api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';

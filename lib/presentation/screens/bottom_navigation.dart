@@ -1,6 +1,6 @@
-import 'package:database_app/core/theme/app_colors.dart';
-import 'package:database_app/presentation/screens/leave_screen_employee.dart';
-import 'package:database_app/presentation/screens/team_screen.dart';
+import 'package:hrms/core/theme/app_colors.dart';
+import 'package:hrms/presentation/screens/leave_screen_employee.dart';
+import 'package:hrms/presentation/screens/team_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'clockin_screen.dart';

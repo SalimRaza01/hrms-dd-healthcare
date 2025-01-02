@@ -1,6 +1,6 @@
 // ignore_for_file: unused_field
 
-import 'package:database_app/core/theme/app_colors.dart';
+import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'onboarding_screen.dart';

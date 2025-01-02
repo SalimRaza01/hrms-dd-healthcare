@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:database_app/core/theme/app_colors.dart';
+import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:hive_flutter/hive_flutter.dart';

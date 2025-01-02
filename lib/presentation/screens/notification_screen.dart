@@ -1,4 +1,4 @@
-import 'package:database_app/core/theme/app_colors.dart';
+import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class NotificationScreen extends StatefulWidget {

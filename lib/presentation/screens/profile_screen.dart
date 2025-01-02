@@ -2,15 +2,15 @@
 
 import 'dart:io';
 
-import 'package:database_app/core/api/api_config.dart';
-import 'package:database_app/core/theme/app_colors.dart';
-import 'package:database_app/presentation/animations/profile_shimmer.dart';
+import 'package:hrms/core/api/api_config.dart';
+import 'package:hrms/core/theme/app_colors.dart';
+import 'package:hrms/presentation/animations/profile_shimmer.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:database_app/core/api/api.dart';
-import 'package:database_app/core/model/models.dart';
+import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/model/models.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';

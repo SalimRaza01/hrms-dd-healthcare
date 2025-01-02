@@ -1,5 +1,5 @@
-import 'package:database_app/core/api/api.dart';
-import 'package:database_app/core/theme/app_colors.dart';
+import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

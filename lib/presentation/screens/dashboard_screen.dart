@@ -1,9 +1,9 @@
 // ignore_for_file: sort_child_properties_last, prefer_final_fields
 
 import 'package:calendar_timeline/calendar_timeline.dart';
-import 'package:database_app/core/api/api.dart';
-import 'package:database_app/core/model/models.dart';
-import 'package:database_app/core/theme/app_colors.dart';
+import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/model/models.dart';
+import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_stack/flutter_image_stack.dart';
 import 'package:hive_flutter/hive_flutter.dart';

@@ -1,5 +1,5 @@
 import 'package:concentric_transition/concentric_transition.dart';
-import 'package:database_app/presentation/authentication/login_screen.dart';
+import 'package:hrms/presentation/authentication/login_screen.dart';
 import 'package:flutter/material.dart';
 
 final pages = [

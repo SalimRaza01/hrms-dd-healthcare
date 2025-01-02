@@ -1,8 +1,8 @@
 // ignore_for_file: unused_field
 
 import 'package:flutter/material.dart';
-import 'package:database_app/core/api/api.dart';
-import 'package:database_app/core/theme/app_colors.dart';
+import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/theme/app_colors.dart';
 
 class CreateNewPassword extends StatefulWidget {
   final String email;
