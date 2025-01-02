@@ -56,40 +56,38 @@ class Attendance {
   final int earlyBy;
   final int weekOff;
   final int isHoliday;
-  Attendance({
-    required this.employeeName,
-    required this.employeeCode,
-    required this.gender,
-    required this.employmentType,
-    required this.attendanceDate,
-    required this.inTime,
-    required this.outTime,
-    required this.status,
-    required this.duration,
-    required this.punchRecords,
-    required this.lateby,
-    required this.earlyBy,
-    required this.weekOff,
-    required this.isHoliday
-  });
+  Attendance(
+      {required this.employeeName,
+      required this.employeeCode,
+      required this.gender,
+      required this.employmentType,
+      required this.attendanceDate,
+      required this.inTime,
+      required this.outTime,
+      required this.status,
+      required this.duration,
+      required this.punchRecords,
+      required this.lateby,
+      required this.earlyBy,
+      required this.weekOff,
+      required this.isHoliday});
 
   factory Attendance.fromJson(Map<String, dynamic> json) {
     return Attendance(
-      employeeName: json['EmployeeName'] ?? '',
-      employeeCode: json['EmployeeCode'] ?? '',
-      gender: json['Gender'] ?? '',
-      employmentType: json['EmployementType'] ?? '',
-      attendanceDate: json['AttendanceDate'] ?? '',
-      inTime: json['InTime'] ?? '',
-      outTime: json['OutTime'] ?? '',
-      status: json['Status'] ?? '',
-      duration: json['Duration'] ?? 0,
-      punchRecords: json['PunchRecords'] ?? '',
-      lateby: json['LateBy'] ?? 0,
-      earlyBy: json['EarlyBy'] ?? 0,
-      weekOff: json['WeeklyOff'] ?? '',
-      isHoliday: json['Holiday'] ?? 0
-    );
+        employeeName: json['EmployeeName'] ?? '',
+        employeeCode: json['EmployeeCode'] ?? '',
+        gender: json['Gender'] ?? '',
+        employmentType: json['EmployementType'] ?? '',
+        attendanceDate: json['AttendanceDate'] ?? '',
+        inTime: json['InTime'] ?? '',
+        outTime: json['OutTime'] ?? '',
+        status: json['Status'] ?? '',
+        duration: json['Duration'] ?? 0,
+        punchRecords: json['PunchRecords'] ?? '',
+        lateby: json['LateBy'] ?? 0,
+        earlyBy: json['EarlyBy'] ?? 0,
+        weekOff: json['WeeklyOff'] ?? '',
+        isHoliday: json['Holiday'] ?? 0);
   }
 
   Map<String, dynamic> toJson() {
@@ -282,19 +280,14 @@ class HolidayModel {
     );
   }
 
-Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'holidayName': holidayName,
       'holidayDate': holidayDate,
       'description': holidayDescription,
-     
     };
   }
-
-
 }
-
-
 
 class LeaveRequests {
   final String id;
@@ -309,34 +302,32 @@ class LeaveRequests {
   final String employeeName;
   final String location;
 
-  LeaveRequests({
-    required this.id,
-    required this.leaveType,
-    required this.leaveStartDate,
-    required this.leaveEndDate,
-    required this.totalDays,
-    required this.reason,
-    required this.status,
-    required this.approvedBy,
-    required this.dateTime,
-    required this.employeeName,
-    required this.location
-  });
+  LeaveRequests(
+      {required this.id,
+      required this.leaveType,
+      required this.leaveStartDate,
+      required this.leaveEndDate,
+      required this.totalDays,
+      required this.reason,
+      required this.status,
+      required this.approvedBy,
+      required this.dateTime,
+      required this.employeeName,
+      required this.location});
 
   factory LeaveRequests.fromJson(Map<String, dynamic> json) {
     return LeaveRequests(
-      id: json['_id'] ?? '',
-      leaveType: json['leaveType'] ?? '',
-      leaveStartDate: json['leaveStartDate'] ?? '',
-      leaveEndDate: json['leaveEndDate'] ?? '',
-      totalDays: json['totalDays'] ?? '',
-      reason: json['reason'] ?? '',
-      status: json['status'] ?? '',
-      approvedBy: json['approvedBy'] ?? '',
-      dateTime: json['dateTime'] ?? '',
-            employeeName: json['employeeInfo']['employeeName'] ?? '',
-            location: json['location']
-    );
+        id: json['_id'] ?? '',
+        leaveType: json['leaveType'] ?? '',
+        leaveStartDate: json['leaveStartDate'] ?? '',
+        leaveEndDate: json['leaveEndDate'] ?? '',
+        totalDays: json['totalDays'] ?? '',
+        reason: json['reason'] ?? '',
+        status: json['status'] ?? '',
+        approvedBy: json['approvedBy'] ?? '',
+        dateTime: json['dateTime'] ?? '',
+        employeeName: json['employeeInfo']['employeeName'] ?? '',
+        location: json['location']);
   }
 
   Map<String, dynamic> toJson() {
@@ -350,9 +341,31 @@ class LeaveRequests {
       'status': status,
       'approvedBy': approvedBy,
       'dateTime': dateTime,
-      'employeeName' : employeeName,
-      'location' : location
+      'employeeName': employeeName,
+      'location': location
     };
   }
 }
 
+class DocumentList {
+  final String docType;
+  final String documentName;
+  final String employeeId;
+  final String location;
+
+  DocumentList({
+    required this.docType,
+    required this.documentName,
+    required this.employeeId,
+    required this.location,
+  });
+
+  factory DocumentList.fromJson(Map<String, dynamic> json) {
+    return DocumentList(
+      docType: json['docType'].toString(),
+      documentName: json['documentName'],
+      employeeId: json['employeeId'],
+      location: json['location'],
+    );
+  }
+}

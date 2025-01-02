@@ -226,7 +226,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       shadowColor: Colors.black.withOpacity(0.1),
                       child: Padding(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
                         child: CalendarTimeline(
                           height: height * 0.075,
                           dayNameFontSize: 10,
@@ -239,7 +239,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           leftMargin: 0,
                           monthColor: Colors.blueGrey,
                           dayColor: Colors.blueGrey,
-                          activeDayColor: Colors.white,
+                          activeDayColor: Colors.amber,
                           activeBackgroundDayColor: AppColor.mainThemeColor,
                           locale: 'en_ISO',
                         ),
@@ -422,7 +422,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 } else if (snapshot.hasError) {
                                   return Center(
                                       child: Text(
-                                          'Please check your internet connection'));
+                                          'No Holiday List Found'));
                                 } else if (!snapshot.hasData ||
                                     snapshot.data!.isEmpty) {
                                   return Center(

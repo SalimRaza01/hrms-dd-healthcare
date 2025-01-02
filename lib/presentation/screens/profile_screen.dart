@@ -57,15 +57,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           print('This is my set image $_image');
         });
 
-   
         final fileSize = await _image!.length();
 
- 
         uploadPrescription([
           PlatformFile(
             path: filepath,
             name: pickedFile.name,
-            size: fileSize, 
+            size: fileSize,
           ),
         ]);
       }
@@ -77,7 +75,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _filepicker(ImageSource source) async {
-    PermissionStatus permissionStatus = await Permission.manageExternalStorage.request();
+    PermissionStatus permissionStatus =
+        await Permission.manageExternalStorage.request();
 
     if (permissionStatus.isGranted) {
       final picker = ImagePicker();
@@ -90,15 +89,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           print('This is my set image $_image');
         });
 
- 
         final fileSize = await _image!.length();
 
-    
         uploadPrescription([
           PlatformFile(
             path: filepath,
             name: pickedFile.name,
-            size: fileSize, 
+            size: fileSize,
           ),
         ]);
       }
@@ -130,6 +127,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   content: Text('Avatar Updated'),
                   backgroundColor: Colors.green),
             );
+            setState(() {
+              employeeProfile = fetchEmployeeDetails(widget.empID);
+            });
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -178,7 +178,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Navigator.of(context).pop();
               },
             ),
-            
             ListTile(
               leading: Icon(
                 Icons.cancel,
@@ -261,13 +260,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             shape: BoxShape.circle,
                           ),
                           child: CircleAvatar(
-                            backgroundImage: employee.employeePhoto.contains("NA")
-                                ? AssetImage(
-                                    employee.gender == 'Male'
-                                        ? 'assets/image/MaleAvatar.png'
-                                        : 'assets/image/FemaleAvatar.png',
-                                  )
-                                : NetworkImage(employee.employeePhoto),
+                            backgroundImage:
+                                employee.employeePhoto.contains("NA")
+                                    ? AssetImage(
+                                        employee.gender == 'Male'
+                                            ? 'assets/image/MaleAvatar.png'
+                                            : 'assets/image/FemaleAvatar.png',
+                                      )
+                                    : NetworkImage(employee.employeePhoto),
                             radius: 50,
                           ),
                         ),

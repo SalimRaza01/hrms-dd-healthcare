@@ -94,16 +94,29 @@ class AuthProvider with ChangeNotifier {
         await _authBox.put('gender', gender);
         await _authBox.put('role', role);
 
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => BottomNavigation()));
+     
 
         print('successfull');
+         ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Login Successfully'),
+        backgroundColor: Colors.green,
+      ),
+    );
+       Navigator.push(context,
+            MaterialPageRoute(builder: (context) => BottomNavigation()));
       } else {
-        print('failed ${response.statusMessage}');
+
       }
-    } catch (e) {
-      print(e.toString());
-    }
+    } on DioException catch (e) {
+      print(e);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Invalid user credential'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
   }
 }
 

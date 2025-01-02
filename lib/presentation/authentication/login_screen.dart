@@ -98,24 +98,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               onChanged: (value) {
                                 setState(() {
                                   final hasEmail = RegExp(
-                                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$'); 
-                                  final hasSpace = RegExp(
-                                      r'\s'); 
-                                  final containsDomain = RegExp(
-                                      r'@agvahealthtech.com$'); 
+                                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                                  final hasSpace = RegExp(r'\s');
+                                  final containsDomain =
+                                      RegExp(r'@agvahealthtech.com$');
 
                                   if (value.isEmpty) {
-                                    _emailErrorText =
-                                        null; 
+                                    _emailErrorText = null;
                                   } else if (!hasEmail.hasMatch(value)) {
-                                    _emailErrorText =
-                                        'Invalid Email';
+                                    _emailErrorText = 'Invalid Email';
                                   } else if (hasSpace.hasMatch(value)) {
                                     _emailErrorText =
-                                        "Email can't contain spaces"; 
+                                        "Email can't contain spaces";
                                   } else if (!containsDomain.hasMatch(value)) {
-                                    _emailErrorText =
-                                     'Invalid Email'; 
+                                    _emailErrorText = 'Invalid Email';
                                   } else {
                                     _emailErrorText = null;
                                   }
@@ -168,26 +164,45 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           TextButton(
                               onPressed: () async {
-                                await sendPasswordOTP(context,
-                                    _emailController.text.toString(), 'LOGIN');
+                                if (_emailController.text.isNotEmpty) {
+                                  await sendPasswordOTP(
+                                      context,
+                                      _emailController.text.toString(),
+                                      'LOGIN');
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Please Enter Email'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                               },
                               child: Text('Forgot Password ?'))
                         ],
                       ),
                       InkWell(
                         onTap: () async {
-                          if (_emailController.text.isNotEmpty ||
-                              _passwordController.text.isNotEmpty) {
+                          if (_emailController.text.isEmpty &&
+                              _passwordController.text.isEmpty) {
+                            setState(() {
+                              _emailErrorText = "Please Enter Email";
+                              _passwordErrorText = "Please Enter Password";
+                            });
+                          } else if (_emailController.text.isEmpty) {
+                            setState(() {
+                              _emailErrorText = "Please Enter Email";
+                            });
+                          } else if (_passwordController.text.isEmpty) {
+                            setState(() {
+                              _passwordErrorText = "Please Enter Password";
+                            });
+                          } else {
                             print('sign in button');
                             await authProvider.login(
                                 _emailController.text.toString(),
                                 _passwordController.text.toString(),
                                 context);
-                          } else {
-                            setState(() {
-                              _emailErrorText = "Please Enter Email";
-                              _passwordErrorText = "Please Enter Password";
-                            });
                           }
                         },
                         child: Container(

@@ -134,12 +134,12 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
       request.fields['longitude'] = _currentLocation!.longitude.toString();
       request.fields['status'] = _isPunchIn ? "punch_in" : "punch_out";
 
-      var response = await request.send();
+      // var response = await request.send();
       setState(() {
         _isLoading = false;
       });
 
-      if (response.statusCode == 200) {
+      // if (response.statusCode == 200) {
         setState(() {
           _isPunchIn = !_isPunchIn;
         });
@@ -151,20 +151,22 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  backgroundColor: Colors.green,
           content: Text(_isPunchIn
               ? 'Punched In Successfully!'
               : 'Punched Out Successfully'),
         ));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  backgroundColor: Colors.red,
           content: Text('Failed to punch ${_isPunchIn ? 'in' : 'out'}'),
         ));
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Please take a selfie and get your location first.'),
-      ));
-    }
+    // } else {
+    //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    //     content: Text('Please take a selfie and get your location first.'),
+    //   ));
+    // }
   }
 
   @override
@@ -207,38 +209,9 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
               children: [
                 FlutterMap(
                   options: MapOptions(
-                      initialCenter: _currentLocation!, initialZoom: 16.0),
+                      initialCenter: _currentLocation != null ? _currentLocation! : LatLng(50.5, 30.51), initialZoom: 16.0),
                   children: [
-                    // MarkerLayer(
-                    //   markers: [
-                    //     Marker(
-                    //       height: 500,
-                    //       width: 500,
-                    //       child: Icon(
-                    //         Icons.person,
-                    //         size: 50.0,
-                    //         color: Colors.red,
-                    //       ),
-                    //       // borderStrokeWidth: 5.0,
-                    //       // borderColor: Colors.red,
-                    //       // color: Colors.red,
-                    //       point: _currentLocation!,
-                    //       // radius: 5.0,
-                    //       // useRadiusInMeter: true,
-                    //     ),
-                    //   ],
-                    // ),
-                    // MarkerLayer(
-                    //   markers: [
-                    //     Marker(
-                    //       point: _currentLocation!,
-                    //       width: 80,
-                    //       height: 80,
-                    //       child: FlutterLogo(),
-                    //     ),
-                    //   ],
-                    // ),
-
+                  
                     TileLayer(
                       urlTemplate:
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
