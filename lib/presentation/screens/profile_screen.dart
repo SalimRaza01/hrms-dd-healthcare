@@ -57,15 +57,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           print('This is my set image $_image');
         });
 
-        // Get the file size
+   
         final fileSize = await _image!.length();
 
-        // Pass the required size parameter
+ 
         uploadPrescription([
           PlatformFile(
             path: filepath,
             name: pickedFile.name,
-            size: fileSize, // Provide the size of the file
+            size: fileSize, 
           ),
         ]);
       }
@@ -77,7 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _filepicker(ImageSource source) async {
-    PermissionStatus permissionStatus = await Permission.storage.request();
+    PermissionStatus permissionStatus = await Permission.manageExternalStorage.request();
 
     if (permissionStatus.isGranted) {
       final picker = ImagePicker();
@@ -90,15 +90,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           print('This is my set image $_image');
         });
 
-        // Get the file size
+ 
         final fileSize = await _image!.length();
 
-        // Pass the required size parameter
+    
         uploadPrescription([
           PlatformFile(
             path: filepath,
             name: pickedFile.name,
-            size: fileSize, // Provide the size of the file
+            size: fileSize, 
           ),
         ]);
       }
@@ -178,30 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Navigator.of(context).pop();
               },
             ),
-            Visibility(
-              visible: _image != null,
-              child: ListTile(
-                leading: Icon(
-                  Icons.cancel,
-                  color: Colors.red,
-                ),
-                title: Text(
-                  'Remove Current Profile',
-                  style: TextStyle(
-                    color: Colors.red,
-                  ),
-                ),
-                onTap: () {
-                  // setState(() {
-                  //   _image = null;
-                  // });
-                  //  SharedPrefsHelper()
-                  //     .putImageFile('profileImage', _image!);
-
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
+            
             ListTile(
               leading: Icon(
                 Icons.cancel,
@@ -284,7 +261,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             shape: BoxShape.circle,
                           ),
                           child: CircleAvatar(
-                            backgroundImage: employee.employeePhoto.isEmpty
+                            backgroundImage: employee.employeePhoto.contains("NA")
                                 ? AssetImage(
                                     employee.gender == 'Male'
                                         ? 'assets/image/MaleAvatar.png'
@@ -313,7 +290,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           Icon(
                             Icons.circle,
-                            color: employee.employeeStatus == 'Present'
+                            color: employee.employeeStatus == 'Working'
                                 ? Colors.green
                                 : Colors.red,
                             size: height * .015,

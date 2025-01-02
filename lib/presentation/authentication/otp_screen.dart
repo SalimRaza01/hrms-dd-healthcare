@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:database_app/core/api/api.dart';
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
@@ -16,11 +18,35 @@ class _OTPScrenState extends State<OTPScren> {
   TextEditingController pinController = TextEditingController();
   late final FocusNode focusNode;
   bool showerror = false;
+  bool resendOtp = false;
+  late Timer _resendTimer;
+  int remainingTime = 59;
 
   @override
   void initState() {
     super.initState();
+    startResendTimer();
     focusNode = FocusNode();
+  }
+
+  startResendTimer() {
+    print('time is running');
+    remainingTime = 59;
+    _resendTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      print('time is running 1');
+      setState(() {
+        if (remainingTime > 0) {
+          print('time is running 2');
+          remainingTime--;
+        } else if (remainingTime == 0) {
+          resendOtp = true;
+          _resendTimer.cancel();
+          timer.cancel();
+        } else {
+          timer.cancel();
+        }
+      });
+    });
   }
 
   @override
@@ -94,12 +120,21 @@ class _OTPScrenState extends State<OTPScren> {
                             Column(
                               children: [
                                 Text(
-                                  'Sign in',
+                                  remainingTime > 9
+                                      ? "00:$remainingTime"
+                                      : "00:0$remainingTime",
                                   style: TextStyle(
                                       fontSize: height * 0.035,
                                       color: AppColor.mainTextColor,
                                       fontWeight: FontWeight.bold),
                                 ),
+                                // Text(
+                                //   'OTP',
+                                //   style: TextStyle(
+                                //       fontSize: height * 0.035,
+                                //       color: AppColor.mainTextColor,
+                                //       fontWeight: FontWeight.bold),
+                                // ),
                                 SizedBox(
                                   height: 10,
                                 ),
@@ -117,7 +152,7 @@ class _OTPScrenState extends State<OTPScren> {
                                               fontWeight: FontWeight.bold)),
                                       TextSpan(
                                           text:
-                                              ', check your inbox to continue the sign in process.'),
+                                              ', check your inbox to continue the process.'),
                                     ],
                                   ),
                                 ),
@@ -134,8 +169,8 @@ class _OTPScrenState extends State<OTPScren> {
                                 hapticFeedbackType:
                                     HapticFeedbackType.lightImpact,
                                 onCompleted: (pin) async {
-                                  await verifyPasswordOTP(context, pin, widget.emailController);
-                                 
+                                  await verifyPasswordOTP(
+                                      context, pin, widget.emailController);
                                 },
                                 // onChanged: (value) {
                                 //   debugPrint('onChanged: $value');
@@ -183,18 +218,27 @@ class _OTPScrenState extends State<OTPScren> {
                                       color: AppColor.mainTextColor2,
                                       fontWeight: FontWeight.w500),
                                 ),
-                                Text(
-                                  ' Resend OTP.',
-                                  style: TextStyle(
-                                      color: AppColor.secondaryThemeColor2,
-                                      fontWeight: FontWeight.w500),
+                                InkWell(
+                                  onTap: remainingTime == 0 ? () async {
+                                    await sendPasswordOTP(
+                                        context, widget.emailController, '');
+                                          await startResendTimer();
+                                  } : null,
+                                  child: Text(
+                                    ' Resend OTP.',
+                                    style: TextStyle(
+                                        color: remainingTime == 0 ? AppColor.secondaryThemeColor2 : Colors.grey,
+                                        fontWeight: FontWeight.w500),
+                                  ),
                                 )
                               ],
                             ),
                             InkWell(
                               onTap: () async {
-                                       await verifyPasswordOTP(context, pinController.text.toString(),  widget.emailController);
-                                
+                                await verifyPasswordOTP(
+                                    context,
+                                    pinController.text.toString(),
+                                    widget.emailController);
                               },
                               child: Container(
                                 decoration: BoxDecoration(

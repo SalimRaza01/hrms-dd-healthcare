@@ -13,8 +13,11 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool showError = false;
   bool _isPasswordVisible = false;
+  bool notfilledemail = false;
+  bool notfilledpass = false;
+  String? _emailErrorText;
+  String? _passwordErrorText;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
           alignment: AlignmentDirectional.topCenter,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 120),
+              padding: const EdgeInsets.only(top: 160),
               child: Image.asset(
                 'assets/image/DDLOGO.png',
                 height: height * 0.07,
@@ -47,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                height: height * 0.7,
+                height: height * 0.5,
                 width: width,
                 decoration: BoxDecoration(
                     color: Colors.white,
@@ -87,10 +90,37 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: TextField(
                               controller: _emailController,
                               decoration: InputDecoration(
+                                errorText: _emailErrorText,
                                 labelText: 'Email',
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12)),
                               ),
+                              onChanged: (value) {
+                                setState(() {
+                                  final hasEmail = RegExp(
+                                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$'); 
+                                  final hasSpace = RegExp(
+                                      r'\s'); 
+                                  final containsDomain = RegExp(
+                                      r'@agvahealthtech.com$'); 
+
+                                  if (value.isEmpty) {
+                                    _emailErrorText =
+                                        null; 
+                                  } else if (!hasEmail.hasMatch(value)) {
+                                    _emailErrorText =
+                                        'Invalid Email';
+                                  } else if (hasSpace.hasMatch(value)) {
+                                    _emailErrorText =
+                                        "Email can't contain spaces"; 
+                                  } else if (!containsDomain.hasMatch(value)) {
+                                    _emailErrorText =
+                                     'Invalid Email'; 
+                                  } else {
+                                    _emailErrorText = null;
+                                  }
+                                });
+                              },
                             ),
                           ),
                           SizedBox(height: 20),
@@ -101,6 +131,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               obscureText: !_isPasswordVisible,
                               decoration: InputDecoration(
                                 labelText: 'Password',
+                                errorText: notfilledpass
+                                    ? 'Please enter password'
+                                    : _passwordErrorText,
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     _isPasswordVisible
@@ -118,20 +151,32 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
+                              onChanged: (value) {
+                                setState(() {
+                                  final hasSpace = RegExp(r'\s');
+                                  if (value.isEmpty) {
+                                    _passwordErrorText = null;
+                                  } else if (hasSpace.hasMatch(value)) {
+                                    _passwordErrorText =
+                                        "Password can't cantain space";
+                                  } else {
+                                    _passwordErrorText = null;
+                                  }
+                                });
+                              },
                             ),
                           ),
                           TextButton(
                               onPressed: () async {
-                                await sendPasswordOTP(
-                                    context, _emailController.text.toString());
-                   
+                                await sendPasswordOTP(context,
+                                    _emailController.text.toString(), 'LOGIN');
                               },
                               child: Text('Forgot Password ?'))
                         ],
                       ),
                       InkWell(
                         onTap: () async {
-                          if (_emailController.text.isNotEmpty &&
+                          if (_emailController.text.isNotEmpty ||
                               _passwordController.text.isNotEmpty) {
                             print('sign in button');
                             await authProvider.login(
@@ -140,7 +185,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 context);
                           } else {
                             setState(() {
-                              showError = true;
+                              _emailErrorText = "Please Enter Email";
+                              _passwordErrorText = "Please Enter Password";
                             });
                           }
                         },

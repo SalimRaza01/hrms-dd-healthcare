@@ -59,12 +59,14 @@ class _TeamProfileState extends State<TeamProfile> {
                   child: Row(
                     children: [
                       CircleAvatar(
+                        backgroundImage: employee.employeePhoto.contains('NA')
+                            ? AssetImage(
+                                employee.gender == 'Male'
+                                    ? 'assets/image/MaleAvatar.png'
+                                    : 'assets/image/FemaleAvatar.png',
+                              )
+                            : NetworkImage(employee.employeePhoto),
                         radius: 30,
-                        child: Image.asset(
-                          employee.gender == 'Male'
-                              ? 'assets/image/MaleAvatar.png'
-                              : 'assets/image/FemaleAvatar.png',
-                        ),
                       ),
                       SizedBox(width: 20),
                       Column(

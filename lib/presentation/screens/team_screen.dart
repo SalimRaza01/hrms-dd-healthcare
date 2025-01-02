@@ -199,7 +199,7 @@ class _TeamScreenState extends State<TeamScreen> {
                                           ListTile(
                                             leading: CircleAvatar(
                                               backgroundColor:
-                                                const Color.fromARGB(
+                                                  const Color.fromARGB(
                                                       255, 235, 244, 254),
                                               child: Text(
                                                 employee.employeeName[0],
@@ -341,9 +341,9 @@ class _TeamScreenState extends State<TeamScreen> {
                                                                 topRight: Radius
                                                                     .circular(
                                                                         0)),
-                                                        color: 
-                                                  const Color.fromARGB(
-                                                      255, 235, 244, 254),
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 235, 244, 254),
                                                       ),
                                                       width: width,
                                                       child: Padding(
@@ -391,8 +391,9 @@ class _TeamScreenState extends State<TeamScreen> {
                                                                     Radius
                                                                         .circular(
                                                                             15)),
-                                                        color:    const Color.fromARGB(
-                                                      255, 235, 244, 254),
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 235, 244, 254),
                                                       ),
                                                       child: Padding(
                                                         padding:
@@ -442,7 +443,6 @@ class _TeamScreenState extends State<TeamScreen> {
   leaveWidget(double height, double width, String leave, String leaveCount) {
     return Container(
       decoration: BoxDecoration(
-  
           color: AppColor.primaryThemeColor,
           borderRadius: BorderRadius.circular(5)),
       child: Padding(

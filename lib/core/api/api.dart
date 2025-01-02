@@ -349,6 +349,7 @@ Future<List<EmployeeProfile>> fetchTeamList() async {
 Future<void> sendPasswordOTP(
   BuildContext context,
   String email,
+  String screen
 ) async {
   final response = await dio.post(sentOTP, data: {
     "email": email,
@@ -361,10 +362,13 @@ Future<void> sendPasswordOTP(
         backgroundColor: Colors.green,
       ),
     );
-    Future.delayed(Duration(seconds: 1), () {
+    if(screen == 'LOGIN'){
+ Future.delayed(Duration(seconds: 1), () {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => OTPScren(email)));
     });
+    }
+   
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
