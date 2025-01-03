@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
@@ -11,6 +12,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   void initState() {
     super.initState();
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   @override
@@ -88,7 +93,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ),
             ),
           ),
-          SizedBox(height: 10,),Card(
+          SizedBox(height: height * 0.01,),Card(
             color: Colors.white,
             elevation: 4,
             margin: EdgeInsets.all(0),

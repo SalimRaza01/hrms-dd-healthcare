@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:hrms/presentation/screens/leave_screen_employee.dart';
 import 'package:hrms/presentation/screens/team_screen.dart';
@@ -24,6 +25,10 @@ class _BottomNavigationState extends State<BottomNavigation> {
   void initState() {
     super.initState();
     checkEmployeeId();
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   Future<void> checkEmployeeId() async {

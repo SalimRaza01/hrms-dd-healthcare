@@ -1,5 +1,6 @@
 // ignore_for_file: unused_field
 
+import 'package:flutter/services.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -24,7 +25,10 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-
+ SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     _controller =
         AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
 

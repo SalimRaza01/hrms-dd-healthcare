@@ -1,5 +1,6 @@
 // ignore_for_file: sort_child_properties_last
 
+import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
@@ -40,6 +41,10 @@ class _LeaveScreenState extends State<LeaveScreenManager>
     _tabController = TabController(vsync: this, length: 3);
     _tabController.addListener(_handleTabSelection);
     super.initState();
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   void _handleTabSelection() {
@@ -248,7 +253,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
             ),
           ),
           SizedBox(
-            height: 15,
+            height: height * 0.015,
           ),
           Expanded(
             child: FutureBuilder<List<LeaveHistory>>(

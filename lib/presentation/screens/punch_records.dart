@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,10 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
   void initState() {
     super.initState();
     checkEmployeeId();
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   Future<void> checkEmployeeId() async {

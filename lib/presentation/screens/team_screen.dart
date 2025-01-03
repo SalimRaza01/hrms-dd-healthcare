@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
@@ -20,6 +21,10 @@ class _TeamScreenState extends State<TeamScreen> {
   @override
   void initState() {
     super.initState();
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     employeeProfiles = fetchTeamList();
   }
 
@@ -160,7 +165,7 @@ class _TeamScreenState extends State<TeamScreen> {
                         } else if (snapshot.hasError) {
                           return Center(
                               child: Text(
-                                  'Please check your internet connection, try again'));
+                                  'No Data Found'));
                         } else if (!snapshot.hasData) {
                           return Center(child: Text('No data found'));
                         } else {
@@ -192,8 +197,9 @@ class _TeamScreenState extends State<TeamScreen> {
                                     ),
                                     shadowColor: Colors.black.withOpacity(0.1),
                                     child: Padding(
-                                      padding: const EdgeInsets.all(0),
+                                      padding: const EdgeInsets.all(5),
                                       child: Column(
+                                        
                                         children: [
                                           // Header
                                           ListTile(
@@ -231,11 +237,10 @@ class _TeamScreenState extends State<TeamScreen> {
                                                 ? height * 0.12
                                                 : 0,
                                             child: SingleChildScrollView(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 2),
+                                      
                                               child: Column(
-                                                spacing: 2.0,
+                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                spacing: 3.0,
                                                 children: [
                                                   FutureBuilder<LeaveBalance>(
                                                       future: fetchLeaves(
@@ -251,7 +256,7 @@ class _TeamScreenState extends State<TeamScreen> {
                                                             .hasError) {
                                                           return Center(
                                                               child: Text(
-                                                                  'Please check your internect connection'));
+                                                                  'No Data Found'));
                                                         } else if (snapshot
                                                             .hasData) {
                                                           final leave =
@@ -263,7 +268,7 @@ class _TeamScreenState extends State<TeamScreen> {
                                                             child: Row(
                                                               mainAxisAlignment:
                                                                   MainAxisAlignment
-                                                                      .spaceEvenly,
+                                                                      .spaceAround,
                                                               children: [
                                                                 leaveWidget(
                                                                     height,
@@ -346,6 +351,7 @@ class _TeamScreenState extends State<TeamScreen> {
                                                             255, 235, 244, 254),
                                                       ),
                                                       width: width,
+                                                      height: height * 0.04,
                                                       child: Padding(
                                                         padding:
                                                             const EdgeInsets
@@ -381,6 +387,7 @@ class _TeamScreenState extends State<TeamScreen> {
                                                     },
                                                     child: Container(
                                                       width: width,
+                                                         height: height * 0.04,
                                                       decoration: BoxDecoration(
                                                         borderRadius:
                                                             BorderRadius.only(
@@ -424,7 +431,7 @@ class _TeamScreenState extends State<TeamScreen> {
                               separatorBuilder:
                                   (BuildContext context, int index) {
                                 return SizedBox(
-                                  height: 10,
+                                  height: height * 0.01,
                                 );
                               },
                             ),
@@ -442,15 +449,22 @@ class _TeamScreenState extends State<TeamScreen> {
 
   leaveWidget(double height, double width, String leave, String leaveCount) {
     return Container(
+      width: width / 5,
+
       decoration: BoxDecoration(
           color: AppColor.primaryThemeColor,
           borderRadius: BorderRadius.circular(5)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 8),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Text(
-              '${leave} - ',
+              leave,
+              style: TextStyle(color: Colors.white, fontSize: height * 0.013),
+            ),
+            Text(
+              '-',
               style: TextStyle(color: Colors.white, fontSize: height * 0.013),
             ),
             Text(

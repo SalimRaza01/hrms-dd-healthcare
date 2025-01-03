@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
@@ -16,14 +17,17 @@ class _HolidayListState extends State<HolidayList> {
   @override
   void initState() {
     super.initState();
-
+ SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     holidayList = fetchHolidayList();
   }
 
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-
+    final width = MediaQuery.of(context).size.width;
     return SafeArea(
         child: Scaffold(
       backgroundColor: AppColor.mainBGColor,
@@ -122,12 +126,17 @@ class _HolidayListState extends State<HolidayList> {
                                       MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      item.holidayName,
-                                      style: TextStyle(
-                                          fontSize: height * 0.02,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColor.mainTextColor),
+                                    SizedBox(
+                                      width: width / 1.5,
+                                      child: Text(
+                                                                    overflow: TextOverflow.ellipsis,
+                                        item.holidayName,
+                                        style: TextStyle(
+                                          
+                                            fontSize: height * 0.018,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColor.mainTextColor),
+                                      ),
                                     ),
                                     SizedBox(
                                       height: height * 0.005,
@@ -148,7 +157,7 @@ class _HolidayListState extends State<HolidayList> {
                       },
                       separatorBuilder: (BuildContext context, int index) {
                         return SizedBox(
-                          height: 10,
+                          height: height * 0.01,
                         );
                       },
                     );

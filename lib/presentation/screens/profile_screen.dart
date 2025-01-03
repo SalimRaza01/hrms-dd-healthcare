@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:hrms/presentation/animations/profile_shimmer.dart';
@@ -32,6 +33,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void initState() {
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     super.initState();
     employeeProfile = fetchEmployeeDetails(widget.empID);
   }
@@ -213,7 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           } else if (snapshot.hasError) {
             return Center(
                 child:
-                    Text('Please check your internet connection, try again'));
+                    Text('No Data Found'));
           } else if (!snapshot.hasData) {
             return Center(child: Text('No data found'));
           } else {
@@ -309,7 +314,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               SizedBox(
-                height: 10,
+                height: height * 0.01,
               ),
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -357,7 +362,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       SizedBox(
-                        height: 15,
+                        height: height * 0.015,
                       ),
                       Container(
                         decoration: BoxDecoration(
@@ -392,7 +397,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       SizedBox(
-                        height: 15,
+                        height: height * 0.015,
                       ),
                       Container(
                         decoration: BoxDecoration(

@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
@@ -18,6 +19,10 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
   late String empID;
   @override
   void initState() {
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     super.initState();
     attendenceLog = fetchAttendence(widget.empID);
   }
@@ -254,7 +259,7 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                   },
                   separatorBuilder: (BuildContext context, int index) {
                     return SizedBox(
-                      height: 10,
+                      height: height * 0.01,
                     );
                   },
                 );

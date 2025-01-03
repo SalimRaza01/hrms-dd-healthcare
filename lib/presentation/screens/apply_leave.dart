@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/theme/app_colors.dart';
@@ -71,6 +72,10 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   void initState() {
     getleaveBalance();
     super.initState();
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   String? get uploadURL => '$documentUpload/$empID';
@@ -143,7 +148,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             fontWeight: FontWeight.bold),
                       ),
                       SizedBox(
-                        height: 10,
+                        height: height * 0.01,
                       ),
                       CustomDropdown<Leave>(
                         hintText: 'Select Leave Type',
@@ -169,7 +174,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                         child: Column(
                           children: [
                             SizedBox(
-                              height: 15,
+                              height: height * 0.015,
                             ),
                             Visibility(
                               visible: _selectedLeaveType == 'Casual Leave' ||
@@ -201,7 +206,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             Visibility(
                               visible: _selectedLeaveType == 'Casual Leave',
                               child: SizedBox(
-                                height: 15,
+                                height: height * 0.015,
                               ),
                             ),
                             Visibility(
@@ -213,13 +218,13 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   children: [
                                     startDateLeave(height, width, context),
                                     SizedBox(
-                                      height: 15,
+                                      height: height * 0.015,
                                     ),
                                     endDateLeave(height, width, context)
                                   ],
                                 )),
                             SizedBox(
-                              height: 15,
+                              height: height * 0.015,
                             ),
                             Card(
                               color: Colors.white,
@@ -262,7 +267,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               ),
                             ),
                             SizedBox(
-                              height: 15,
+                              height: height * 0.015,
                             ),
                             Builder(
                               builder: (BuildContext context) => _isLoading
@@ -314,7 +319,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                         ),
                             ),
                             SizedBox(
-                              height: 15,
+                              height: height * 0.015,
                             ),
                             // InkWell(
                             //   onTap: () async {
@@ -351,7 +356,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             //   ),
                             // ),
                             SizedBox(
-                              height: 50,
+                              height: height * 0.05,
                             ),
                             InkWell(
                               onTap: () async {
@@ -518,7 +523,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               ),
                             ),
                             SizedBox(
-                              height: 10,
+                              height: height * 0.01,
                             ),
                           ],
                         ),

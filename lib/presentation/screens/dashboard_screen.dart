@@ -1,6 +1,7 @@
 // ignore_for_file: sort_child_properties_last, prefer_final_fields
 
 import 'package:calendar_timeline/calendar_timeline.dart';
+import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
@@ -55,6 +56,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     checkEmployeeId();
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     holidayList = fetchHolidayList();
   }
 
@@ -150,9 +155,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               shadowColor: Colors.black.withOpacity(0.1),
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                    child: Text(
-                                        'Please check your internect connection')),
+                                child: Center(child: Text('No Data Found')),
                               ),
                             );
                           } else if (snapshot.hasData) {
@@ -215,7 +218,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           }
                         }),
                     SizedBox(
-                      height: 15,
+                      height: height * 0.015,
                     ),
                     Card(
                       color: Colors.white,
@@ -226,7 +229,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       shadowColor: Colors.black.withOpacity(0.1),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 10),
                         child: CalendarTimeline(
                           height: height * 0.075,
                           dayNameFontSize: 10,
@@ -246,7 +250,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                     SizedBox(
-                      height: 15,
+                      height: height * 0.015,
                     ),
                     SizedBox(
                       width: width,
@@ -271,7 +275,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     fontWeight: FontWeight.w500),
                               ),
                               SizedBox(
-                                height: 10,
+                                height: height * 0.01,
                               ),
                               FlutterImageStack.widgets(
                                 children: _images,
@@ -307,7 +311,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                     SizedBox(
-                      height: 15,
+                      height: height * 0.015,
                     ),
                     SizedBox(
                       width: width,
@@ -332,7 +336,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     fontWeight: FontWeight.w500),
                               ),
                               SizedBox(
-                                height: 10,
+                                height: height * 0.01,
                               ),
                               FutureBuilder<LeaveBalance>(
                                   future: fetchLeaves(widget.empID),
@@ -343,11 +347,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           height, width);
                                     } else if (snapshot.hasError) {
                                       return Center(
-                                          child: Text(
-                                              'Please check your internect connection'));
+                                          child: Text('No Data Found'));
                                     } else if (snapshot.hasData) {
                                       final leave = snapshot.data!;
-                      
+
                                       return SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
                                         child: Row(
@@ -356,19 +359,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           children: [
                                             leaveWidget(height, width, 'Casual',
                                                 leave.casualLeave),
-                                           SizedBox(width: 10,),
-                                            leaveWidget(height, width, 'Medical',
-                                                leave.medicalLeave),
-                                           SizedBox(width: 10,),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            leaveWidget(height, width,
+                                                'Medical', leave.medicalLeave),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
                                             leaveWidget(height, width, 'Earned',
                                                 leave.earnedLeave),
-                                           SizedBox(width: 10,),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
                                             leaveWidget(
                                                 height,
                                                 width,
                                                 'Maternity',
                                                 leave.maternityLeave),
-                                           SizedBox(width: 10,),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
                                             leaveWidget(
                                                 height,
                                                 width,
@@ -387,7 +398,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                     SizedBox(
-                      height: 15,
+                      height: height * 0.015,
                     ),
                     Card(
                       color: Colors.white,
@@ -410,7 +421,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   fontWeight: FontWeight.w500),
                             ),
                             SizedBox(
-                              height: 10,
+                              height: height * 0.01,
                             ),
                             FutureBuilder<List<HolidayModel>>(
                               future: holidayList,
@@ -421,8 +432,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       child: CircularProgressIndicator());
                                 } else if (snapshot.hasError) {
                                   return Center(
-                                      child: Text(
-                                          'No Holiday List Found'));
+                                      child: Text('No Holiday List Found'));
                                 } else if (!snapshot.hasData ||
                                     snapshot.data!.isEmpty) {
                                   return Center(
@@ -511,29 +521,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
+                                                  SizedBox(
+                                                    width: width / 2,
+                                                    child: Text(
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      item.holidayName,
+                                                      style: TextStyle(
+                                                          fontSize:
+                                                              height * 0.018,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: AppColor
+                                                              .mainTextColor),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: height * 0.005,
+                                                  ),
                                                   Text(
-                                                    item.holidayName,
+                                                    DateFormat('MMMM')
+                                                        .format(newDate)
+                                                        .toString(),
                                                     style: TextStyle(
-                                                        fontSize: height * 0.02,
+                                                        fontSize:
+                                                            height * 0.014,
                                                         fontWeight:
-                                                            FontWeight.bold,
+                                                            FontWeight.w500,
                                                         color: AppColor
                                                             .mainTextColor),
                                                   ),
-                                                  // SizedBox(
-                                                  //   height: height * 0.005,
-                                                  // ),
-                                                  // Text(
-                                                  //   item.holidayDescription
-                                                  //    ,
-                                                  //   style: TextStyle(
-                                                  //       fontSize:
-                                                  //           height * 0.014,
-                                                  //       fontWeight:
-                                                  //           FontWeight.w500,
-                                                  //       color: AppColor
-                                                  //           .mainTextColor),
-                                                  // ),
                                                 ],
                                               ),
                                             ),
@@ -553,9 +570,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 15,
-                    ),
+                       SizedBox(
+                              height: height * 0.015,
+                            ),
                     Card(
                       color: Colors.white,
                       elevation: 4,
@@ -570,108 +587,178 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Today Task ',
+                              'Today Task',
                               style: TextStyle(
                                   fontSize: height * 0.018,
                                   color: AppColor.mainTextColor,
                                   fontWeight: FontWeight.w500),
                             ),
-                            SizedBox(
-                              height: 3,
+                               SizedBox(
+                              height: height * 0.005,
                             ),
                             Text(
                               'The tasks assigned to you for today',
                               style: TextStyle(
-                                fontSize: height * 0.015,
-                                color: Color.fromARGB(141, 0, 0, 0),
+                                fontSize: height * 0.012,
+                                color: AppColor.mainTextColor2,
                               ),
                             ),
-                            SizedBox(
-                              height: 10,
+                                SizedBox(
+                              height: height * 0.01,
                             ),
-                            Container(
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: const Color.fromARGB(14, 0, 0, 0)),
-                                  color: AppColor.mainBGColor,
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 12),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.circle_outlined,
-                                          color: AppColor.primaryThemeColor,
-                                          size: height * 0.022,
-                                        ),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          'Complete HRMS UI',
-                                          style: TextStyle(
-                                              fontSize: height * 0.018,
-                                              color: AppColor.mainTextColor,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: 15,
-                                    ),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        TaskWidgets(
-                                          height: height,
-                                          icon: Icons.timelapse_rounded,
-                                          text: 'In Progress',
-                                          color: const Color.fromARGB(
-                                              86, 158, 158, 158),
-                                          textcolor: const Color.fromARGB(
-                                              158, 0, 0, 0),
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        TaskWidgets(
-                                          height: height,
-                                          icon: Icons.flag,
-                                          text: 'High',
-                                          color: const Color.fromARGB(
-                                              201, 229, 27, 27),
-                                          textcolor: const Color.fromARGB(
-                                              255, 255, 255, 255),
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        TaskWidgets(
-                                          height: height,
-                                          icon: Icons.calendar_month,
-                                          text: '5 Dec',
-                                          color: const Color.fromARGB(
-                                              201, 229, 27, 27),
-                                          textcolor: const Color.fromARGB(
-                                              255, 255, 255, 255),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                            Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Center(
+                                child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(5),
+                                    child: Image.asset(
+                                      'assets/image/Frame.png',
+                                      height: height * 0.08,
+                                    )),
+                              ),
+                            ),
+                             SizedBox(
+                              height: height * 0.01,
+                            ),
+                            Center(
+                              child: Text(
+                                'No Tasks Assigned',
+                                style: TextStyle(
+                                    fontSize: height * 0.015,
+                                    color: AppColor.mainTextColor,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                              SizedBox(
+                              height: height * 0.01,
+                            ),
+                            Text(
+                              'It looks like you don’t have any tasks assigned to you right now. Don’t worry, this space will be updated as new tasks become available.',
+                              style: TextStyle(
+                                fontSize: height * 0.012,
+                                color: AppColor.mainTextColor2,
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
+                    // Card(
+                    //   color: Colors.white,
+                    //   elevation: 4,
+                    //   margin: EdgeInsets.all(0),
+                    //   shape: RoundedRectangleBorder(
+                    //     borderRadius: BorderRadius.circular(10),
+                    //   ),
+                    //   shadowColor: Colors.black.withOpacity(0.1),
+                    //   child: Padding(
+                    //     padding: const EdgeInsets.all(10),
+                    //     child: Column(
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         Text(
+                    //           'Today Task ',
+                    //           style: TextStyle(
+                    //               fontSize: height * 0.018,
+                    //               color: AppColor.mainTextColor,
+                    //               fontWeight: FontWeight.w500),
+                    //         ),
+                    //         SizedBox(
+                    //           height: 3,
+                    //         ),
+                    //         Text(
+                    //           'The tasks assigned to you for today',
+                    //           style: TextStyle(
+                    //             fontSize: height * 0.015,
+                    //             color: Color.fromARGB(141, 0, 0, 0),
+                    //           ),
+                    //         ),
+                    //         SizedBox(
+                    //           height: height * 0.01,
+                    //         ),
+                    //         Container(
+                    //           decoration: BoxDecoration(
+                    //               border: Border.all(
+                    //                   color: const Color.fromARGB(14, 0, 0, 0)),
+                    //               color: AppColor.mainBGColor,
+                    //               borderRadius: BorderRadius.circular(10)),
+                    //           child: Padding(
+                    //             padding: const EdgeInsets.symmetric(
+                    //                 horizontal: 10, vertical: 12),
+                    //             child: Column(
+                    //               crossAxisAlignment: CrossAxisAlignment.start,
+                    //               children: [
+                    //                 Row(
+                    //                   children: [
+                    //                     Icon(
+                    //                       Icons.circle_outlined,
+                    //                       color: AppColor.primaryThemeColor,
+                    //                       size: height * 0.022,
+                    //                     ),
+                    //                     SizedBox(
+                    //                       width: 5,
+                    //                     ),
+                    //                     Text(
+                    //                       'Complete HRMS UI',
+                    //                       style: TextStyle(
+                    //                           fontSize: height * 0.018,
+                    //                           color: AppColor.mainTextColor,
+                    //                           fontWeight: FontWeight.w500),
+                    //                     ),
+                    //                   ],
+                    //                 ),
+                    //                 SizedBox(
+                    //                   height: height * 0.015,
+                    //                 ),
+                    //                 Row(
+                    //                   crossAxisAlignment:
+                    //                       CrossAxisAlignment.start,
+                    //                   children: [
+                    //                     TaskWidgets(
+                    //                       height: height,
+                    //                       icon: Icons.timelapse_rounded,
+                    //                       text: 'In Progress',
+                    //                       color: const Color.fromARGB(
+                    //                           86, 158, 158, 158),
+                    //                       textcolor: const Color.fromARGB(
+                    //                           158, 0, 0, 0),
+                    //                     ),
+                    //                     SizedBox(
+                    //                       width: 10,
+                    //                     ),
+                    //                     TaskWidgets(
+                    //                       height: height,
+                    //                       icon: Icons.flag,
+                    //                       text: 'High',
+                    //                       color: const Color.fromARGB(
+                    //                           201, 229, 27, 27),
+                    //                       textcolor: const Color.fromARGB(
+                    //                           255, 255, 255, 255),
+                    //                     ),
+                    //                     SizedBox(
+                    //                       width: 10,
+                    //                     ),
+                    //                     TaskWidgets(
+                    //                       height: height,
+                    //                       icon: Icons.calendar_month,
+                    //                       text: '5 Dec',
+                    //                       color: const Color.fromARGB(
+                    //                           201, 229, 27, 27),
+                    //                       textcolor: const Color.fromARGB(
+                    //                           255, 255, 255, 255),
+                    //                     )
+                    //                   ],
+                    //                 ),
+                    //               ],
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
                     SizedBox(
-                      height: 15,
+                      height: height * 0.015,
                     ),
                     Card(
                       color: Colors.white,
@@ -693,103 +780,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   color: AppColor.mainTextColor,
                                   fontWeight: FontWeight.w500),
                             ),
-                            SizedBox(
-                              height: 8,
+                                 SizedBox(
+                              height: height * 0.005,
                             ),
                             Text(
-                              'A new announcement has been published by Swasti Negi on Wednesday, 20 December, 2023.',
+                              'No announcements have been published yet. Keep an eye out for future updates.',
                               style: TextStyle(
-                                fontSize: height * 0.015,
+                                fontSize: height * 0.012,
                                 color: Color.fromARGB(141, 0, 0, 0),
                               ),
                             ),
                             SizedBox(
-                              height: 10,
+                              height: height * 0.01,
                             ),
-                            ClipRRect(
-                                borderRadius: BorderRadius.circular(5),
-                                child: Image.asset(
-                                    'assets/image/annoucementImage.png')),
+                            Image.asset(
+                                fit: BoxFit.fitWidth,
+                                width: width,
+                                'assets/image/annoucementImage.png'),
                           ],
                         ),
                       ),
                     ),
-                    // SizedBox(
-                    //   height: 15,
-                    // ),
-                    // Card(
-                    //   color: Colors.white,
-                    //   elevation: 4,
-                    //   margin: EdgeInsets.all(0),
-                    //   shape: RoundedRectangleBorder(
-                    //     borderRadius: BorderRadius.circular(10),
-                    //   ),
-                    //   shadowColor: Colors.black.withOpacity(0.1),
-                    //   child: Padding(
-                    //     padding: const EdgeInsets.all(10),
-                    //     child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         Text(
-                    //           'Today Task',
-                    //           style: TextStyle(
-                    //               fontSize: height * 0.018,
-                    //               color: AppColor.mainTextColor,
-                    //               fontWeight: FontWeight.w500),
-                    //         ),
-                    //         SizedBox(
-                    //           height: 5,
-                    //         ),
-                    //         Text(
-                    //           'The tasks assigned to you for today',
-                    //           style: TextStyle(
-                    //             fontSize: height * 0.015,
-                    //             color: AppColor.mainTextColor2,
-                    //           ),
-                    //         ),
-                    //         SizedBox(
-                    //           height: 10,
-                    //         ),
-                    //         Padding(
-                    //           padding: const EdgeInsets.all(12),
-                    //           child: Center(
-                    //             child: ClipRRect(
-                    //                 borderRadius: BorderRadius.circular(5),
-                    //                 child: Image.asset(
-                    //                   'assets/image/Frame.png',
-                    //                   height: height * 0.08,
-                    //                 )),
-                    //           ),
-                    //         ),
-                    //         SizedBox(
-                    //           height: 10,
-                    //         ),
-                    //         Center(
-                    //           child: Text(
-                    //             'No Tasks Assigned',
-                    //             style: TextStyle(
-                    //                 fontSize: height * 0.018,
-                    //                 color: AppColor.mainTextColor,
-                    //                 fontWeight: FontWeight.w500),
-                    //           ),
-                    //         ),
-                    //         SizedBox(
-                    //           height: 10,
-                    //         ),
-                    //         Text(
-                    //           'It looks like you don’t have any tasks assigned to you right now. Don’t worry, this space will be updated as new tasks become available.',
-                    //           style: TextStyle(
-                    //             fontSize: height * 0.012,
-                    //             color: AppColor.mainTextColor2,
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                    // SizedBox(
-                    //   height: 15,
-                    // ),
                   ],
                 ),
               )
@@ -888,7 +899,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   //           ],
   //         ),
   //         SizedBox(
-  //           height: 10,
+  //           height: height * 0.01,
   //         ),
   //         Text(
   //           leave,

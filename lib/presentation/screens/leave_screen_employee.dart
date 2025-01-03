@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
@@ -28,6 +29,10 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
 
   @override
   void initState() {
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
     super.initState();
   }
@@ -213,7 +218,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                       ),
                     ),
                     SizedBox(
-                      height: 15,
+                      height: height * 0.015,
                     ),
                     Expanded(
                       child: FutureBuilder<List<LeaveHistory>>(

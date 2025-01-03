@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:hrms/presentation/animations/profile_shimmer.dart';
 import 'package:flutter/cupertino.dart';
@@ -19,11 +20,17 @@ class _TeamProfileState extends State<TeamProfile> {
   @override
   void initState() {
     super.initState();
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     employeeProfile = fetchEmployeeDetails(widget.empID);
   }
 
   @override
   Widget build(BuildContext context) {
+        final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: AppColor.mainBGColor,
       body: FutureBuilder<EmployeeProfile>(
@@ -34,7 +41,7 @@ class _TeamProfileState extends State<TeamProfile> {
           } else if (snapshot.hasError) {
             return Center(
                 child:
-                    Text('Please check your internet connection, try again'));
+                    Text('No Data Found'));
           } else if (!snapshot.hasData) {
             return Center(child: Text('No data found'));
           } else {
@@ -144,7 +151,7 @@ class _TeamProfileState extends State<TeamProfile> {
                         ),
                       ),
                       SizedBox(
-                        height: 15,
+                        height: height * 0.015,
                       ),
                       Container(
                         decoration: BoxDecoration(
@@ -179,7 +186,7 @@ class _TeamProfileState extends State<TeamProfile> {
                         ),
                       ),
                       SizedBox(
-                        height: 15,
+                        height: height * 0.015,
                       ),
                       Container(
                         decoration: BoxDecoration(

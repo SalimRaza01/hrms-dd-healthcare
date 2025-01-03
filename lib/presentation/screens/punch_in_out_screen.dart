@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -11,6 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:geocoding/geocoding.dart';
 
 class PunchInOutScreen extends StatefulWidget {
   @override
@@ -25,13 +27,18 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
   bool _isPunchIn = false;
   bool _isLoading = false;
   DateTime? _punchInTime;
+  List<Placemark>? placemarks;
+  Placemark? place;
 
   @override
   void initState() {
     super.initState();
     _checkEmployeeId();
-    _initializeCamera();
     _getCurrentLocation();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   Future<void> _checkEmployeeId() async {
@@ -68,23 +75,27 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
     }
 
     PermissionStatus permissionStatus = await Permission.location.request();
+    _initializeCamera();
     if (permissionStatus.isGranted) {
       try {
         Position position = await Geolocator.getCurrentPosition(
           locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
           // desiredAccuracy: LocationAccuracy.high,
         );
+        placemarks = await placemarkFromCoordinates(
+            position.latitude, position.longitude);
         setState(() {
           _currentLocation = LatLng(position.latitude, position.longitude);
+
+          place = placemarks![0];
           _isLoading = false;
-          print(_currentLocation);
         });
       } catch (e) {
         setState(() {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error retrieving location: $e'),
+          content: Text('Error retrieving location'),
         ));
       }
     } else {
@@ -118,6 +129,9 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
 
   Future<void> _punchInOut() async {
     await _getCurrentLocation();
+    if (_selfie == null) {
+      await _takeSelfie();
+    }
     if (_selfie != null && _currentLocation != null) {
       setState(() {
         _isLoading = true;
@@ -140,28 +154,28 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
       });
 
       // if (response.statusCode == 200) {
-        setState(() {
-          _isPunchIn = !_isPunchIn;
-        });
+      setState(() {
+        _isPunchIn = !_isPunchIn;
+      });
 
-        if (_isPunchIn == false) {
-          await _savePunchInStatus(_isPunchIn, null);
-        } else {
-          await _savePunchInStatus(_isPunchIn, DateTime.now());
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  backgroundColor: Colors.green,
-          content: Text(_isPunchIn
-              ? 'Punched In Successfully!'
-              : 'Punched Out Successfully'),
-        ));
+      if (_isPunchIn == false) {
+        await _savePunchInStatus(_isPunchIn, null);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  backgroundColor: Colors.red,
-          content: Text('Failed to punch ${_isPunchIn ? 'in' : 'out'}'),
-        ));
+        await _savePunchInStatus(_isPunchIn, DateTime.now());
       }
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.green,
+        content: Text(_isPunchIn
+            ? 'Punched In Successfully!'
+            : 'Punched Out Successfully'),
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.red,
+        content: Text('Failed to punch ${_isPunchIn ? 'in' : 'out'}'),
+      ));
+    }
     // } else {
     //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     //     content: Text('Please take a selfie and get your location first.'),
@@ -209,16 +223,21 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
               children: [
                 FlutterMap(
                   options: MapOptions(
-                      initialCenter: _currentLocation != null ? _currentLocation! : LatLng(50.5, 30.51), initialZoom: 16.0),
+                      initialCenter: _currentLocation != null
+                          ? _currentLocation!
+                          : LatLng(50.5, 30.51),
+                      initialZoom: 16.0),
                   children: [
-                  
                     TileLayer(
                       urlTemplate:
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'dev.fleaflet.flutter_map.example',
                     ),
                     CurrentLocationLayer(
-                      style: LocationMarkerStyle( markerSize: Size.fromRadius(10), accuracyCircleColor :const Color.fromARGB(120, 64, 195, 255)),
+                      style: LocationMarkerStyle(
+                          markerSize: Size.fromRadius(10),
+                          accuracyCircleColor:
+                              const Color.fromARGB(120, 64, 195, 255)),
                     ),
                   ],
                 ),
@@ -261,11 +280,23 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                   fontWeight: FontWeight.w500),
                             ),
                             Text(
-                              'Shift  08:45 AM - 06:00 PM',
+                              'Shift : 08:45 AM - 06:00 PM',
                               style: TextStyle(
                                   fontSize: height * 0.016,
                                   color: AppColor.mainTextColor,
                                   fontWeight: FontWeight.w500),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              place != null
+                                  ? 'Location : ${place!.subLocality} ${place!.locality}'
+                                  : 'Unable to track location',
+                              style: TextStyle(
+                                  fontSize: height * 0.016,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.w400),
                             ),
                             SizedBox(
                               height: 5,

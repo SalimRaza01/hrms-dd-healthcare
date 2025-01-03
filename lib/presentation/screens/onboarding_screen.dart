@@ -1,4 +1,5 @@
 import 'package:concentric_transition/concentric_transition.dart';
+import 'package:flutter/services.dart';
 import 'package:hrms/presentation/authentication/login_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -28,8 +29,24 @@ final pages = [
   )
 ];
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {

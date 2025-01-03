@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
@@ -23,6 +24,10 @@ late String empID;
   void initState() {
     super.initState();
     attendenceLog = fetchAttendence(widget.empID);
+     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
 
   }
 
@@ -84,7 +89,7 @@ late String empID;
                                   fontWeight: FontWeight.bold),
                             ),
                             SizedBox(
-                              height: 10,
+                              height: height * 0.01,
                             ),
                             Text(
                               'Don’t miss your clock in schedule',
@@ -113,7 +118,8 @@ late String empID;
                             return Center(child: CircularProgressIndicator());
                           } else if (snapshot.hasError) {
                             return Center(
-                                child: Text('Error: ${snapshot.error}'));
+                                child:
+                                    Text('No attendance records available.'));
                           } else if (!snapshot.hasData ||
                               snapshot.data!.isEmpty) {
                             return Center(
@@ -383,7 +389,7 @@ late String empID;
                               separatorBuilder:
                                   (BuildContext context, int index) {
                                 return SizedBox(
-                                  height: 10,
+                                  height: height * 0.01,
                                 );
                               },
                             );
