@@ -72,7 +72,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   void initState() {
     getleaveBalance();
     super.initState();
-     SystemChrome.setPreferredOrientations([
+    SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
@@ -321,40 +321,45 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             SizedBox(
                               height: height * 0.015,
                             ),
-                            // InkWell(
-                            //   onTap: () async {
-                            //     FilePickerResult? result =
-                            //         await FilePicker.platform.pickFiles();
+                            Visibility(
+                              visible: _selectedLeaveType != null
+                                  && _selectedLeaveType!.contains('Medical')
+                                  ,
+                              child: InkWell(
+                                onTap: () async {
+                                  FilePickerResult? result =
+                                      await FilePicker.platform.pickFiles();
 
-                            //     setState(() {
-                            //       _isLoading = true;
-                            //     });
+                                  setState(() {
+                                    _isLoading = true;
+                                  });
 
-                            //     if (result != null) {
-                            //       setState(() {
-                            //         _paths = result.files;
-                            //         uploadPrescription(result.files);
-                            //       });
-                            //     } else {
-                            //       setState(() {
-                            //         _isLoading = false;
-                            //       });
-                            //     }
-                            //   },
-                            //   child: Container(
-                            //     decoration: BoxDecoration(
-                            //       color: Colors.blue,
-                            //       borderRadius: BorderRadius.circular(20),
-                            //     ),
-                            //     padding: EdgeInsets.symmetric(
-                            //         horizontal: 50, vertical: 10),
-                            //     child: Text(
-                            //       "Upload Prescription",
-                            //       style: TextStyle(
-                            //           color: Colors.white, fontSize: 15),
-                            //     ),
-                            //   ),
-                            // ),
+                                  if (result != null) {
+                                    setState(() {
+                                      _paths = result.files;
+                                      uploadPrescription(result.files);
+                                    });
+                                  } else {
+                                    setState(() {
+                                      _isLoading = false;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 50, vertical: 10),
+                                  child: Text(
+                                    "Upload Prescription",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 15),
+                                  ),
+                                ),
+                              ),
+                            ),
                             SizedBox(
                               height: height * 0.05,
                             ),

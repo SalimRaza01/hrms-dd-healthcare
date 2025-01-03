@@ -291,7 +291,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                             ),
                             Text(
                               place != null
-                                  ? 'Location : ${place!.subLocality} ${place!.locality}'
+                                  ? 'Location : ${place!.subLocality}, ${place!.locality}'
                                   : 'Unable to track location',
                               style: TextStyle(
                                   fontSize: height * 0.016,

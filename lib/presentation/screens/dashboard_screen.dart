@@ -56,7 +56,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     checkEmployeeId();
-     SystemChrome.setPreferredOrientations([
+    SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
@@ -570,9 +570,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
-                       SizedBox(
-                              height: height * 0.015,
-                            ),
+                    SizedBox(
+                      height: height * 0.015,
+                    ),
                     Card(
                       color: Colors.white,
                       elevation: 4,
@@ -593,7 +593,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   color: AppColor.mainTextColor,
                                   fontWeight: FontWeight.w500),
                             ),
-                               SizedBox(
+                            SizedBox(
                               height: height * 0.005,
                             ),
                             Text(
@@ -603,7 +603,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 color: AppColor.mainTextColor2,
                               ),
                             ),
-                                SizedBox(
+                            SizedBox(
                               height: height * 0.01,
                             ),
                             Padding(
@@ -617,7 +617,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     )),
                               ),
                             ),
-                             SizedBox(
+                            SizedBox(
                               height: height * 0.01,
                             ),
                             Center(
@@ -629,7 +629,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     fontWeight: FontWeight.w500),
                               ),
                             ),
-                              SizedBox(
+                            SizedBox(
                               height: height * 0.01,
                             ),
                             Text(
@@ -780,7 +780,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   color: AppColor.mainTextColor,
                                   fontWeight: FontWeight.w500),
                             ),
-                                 SizedBox(
+                            SizedBox(
+                              height: height * 0.005,
+                            ),
+                            Image.asset(
+                                fit: BoxFit.fitWidth,
+                                width: width,
+                                'assets/image/annoucementImage.png'),
+                            SizedBox(
                               height: height * 0.005,
                             ),
                             Text(
@@ -790,13 +797,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 color: Color.fromARGB(141, 0, 0, 0),
                               ),
                             ),
-                            SizedBox(
-                              height: height * 0.01,
-                            ),
-                            Image.asset(
-                                fit: BoxFit.fitWidth,
-                                width: width,
-                                'assets/image/annoucementImage.png'),
                           ],
                         ),
                       ),

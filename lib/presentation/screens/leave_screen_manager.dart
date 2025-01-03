@@ -182,7 +182,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                           return _shimmerLoader(height, width);
                         } else if (snapshot.hasError) {
                           return Center(
-                              child: Text('Internet connection error'));
+                              child: Text('No Data Found'));
                         } else if (snapshot.hasData) {
                           final leave = snapshot.data!;
 

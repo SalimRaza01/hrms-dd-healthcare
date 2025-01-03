@@ -139,7 +139,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                                   } else if (snapshot.hasError) {
                                     return Center(
                                         child:
-                                            Text('Internet connection error'));
+                                            Text('No Data Found'));
                                   } else if (snapshot.hasData) {
                                     final leave = snapshot.data!;
 
