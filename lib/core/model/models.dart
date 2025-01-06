@@ -369,3 +369,33 @@ class DocumentList {
     );
   }
 }
+
+
+
+class DocumentListModel {
+  final String documentName;
+  final String docType;
+  final String location;
+
+  DocumentListModel({
+    required this.documentName,
+    required this.docType,
+    required this.location,
+  });
+
+  factory DocumentListModel.fromJson(Map<String, dynamic> json) {
+    return DocumentListModel(
+      documentName: json['documentName'],
+      docType: json['docType'],
+      location: json['location'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'documentName': documentName,
+      'docType': docType,
+      'location': location,
+    };
+  }
+}

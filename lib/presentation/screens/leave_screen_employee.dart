@@ -1,3 +1,5 @@
+// ignore_for_file: sort_child_properties_last
+
 import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
@@ -29,7 +31,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
 
   @override
   void initState() {
-     SystemChrome.setPreferredOrientations([
+    SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
@@ -137,9 +139,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                                       ConnectionState.waiting) {
                                     return _shimmerLoader(height, width);
                                   } else if (snapshot.hasError) {
-                                    return Center(
-                                        child:
-                                            Text('No Data Found'));
+                                    return Center(child: Text('No Data Found'));
                                   } else if (snapshot.hasData) {
                                     final leave = snapshot.data!;
 
@@ -228,10 +228,38 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                                 ConnectionState.waiting) {
                               return _shimmerhistoryLoader(height, width);
                             } else if (snapshot.hasError) {
-                              return Center(child: Text('No History Found'));
+                              return Center(
+                                child: Card(
+                                  color: Colors.white,
+                                  elevation: 4,
+                                  margin: EdgeInsets.all(0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text('No History Found'),
+                                  ),
+                                  shadowColor: Colors.black.withOpacity(0.1),
+                                ),
+                              );
                             } else if (!snapshot.hasData ||
                                 snapshot.data!.isEmpty) {
-                              return Center(child: Text('No History Found'));
+                              return Center(
+                                child: Card(
+                                  color: Colors.white,
+                                  elevation: 4,
+                                  margin: EdgeInsets.all(0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text('No History Found'),
+                                  ),
+                                  shadowColor: Colors.black.withOpacity(0.1),
+                                ),
+                              );
                             } else {
                               List<LeaveHistory> items = snapshot.data!;
 

@@ -472,3 +472,22 @@ Future<void> createNewPass(
     );
   }
 }
+
+
+
+Future<List<DocumentListModel>> fetchDocumentList(String documentType) async {
+
+  String empID = _authBox.get('employeeId');
+
+    final response = await dio.get(
+      documentType == 'Public' ? documentList : '$documentList/049',
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data['data'];
+      return data.map((item) => DocumentListModel.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load Holiday data');
+    }
+  
+}

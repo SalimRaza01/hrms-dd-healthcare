@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hrms/presentation/screens/document_list.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -277,14 +278,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: height * 0.01),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             employee.employeeName,
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: height * 0.02,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -305,7 +306,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text(
                         employee.email,
                         style: TextStyle(
-                            fontSize: 16,
+                            fontSize: height * 0.016,
                             color: const Color.fromARGB(255, 224, 224, 224)),
                         textAlign: TextAlign.center,
                       ),
@@ -344,19 +345,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 'Personal Information',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 18,
+                                  fontSize: height * 0.018,
                                   color: AppColor.mainTextColor2,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: height *0.005),
+
                               _buildProfileInfo(
-                                  'Gender :', employee.gender, Icons.person),
+                                  'Gender :', employee.gender, Icons.person, height),
                               _buildProfileInfo('Date of Birth :', employee.dob,
-                                  Icons.calendar_today),
+                                  Icons.calendar_today, height),
                               _buildProfileInfo('Marital Status :',
-                                  employee.maritalStatus, Icons.favorite),
+                                  employee.maritalStatus, Icons.favorite, height),
                               _buildProfileInfo('Address :',
-                                  employee.permanentAddress, Icons.flag),
+                                  employee.permanentAddress, Icons.flag, height),
                             ],
                           ),
                         ),
@@ -379,19 +381,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 'Contact Information',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 18,
+                                  fontSize: height * 0.018,
                                   color: AppColor.mainTextColor2,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: height * 0.005),
                               _buildProfileInfo('Contact No :',
-                                  employee.contactNo, Icons.phone),
+                                  employee.contactNo, Icons.phone, height),
                               _buildProfileInfo(
-                                  'Email :', employee.email, Icons.email),
+                                  'Email :', employee.email, Icons.email, height),
                               _buildProfileInfo(
                                   'Emergency Contact :',
                                   employee.emergencyContact,
-                                  Icons.local_hospital),
+                                  Icons.local_hospital, height),
                             ],
                           ),
                         ),
@@ -414,21 +416,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 'Work Information',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 18,
+                                  fontSize: height * 0.018,
                                   color: AppColor.mainTextColor2,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: height * 0.005),
                               _buildProfileInfo('EmployeeID :',
-                                  employee.employeeId, Icons.badge),
+                                  employee.employeeId, Icons.badge, height),
                               _buildProfileInfo('Date of Joining :',
-                                  employee.doj, Icons.work),
+                                  employee.doj, Icons.work, height),
                               _buildProfileInfo('Workplace :',
-                                  employee.workPlace, Icons.business),
+                                  employee.workPlace, Icons.business, height),
                               _buildProfileInfo('Designation :',
-                                  employee.designation, Icons.assignment),
+                                  employee.designation, Icons.assignment, height),
                               _buildProfileInfo('Employee Type :',
-                                  employee.employmentType, Icons.assignment),
+                                  employee.employmentType, Icons.assignment, height),
                             ],
                           ),
                         ),
@@ -436,6 +438,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ]),
                   ),
                 ),
+              ),
+            
+              InkWell(
+                onTap: () {
+                     Navigator.push(context, MaterialPageRoute(builder: (context)=> DocumentListScreen()));
+                },
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Card(
+                      color: Colors.white,
+                      elevation: 4,
+                      margin: EdgeInsets.all(0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      shadowColor: Colors.black.withOpacity(0.1),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 13),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.file_copy_rounded,
+                              color: AppColor.mainThemeColor,
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              'Documents',
+                              style: TextStyle(
+                                fontSize: height * 0.016,
+                                fontWeight: FontWeight.w500,
+                                color: AppColor.mainTextColor,
+                              ),
+                              textAlign: TextAlign.end,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ),
+                  SizedBox(
+                height: height * 0.02,
               ),
               InkWell(
                 onTap: () async {
@@ -502,7 +549,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Text(
                             'Log-Out',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: height * 0.016,
                               fontWeight: FontWeight.w500,
                               color: AppColor.mainTextColor,
                             ),
@@ -514,8 +561,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
-              SizedBox(
-                height: 20,
+                SizedBox(
+                height: height * 0.02,
               ),
             ]);
           }
@@ -524,7 +571,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileInfo(String label, String value, IconData icon) {
+  Widget _buildProfileInfo(String label, String value, IconData icon, double height) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
@@ -535,7 +582,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             label,
             style: TextStyle(
               fontWeight: FontWeight.w500,
-              fontSize: 14,
+              fontSize:     height * 0.014,
               color: const Color.fromARGB(139, 0, 0, 0),
             ),
           ),
@@ -544,7 +591,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text(
               value,
               style: TextStyle(
-                fontSize: 14,
+              fontSize:     height * 0.014,
                 color: const Color.fromARGB(139, 0, 0, 0),
               ),
               textAlign: TextAlign.end,
