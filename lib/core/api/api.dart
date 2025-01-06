@@ -480,7 +480,7 @@ Future<List<DocumentListModel>> fetchDocumentList(String documentType) async {
   String empID = _authBox.get('employeeId');
 
     final response = await dio.get(
-      documentType == 'Public' ? documentList : '$documentList/049',
+      documentType == 'Public' ? documentList : '$documentList/$empID',
     );
 
     if (response.statusCode == 200) {

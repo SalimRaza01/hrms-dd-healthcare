@@ -49,7 +49,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   List<String> name = [
     'Shiv,',
-    'Sofiya',
+    'Rahul',
   ];
 
   @override
@@ -69,6 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       empDesign = box.get('employeeDesign');
       empName = box.get('employeeName');
       empGender = box.get('gender');
+      print(box.get('token'));
     });
 
     print('Stored Employee ID: $empName');

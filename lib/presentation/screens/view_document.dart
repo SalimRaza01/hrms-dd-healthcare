@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:dio/dio.dart';
-import 'dart:io';  // For File handling
-import 'package:path_provider/path_provider.dart';
-
-import '../../core/model/models.dart'; 
+import 'dart:io';
+// import 'package:path_provider/path_provider.dart';
+import '../../core/model/models.dart';
 
 class ViewDocument extends StatefulWidget {
   final String documentType;
@@ -19,8 +18,8 @@ class ViewDocument extends StatefulWidget {
 class _ViewDocumentState extends State<ViewDocument> {
   late String documentType;
   late Future<List<DocumentListModel>> documentList;
-  
-  bool isDownloading = false;  
+
+  bool isDownloading = false;
 
   @override
   void initState() {
@@ -28,15 +27,16 @@ class _ViewDocumentState extends State<ViewDocument> {
     documentList = fetchDocumentList(widget.documentType);
   }
 
-
   Future<void> _downloadDocument(String url, String filename) async {
     setState(() {
-      isDownloading = true; 
+      isDownloading = true;
     });
 
-    if(isDownloading){
-         ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Downloading Document'), backgroundColor: Colors.blue),
+    if (isDownloading) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Downloading Document'),
+            backgroundColor: Colors.blue),
       );
     }
 
@@ -45,28 +45,28 @@ class _ViewDocumentState extends State<ViewDocument> {
       final response = await dio.get(url,
           options: Options(responseType: ResponseType.bytes));
 
-
-      final directory = await getApplicationDocumentsDirectory();
-      final filePath = '${directory.path}/$filename';
+      // final directory = await getExternalStorageDirectory();
+      final myDownloads = '/storage/emulated/0/Download';
+      final filePath = '${myDownloads}/$filename' + '.pdf';
       final file = File(filePath);
       await file.writeAsBytes(response.data);
 
       setState(() {
-        isDownloading = false; 
+        isDownloading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Downloaded to $filePath'), backgroundColor: Colors.green)
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Downloaded to $filePath'),
+          backgroundColor: Colors.green));
     } catch (e) {
       setState(() {
         isDownloading = false;
       });
 
       print('Download error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to download the document'), backgroundColor: Colors.red)
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Failed to download the document'),
+          backgroundColor: Colors.red));
     }
   }
 
@@ -108,7 +108,8 @@ class _ViewDocumentState extends State<ViewDocument> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
+                      return Center(
+                          child: Text('No document records available.'));
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return Center(
                           child: Text('No document records available.'));
@@ -131,61 +132,58 @@ class _ViewDocumentState extends State<ViewDocument> {
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-  Row(
-                                    children: [
-  Image.asset(
-                                    'assets/image/document2.png',
-                                    height: height * 0.04,
-                                  ),
-                                  SizedBox(
-                                    width: width * 0.05,
-                                  ),
-                                  Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item.documentName,
-                                        style: TextStyle(
-                                            fontSize: height * 0.017,
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColor.mainTextColor),
-                                      ),
-                                      Text(
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 3,
-                                        item.docType,
-                                        style: TextStyle(
-                                            fontSize: height * 0.013,
-                                            color: AppColor.mainTextColor),
-                                      ),
-                                    ],
-                                  ),
-                                    ],
-                                  ),
-                                IconButton(
-                                        onPressed: isDownloading
-                                            ? null 
-                                            : () {
-                                                _downloadDocument(
-                                                    item.location,
-                                                    item.documentName);
-
-                                              },
-                                        icon: Icon(Icons.download),
-                                        color: AppColor.mainThemeColor,
-                                        tooltip: 'Download Document',
-                                      ),
-                                ]
-                                
-                                 
-                              
-                              ),
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Image.asset(
+                                          'assets/image/document2.png',
+                                          height: height * 0.04,
+                                        ),
+                                        SizedBox(
+                                          width: width * 0.05,
+                                        ),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              item.documentName,
+                                              style: TextStyle(
+                                                  fontSize: height * 0.017,
+                                                  fontWeight: FontWeight.w500,
+                                                  color:
+                                                      AppColor.mainTextColor),
+                                            ),
+                                            Text(
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 3,
+                                              item.docType,
+                                              style: TextStyle(
+                                                  fontSize: height * 0.013,
+                                                  color:
+                                                      AppColor.mainTextColor),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    IconButton(
+                                      onPressed: isDownloading
+                                          ? null
+                                          : () {
+                                              _downloadDocument(item.location,
+                                                  item.documentName);
+                                            },
+                                      icon: Icon(Icons.download),
+                                      color: AppColor.mainThemeColor,
+                                      tooltip: 'Download Document',
+                                    ),
+                                  ]),
                             ),
                           );
                         },
