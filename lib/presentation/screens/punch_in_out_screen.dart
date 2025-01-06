@@ -248,7 +248,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                     alignment: Alignment.topCenter,
                     children: [
                       Container(
-                        height: height / 2.8,
+                        height: height / 3,
                         width: width,
                         padding:
                             EdgeInsets.symmetric(vertical: 20, horizontal: 50),
@@ -270,7 +270,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             SizedBox(
-                              height: 70,
+                              height: height * 0.06,
                             ),
                             Text(
                               empName != null ? 'Name : ${empName!}' : '',
@@ -279,13 +279,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                   color: AppColor.mainTextColor,
                                   fontWeight: FontWeight.w500),
                             ),
-                            Text(
-                              'Shift : 08:45 AM - 06:00 PM',
-                              style: TextStyle(
-                                  fontSize: height * 0.016,
-                                  color: AppColor.mainTextColor,
-                                  fontWeight: FontWeight.w500),
-                            ),
+                           
                             SizedBox(
                               height: 5,
                             ),
@@ -398,7 +392,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                               ? 'Take Selfie'
                                               : 'Retake Selfie',
                                           style: TextStyle(
-                                              fontSize: height * 0.015,
+                                              fontSize: height * 0.012,
                                               color: Colors.white),
                                         ),
                                       ),
@@ -444,7 +438,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                         ),
                       ),
                       Positioned(
-                          top: -50,
+                          top: -height * 0.12,
                           child: GestureDetector(
                             onTap: () {
                               if (_selfie != null) {

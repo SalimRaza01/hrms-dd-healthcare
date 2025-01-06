@@ -127,7 +127,7 @@ class _HolidayListState extends State<HolidayList> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     SizedBox(
-                                      width: width / 1.5,
+                                      width: width / 1.6,
                                       child: Text(
                                                                     overflow: TextOverflow.ellipsis,
                                         item.holidayName,

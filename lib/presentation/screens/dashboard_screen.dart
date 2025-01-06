@@ -914,7 +914,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   SizedBox leaveWidget(
       double height, double width, String leave, String leaveCount) {
     return SizedBox(
-      width: width * 0.2,
+      width: width * 0.22,
       child: Container(
         decoration: BoxDecoration(
             border: Border.all(color: const Color.fromARGB(14, 0, 0, 0)),

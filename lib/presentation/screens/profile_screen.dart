@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/theme/app_colors.dart';
@@ -81,8 +82,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _filepicker(ImageSource source) async {
-    PermissionStatus permissionStatus =
-        await Permission.manageExternalStorage.request();
+     final plugin = DeviceInfoPlugin();
+  final android = await plugin.androidInfo;
+     final permissionStatus = android.version.sdkInt < 33
+      ? await Permission.manageExternalStorage.request()
+      : PermissionStatus.granted;
+
+    // PermissionStatus permissionStatus =
+    //     await Permission.manageExternalStorage.request();
 
     if (permissionStatus.isGranted) {
       final picker = ImagePicker();

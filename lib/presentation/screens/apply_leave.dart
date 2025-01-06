@@ -269,54 +269,58 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             SizedBox(
                               height: height * 0.015,
                             ),
-                            Builder(
-                              builder: (BuildContext context) => _isLoading
-                                  ? Center(child: CircularProgressIndicator())
-                                  : _paths == null
-                                      ? SizedBox()
-                                      : ListView.builder(
-                                          shrinkWrap: true,
-                                          itemCount: _paths?.length ?? 0,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            final file = _paths![index];
-                                            return Card(
-                                              color: Colors.white,
-                                              elevation: 5,
-                                              margin: EdgeInsets.all(0),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(15),
-                                              ),
-                                              shadowColor:
-                                                  Colors.black.withOpacity(0.1),
-                                              child: ListTile(
-                                                leading: Icon(
-                                                  Icons.file_copy_rounded,
-                                                  color: Colors.blue,
+                         Visibility(
+                              visible: _selectedLeaveType != null
+                                  && _selectedLeaveType!.contains('Medical'),
+                              child: Builder(
+                                builder: (BuildContext context) => _isLoading
+                                    ? Center(child: CircularProgressIndicator())
+                                    : _paths == null
+                                        ? SizedBox()
+                                        : ListView.builder(
+                                            shrinkWrap: true,
+                                            itemCount: _paths?.length ?? 0,
+                                            itemBuilder: (BuildContext context,
+                                                int index) {
+                                              final file = _paths![index];
+                                              return Card(
+                                                color: Colors.white,
+                                                elevation: 5,
+                                                margin: EdgeInsets.all(0),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(15),
                                                 ),
-                                                title: Text(
-                                                  file.name,
-                                                  style: TextStyle(
-                                                      color: AppColor
-                                                          .mainTextColor2,
-                                                      fontSize: 15),
-                                                ),
-                                                trailing: IconButton(
-                                                  icon: Icon(
-                                                    Icons.delete,
-                                                    color: Colors.red,
+                                                shadowColor:
+                                                    Colors.black.withOpacity(0.1),
+                                                child: ListTile(
+                                                  leading: Icon(
+                                                    Icons.file_copy_rounded,
+                                                    color: Colors.blue,
                                                   ),
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      _paths!.removeAt(index);
-                                                    });
-                                                  },
+                                                  title: Text(
+                                                    file.name,
+                                                    style: TextStyle(
+                                                        color: AppColor
+                                                            .mainTextColor2,
+                                                        fontSize: 15),
+                                                  ),
+                                                  trailing: IconButton(
+                                                    icon: Icon(
+                                                      Icons.delete,
+                                                      color: Colors.red,
+                                                    ),
+                                                    onPressed: () {
+                                                      setState(() {
+                                                        _paths!.removeAt(index);
+                                                      });
+                                                    },
+                                                  ),
                                                 ),
-                                              ),
-                                            );
-                                          },
-                                        ),
+                                              );
+                                            },
+                                          ),
+                              ),
                             ),
                             SizedBox(
                               height: height * 0.015,
@@ -592,7 +596,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                     context: context,
                     builder: (context) {
                       return Container(
-                        height: height * 0.3,
+                     height: height * 0.35,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),
@@ -757,7 +761,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                     context: context,
                     builder: (context) {
                       return Container(
-                        height: height * 0.3,
+                        height: height * 0.35,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),
@@ -922,7 +926,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                     context: context,
                     builder: (context) {
                       return Container(
-                        height: height * 0.3,
+                    height: height * 0.35,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),
@@ -1054,7 +1058,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                     context: context,
                     builder: (context) {
                       return Container(
-                        height: height * 0.3,
+                      height: height * 0.35,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),
