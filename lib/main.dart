@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       darkTheme: ThemeData(brightness: Brightness.dark),
       debugShowCheckedModeBanner: false,
-      initialRoute: "/SplashScreen",
+      initialRoute: "/applyLeave",
       routes: {
         "/SplashScreen": (context) => SplashScreen(),
         "/OnBoarding": (context) => OnboardingScreen(),

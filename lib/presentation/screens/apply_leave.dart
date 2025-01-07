@@ -269,9 +269,9 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             SizedBox(
                               height: height * 0.015,
                             ),
-                         Visibility(
-                              visible: _selectedLeaveType != null
-                                  && _selectedLeaveType!.contains('Medical'),
+                            Visibility(
+                              visible: _selectedLeaveType != null &&
+                                  _selectedLeaveType!.contains('Medical'),
                               child: Builder(
                                 builder: (BuildContext context) => _isLoading
                                     ? Center(child: CircularProgressIndicator())
@@ -291,8 +291,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                   borderRadius:
                                                       BorderRadius.circular(15),
                                                 ),
-                                                shadowColor:
-                                                    Colors.black.withOpacity(0.1),
+                                                shadowColor: Colors.black
+                                                    .withOpacity(0.1),
                                                 child: ListTile(
                                                   leading: Icon(
                                                     Icons.file_copy_rounded,
@@ -326,9 +326,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               height: height * 0.015,
                             ),
                             Visibility(
-                              visible: _selectedLeaveType != null
-                                  && _selectedLeaveType!.contains('Medical')
-                                  ,
+                              visible: _selectedLeaveType != null &&
+                                  _selectedLeaveType!.contains('Medical'),
                               child: InkWell(
                                 onTap: () async {
                                   FilePickerResult? result =
@@ -377,8 +376,23 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   orElse: () => Leave('Unknown', '0'),
                                 );
 
-                                if (_selectedLeaveType!.contains('Casual') ||
-                                    _selectedLeaveType!.contains('Comp')) {
+                                if (_selectedLeaveType!.contains('Casual')) {
+                                  DateTime startDate =
+                                      DateTime.parse(startDateController.text);
+                                  DateTime now = DateTime.now();
+
+                                  if (startDate.year != now.year ||
+                                      startDate.month != now.month) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Casual leave can only be applied for the current month.'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                    return;
+                                  }
+
                                   if (_selectedText == 'Full Day') {
                                     setState(() {
                                       totalDays = 1;
@@ -434,8 +448,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   return;
                                 }
 
-                                if (_selectedLeaveType!.contains('Casual') ||
-                                    _selectedLeaveType!.contains('Comp')) {
+                                if (_selectedLeaveType!.contains('Casual')) {
                                   DateTime startDate =
                                       DateTime.parse(startDateController.text);
                                   DateTime now = DateTime.now();
@@ -470,7 +483,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   DateTime endDate =
                                       DateTime.parse(endDateController.text);
                                   int medicalLeaveDuration =
-                                      endDate.difference(startDate).inDays;
+                                      endDate.difference(startDate).inDays + 1;
+                                      print(medicalLeaveDuration);
 
                                   if (startDate.isAfter(DateTime.now())) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -596,7 +610,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                     context: context,
                     builder: (context) {
                       return Container(
-                     height: height * 0.35,
+                        height: height * 0.35,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),
@@ -611,16 +625,28 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   child: CupertinoDatePicker(
                                     mode: CupertinoDatePickerMode.date,
                                     use24hFormat: false,
-                                    maximumDate:
-                                        _selectedLeaveType!.contains('Medical')
-                                            ? DateTime.now()
-                                                .subtract(Duration(days: 1))
+                                    maximumDate: _selectedLeaveType!
+                                            .contains('Medical')
+                                        ? DateTime.now()
+                                            .subtract(Duration(days: 1))
+                                        : _selectedLeaveType!.contains('Earned')
+                                            ? DateTime.parse(
+                                                    startDateController.text)
+                                                .add(Duration(days: 6))
                                             : null,
-                                    minimumDate:
-                                        _selectedLeaveType!.contains('Medical')
-                                            ? DateTime.now()
-                                                .subtract(Duration(days: 5))
-                                            : DateTime.now(),
+                                    minimumDate: _selectedLeaveType!
+                                            .contains('Medical')
+                                        ? DateTime.now()
+                                            .subtract(Duration(days: 5))
+                                        : _selectedLeaveType!.contains('Earned')
+                                            ? DateTime.parse(
+                                                startDateController.text)
+                                            : null,
+                                    initialDateTime:
+                                        _selectedLeaveType!.contains('Earned')
+                                            ? DateTime.parse(
+                                                startDateController.text)
+                                            : null,
                                     onDateTimeChanged: (DateTime newDate) {
                                       selectedendDate = newDate;
                                     },
@@ -760,48 +786,59 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                     backgroundColor: Colors.white,
                     context: context,
                     builder: (context) {
-                      return Container(
+                      return SizedBox(
                         height: height * 0.35,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),
                           child: Column(
                             children: [
-                              Container(
+                              SizedBox(
                                 height: height * 0.22,
                                 child: CupertinoTheme(
-                                  data: CupertinoThemeData(
-                                    brightness: Brightness.light,
-                                  ),
-                                  child: _selectedLeaveType!.contains('Medical')
-                                      ? CupertinoDatePicker(
-                                          mode: CupertinoDatePickerMode.date,
-                                          use24hFormat: false,
-                                          maximumDate: _selectedLeaveType!
-                                                  .contains('Medical')
-                                              ? DateTime.now()
-                                                  .subtract(Duration(days: 2))
-                                              : null,
-                                          minimumDate: _selectedLeaveType!
-                                                  .contains('Medical')
-                                              ? DateTime.now()
-                                                  .subtract(Duration(days: 6))
-                                              : DateTime.now(),
-                                          onDateTimeChanged:
-                                              (DateTime newDate) {
-                                            selectedStartDate = newDate;
-                                          },
-                                        )
-                                      : CupertinoDatePicker(
-                                          mode: CupertinoDatePickerMode.date,
-                                          use24hFormat: false,
-                                          minimumDate: DateTime.now(),
-                                          onDateTimeChanged:
-                                              (DateTime newDate) {
-                                            selectedStartDate = newDate;
-                                          },
-                                        ),
-                                ),
+                                    data: CupertinoThemeData(
+                                      brightness: Brightness.light,
+                                    ),
+                                    child: _selectedLeaveType!
+                                            .contains('Medical')
+                                        ? CupertinoDatePicker(
+                                            mode: CupertinoDatePickerMode.date,
+                                            use24hFormat: false,
+                                            maximumDate: DateTime.now()
+                                                .subtract(Duration(days: 2)),
+                                            minimumDate: DateTime.now()
+                                                .subtract(Duration(days: 6)),
+                                            onDateTimeChanged:
+                                                (DateTime newDate) {
+                                              selectedStartDate = newDate;
+                                            },
+                                          )
+                                        : CupertinoDatePicker(
+                                            mode: CupertinoDatePickerMode.date,
+                                            use24hFormat: false,
+                                            minimumDate: _selectedLeaveType!
+                                                    .contains('Earned')
+                                                ? DateTime.now()
+                                                    .add(Duration(days: 1))
+                                                : _selectedLeaveType!
+                                                        .contains('Casual')
+                                                    ? DateTime(
+                                                        DateTime.now().year,
+                                                        DateTime.now().month,
+                                                        1)
+                                                    : null,
+                                            maximumDate: _selectedLeaveType!
+                                                    .contains('Casual')
+                                                ? DateTime(DateTime.now().year,
+                                                    DateTime.now().month + 1, 0)
+                                                : null,
+                                            onDateTimeChanged:
+                                                (DateTime newDate) {
+                                              setState(() {
+                                                selectedStartDate = newDate;
+                                              });
+                                            },
+                                          )),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(10),
@@ -926,7 +963,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                     context: context,
                     builder: (context) {
                       return Container(
-                    height: height * 0.35,
+                        height: height * 0.35,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),
@@ -1058,7 +1095,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                     context: context,
                     builder: (context) {
                       return Container(
-                      height: height * 0.35,
+                        height: height * 0.35,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),
