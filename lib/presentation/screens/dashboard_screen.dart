@@ -32,17 +32,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   List<Widget> _images = [
     CircleAvatar(
-      backgroundColor: AppColor.mainBGColor,
+      backgroundColor: AppColor.mainThemeColor,
       child: Icon(
         Icons.person,
-        color: AppColor.mainThemeColor,
+        color: AppColor.mainBGColor,
       ),
     ),
     CircleAvatar(
-      backgroundColor: AppColor.mainBGColor,
+      backgroundColor: AppColor.mainThemeColor,
       child: Icon(
         Icons.person,
-        color: AppColor.mainThemeColor,
+        color: AppColor.mainBGColor,
       ),
     ),
   ];
@@ -877,39 +877,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
-  // leaveWidget(double height, double width, String leave, String leaveCount) {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
-  //     child: Column(
-  //       children: [
-  //         Stack(
-  //           alignment: AlignmentDirectional.center,
-  //           children: [
-  //             Text(
-  //               leaveCount,
-  //               style: TextStyle(
-  //                   color: Color.fromARGB(141, 0, 0, 0),
-  //                   fontSize: height * 0.022),
-  //             ),
-  //             CircularProgressIndicator(
-  //               value: 1.0,
-  //               strokeWidth: 3.0,
-  //               color: AppColor.mainThemeColor,
-  //             ),
-  //           ],
-  //         ),
-  //         SizedBox(
-  //           height: height * 0.01,
-  //         ),
-  //         Text(
-  //           leave,
-  //           style: TextStyle(color: AppColor.mainTextColor2),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   SizedBox leaveWidget(
       double height, double width, String leave, String leaveCount) {

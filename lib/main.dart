@@ -1,3 +1,4 @@
+import 'package:hrms/presentation/odoo/all_project.dart';
 import 'package:hrms/presentation/screens/punch_in_out_screen.dart';
 import 'package:hrms/presentation/screens/splash_screen.dart';
 import 'core/api/api.dart';
@@ -7,6 +8,8 @@ import 'package:provider/provider.dart';
 import 'presentation/authentication/otp_screen.dart';
 import 'presentation/authentication/login_screen.dart';
 import 'presentation/authentication/create_new_pass.dart';
+import 'presentation/odoo/create_task.dart';
+import 'presentation/odoo/view_task.dart';
 import 'presentation/screens/onboarding_screen.dart';
 import 'presentation/screens/apply_leave.dart';
 import 'presentation/screens/bottom_navigation.dart';
@@ -44,7 +47,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       darkTheme: ThemeData(brightness: Brightness.dark),
       debugShowCheckedModeBanner: false,
-      initialRoute: "/applyLeave",
+      initialRoute: "/allProject",
       routes: {
         "/SplashScreen": (context) => SplashScreen(),
         "/OnBoarding": (context) => OnboardingScreen(),
@@ -59,7 +62,10 @@ class MyApp extends StatelessWidget {
         "/leaveSecondScreen": (context) => LeaveScreenManager(''),
         "/holidayList": (context) => HolidayList(),
         "/notificationScreen": (context) => NotificationScreen(),
-        "/punchinout": (context) => PunchInOutScreen()
+        "/punchinout": (context) => PunchInOutScreen(),
+        "/allProject": (context) => AllProject(),
+        "/createTask": (context) => CreateTask(),
+        "/viewTask": (context) => ViewTask(),
       },
     );
   }

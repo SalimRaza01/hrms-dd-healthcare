@@ -399,3 +399,31 @@ class DocumentListModel {
     };
   }
 }
+
+class OdooUserModel {
+  final int id;
+  final String name;
+  final String email;
+
+  OdooUserModel({
+    required this.id,
+    required this.name,
+    required this.email,
+  });
+
+  factory OdooUserModel.fromJson(Map<String, dynamic> json) {
+    return OdooUserModel(
+      id: json['id'],
+      name: json['name'],
+      email: json['email'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+    };
+  }
+}

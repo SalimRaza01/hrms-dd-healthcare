@@ -94,29 +94,25 @@ class AuthProvider with ChangeNotifier {
         await _authBox.put('gender', gender);
         await _authBox.put('role', role);
 
-     
-
         print('successfull');
-         ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Login Successfully'),
-        backgroundColor: Colors.green,
-      ),
-    );
-       Navigator.push(context,
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login Successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.push(context,
             MaterialPageRoute(builder: (context) => BottomNavigation()));
-      } else {
-
-      }
+      } else {}
     } on DioException catch (e) {
       print(e);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Invalid user credential'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Invalid user credential'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }
 
@@ -360,10 +356,7 @@ Future<List<EmployeeProfile>> fetchTeamList() async {
 }
 
 Future<void> sendPasswordOTP(
-  BuildContext context,
-  String email,
-  String screen
-) async {
+    BuildContext context, String email, String screen) async {
   final response = await dio.post(sentOTP, data: {
     "email": email,
   });
@@ -375,13 +368,12 @@ Future<void> sendPasswordOTP(
         backgroundColor: Colors.green,
       ),
     );
-    if(screen == 'LOGIN'){
- Future.delayed(Duration(seconds: 1), () {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => OTPScren(email)));
-    });
+    if (screen == 'LOGIN') {
+      Future.delayed(Duration(seconds: 1), () {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => OTPScren(email)));
+      });
     }
-   
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -473,21 +465,68 @@ Future<void> createNewPass(
   }
 }
 
-
-
 Future<List<DocumentListModel>> fetchDocumentList(String documentType) async {
-
   String empID = _authBox.get('employeeId');
 
-    final response = await dio.get(
-      documentType == 'Public' ? documentList : '$documentList/$empID',
-    );
+  final response = await dio.get(
+    documentType == 'Public' ? documentList : '$documentList/$empID',
+  );
+
+  if (response.statusCode == 200) {
+    final List<dynamic> data = response.data['data'];
+    return data.map((item) => DocumentListModel.fromJson(item)).toList();
+  } else {
+    throw Exception('Failed to load Holiday data');
+  }
+}
+
+Future<List<OdooUserModel>> fetchOddoUsers(String documentType) async {
+  final response = await dio.get(getodooUsers);
+
+  if (response.statusCode == 200) {
+    print(response.data['users']);
+    final List<dynamic> data = response.data['users'];
+    return data.map((item) => OdooUserModel.fromJson(item)).toList();
+  } else {
+    throw Exception('Failed to load OdooUsers data');
+  }
+}
+
+Future<void> createProject(
+  BuildContext context,
+  String projectNameController,
+  String projectDescriptionController,
+  List<int> userIDs,
+) async {
+  print(userIDs);
+  try {
+    final response = await dio.post(postOdooProject, data: {
+      "name": projectNameController,
+      "user_ids": userIDs,
+      "description": projectDescriptionController,
+    });
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = response.data['data'];
-      return data.map((item) => DocumentListModel.fromJson(item)).toList();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Project Created Successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
     } else {
-      throw Exception('Failed to load Holiday data');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Something Went Wrong'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-  
+  } on DioException {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Something Went Wrong'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
 }
