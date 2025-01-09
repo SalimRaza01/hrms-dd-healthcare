@@ -1,22 +1,28 @@
 import 'package:flutter/services.dart';
+import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hrms/presentation/odoo/create_project.dart';
+import 'package:hrms/presentation/odoo/view_projects.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-class AllProject extends StatefulWidget {
-  const AllProject({super.key});
+class OdooDashboard extends StatefulWidget {
+  const OdooDashboard({super.key});
   @override
-  State<AllProject> createState() => _AllProjectState();
+  State<OdooDashboard> createState() => _OdooDashboardState();
 }
 
-class _AllProjectState extends State<AllProject> {
+class _OdooDashboardState extends State<OdooDashboard> {
+  late Future<List<OdooProjectList>> _projectsFuture;
   String _selectedText = 'All Task';
   Color? activeColor;
   Color? activeText;
+
   @override
   void initState() {
     super.initState();
+    _projectsFuture = fetchOdooProjects();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -41,7 +47,7 @@ class _AllProjectState extends State<AllProject> {
             ),
           ),
           title: Text(
-            'PROJECT',
+            'DASHBOARD',
             style: TextStyle(color: Colors.white),
           ),
           centerTitle: true,
@@ -65,17 +71,47 @@ class _AllProjectState extends State<AllProject> {
                 SizedBox(
                   height: height * 0.02,
                 ),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      projectCard(height, width, 'Project 01', 'AGVA PRO',
-                          'Created : 06 Jan 2025'),
-                      projectCard(height, width, 'Project 02', 'INSUL',
-                          'Created : 02 Jan 2025'),
-                      projectCard(height, width, 'Project 03', 'ATP',
-                          'Created : 03 Jan 2025'),
-                    ],
+                SizedBox(
+                  height: height * 0.2,
+                  child: FutureBuilder<List<OdooProjectList>>(
+                    future: _projectsFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else if (snapshot.hasData &&
+                          snapshot.data!.isNotEmpty) {
+                        List<OdooProjectList> items = snapshot.data!;
+                                    
+                        return ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            OdooProjectList item = items[index];
+                                    
+                            String formattedDate = item.date_start == "False"
+                                ? "No start date"
+                                : item.date_start;
+                                    
+                            return  InkWell(
+                              onTap: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (context)=> ViewProjects(projectName: item.name, projectID: item.id)));
+                              },
+                              child: projectCard(
+                                height, width, index <= 8 ? 'Project : 0${index + 1}' :'Project : ${index + 1}' , item.name, formattedDate),
+                            ); 
+                          },
+                          separatorBuilder: (BuildContext context, int index) {
+                            return SizedBox(
+                              height: height * 0.01,
+                            );
+                          },
+                        );
+                      } else {
+                        return Center(child: Text('No projects found.'));
+                      }
+                    },
                   ),
                 ),
                 SizedBox(
@@ -133,7 +169,7 @@ class _AllProjectState extends State<AllProject> {
                               children: [
                                 Icon(
                                   Icons.circle_outlined,
-                                     color: Colors.red,
+                                  color: Colors.red,
                                 ),
                                 SizedBox(
                                   width: width * 0.02,
@@ -182,19 +218,20 @@ class _AllProjectState extends State<AllProject> {
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.red, 
-                          borderRadius: BorderRadius.only(topRight: Radius.circular(10), bottomLeft: Radius.circular(10))
-
-                        ),
+                            color: Colors.red,
+                            borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(10),
+                                bottomLeft: Radius.circular(10))),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 5.0, horizontal: 30.0),
                           child: Text(
-                                'High',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: height * 0.015,
-                                    fontWeight: FontWeight.w400),
-                              ),
+                            'High',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: height * 0.015,
+                                fontWeight: FontWeight.w400),
+                          ),
                         ),
                       )
                     ],

@@ -370,8 +370,6 @@ class DocumentList {
   }
 }
 
-
-
 class DocumentListModel {
   final String documentName;
   final String docType;
@@ -424,6 +422,80 @@ class OdooUserModel {
       'id': id,
       'name': name,
       'email': email,
+    };
+  }
+}
+
+class OdooProjectList {
+  final int id;
+  final String name;
+  final String date_start;
+
+  OdooProjectList({
+    required this.id,
+    required this.name,
+    required this.date_start,
+  });
+
+  factory OdooProjectList.fromJson(Map<String, dynamic> json) {
+    return OdooProjectList(
+        id: json['id'], name: json['name'], date_start: json['date_start']);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'date_start': date_start,
+    };
+  }
+}
+
+
+class OdooTaskList {
+  final int id;
+  final String name;
+  final int project_id;
+  final String project_name;
+  final String stage_name;
+  final String start_date;
+  final String deadline_date;
+  final String description;
+
+  OdooTaskList({
+    required this.id,
+    required this.name,
+    required this.project_id,
+    required this.project_name,
+    required this.stage_name,
+    required this.start_date,
+    required this.deadline_date,
+    required this.description,
+  });
+
+  factory OdooTaskList.fromJson(Map<String, dynamic> json) {
+    return OdooTaskList(
+      id: json['id'],
+      name: json['name'],
+      project_id: json['project_id'],
+      project_name: json['project_name'],
+      stage_name: json['stage_name'],
+      start_date: json['start_date'],
+      deadline_date: json['deadline_date'],
+      description: json['description'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'project_id': project_id,
+      'project_name': project_name,
+      'stage_name': stage_name,
+      'start_date': start_date,
+      'deadline_date': deadline_date,
+      'description': description,
     };
   }
 }

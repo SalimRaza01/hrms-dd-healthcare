@@ -530,3 +530,25 @@ Future<void> createProject(
     );
   }
 }
+
+Future<List<OdooProjectList>> fetchOdooProjects() async {
+  String email = _authBox.get('email');
+  final response = await dio.get(getOdooProject);
+
+  if (response.statusCode == 200) {
+    print(response.data['projects']);
+
+    final List<dynamic> projects = response.data['projects'];
+
+    final List<dynamic> data = projects.where((project) {
+      var assignedEmails = project['assignes_emails'];
+
+      return assignedEmails is List && assignedEmails.contains(email);
+    }).toList();
+
+    return data.map((item) => OdooProjectList.fromJson(item)).toList();
+  } else {
+    throw Exception('Failed to load OdooProjects data');
+  }
+}
+
