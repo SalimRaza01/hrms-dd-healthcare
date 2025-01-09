@@ -48,7 +48,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
           ),
           title: Text(
             'DASHBOARD',
-            style: TextStyle(color: Colors.white),
+    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w400, fontSize: height * 0.02),
           ),
           centerTitle: true,
         ),

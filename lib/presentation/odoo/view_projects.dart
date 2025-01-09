@@ -88,7 +88,7 @@ class _ViewProjectsState extends State<ViewProjects> {
         ),
         title: Text(
           widget.projectName,
-          style: TextStyle(color: Colors.white),
+    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w400, fontSize: height * 0.02),
         ),
         centerTitle: true,
       ),
@@ -170,12 +170,12 @@ class _ViewProjectsState extends State<ViewProjects> {
                                             children: [
                                               Icon(
                                                 Icons.circle_outlined,
-                                                color: Colors.red,
+                                     color: AppColor.mainThemeColor,
                                                 size: height * 0.018,
                                               ),
                                               SizedBox(width: width * 0.02),
                                               SizedBox(
-                                                width: width / 2,
+                                                width: width / 1.5,
                                                 child: Text(
                                                   overflow:
                                                       TextOverflow.ellipsis,
@@ -183,7 +183,7 @@ class _ViewProjectsState extends State<ViewProjects> {
                                                   style: TextStyle(
                                                     color:
                                                         AppColor.mainTextColor,
-                                                    fontSize: height * 0.018,
+                                                         fontSize: height * 0.016,
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
@@ -270,7 +270,7 @@ class _ViewProjectsState extends State<ViewProjects> {
         backgroundColor: AppColor.mainThemeColor,
         onPressed: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CreateTask()),
+          MaterialPageRoute(builder: (context) => CreateTask(projectID:  widget.projectID)),
         ),
         label: Text(
           'Create Task',

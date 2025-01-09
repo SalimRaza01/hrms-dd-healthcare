@@ -77,7 +77,7 @@ class _TaskDetailsState extends State<TaskDetails> {
         ),
         title: Text(
           'Task Details',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w400, fontSize: height * 0.02),
         ),
         centerTitle: true,
         elevation: 0,
@@ -101,27 +101,26 @@ class _TaskDetailsState extends State<TaskDetails> {
                     elevation: 5,
                     margin: EdgeInsets.all(0),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     shadowColor: Colors.black.withOpacity(0.1),
                     child: Padding(
-                      padding: const EdgeInsets.all(15.0),
+                      padding: const EdgeInsets.all(10.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
                               Icon(Icons.circle_outlined,
-                                  color: Colors.red, size: height * 0.022),
+                                  color: AppColor.mainThemeColor, size: height * 0.022),
                               SizedBox(width: width * 0.02),
                               SizedBox(
-                                width: width / 2,
+                                width: width / 1.5,
                                 child: Text(
-                                  overflow: TextOverflow.ellipsis,
-                                  task['name'],
+                                  task['name'].toString().toUpperCase(),
                                   style: TextStyle(
                                     color: AppColor.mainTextColor,
-                                    fontSize: height * 0.018,
+                                    fontSize: height * 0.016,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -135,10 +134,10 @@ class _TaskDetailsState extends State<TaskDetails> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(5),
                                   color: priority == 'High'
-                                      ? Colors.red
+                                      ? const Color.fromARGB(150, 255, 17, 0)
                                       : priority == 'Medium'
-                                          ? Colors.amber
-                                          : Colors.green,
+                                          ? const Color.fromARGB(150, 255, 193, 7)
+                                          : const Color.fromARGB(150, 76, 175, 79),
                                 ),
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(
@@ -156,7 +155,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(5),
-                                  color: Colors.amber,
+                                  color: const Color.fromARGB(143, 255, 191, 0),
                                 ),
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(
@@ -164,7 +163,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                   child: Text(
                                     task['stage_name'],
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: AppColor.mainTextColor,
                                       fontSize: height * 0.015,
                                     ),
                                   ),
@@ -174,7 +173,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(5),
-                                  color: Colors.red,
+                                  color:  const Color.fromARGB(143, 255, 17, 0)
                                 ),
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(
@@ -203,7 +202,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                               filled: true,
                               fillColor: AppColor.mainBGColor,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
+                                borderRadius: BorderRadius.circular(10),
                                 borderSide: BorderSide.none,
                               ),
                               contentPadding: EdgeInsets.all(15),
@@ -214,7 +213,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                             'Assignee :',
                             style: TextStyle(
                               color: AppColor.mainTextColor,
-                              fontSize: height * 0.018,
+                              fontSize: height * 0.016,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -225,7 +224,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                             'Add a Note:',
                             style: TextStyle(
                               color: AppColor.mainTextColor,
-                              fontSize: height * 0.018,
+                              fontSize: height * 0.016,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -254,14 +253,7 @@ class _TaskDetailsState extends State<TaskDetails> {
               user ?? 'Unknown User',
               style: TextStyle(color: Colors.white),
             ),
-            avatar: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Text(
-                user[0].toUpperCase(),
-                style: TextStyle(color: AppColor.mainThemeColor, fontSize: 10),
-              ),
-            ),
-            deleteIcon: Icon(Icons.cancel, color: Colors.white),
+           
           );
         }).toList(),
       ),
@@ -281,7 +273,7 @@ class _TaskDetailsState extends State<TaskDetails> {
         filled: true,
         fillColor: AppColor.mainBGColor,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
         ),
         contentPadding: EdgeInsets.all(15),

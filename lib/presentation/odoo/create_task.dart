@@ -9,13 +9,15 @@ import 'package:hrms/core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 
 class CreateTask extends StatefulWidget {
-  const CreateTask();
+  final int projectID;
+  const CreateTask({required this.projectID});
 
   @override
   State<CreateTask> createState() => _CreateTaskState();
 }
 
 class _CreateTaskState extends State<CreateTask> {
+  late int projectID;
   TextEditingController taskNameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController assigneeEmailController = TextEditingController();
@@ -36,7 +38,25 @@ class _CreateTaskState extends State<CreateTask> {
     ]);
   }
 
-  dateTimePickerWidget(BuildContext context) {
+  startDate(BuildContext context) {
+    return DatePicker.showDatePicker(
+      context,
+      dateFormat: 'dd MMMM yyyy HH:mm',
+      initialDateTime: DateTime.now(),
+      minDateTime: DateTime(2000),
+      maxDateTime: DateTime(3000),
+      onMonthChangeStartWithFirstDate: true,
+      onConfirm: (dateTime, List<int> index) {
+        DateTime selectdate = dateTime;
+        final formattedDate =
+            DateFormat('dd-MMM-yyyy - HH:mm').format(selectdate);
+        print(formattedDate);
+      },
+    );
+    
+  }
+
+    endDate(BuildContext context) {
     return DatePicker.showDatePicker(
       context,
       dateFormat: 'dd MMMM yyyy HH:mm',
@@ -294,7 +314,11 @@ class _CreateTaskState extends State<CreateTask> {
   Widget _buildDateSelection(String text) {
     return GestureDetector(
       onTap: () {
-        dateTimePickerWidget(context);
+       if(text.contains('Start')){
+ startDate(context);
+       } else {
+         endDate(context);
+       }
       },
       child: Card(
         color: Colors.white,
@@ -325,10 +349,10 @@ class _CreateTaskState extends State<CreateTask> {
             selectedUsers.isNotEmpty &&
             startDateController.text.isNotEmpty &&
             endDateController.text.isNotEmpty) {
-          List<int> assigneeIDs = selectedUsers.map((e) => e.id).toList();
+          List<String> assigneeEmails = selectedUsers.map((e) => e.email).toList();
 
-          await createProject(context, taskNameController.text,
-              descriptionController.text, assigneeIDs);
+          await createTask(context, taskNameController.text,
+              widget.projectID, descriptionController.text, _selectedText, startDateController.text, endDateController.text,  assigneeEmails);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

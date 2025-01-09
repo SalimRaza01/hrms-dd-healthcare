@@ -552,3 +552,50 @@ Future<List<OdooProjectList>> fetchOdooProjects() async {
   }
 }
 
+Future<void> createTask(
+  BuildContext context,
+  String taskName,
+  int projectID,
+  String taskDescription,
+  String taskPriority,
+  String taskStartDate,
+  String taskEndDate,
+  List<String> userEmails,
+) async {
+  String email = _authBox.get('email');
+  try {
+    final response = await dio.post(postOdooProject, data: {
+      "name": taskName,
+      "project_id": projectID,
+      "assignees_emails": userEmails,
+      "priority": taskPriority,
+      "start_date": taskStartDate,
+      "date_deadline": taskEndDate,
+      "description": taskDescription,
+      "ownerEmail": email,
+    });
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Task Created Successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Something Went Wrong'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } on DioException {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Something Went Wrong'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}

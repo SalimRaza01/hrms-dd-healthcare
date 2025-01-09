@@ -8,6 +8,7 @@ import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_stack/flutter_image_stack.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hrms/presentation/odoo/odoo_dashboard.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
@@ -102,7 +103,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                 empName != null ? empName! : '',
                 style: TextStyle(
-                    fontSize: height * 0.02,
+                    fontSize: height * 0.018,
                     color: AppColor.mainTextColor,
                     fontWeight: FontWeight.w500),
               ),
@@ -218,6 +219,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             return Text('No data Found');
                           }
                         }),
+                    SizedBox(
+                      height: height * 0.015,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=> OdooDashboard()));
+                      },
+                      child: Container(
+                          width: width,
+                          decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.centerRight,
+                                colors: [
+                                  AppColor.primaryThemeColor,
+                                  AppColor.mainThemeColor,
+                                ],
+                              ),
+                              border: Border.all(
+                                  color: const Color.fromARGB(14, 0, 0, 0)),
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle_outline_outlined,
+                                      color: Colors.white,
+                                      size: height * 0.022,
+                                    ),
+                                    SizedBox(
+                                      width: width * 0.02,
+                                    ),
+                                    Text(
+                                      'View Task Dashbaord',
+                                      style: TextStyle(
+                                          fontSize: height * 0.018,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  ],
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios_outlined,
+                                  color: Colors.white,
+                                  size: height * 0.022,
+                                ),
+                              ],
+                            ),
+                          )),
+                    ),
                     SizedBox(
                       height: height * 0.015,
                     ),
@@ -677,81 +733,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     //         SizedBox(
                     //           height: height * 0.01,
                     //         ),
-                    //         Container(
-                    //           decoration: BoxDecoration(
-                    //               border: Border.all(
-                    //                   color: const Color.fromARGB(14, 0, 0, 0)),
-                    //               color: AppColor.mainBGColor,
-                    //               borderRadius: BorderRadius.circular(10)),
-                    //           child: Padding(
-                    //             padding: const EdgeInsets.symmetric(
-                    //                 horizontal: 10, vertical: 12),
-                    //             child: Column(
-                    //               crossAxisAlignment: CrossAxisAlignment.start,
-                    //               children: [
-                    //                 Row(
-                    //                   children: [
-                    //                     Icon(
-                    //                       Icons.circle_outlined,
-                    //                       color: AppColor.primaryThemeColor,
-                    //                       size: height * 0.022,
-                    //                     ),
-                    //                     SizedBox(
-                    //                       width: 5,
-                    //                     ),
-                    //                     Text(
-                    //                       'Complete HRMS UI',
-                    //                       style: TextStyle(
-                    //                           fontSize: height * 0.018,
-                    //                           color: AppColor.mainTextColor,
-                    //                           fontWeight: FontWeight.w500),
-                    //                     ),
-                    //                   ],
-                    //                 ),
-                    //                 SizedBox(
-                    //                   height: height * 0.015,
-                    //                 ),
-                    //                 Row(
-                    //                   crossAxisAlignment:
-                    //                       CrossAxisAlignment.start,
-                    //                   children: [
-                    //                     TaskWidgets(
-                    //                       height: height,
-                    //                       icon: Icons.timelapse_rounded,
-                    //                       text: 'In Progress',
-                    //                       color: const Color.fromARGB(
-                    //                           86, 158, 158, 158),
-                    //                       textcolor: const Color.fromARGB(
-                    //                           158, 0, 0, 0),
-                    //                     ),
-                    //                     SizedBox(
-                    //                       width: 10,
-                    //                     ),
-                    //                     TaskWidgets(
-                    //                       height: height,
-                    //                       icon: Icons.flag,
-                    //                       text: 'High',
-                    //                       color: const Color.fromARGB(
-                    //                           201, 229, 27, 27),
-                    //                       textcolor: const Color.fromARGB(
-                    //                           255, 255, 255, 255),
-                    //                     ),
-                    //                     SizedBox(
-                    //                       width: 10,
-                    //                     ),
-                    //                     TaskWidgets(
-                    //                       height: height,
-                    //                       icon: Icons.calendar_month,
-                    //                       text: '5 Dec',
-                    //                       color: const Color.fromARGB(
-                    //                           201, 229, 27, 27),
-                    //                       textcolor: const Color.fromARGB(
-                    //                           255, 255, 255, 255),
-                    //                     )
-                    //                   ],
-                    //                 ),
-                    //               ],
+                    // Container(
+                    //   decoration: BoxDecoration(
+                    //       border: Border.all(
+                    //           color: const Color.fromARGB(14, 0, 0, 0)),
+                    //       color: AppColor.mainBGColor,
+                    //       borderRadius: BorderRadius.circular(10)),
+                    //   child: Padding(
+                    //     padding: const EdgeInsets.symmetric(
+                    //         horizontal: 10, vertical: 12),
+                    //     child: Column(
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         Row(
+                    //           children: [
+                    //             Icon(
+                    // Icons.circle_outlined,
+                    // color: AppColor.primaryThemeColor,
+                    // size: height * 0.022,
                     //             ),
+                    //             SizedBox(
+                    //               width: 5,
+                    //             ),
+                    //             Text(
+                    //               'Complete HRMS UI',
+                    //               style: TextStyle(
+                    //                   fontSize: height * 0.018,
+                    //                   color: AppColor.mainTextColor,
+                    //                   fontWeight: FontWeight.w500),
+                    //             ),
+                    //           ],
+                    //         ),
+                    //         SizedBox(
+                    //           height: height * 0.015,
+                    //         ),
+                    //         Row(
+                    //           crossAxisAlignment:
+                    //               CrossAxisAlignment.start,
+                    //           children: [
+                    //             TaskWidgets(
+                    //               height: height,
+                    //               icon: Icons.timelapse_rounded,
+                    //               text: 'In Progress',
+                    //               color: const Color.fromARGB(
+                    //                   86, 158, 158, 158),
+                    //               textcolor: const Color.fromARGB(
+                    //                   158, 0, 0, 0),
+                    //             ),
+                    //             SizedBox(
+                    //               width: 10,
+                    //             ),
+                    //             TaskWidgets(
+                    //               height: height,
+                    //               icon: Icons.flag,
+                    //               text: 'High',
+                    //               color: const Color.fromARGB(
+                    //                   201, 229, 27, 27),
+                    //               textcolor: const Color.fromARGB(
+                    //                   255, 255, 255, 255),
+                    //             ),
+                    //             SizedBox(
+                    //               width: 10,
+                    //             ),
+                    //             TaskWidgets(
+                    //               height: height,
+                    //               icon: Icons.calendar_month,
+                    //               text: '5 Dec',
+                    //               color: const Color.fromARGB(
+                    //                   201, 229, 27, 27),
+                    //               textcolor: const Color.fromARGB(
+                    //                   255, 255, 255, 255),
+                    //             )
+                    //           ],
+                    //         ),
+                    //       ],
+                    //     ),
                     //           ),
                     //         ),
                     //       ],

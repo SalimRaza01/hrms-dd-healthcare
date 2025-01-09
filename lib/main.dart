@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       darkTheme: ThemeData(brightness: Brightness.dark),
       debugShowCheckedModeBanner: false,
-      initialRoute: "/odooDashbaord",
+      initialRoute: "/SplashScreen",
       routes: {
         "/SplashScreen": (context) => SplashScreen(),
         "/OnBoarding": (context) => OnboardingScreen(),
@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
         "/notificationScreen": (context) => NotificationScreen(),
         "/punchinout": (context) => PunchInOutScreen(),
         "/odooDashbaord": (context) => OdooDashboard(),
-        "/createTask": (context) => CreateTask(),
+        "/createTask": (context) => CreateTask(projectID: 0,),
         "/taskDetails": (context) => TaskDetails(taskID: 0,),
                 "/viewProject": (context) => ViewProjects(projectName: '', projectID: 0,),
       },
