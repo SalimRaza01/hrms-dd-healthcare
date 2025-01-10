@@ -20,7 +20,11 @@ Future<List<Attendance>> fetchAttendence(String empID, int count) async {
 
   try {
     final response = await dio.get('$getAttendenceData/$empID',
-        queryParameters: {"dateFrom": dateFrom, "dateTo": dateTo, "page": count});
+        queryParameters: {
+          "dateFrom": dateFrom,
+          "dateTo": dateTo,
+          "page": count
+        });
 
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data['data'];
@@ -56,8 +60,8 @@ Future<ShiftTimeModel> fetchShiftTime(String empID) async {
     if (response.statusCode == 200) {
       String mgrId = response.data['data']['managerId'];
       await _authBox.put('managerId', mgrId);
-      await _authBox.put(
-          'lateby', response.data['data']['shiftTime']['startAt'].replaceAll(' ',''));
+      await _authBox.put('lateby',
+          response.data['data']['shiftTime']['startAt'].replaceAll(' ', ''));
       await _authBox.put(
           'earlyby', response.data['data']['shiftTime']['endAt']);
       return ShiftTimeModel.fromJson(response.data['data']['shiftTime']);

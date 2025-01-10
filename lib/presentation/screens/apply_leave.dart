@@ -194,6 +194,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         Leave('Casual Leave', casualLeave!),
         Leave('Medical Leave', medicalLeave!),
         Leave('Earned Leave', earnedLeave!),
+        Leave('Short-Leave', '1'),
         Leave('Maternity Leave', maternityLeave!),
         Leave('Paternity Leave', paternityLeave!),
       ];
@@ -490,7 +491,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   child: Text(
                                     "Upload Prescription",
                                     style: TextStyle(
-                                        color: AppColor.mainFGColor, fontSize: 15),
+                                        color: AppColor.mainFGColor,
+                                        fontSize: 15),
                                   ),
                                 ),
                               ),
@@ -501,7 +503,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             InkWell(
                               onTap: () async {
                                 checkConditions();
-                              
                               },
                               child: Container(
                                 width: width / 2,
@@ -699,7 +700,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 child: Text(
                                                   'SELECT',
                                                   style: TextStyle(
-                                                      color: AppColor.mainFGColor,
+                                                      color:
+                                                          AppColor.mainFGColor,
                                                       fontSize: height * 0.016),
                                                 ),
                                               ),
@@ -886,7 +888,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 child: Text(
                                                   'SELECT',
                                                   style: TextStyle(
-                                                      color: AppColor.mainFGColor,
+                                                      color:
+                                                          AppColor.mainFGColor,
                                                       fontSize: height * 0.016),
                                                 ),
                                               ),
@@ -1031,7 +1034,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 child: Text(
                                                   'SELECT',
                                                   style: TextStyle(
-                                                      color: AppColor.mainFGColor,
+                                                      color:
+                                                          AppColor.mainFGColor,
                                                       fontSize: height * 0.016),
                                                 ),
                                               ),
@@ -1163,7 +1167,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 child: Text(
                                                   'SELECT',
                                                   style: TextStyle(
-                                                      color: AppColor.mainFGColor,
+                                                      color:
+                                                          AppColor.mainFGColor,
                                                       fontSize: height * 0.016),
                                                 ),
                                               ),
