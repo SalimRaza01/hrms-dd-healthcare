@@ -11,7 +11,9 @@ class PunchRecordScreen extends StatefulWidget {
   final int lateMinutes;
 
   PunchRecordScreen(
-      {required this.punchRecords, required this.regularizationDate, required this.lateMinutes});
+      {required this.punchRecords,
+      required this.regularizationDate,
+      required this.lateMinutes});
 
   @override
   State<PunchRecordScreen> createState() => _PunchRecordScreenState();
@@ -27,7 +29,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
     super.initState();
     date = DateTime.parse(widget.regularizationDate!);
     checkEmployeeId();
-     SystemChrome.setPreferredOrientations([
+    SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
@@ -56,7 +58,11 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'Apply Regularization',
+          widget.lateMinutes > 15 &&
+                  date != DateTime.now() &&
+                  date!.isAfter(DateTime.now().subtract(Duration(days: 8)))
+              ? 'Apply Regularization'
+              : 'Records',
           style: TextStyle(
             fontSize: height * 0.02,
             fontWeight: FontWeight.w500,
@@ -71,11 +77,13 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Visibility(
-              visible: widget.lateMinutes > 15 && date != DateTime.now( ) && date!.isAfter(DateTime.now().subtract(Duration(days:7))),
+              visible: widget.lateMinutes > 15 &&
+                  date != DateTime.now() &&
+                  date!.isAfter(DateTime.now().subtract(Duration(days: 8))),
               child: Column(
                 children: [
                   Card(
-                    color: Colors.white,
+                    color: AppColor.mainFGColor,
                     elevation: 4,
                     margin: EdgeInsets.all(0),
                     shape: RoundedRectangleBorder(
@@ -99,66 +107,68 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                             ),
                             decoration: InputDecoration(
                               filled: false,
-                              floatingLabelBehavior: FloatingLabelBehavior.always,
-                              enabledBorder:
-                                  OutlineInputBorder(borderSide: BorderSide.none),
-                              border: OutlineInputBorder(borderSide: BorderSide.none),
-                              focusedBorder:
-                                  OutlineInputBorder(borderSide: BorderSide.none),
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.always,
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide.none),
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide.none),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide.none),
                               label: Text('Describe Reason'),
                             ),
                           )),
                     ),
                   ),
-                   SizedBox(height: height * 0.03),
-              Center(
-                child: Text(
-                  'Regularization Limit - $maxRegularization',
-                  style: TextStyle(
-                    fontSize: height * 0.015,
-                    fontWeight: FontWeight.w400,
-                    color: AppColor.mainTextColor,
-                  ),
-                ),
-              ),
-              SizedBox(height: height * 0.01),
-              InkWell(
-                onTap: () async {
-                  if (reasonController.text.isNotEmpty) {
-                    print('sign in button');
-                    await applyRegularize(context, widget.regularizationDate!,
-                        reasonController.text);
-                  } else {
-                    // setState(() {
-                    //   showError = true;
-                    // });
-                  }
-                },
-                child: Center(
-                  child: Container(
-                    width: width / 2,
-                    decoration: BoxDecoration(
-                      color: AppColor.mainThemeColor,
-                      borderRadius: BorderRadius.circular(20),
+                  SizedBox(height: height * 0.03),
+                  Center(
+                    child: Text(
+                      'Regularization Limit - $maxRegularization',
+                      style: TextStyle(
+                        fontSize: height * 0.015,
+                        fontWeight: FontWeight.w400,
+                        color: AppColor.mainTextColor,
+                      ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                      child: Center(
-                        child: Text(
-                          'SUBMIT',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.w500),
+                  ),
+                  SizedBox(height: height * 0.01),
+                  InkWell(
+                    onTap: () async {
+                      if (reasonController.text.isNotEmpty) {
+                        print('sign in button');
+                        await applyRegularize(context,
+                            widget.regularizationDate!, reasonController.text);
+                      } else {
+                        // setState(() {
+                        //   showError = true;
+                        // });
+                      }
+                    },
+                    child: Center(
+                      child: Container(
+                        width: width / 2,
+                        decoration: BoxDecoration(
+                          color: AppColor.mainThemeColor,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          child: Center(
+                            child: Text(
+                              'SUBMIT',
+                              style: TextStyle(
+                                  color: AppColor.mainFGColor,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
                 ],
               ),
             ),
-           
             SizedBox(height: height * 0.03),
             Text(
               'Punch Records',
@@ -182,7 +192,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                       punchOut.substring(0, min(5, punchOut.length));
 
                   return Card(
-                    color: Colors.white,
+                    color: AppColor.mainFGColor,
                     elevation: 4,
                     margin: EdgeInsets.all(0),
                     shape: RoundedRectangleBorder(

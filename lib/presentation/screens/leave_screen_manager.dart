@@ -106,8 +106,8 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                     TabBar(
                         dividerColor: Colors.transparent,
                         controller: _tabController,
-                        indicatorColor: Colors.white,
-                        labelColor: Colors.white,
+                        indicatorColor: AppColor.mainFGColor,
+                        labelColor: AppColor.mainFGColor,
                         unselectedLabelColor:
                             const Color.fromARGB(206, 255, 255, 255),
                         tabs: [
@@ -149,9 +149,9 @@ class _LeaveScreenState extends State<LeaveScreenManager>
               backgroundColor: Colors.transparent,
               builder: (context) => ApplyLeave(),
             ),
-            label: const Text(
+            label:  Text(
               'Apply Leave',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: AppColor.mainFGColor),
             ),
           )),
     );
@@ -162,7 +162,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
       child: Column(
         children: [
           Card(
-            color: Colors.white,
+            color: AppColor.mainFGColor,
             elevation: 4,
             margin: EdgeInsets.all(0),
             shape: RoundedRectangleBorder(
@@ -234,7 +234,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
             height: height * 0.02,
           ),
           Card(
-            color: Colors.white,
+            color: AppColor.mainFGColor,
             elevation: 4,
             margin: EdgeInsets.all(0),
             shape: RoundedRectangleBorder(
@@ -264,7 +264,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                   } else if (snapshot.hasError) {
                     return Center(
                       child: Card(
-                        color: Colors.white,
+                        color: AppColor.mainFGColor,
                         elevation: 4,
                         margin: EdgeInsets.all(0),
                         shape: RoundedRectangleBorder(
@@ -290,7 +290,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                         final endDate = DateTime.parse(leave.leaveEndDate);
 
                         return Card(
-                          color: Colors.white,
+                          color: AppColor.mainFGColor,
                           elevation: 4,
                           margin: EdgeInsets.all(0),
                           shape: RoundedRectangleBorder(
@@ -414,7 +414,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                   } else if (snapshot.hasError) {
                     return Center(
                       child: Card(
-                        color: Colors.white,
+                        color: AppColor.mainFGColor,
                         elevation: 4,
                         margin: EdgeInsets.all(0),
                         shape: RoundedRectangleBorder(
@@ -440,7 +440,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                         final endDate = DateTime.parse(leave.leaveEndDate);
 
                         return Card(
-                          color: Colors.white,
+                          color: AppColor.mainFGColor,
                           elevation: 4,
                           margin: EdgeInsets.all(0),
                           shape: RoundedRectangleBorder(
@@ -731,7 +731,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
 
     if (_selectedText == text) {
       activeColor = AppColor.mainThemeColor;
-      activeText = Colors.white;
+      activeText = AppColor.mainFGColor;
     } else {
       activeColor = Colors.transparent;
       activeText = const Color.fromARGB(141, 0, 0, 0);
@@ -775,7 +775,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
           itemBuilder: (context, index) {
             return Container(
               height: height * 0.15,
-              color: Colors.white,
+              color: AppColor.mainFGColor,
               width: width * 0.2,
               margin: EdgeInsets.symmetric(horizontal: 5),
             );
@@ -797,7 +797,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
           itemBuilder: (context, index) {
             return Container(
               height: height * 0.15,
-              color: Colors.white,
+              color: AppColor.mainFGColor,
               width: width * 0.9,
               margin: EdgeInsets.symmetric(vertical: 5),
             );

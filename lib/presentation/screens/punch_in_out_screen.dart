@@ -215,7 +215,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
       body: _isLoading
           ? Center(
               child: LoadingAnimationWidget.inkDrop(
-                color: Colors.white,
+                color: AppColor.mainFGColor,
                 size: height * 0.04,
               ),
             )
@@ -253,7 +253,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                         padding:
                             EdgeInsets.symmetric(vertical: 20, horizontal: 50),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColor.mainFGColor,
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(30),
                             topRight: Radius.circular(30),
@@ -393,7 +393,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                               : 'Retake Selfie',
                                           style: TextStyle(
                                               fontSize: height * 0.012,
-                                              color: Colors.white),
+                                              color: AppColor.mainFGColor),
                                         ),
                                       ),
                                     ),
@@ -426,7 +426,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                           _isPunchIn ? 'Punch Out' : 'Punch In',
                                           style: TextStyle(
                                               fontSize: height * 0.015,
-                                              color: Colors.white),
+                                              color: AppColor.mainFGColor),
                                         ),
                                       ),
                                     ),
@@ -454,7 +454,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: AppColor.mainFGColor,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(

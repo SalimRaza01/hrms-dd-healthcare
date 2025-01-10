@@ -35,12 +35,12 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
           },
           child: Icon(
             Icons.arrow_back_ios,
-            color: Colors.white,
+            color: AppColor.mainFGColor,
           ),
         ),
         title: Text(
           'DOCUMENTS',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: AppColor.mainFGColor),
         ),
         centerTitle: true,
       ),
@@ -56,7 +56,7 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
                   Navigator.push(context, MaterialPageRoute(builder: (context)=> ViewDocument(documentType: 'Private')));
                 },
                 child: Card(
-                  color: Colors.white,
+                  color: AppColor.mainFGColor,
                   elevation: 4,
                   margin: EdgeInsets.all(0),
                   shape: RoundedRectangleBorder(
@@ -112,7 +112,7 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
                   Navigator.push(context, MaterialPageRoute(builder: (context)=> ViewDocument(documentType: 'Public')));
                 },
                 child: Card(
-                  color: Colors.white,
+                  color: AppColor.mainFGColor,
                   elevation: 4,
                   margin: EdgeInsets.all(0),
                   shape: RoundedRectangleBorder(

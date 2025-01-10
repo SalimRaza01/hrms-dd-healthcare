@@ -4,11 +4,20 @@ import 'package:flutter/material.dart';
 class LeavePolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColor.mainFGColor,
       appBar: AppBar(
-              backgroundColor: Colors.white,
-        title: Text("Leave Policy Instructions"),
+        backgroundColor: AppColor.mainFGColor,
+        title: Text(
+          "Leave Policy Instructions",
+          style: TextStyle(
+            fontSize: height * 0.02,
+            fontWeight: FontWeight.w500,
+            color: AppColor.mainTextColor,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -16,7 +25,8 @@ class LeavePolicyScreen extends StatelessWidget {
           children: [
             _buildSectionTitle('Casual & Comp-Off Leave:'),
             _buildBulletPoint(
-                'Casual Leave and Comp Off can only be applied for future days within the current month.'),
+                'Casual Leave future days within the current month.'),
+            _buildBulletPoint('Comp-Off will be added to earned leave'),
             _buildBulletPoint(
                 'If you are applying for leave on the same day (today), it must be submitted before 9 AM. The leave request will apply for both the 1st half and the 2nd half of the day.'),
             SizedBox(height: 20),

@@ -64,7 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColor.mainFGColor,
           leading: Padding(
             padding: const EdgeInsets.only(left: 15),
             child: CircleAvatar(
@@ -129,7 +129,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             return _shimmerEffectshiftTime(height, width);
                           } else if (snapshot.hasError) {
                             return Card(
-                              color: Colors.white,
+                              color: AppColor.mainFGColor,
                               elevation: 4,
                               margin: EdgeInsets.all(0),
                               shape: RoundedRectangleBorder(
@@ -145,7 +145,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             final shift = snapshot.data!;
 
                             return Card(
-                                color: Colors.white,
+                                color: AppColor.mainFGColor,
                                 elevation: 4,
                                 margin: EdgeInsets.all(0),
                                 shape: RoundedRectangleBorder(
@@ -234,7 +234,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   children: [
                                     Icon(
                                       Icons.check_circle_outline_outlined,
-                                      color: Colors.white,
+                                      color: AppColor.mainFGColor,
                                       size: height * 0.022,
                                     ),
                                     SizedBox(
@@ -244,14 +244,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       'View Task Dashbaord',
                                       style: TextStyle(
                                           fontSize: height * 0.015,
-                                          color: Colors.white,
+                                          color: AppColor.mainFGColor,
                                           fontWeight: FontWeight.w400),
                                     ),
                                   ],
                                 ),
                                 Icon(
                                   Icons.arrow_forward_ios_outlined,
-                                  color: Colors.white,
+                                  color: AppColor.mainFGColor,
                                   size: height * 0.018,
                                 ),
                               ],
@@ -262,7 +262,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       height: height * 0.015,
                     ),
                     Card(
-                      color: Colors.white,
+                      color: AppColor.mainFGColor,
                       elevation: 4,
                       margin: EdgeInsets.all(0),
                       shape: RoundedRectangleBorder(
@@ -296,7 +296,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     SizedBox(
                       width: width,
                       child: Card(
-                        color: Colors.white,
+                        color: AppColor.mainFGColor,
                         elevation: 4,
                         margin: EdgeInsets.all(0),
                         shape: RoundedRectangleBorder(
@@ -396,7 +396,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     SizedBox(
                       width: width,
                       child: Card(
-                        color: Colors.white,
+                        color: AppColor.mainFGColor,
                         elevation: 4,
                         margin: EdgeInsets.all(0),
                         shape: RoundedRectangleBorder(
@@ -481,7 +481,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       height: height * 0.015,
                     ),
                     Card(
-                      color: Colors.white,
+                      color: AppColor.mainFGColor,
                       elevation: 4,
                       margin: EdgeInsets.all(0),
                       shape: RoundedRectangleBorder(
@@ -571,7 +571,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                         fontSize: height * 0.02,
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        color: Colors.white,
+                                                        color: AppColor.mainFGColor,
                                                       ),
                                                     ),
                                                     Text(
@@ -583,7 +583,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                               height * 0.014,
                                                           fontWeight:
                                                               FontWeight.bold,
-                                                          color: Colors.white),
+                                                          color: AppColor.mainFGColor),
                                                     ),
                                                   ],
                                                 ),
@@ -654,7 +654,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       height: height * 0.015,
                     ),
                     Card(
-                      color: Colors.white,
+                      color: AppColor.mainFGColor,
                       elevation: 4,
                       margin: EdgeInsets.all(0),
                       shape: RoundedRectangleBorder(
@@ -724,7 +724,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                     // Card(
-                    //   color: Colors.white,
+                    //   color: AppColor.mainFGColor,
                     //   elevation: 4,
                     //   margin: EdgeInsets.all(0),
                     //   shape: RoundedRectangleBorder(
@@ -841,7 +841,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       height: height * 0.015,
                     ),
                     Card(
-                      color: Colors.white,
+                      color: AppColor.mainFGColor,
                       elevation: 4,
                       margin: EdgeInsets.all(0),
                       shape: RoundedRectangleBorder(
@@ -903,7 +903,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           itemBuilder: (context, index) {
             return Container(
               height: height * 0.15,
-              color: Colors.white,
+              color: AppColor.mainFGColor,
               width: width * 0.2,
               margin: EdgeInsets.symmetric(horizontal: 5),
             );
@@ -920,7 +920,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         baseColor: Colors.grey.shade300,
         highlightColor: Colors.grey.shade100,
         child: Container(
-          color: Colors.white,
+          color: AppColor.mainFGColor,
           width: width,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

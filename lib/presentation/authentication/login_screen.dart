@@ -53,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: height * 0.5,
                 width: width,
                 decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColor.mainFGColor,
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(30),
                         topRight: Radius.circular(30))),
@@ -223,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: Text(
                                 'Sign In',
                                 style: TextStyle(
-                                    color: Colors.white,
+                                    color: AppColor.mainFGColor,
                                     fontWeight: FontWeight.w500),
                               ),
                             ),

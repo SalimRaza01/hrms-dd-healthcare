@@ -83,12 +83,12 @@ class _ViewProjectsState extends State<ViewProjects> {
           },
           child: Icon(
             Icons.arrow_back_ios,
-            color: Colors.white,
+            color: AppColor.mainFGColor,
           ),
         ),
         title: Text(
           widget.projectName,
-    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w400, fontSize: height * 0.02),
+    style: TextStyle(color: AppColor.mainFGColor, fontWeight: FontWeight.w400, fontSize: height * 0.02),
         ),
         centerTitle: true,
       ),
@@ -102,7 +102,7 @@ class _ViewProjectsState extends State<ViewProjects> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Card(
-                color: Colors.white,
+                color: AppColor.mainFGColor,
                 elevation: 4,
                 margin: EdgeInsets.all(0),
                 shape: RoundedRectangleBorder(
@@ -150,7 +150,7 @@ class _ViewProjectsState extends State<ViewProjects> {
                                 );
                               },
                               child: Card(
-                                color: Colors.white,
+                                color: AppColor.mainFGColor,
                                 elevation: 4,
                                 margin: EdgeInsets.all(0),
                                 shape: RoundedRectangleBorder(
@@ -247,7 +247,7 @@ class _ViewProjectsState extends State<ViewProjects> {
                                         child: Text(
                                           priority,
                                           style: TextStyle(
-                                            color: Colors.white,
+                                            color: AppColor.mainFGColor,
                                             fontSize: height * 0.015,
                                             fontWeight: FontWeight.w400,
                                           ),
@@ -274,7 +274,7 @@ class _ViewProjectsState extends State<ViewProjects> {
         ),
         label: Text(
           'Create Task',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: AppColor.mainFGColor),
         ),
       ),
     );
@@ -286,7 +286,7 @@ class _ViewProjectsState extends State<ViewProjects> {
 
     if (_selectedText == text) {
       activeColor = AppColor.mainThemeColor;
-      activeText = Colors.white;
+      activeText = AppColor.mainFGColor;
     } else {
       activeColor = Colors.transparent;
       activeText = const Color.fromARGB(141, 0, 0, 0);

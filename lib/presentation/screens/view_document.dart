@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:dio/dio.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 // import 'package:path_provider/path_provider.dart';
 import '../../core/model/models.dart';
@@ -28,26 +29,36 @@ class _ViewDocumentState extends State<ViewDocument> {
   }
 
   Future<void> _downloadDocument(String url, String filename) async {
+    // Request storage permissions
+    final status = await Permission.manageExternalStorage.request();
+    if (!status.isGranted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Storage permission is required to download the document'),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+
     setState(() {
       isDownloading = true;
     });
 
-    if (isDownloading) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Downloading Document'),
-            backgroundColor: Colors.blue),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Downloading Document'),
+        backgroundColor: Colors.blue,
+      ),
+    );
 
     try {
       final dio = Dio();
-      final response = await dio.get(url,
-          options: Options(responseType: ResponseType.bytes));
+      final response = await dio.get(
+        url,
+        options: Options(responseType: ResponseType.bytes),
+      );
 
-      // final directory = await getExternalStorageDirectory();
       final myDownloads = '/storage/emulated/0/Download';
-      final filePath = '${myDownloads}/$filename' + '.pdf';
+      final filePath = '$myDownloads/$filename.pdf';
       final file = File(filePath);
       await file.writeAsBytes(response.data);
 
@@ -56,8 +67,9 @@ class _ViewDocumentState extends State<ViewDocument> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Downloaded to $filePath'),
-          backgroundColor: Colors.green));
+        content: Text('Downloaded to $filePath'),
+        backgroundColor: Colors.green,
+      ));
     } catch (e) {
       setState(() {
         isDownloading = false;
@@ -65,10 +77,12 @@ class _ViewDocumentState extends State<ViewDocument> {
 
       print('Download error: $e');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Failed to download the document'),
-          backgroundColor: Colors.red));
+        content: Text('Failed to download the document'),
+        backgroundColor: Colors.red,
+      ));
     }
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -85,12 +99,12 @@ class _ViewDocumentState extends State<ViewDocument> {
           },
           child: Icon(
             Icons.arrow_back_ios,
-            color: Colors.white,
+            color: AppColor.mainFGColor,
           ),
         ),
         title: Text(
           'View Documents',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: AppColor.mainFGColor),
         ),
         centerTitle: true,
       ),
@@ -122,7 +136,7 @@ class _ViewDocumentState extends State<ViewDocument> {
                           DocumentListModel item = items[index];
 
                           return Card(
-                            color: Colors.white,
+                            color: AppColor.mainFGColor,
                             elevation: 4,
                             margin: EdgeInsets.all(0),
                             shape: RoundedRectangleBorder(

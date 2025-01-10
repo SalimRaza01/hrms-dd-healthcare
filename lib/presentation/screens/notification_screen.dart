@@ -32,12 +32,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
       },
       child: Icon(
         Icons.arrow_back_ios,
-        color: Colors.white,
+        color: AppColor.mainFGColor,
       ),
     ),
     title: Text(
       'Notification',
-      style: TextStyle(color: Colors.white),
+      style: TextStyle(color: AppColor.mainFGColor),
     ),
     centerTitle: true,
           ),
@@ -49,7 +49,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       child: Column(
         children: [
           Card(
-            color: Colors.white,
+            color: AppColor.mainFGColor,
             elevation: 4,
             margin: EdgeInsets.all(0),
             shape: RoundedRectangleBorder(
@@ -94,7 +94,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             ),
           ),
           SizedBox(height: height * 0.01,),Card(
-            color: Colors.white,
+            color: AppColor.mainFGColor,
             elevation: 4,
             margin: EdgeInsets.all(0),
             shape: RoundedRectangleBorder(

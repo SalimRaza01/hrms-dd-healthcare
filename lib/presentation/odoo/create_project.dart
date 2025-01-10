@@ -57,7 +57,7 @@ class _CreateProjectState extends State<CreateProject> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 child: Container(
-                  color: Colors.white,
+                  color: AppColor.mainFGColor,
                   height: height * 0.06,
                   child: TextField(
                     controller: projectNameController,
@@ -86,7 +86,7 @@ class _CreateProjectState extends State<CreateProject> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 child: Container(
-                    color: Colors.white,
+                    color: AppColor.mainFGColor,
                     height: height * 0.1,
                     width: width,
                     child: TextFormField(
@@ -121,12 +121,12 @@ class _CreateProjectState extends State<CreateProject> {
                       ),
                     )),
               ),
-
+        _buildSelectedUsers(),
               // Assignee Email Search
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 child: Container(
-                  color: Colors.white,
+                  color: AppColor.mainFGColor,
                   height: height * 0.06,
                   child: TextField(
                     controller: assigneeEmailController,
@@ -162,7 +162,7 @@ class _CreateProjectState extends State<CreateProject> {
                 ),
               ),
 
-            
+          
                 Visibility(
                   visible: assigneeEmailController.text.isNotEmpty,
                   child: SizedBox(
@@ -189,7 +189,7 @@ class _CreateProjectState extends State<CreateProject> {
                               OdooUserModel item = filteredUsers[index];
                   
                               return Card(
-                                color: Colors.white,
+                                color: AppColor.mainFGColor,
                                 elevation: 4,
                                 margin: EdgeInsets.all(0),
                                 shape: RoundedRectangleBorder(
@@ -296,7 +296,7 @@ class _CreateProjectState extends State<CreateProject> {
                         child: Text(
                           'SUBMIT',
                           style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.w500),
+                              color: AppColor.mainFGColor, fontWeight: FontWeight.w500),
                         ),
                       ),
                     ),
@@ -306,6 +306,38 @@ class _CreateProjectState extends State<CreateProject> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSelectedUsers() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: Wrap(
+        spacing: 8.0,
+        runSpacing: 4.0,
+        children: selectedUsers.map((user) {
+          return Chip(
+            backgroundColor: AppColor.mainThemeColor,
+            label: Text(
+              user.name,
+              style: TextStyle(color: AppColor.mainFGColor),
+            ),
+            avatar: CircleAvatar(
+              backgroundColor: AppColor.mainFGColor,
+              child: Text(
+                user.name[0],
+                style: TextStyle(color: AppColor.mainThemeColor, fontSize: 10),
+              ),
+            ),
+            deleteIcon: Icon(Icons.cancel, color: AppColor.mainFGColor),
+            onDeleted: () {
+              setState(() {
+                selectedUsers.remove(user);
+              });
+            },
+          );
+        }).toList(),
       ),
     );
   }

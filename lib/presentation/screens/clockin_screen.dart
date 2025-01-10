@@ -25,15 +25,26 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
   String? empDesign;
   String? empGender;
   late String empID;
+  int pageCount = 1;
 
   @override
   void initState() {
     super.initState();
-    attendenceLog = fetchAttendence(widget.empID);
+    empID = widget.empID;
+    attendenceLog = fetchAttendence(empID, pageCount);
+
+
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+  }
+
+
+  @override
+  void dispose() {
+  
+    super.dispose();
   }
 
   @override
@@ -90,7 +101,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                               'Let’s Clock-In!',
                               style: TextStyle(
                                   fontSize: height * 0.023,
-                                  color: Colors.white,
+                                  color: AppColor.mainFGColor,
                                   fontWeight: FontWeight.bold),
                             ),
                             SizedBox(
@@ -100,7 +111,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                               'Don’t miss your clock in schedule',
                               style: TextStyle(
                                 fontSize: height * 0.018,
-                                color: Colors.white,
+                                color: AppColor.mainFGColor,
                               ),
                             )
                           ],
@@ -186,8 +197,6 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                   lateMinutes = 0;
                                 }
 
-                               
-
                                 return InkWell(
                                     onTap: () {
                                       if (item.punchRecords.isNotEmpty) {
@@ -204,7 +213,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                   punchRecords:
                                                       item.punchRecords,
                                                   regularizationDate:
-                                                      regularizationDate, lateMinutes:lateMinutes),
+                                                      regularizationDate,
+                                                  lateMinutes: lateMinutes),
                                         );
                                       } else {
                                         ScaffoldMessenger.of(context)
@@ -216,7 +226,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                       }
                                     },
                                     child: Card(
-                                      color: Colors.white,
+                                      color: AppColor.mainFGColor,
                                       elevation: 4,
                                       margin: EdgeInsets.all(0),
                                       shape: RoundedRectangleBorder(
@@ -225,7 +235,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                       shadowColor:
                                           Colors.black.withOpacity(0.1),
                                       child: Stack(
-                                        alignment:AlignmentDirectional.bottomEnd,
+                                        alignment:
+                                            AlignmentDirectional.bottomEnd,
                                         children: [
                                           Padding(
                                             padding: const EdgeInsets.all(5),
@@ -314,43 +325,38 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                             .center,
                                                     children: [
                                                       Text(
-                                                        punchIn ==
-                                                                '00:00'
+                                                        punchIn == '00:00'
                                                             ? '--/--'
                                                             : '$punchIn',
                                                         style: TextStyle(
-                                                            fontSize: height *
-                                                                0.02,
-                                                            fontWeight: FontWeight
-                                                                .bold,
-                                                            color:
-                                                                AppColor.mainTextColor),
+                                                            fontSize:
+                                                                height * 0.02,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: AppColor
+                                                                .mainTextColor),
                                                       ),
                                                       SizedBox(
-                                                        height: height *
-                                                            0.005,
+                                                        height: height * 0.005,
                                                       ),
                                                       Text(
                                                         'Clock in',
                                                         style: TextStyle(
-                                                            fontSize: height *
-                                                                0.014,
-                                                            fontWeight: FontWeight
-                                                                .w500,
-                                                            color:
-                                                                AppColor.mainTextColor),
+                                                            fontSize:
+                                                                height * 0.014,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                            color: AppColor
+                                                                .mainTextColor),
                                                       ),
-                                                       SizedBox(
-                                                        height: height *
-                                                            0.005,
+                                                      SizedBox(
+                                                        height: height * 0.005,
                                                       ),
                                                     ],
                                                   ),
                                                   VerticalDivider(
-                                                    color: Colors
-                                                        .black,
-                                                    thickness:
-                                                        0.3,
+                                                    color: Colors.black,
+                                                    thickness: 0.3,
                                                   ),
                                                   Column(
                                                     mainAxisAlignment:
@@ -361,43 +367,38 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                             .center,
                                                     children: [
                                                       Text(
-                                                        punchIn ==
-                                                                '00:00'
+                                                        punchIn == '00:00'
                                                             ? '--/--'
                                                             : '$punchOut',
                                                         style: TextStyle(
-                                                            fontSize: height *
-                                                                0.02,
-                                                            fontWeight: FontWeight
-                                                                .bold,
-                                                            color:
-                                                                AppColor.mainTextColor),
+                                                            fontSize:
+                                                                height * 0.02,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: AppColor
+                                                                .mainTextColor),
                                                       ),
                                                       SizedBox(
-                                                        height: height *
-                                                            0.005,
+                                                        height: height * 0.005,
                                                       ),
                                                       Text(
                                                         'Clock out',
                                                         style: TextStyle(
-                                                            fontSize: height *
-                                                                0.014,
-                                                            fontWeight: FontWeight
-                                                                .w500,
-                                                            color:
-                                                                AppColor.mainTextColor),
+                                                            fontSize:
+                                                                height * 0.014,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                            color: AppColor
+                                                                .mainTextColor),
                                                       ),
-                                                       SizedBox(
-                                                        height: height *
-                                                            0.005,
+                                                      SizedBox(
+                                                        height: height * 0.005,
                                                       ),
                                                     ],
                                                   ),
                                                   VerticalDivider(
-                                                    color: Colors
-                                                        .black,
-                                                    thickness:
-                                                        0.3,
+                                                    color: Colors.black,
+                                                    thickness: 0.3,
                                                   ),
                                                   Column(
                                                     mainAxisAlignment:
@@ -409,11 +410,9 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                     children: [
                                                       Text(
                                                         formattedDuration,
-                                                        style:
-                                                            TextStyle(
+                                                        style: TextStyle(
                                                           fontSize:
-                                                              height *
-                                                                  0.02,
+                                                              height * 0.02,
                                                           fontWeight:
                                                               FontWeight.bold,
                                                           color: AppColor
@@ -421,26 +420,26 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                         ),
                                                       ),
                                                       SizedBox(
-                                                        height: height *
-                                                            0.005,
+                                                        height: height * 0.005,
                                                       ),
                                                       Text(
                                                         'Total Hrs',
                                                         style: TextStyle(
-                                                            fontSize: height *
-                                                                0.014,
-                                                            fontWeight: FontWeight
-                                                                .w500,
-                                                            color:
-                                                                AppColor.mainTextColor),
+                                                            fontSize:
+                                                                height * 0.014,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                            color: AppColor
+                                                                .mainTextColor),
                                                       ),
-                                                       SizedBox(
-                                                        height: height *
-                                                            0.005,
+                                                      SizedBox(
+                                                        height: height * 0.005,
                                                       ),
                                                     ],
                                                   ),
-                                                  SizedBox(height: height * 0.005,),
+                                                  SizedBox(
+                                                    height: height * 0.005,
+                                                  ),
                                                 ],
                                               ),
                                             ),
@@ -449,18 +448,30 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                             visible: lateMinutes != 0,
                                             child: Container(
                                               decoration: BoxDecoration(
-                                                color:lateMinutes > 15 ?  Colors.redAccent : Colors.green,
-                                                
-                                                borderRadius:BorderRadius.only(topLeft: Radius.circular(15),  bottomRight: Radius.circular(15))
-                                              ),
+                                                  color: lateMinutes > 15
+                                                      ? Colors.redAccent
+                                                      : Colors.green,
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  15),
+                                                          bottomRight:
+                                                              Radius.circular(
+                                                                  15))),
                                               child: Padding(
-                                                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 0,
+                                                        horizontal: 20),
                                                 child: Text(
                                                   'Late by : $lateMinutes mins',
                                                   style: TextStyle(
                                                       fontSize: height * 0.013,
-                                                      fontWeight: FontWeight.w400,
-                                                      color: Colors.white),
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      color:
+                                                          AppColor.mainFGColor),
                                                 ),
                                               ),
                                             ),
@@ -494,9 +505,9 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
               backgroundColor: Colors.transparent,
               builder: (context) => PunchInOutScreen(),
             ),
-            label: const Text(
+            label: Text(
               'Clock-In',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: AppColor.mainFGColor),
             ),
           )),
     );

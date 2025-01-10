@@ -47,6 +47,138 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   String? empID;
   List<Leave> leaveList = [];
 
+  void checkConditions() {
+    num? totalDays;
+
+    Leave selectedLeave = leaveList.firstWhere(
+      (leave) => leave.name == _selectedLeaveType,
+      orElse: () => Leave('Unknown', '0'),
+    );
+
+    if (_selectedLeaveType!.contains('Casual')) {
+      DateTime startDate = DateTime.parse(startDateController.text);
+      DateTime now = DateTime.now();
+
+      if (startDate.year != now.year || startDate.month != now.month) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('Casual leave can only be applied for the current month.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      if (_selectedText == 'Full Day') {
+        setState(() {
+          totalDays = 1;
+        });
+      } else if (_selectedText == '1st Half' || _selectedText == '2nd Half') {
+        setState(() {
+          totalDays = 0.5;
+        });
+      } else {
+        totalDays = 1;
+      }
+    } else {
+      totalDays = selectedendDate.difference(selectedStartDate).inDays;
+    }
+
+    if (selectedLeave.balanceInt < totalDays!) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Not enough leave balance for ${selectedLeave.name}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    DateTime startDate = DateTime.parse(startDateController.text);
+    DateTime now = DateTime.now();
+
+    if (startDate.day == now.day && now.hour >= 9) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Leave must be applied before 9 AM for today.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (startDate.isAtSameMomentAs(now)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('leave must be applied for a future date.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_selectedLeaveType!.contains('Casual')) {
+      DateTime startDate = DateTime.parse(startDateController.text);
+      DateTime now = DateTime.now();
+
+      if (startDate.isAtSameMomentAs(now)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('leave must be applied for a future date.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      if (startDate.day == now.day && now.hour >= 9) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('leave must be applied before 9 AM for today.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+
+    if (_selectedLeaveType!.contains('Medical')) {
+      DateTime startDate = DateTime.parse(startDateController.text);
+      DateTime endDate = DateTime.parse(endDateController.text);
+      int medicalLeaveDuration = endDate.difference(startDate).inDays + 1;
+      print(medicalLeaveDuration);
+
+      if (startDate.isAfter(DateTime.now())) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Medical leave can only be applied for past days.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      if (medicalLeaveDuration < 2 || medicalLeaveDuration > 6) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Medical leave must be between 2 to 6 days.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      if (_paths == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Please Upload Prescription First'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> getleaveBalance() async {
     var box = await Hive.openBox('authBox');
 
@@ -180,7 +312,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               visible: _selectedLeaveType == 'Casual Leave' ||
                                   _selectedLeaveType == 'Comp-off Leave',
                               child: Card(
-                                color: Colors.white,
+                                color: AppColor.mainFGColor,
                                 elevation: 4,
                                 margin: EdgeInsets.all(0),
                                 shape: RoundedRectangleBorder(
@@ -227,7 +359,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               height: height * 0.015,
                             ),
                             Card(
-                              color: Colors.white,
+                              color: AppColor.mainFGColor,
                               elevation: 4,
                               margin: EdgeInsets.all(0),
                               shape: RoundedRectangleBorder(
@@ -284,7 +416,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 int index) {
                                               final file = _paths![index];
                                               return Card(
-                                                color: Colors.white,
+                                                color: AppColor.mainFGColor,
                                                 elevation: 5,
                                                 margin: EdgeInsets.all(0),
                                                 shape: RoundedRectangleBorder(
@@ -358,7 +490,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   child: Text(
                                     "Upload Prescription",
                                     style: TextStyle(
-                                        color: Colors.white, fontSize: 15),
+                                        color: AppColor.mainFGColor, fontSize: 15),
                                   ),
                                 ),
                               ),
@@ -368,156 +500,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             ),
                             InkWell(
                               onTap: () async {
-                                num? totalDays;
-                                print(_selectedLeaveType!);
-
-                                Leave selectedLeave = leaveList.firstWhere(
-                                  (leave) => leave.name == _selectedLeaveType,
-                                  orElse: () => Leave('Unknown', '0'),
-                                );
-
-                                if (_selectedLeaveType!.contains('Casual')) {
-                                  DateTime startDate =
-                                      DateTime.parse(startDateController.text);
-                                  DateTime now = DateTime.now();
-
-                                  if (startDate.year != now.year ||
-                                      startDate.month != now.month) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'Casual leave can only be applied for the current month.'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                    return;
-                                  }
-
-                                  if (_selectedText == 'Full Day') {
-                                    setState(() {
-                                      totalDays = 1;
-                                    });
-                                  } else if (_selectedText == '1st Half' ||
-                                      _selectedText == '2nd Half') {
-                                    setState(() {
-                                      totalDays = 0.5;
-                                    });
-                                  } else {
-                                    totalDays = 1;
-                                  }
-                                } else {
-                                  totalDays = selectedendDate
-                                      .difference(selectedStartDate)
-                                      .inDays;
-                                }
-
-                                if (selectedLeave.balanceInt < totalDays!) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          'Not enough leave balance for ${selectedLeave.name}'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                DateTime startDate =
-                                    DateTime.parse(startDateController.text);
-                                DateTime now = DateTime.now();
-
-                                if (startDate.day == now.day && now.hour >= 9) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          'Leave must be applied before 9 AM for today.'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                if (startDate.isAtSameMomentAs(now)) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          'leave must be applied for a future date.'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                if (_selectedLeaveType!.contains('Casual')) {
-                                  DateTime startDate =
-                                      DateTime.parse(startDateController.text);
-                                  DateTime now = DateTime.now();
-
-                                  if (startDate.isAtSameMomentAs(now)) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'leave must be applied for a future date.'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                    return;
-                                  }
-
-                                  if (startDate.day == now.day &&
-                                      now.hour >= 9) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'leave must be applied before 9 AM for today.'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                    return;
-                                  }
-                                }
-
-                                if (_selectedLeaveType!.contains('Medical')) {
-                                  DateTime startDate =
-                                      DateTime.parse(startDateController.text);
-                                  DateTime endDate =
-                                      DateTime.parse(endDateController.text);
-                                  int medicalLeaveDuration =
-                                      endDate.difference(startDate).inDays + 1;
-                                      print(medicalLeaveDuration);
-
-                                  if (startDate.isAfter(DateTime.now())) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'Medical leave can only be applied for past days.'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                    return;
-                                  }
-
-                                  if (medicalLeaveDuration < 2 ||
-                                      medicalLeaveDuration > 6) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'Medical leave must be between 2 to 6 days.'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                    return;
-                                  }
-                                  if (_paths == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'Please Upload Prescription First'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
-                                }
+                                checkConditions();
+                              
                               },
                               child: Container(
                                 width: width / 2,
@@ -538,7 +522,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                     child: Text(
                                       'SUBMIT',
                                       style: TextStyle(
-                                          color: Colors.white,
+                                          color: AppColor.mainFGColor,
                                           fontWeight: FontWeight.w500),
                                     ),
                                   ),
@@ -571,7 +555,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
 
   Card endDateLeave(double height, double width, BuildContext context) {
     return Card(
-      color: Colors.white,
+      color: AppColor.mainFGColor,
       elevation: 4,
       margin: EdgeInsets.all(0),
       shape: RoundedRectangleBorder(
@@ -606,7 +590,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                 ),
                 onTap: () {
                   showModalBottomSheet(
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColor.mainFGColor,
                     context: context,
                     builder: (context) {
                       return Container(
@@ -715,7 +699,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 child: Text(
                                                   'SELECT',
                                                   style: TextStyle(
-                                                      color: Colors.white,
+                                                      color: AppColor.mainFGColor,
                                                       fontSize: height * 0.016),
                                                 ),
                                               ),
@@ -740,7 +724,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
 
   Card startDateLeave(double height, double width, BuildContext context) {
     return Card(
-      color: Colors.white,
+      color: AppColor.mainFGColor,
       elevation: 4,
       margin: EdgeInsets.all(0),
       shape: RoundedRectangleBorder(
@@ -783,7 +767,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                   }
 
                   showModalBottomSheet(
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColor.mainFGColor,
                     context: context,
                     builder: (context) {
                       return SizedBox(
@@ -902,7 +886,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 child: Text(
                                                   'SELECT',
                                                   style: TextStyle(
-                                                      color: Colors.white,
+                                                      color: AppColor.mainFGColor,
                                                       fontSize: height * 0.016),
                                                 ),
                                               ),
@@ -929,7 +913,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        color: AppColor.mainFGColor,
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
@@ -959,7 +943,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                 ),
                 onTap: () {
                   showModalBottomSheet(
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColor.mainFGColor,
                     context: context,
                     builder: (context) {
                       return Container(
@@ -1047,7 +1031,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 child: Text(
                                                   'SELECT',
                                                   style: TextStyle(
-                                                      color: Colors.white,
+                                                      color: AppColor.mainFGColor,
                                                       fontSize: height * 0.016),
                                                 ),
                                               ),
@@ -1091,7 +1075,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                 ),
                 onTap: () {
                   showModalBottomSheet(
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColor.mainFGColor,
                     context: context,
                     builder: (context) {
                       return Container(
@@ -1179,7 +1163,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 child: Text(
                                                   'SELECT',
                                                   style: TextStyle(
-                                                      color: Colors.white,
+                                                      color: AppColor.mainFGColor,
                                                       fontSize: height * 0.016),
                                                 ),
                                               ),
@@ -1208,7 +1192,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
 
     if (_selectedText == text) {
       activeColor = AppColor.mainThemeColor;
-      activeText = Colors.white;
+      activeText = AppColor.mainFGColor;
     } else {
       activeColor = Colors.transparent;
       activeText = Colors.black87;
@@ -1253,5 +1237,3 @@ class Leave {
 
   num get balanceInt => num.tryParse(balance) ?? 0;
 }
-
-

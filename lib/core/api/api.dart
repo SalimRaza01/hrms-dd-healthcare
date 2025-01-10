@@ -13,14 +13,14 @@ import '../../presentation/screens/bottom_navigation.dart';
 final Box _authBox = Hive.box('authBox');
 final Dio dio = Dio();
 
-Future<List<Attendance>> fetchAttendence(String empID) async {
+Future<List<Attendance>> fetchAttendence(String empID, int count) async {
   final dateTo = DateFormat('yyyy-MM-dd').format(DateTime.now());
   final dateFrom = DateFormat('yyyy-MM-dd')
       .format(DateTime.now().subtract(Duration(days: 365)));
 
   try {
     final response = await dio.get('$getAttendenceData/$empID',
-        queryParameters: {"dateFrom": dateFrom, "dateTo": dateTo, "page": 1});
+        queryParameters: {"dateFrom": dateFrom, "dateTo": dateTo, "page": count});
 
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data['data'];

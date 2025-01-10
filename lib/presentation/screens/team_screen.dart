@@ -83,7 +83,7 @@ class _TeamScreenState extends State<TeamScreen> {
                               'Team',
                               style: TextStyle(
                                   fontSize: height * 0.025,
-                                  color: Colors.white,
+                                  color: AppColor.mainFGColor,
                                   fontWeight: FontWeight.w500),
                             ),
                             SizedBox(
@@ -93,7 +93,7 @@ class _TeamScreenState extends State<TeamScreen> {
                               'Know Everything About Your Team',
                               style: TextStyle(
                                 fontSize: height * 0.018,
-                                color: Colors.white,
+                                color: AppColor.mainFGColor,
                               ),
                             )
                           ],
@@ -144,11 +144,11 @@ class _TeamScreenState extends State<TeamScreen> {
                         hintStyle: TextStyle(
                             color: Colors.black54, fontSize: height * 0.02),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide: BorderSide(color: AppColor.mainFGColor),
                           borderRadius: BorderRadius.circular(32.0),
                         ),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide: BorderSide(color: AppColor.mainFGColor),
                           borderRadius: BorderRadius.circular(32.0),
                         ),
                       ),
@@ -189,7 +189,7 @@ class _TeamScreenState extends State<TeamScreen> {
                                     });
                                   },
                                   child: Card(
-                                    color: Colors.white,
+                                    color: AppColor.mainFGColor,
                                     elevation: 5,
                                     margin: EdgeInsets.all(0),
                                     shape: RoundedRectangleBorder(
@@ -461,15 +461,15 @@ class _TeamScreenState extends State<TeamScreen> {
           children: [
             Text(
               leave,
-              style: TextStyle(color: Colors.white, fontSize: height * 0.013),
+              style: TextStyle(color: AppColor.mainFGColor, fontSize: height * 0.013),
             ),
             Text(
               '-',
-              style: TextStyle(color: Colors.white, fontSize: height * 0.013),
+              style: TextStyle(color: AppColor.mainFGColor, fontSize: height * 0.013),
             ),
             Text(
               leaveCount,
-              style: TextStyle(color: Colors.white, fontSize: height * 0.015),
+              style: TextStyle(color: AppColor.mainFGColor, fontSize: height * 0.015),
             ),
           ],
         ),

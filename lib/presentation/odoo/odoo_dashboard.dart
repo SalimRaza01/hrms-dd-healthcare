@@ -43,12 +43,12 @@ class _OdooDashboardState extends State<OdooDashboard> {
             },
             child: Icon(
               Icons.arrow_back_ios,
-              color: Colors.white,
+              color: AppColor.mainFGColor,
             ),
           ),
           title: Text(
             'DASHBOARD',
-    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w400, fontSize: height * 0.02),
+    style: TextStyle(color: AppColor.mainFGColor, fontWeight: FontWeight.w400, fontSize: height * 0.02),
           ),
           centerTitle: true,
         ),
@@ -128,7 +128,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
                   height: height * 0.02,
                 ),
                 Card(
-                  color: Colors.white,
+                  color: AppColor.mainFGColor,
                   elevation: 4,
                   margin: EdgeInsets.all(0),
                   shape: RoundedRectangleBorder(
@@ -150,7 +150,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
                   height: height * 0.02,
                 ),
                 Card(
-                  color: Colors.white,
+                  color: AppColor.mainFGColor,
                   elevation: 4,
                   margin: EdgeInsets.all(0),
                   shape: RoundedRectangleBorder(
@@ -228,7 +228,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
                           child: Text(
                             'High',
                             style: TextStyle(
-                                color: Colors.white,
+                                color: AppColor.mainFGColor,
                                 fontSize: height * 0.015,
                                 fontWeight: FontWeight.w400),
                           ),
@@ -252,7 +252,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
           ),
           label: Text(
             'Create Project',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: AppColor.mainFGColor),
           ),
         ));
   }
@@ -262,7 +262,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
     return Padding(
       padding: const EdgeInsets.only(right: 10),
       child: Card(
-        color: Colors.white,
+        color: AppColor.mainFGColor,
         elevation: 5,
         margin: EdgeInsets.all(0),
         shape: RoundedRectangleBorder(
@@ -303,7 +303,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
                       Text(
                         projectCount,
                         style: TextStyle(
-                            color: Colors.white,
+                            color: AppColor.mainFGColor,
                             fontSize: height * 0.02,
                             fontWeight: FontWeight.w400),
                       )
@@ -312,14 +312,14 @@ class _OdooDashboardState extends State<OdooDashboard> {
                   Text(
                     projectName,
                     style: TextStyle(
-                        color: Colors.white,
+                        color: AppColor.mainFGColor,
                         fontSize: height * 0.02,
                         fontWeight: FontWeight.bold),
                   ),
                   Text(
                     createDate,
                     style: TextStyle(
-                        color: Colors.white,
+                        color: AppColor.mainFGColor,
                         fontSize: height * 0.015,
                         fontWeight: FontWeight.w400),
                   )
@@ -338,7 +338,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
 
     if (_selectedText == text) {
       activeColor = AppColor.mainThemeColor;
-      activeText = Colors.white;
+      activeText = AppColor.mainFGColor;
     } else {
       activeColor = Colors.transparent;
       activeText = const Color.fromARGB(141, 0, 0, 0);

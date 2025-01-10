@@ -71,7 +71,7 @@ class _HolidayListState extends State<HolidayList> {
 
                       
                         return Card(
-                          color: Colors.white,
+                          color: AppColor.mainFGColor,
                           elevation: 4,
                           margin: EdgeInsets.all(0),
                           shape: RoundedRectangleBorder(
@@ -102,7 +102,7 @@ class _HolidayListState extends State<HolidayList> {
                                                         fontSize: height * 0.02,
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        color: Colors.white,
+                                                        color: AppColor.mainFGColor,
                                                       ),
                                                     ),
                                                     Text(
@@ -112,7 +112,7 @@ class _HolidayListState extends State<HolidayList> {
                                                               height * 0.014,
                                                           fontWeight:
                                                               FontWeight.bold,
-                                                          color: Colors.white),
+                                                          color: AppColor.mainFGColor),
                                                     ),
                                     ],
                                   ),

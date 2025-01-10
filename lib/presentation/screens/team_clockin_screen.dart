@@ -1,4 +1,7 @@
+// ignore_for_file: prefer_interpolation_to_compose_strings
+
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
@@ -15,22 +18,22 @@ class TeamClockinScreen extends StatefulWidget {
 }
 
 class _TeamClockinScreenState extends State<TeamClockinScreen> {
+  final Box _authBox = Hive.box('authBox');
   late Future<List<Attendance>> attendenceLog;
   late String empID;
   @override
   void initState() {
-     SystemChrome.setPreferredOrientations([
+    SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
     super.initState();
-    attendenceLog = fetchAttendence(widget.empID);
+    attendenceLog = fetchAttendence(widget.empID,1);
   }
 
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    final width = MediaQuery.of(context).size.width;
 
     return SafeArea(
         child: Scaffold(
@@ -74,11 +77,23 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
 
                     String attendDay = DateFormat('EEE').format(date);
 
-
                     String punchIn =
                         "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
                     String punchOut =
                         "${dateTime2.hour.toString().padLeft(2, '0')}:${dateTime2.minute.toString().padLeft(2, '0')}";
+
+                    DateTime scheduledTime = DateTime.parse(
+                        DateFormat('yyyy-MM-dd').format(dateTime) +
+                            ' 0${_authBox.get('lateby')}');
+
+                    Duration lateByDuration =
+                        dateTime.difference(scheduledTime);
+
+                    int lateMinutes = lateByDuration.inMinutes;
+
+                    if (lateMinutes < 0) {
+                      lateMinutes = 0;
+                    }
 
                     return InkWell(
                         onTap: () {
@@ -102,158 +117,201 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                           }
                         },
                         child: Card(
-                          color: Colors.white,
+                          color: AppColor.mainFGColor,
                           elevation: 4,
                           margin: EdgeInsets.all(0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
                           shadowColor: Colors.black.withOpacity(0.1),
-                          child: Padding(
-                            padding: const EdgeInsets.all(5),
-                            child: IntrinsicHeight(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Card(
-                                    color:
-                                        attendDay == 'Sun' || attendDay == 'Sat'
+                          child: Stack(
+                            alignment: AlignmentDirectional.bottomEnd,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: IntrinsicHeight(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Card(
+                                        color: attendDay == 'Sun' ||
+                                                attendDay == 'Sat'
                                             ? AppColor.mainBGColor
                                             : item.isHoliday != 0
                                                 ? Colors.amber
                                                 : AppColor.mainThemeColor,
-                                    elevation: 4,
-                                    margin: EdgeInsets.all(0),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    shadowColor: Colors.black.withOpacity(0.1),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 15, vertical: 8),
-                                      child: Column(
+                                        elevation: 4,
+                                        margin: EdgeInsets.all(0),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        shadowColor:
+                                            Colors.black.withOpacity(0.1),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 15, vertical: 8),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Text(
+                                                '$attendDate',
+                                                style: TextStyle(
+                                                  fontSize: height * 0.03,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: attendDay == 'Sun' ||
+                                                          attendDay == 'Sat'
+                                                      ? Colors.black87
+                                                      : AppColor.mainFGColor,
+                                                ),
+                                              ),
+                                              Text(
+                                                '$attendDay',
+                                                style: TextStyle(
+                                                  fontSize: height * 0.014,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: attendDay == 'Sun' ||
+                                                          attendDay == 'Sat'
+                                                      ? Colors.black87
+                                                      : AppColor.mainFGColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      Column(
                                         mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
                                           Text(
-                                            '$attendDate',
+                                            punchIn == '00:00'
+                                                ? '--/--'
+                                                : '$punchIn',
                                             style: TextStyle(
-                                              fontSize: height * 0.03,
-                                              fontWeight: FontWeight.bold,
-                                              color: attendDay == 'Sun' ||
-                                                      attendDay == 'Sat'
-                                                  ? Colors.black87
-                                                  : Colors.white,
-                                            ),
+                                                fontSize: height * 0.02,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColor.mainTextColor),
+                                          ),
+                                          SizedBox(
+                                            height: height * 0.005,
                                           ),
                                           Text(
-                                            '$attendDay',
+                                            'Clock in',
                                             style: TextStyle(
-                                              fontSize: height * 0.014,
-                                              fontWeight: FontWeight.bold,
-                                              color: attendDay == 'Sun' ||
-                                                      attendDay == 'Sat'
-                                                  ? Colors.black87
-                                                  : Colors.white,
-                                            ),
+                                                fontSize: height * 0.014,
+                                                fontWeight: FontWeight.w500,
+                                                color: AppColor.mainTextColor),
+                                          ),
+                                          SizedBox(
+                                            height: height * 0.005,
                                           ),
                                         ],
                                       ),
+                                      VerticalDivider(
+                                        color: Colors.black,
+                                        thickness: 0.3,
+                                      ),
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            punchIn == '00:00'
+                                                ? '--/--'
+                                                : '$punchOut',
+                                            style: TextStyle(
+                                                fontSize: height * 0.02,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColor.mainTextColor),
+                                          ),
+                                          SizedBox(
+                                            height: height * 0.005,
+                                          ),
+                                          Text(
+                                            'Clock out',
+                                            style: TextStyle(
+                                                fontSize: height * 0.014,
+                                                fontWeight: FontWeight.w500,
+                                                color: AppColor.mainTextColor),
+                                          ),
+                                          SizedBox(
+                                            height: height * 0.005,
+                                          ),
+                                        ],
+                                      ),
+                                      VerticalDivider(
+                                        color: Colors.black,
+                                        thickness: 0.3,
+                                      ),
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            formattedDuration,
+                                            style: TextStyle(
+                                              fontSize: height * 0.02,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColor.mainTextColor,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: height * 0.005,
+                                          ),
+                                          Text(
+                                            'Total Hrs',
+                                            style: TextStyle(
+                                                fontSize: height * 0.014,
+                                                fontWeight: FontWeight.w500,
+                                                color: AppColor.mainTextColor),
+                                          ),
+                                          SizedBox(
+                                            height: height * 0.005,
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: height * 0.005,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Visibility(
+                                visible: lateMinutes != 0,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: lateMinutes > 15
+                                          ? Colors.redAccent
+                                          : Colors.green,
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(15),
+                                          bottomRight: Radius.circular(15))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 0, horizontal: 20),
+                                    child: Text(
+                                      'Late by : $lateMinutes mins',
+                                      style: TextStyle(
+                                          fontSize: height * 0.013,
+                                          fontWeight: FontWeight.w400,
+                                          color: AppColor.mainFGColor),
                                     ),
                                   ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        punchIn == '00:00'
-                                            ? '--/--'
-                                            : '$punchIn',
-                                        style: TextStyle(
-                                            fontSize: height * 0.02,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColor.mainTextColor),
-                                      ),
-                                      SizedBox(
-                                        height: height * 0.005,
-                                      ),
-                                      Text(
-                                        'Clock in',
-                                        style: TextStyle(
-                                            fontSize: height * 0.014,
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColor.mainTextColor),
-                                      ),
-                                    ],
-                                  ),
-                                  VerticalDivider(
-                                    color: Colors.black,
-                                    thickness: 0.3,
-                                  ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        punchIn == '00:00'
-                                            ? '--/--'
-                                            : '$punchOut',
-                                        style: TextStyle(
-                                            fontSize: height * 0.02,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColor.mainTextColor),
-                                      ),
-                                      SizedBox(
-                                        height: height * 0.005,
-                                      ),
-                                      Text(
-                                        'Clock out',
-                                        style: TextStyle(
-                                            fontSize: height * 0.014,
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColor.mainTextColor),
-                                      ),
-                                    ],
-                                  ),
-                                  VerticalDivider(
-                                    color: Colors.black,
-                                    thickness: 0.3,
-                                  ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        formattedDuration,
-                                        style: TextStyle(
-                                          fontSize: height * 0.02,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColor.mainTextColor,
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: height * 0.005,
-                                      ),
-                                      Text(
-                                        'Total Hrs',
-                                        style: TextStyle(
-                                            fontSize: height * 0.014,
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColor.mainTextColor),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    width: width * 0.02,
-                                  )
-                                ],
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ));
                   },

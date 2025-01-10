@@ -48,9 +48,8 @@ class _CreateTaskState extends State<CreateTask> {
       onMonthChangeStartWithFirstDate: true,
       onConfirm: (dateTime, List<int> index) {
         DateTime selectdate = dateTime;
-        final formattedDate =
+        startDateController.text =
             DateFormat('dd-MMM-yyyy - HH:mm').format(selectdate);
-        print(formattedDate);
       },
     );
   }
@@ -65,9 +64,9 @@ class _CreateTaskState extends State<CreateTask> {
       onMonthChangeStartWithFirstDate: true,
       onConfirm: (dateTime, List<int> index) {
         DateTime selectdate = dateTime;
-        final formattedDate =
+           endDateController.text =
             DateFormat('dd-MMM-yyyy - HH:mm').format(selectdate);
-        print(formattedDate);
+
       },
     );
   }
@@ -87,12 +86,16 @@ class _CreateTaskState extends State<CreateTask> {
           },
           child: Icon(
             Icons.arrow_back_ios,
-            color: Colors.white,
+            color: AppColor.mainFGColor,
           ),
         ),
         title: Text(
           'CREATE TASK',
-          style: TextStyle(color: Colors.white),
+ style: TextStyle(
+            fontSize: height * 0.02,
+            fontWeight: FontWeight.w500,
+            color: AppColor.mainTextColor,
+          ),
         ),
         centerTitle: true,
       ),
@@ -106,8 +109,38 @@ class _CreateTaskState extends State<CreateTask> {
               _buildTextField('Description', descriptionController,
                   maxLines: 3),
               _buildSelectedUsers(),
-              _buildTextField(
-                  'Search Assignee by Email', assigneeEmailController),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: TextFormField(
+                  controller: assigneeEmailController,
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                  decoration: InputDecoration(
+                    labelText: 'Search Assignee by Email',
+                    labelStyle: TextStyle(color: Colors.black54),
+                    filled: true,
+                    fillColor: AppColor.mainFGColor,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  onChanged: (value) {
+                     setState(() {
+                        filteredUsers = value.isEmpty
+                            ? []
+                            : filteredUsers
+                                .where((user) => user.email
+                                    .toLowerCase()
+                                    .contains(value.toLowerCase()))
+                                .toList();
+                      });
+                  },
+                ),
+              ),
               Visibility(
                   visible: assigneeEmailController.text.isNotEmpty,
                   child: _buildAssigneeList(height)),
@@ -115,8 +148,8 @@ class _CreateTaskState extends State<CreateTask> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildDateSelection('Start Date'),
-                  _buildDateSelection('End Date'),
+                  _buildDateSelection(startDateController.text.isNotEmpty ? startDateController.text : 'Start Date'),
+                   _buildDateSelection(endDateController.text.isNotEmpty ? endDateController.text : 'End Date'),
                 ],
               ),
               SizedBox(height: height * 0.02),
@@ -140,7 +173,7 @@ class _CreateTaskState extends State<CreateTask> {
           labelText: label,
           labelStyle: TextStyle(color: Colors.black54),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: AppColor.mainFGColor,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -167,7 +200,7 @@ class _CreateTaskState extends State<CreateTask> {
 
   Widget _priorityButton(String label) {
     return Card(
-      color: Colors.white,
+      color: AppColor.mainFGColor,
       elevation: 4,
       margin: EdgeInsets.all(0),
       shape: RoundedRectangleBorder(
@@ -182,10 +215,10 @@ class _CreateTaskState extends State<CreateTask> {
         },
         style: ElevatedButton.styleFrom(
           foregroundColor: _selectedText == label
-              ? Colors.white
+              ? AppColor.mainFGColor
               : const Color.fromARGB(255, 128, 128, 128),
           backgroundColor:
-              _selectedText == label ? AppColor.mainThemeColor : Colors.white,
+              _selectedText == label ? AppColor.mainThemeColor : AppColor.mainFGColor,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
@@ -238,7 +271,7 @@ class _CreateTaskState extends State<CreateTask> {
                       OdooUserModel item = filteredUsers[index];
 
                       return Card(
-                        color: Colors.white,
+                        color: AppColor.mainFGColor,
                         elevation: 4,
                         margin: EdgeInsets.all(0),
                         shape: RoundedRectangleBorder(
@@ -320,7 +353,7 @@ class _CreateTaskState extends State<CreateTask> {
         }
       },
       child: Card(
-        color: Colors.white,
+        color: AppColor.mainFGColor,
         elevation: 4,
         margin: EdgeInsets.all(0),
         shape: RoundedRectangleBorder(
@@ -328,7 +361,7 @@ class _CreateTaskState extends State<CreateTask> {
         ),
         shadowColor: Colors.black.withOpacity(0.1),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 50),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           child: Center(
             child: Text(text,
                 style: TextStyle(
@@ -379,7 +412,7 @@ class _CreateTaskState extends State<CreateTask> {
         child: Center(
           child: Text('Create Task',
               style: TextStyle(
-                  color: Colors.white,
+                  color: AppColor.mainFGColor,
                   fontWeight: FontWeight.w500,
                   fontSize: 18)),
         ),
@@ -398,16 +431,16 @@ class _CreateTaskState extends State<CreateTask> {
             backgroundColor: AppColor.mainThemeColor,
             label: Text(
               user.name,
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: AppColor.mainFGColor),
             ),
             avatar: CircleAvatar(
-              backgroundColor: Colors.white,
+              backgroundColor: AppColor.mainFGColor,
               child: Text(
                 user.name[0],
                 style: TextStyle(color: AppColor.mainThemeColor, fontSize: 10),
               ),
             ),
-            deleteIcon: Icon(Icons.cancel, color: Colors.white),
+            deleteIcon: Icon(Icons.cancel, color: AppColor.mainFGColor),
             onDeleted: () {
               setState(() {
                 selectedUsers.remove(user);

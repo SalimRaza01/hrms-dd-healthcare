@@ -84,7 +84,7 @@ class _TeamProfileState extends State<TeamProfile> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppColor.mainFGColor,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -108,7 +108,7 @@ class _TeamProfileState extends State<TeamProfile> {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Card(
-                  color: Colors.white,
+                  color: AppColor.mainFGColor,
                   elevation: 4,
                   margin: EdgeInsets.all(0),
                   shape: RoundedRectangleBorder(

@@ -294,7 +294,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             style: TextStyle(
                               fontSize: height * 0.02,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppColor.mainFGColor,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -327,7 +327,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Card(
-                  color: Colors.white,
+                  color: AppColor.mainFGColor,
                   elevation: 4,
                   margin: EdgeInsets.all(0),
                   shape: RoundedRectangleBorder(
@@ -454,7 +454,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Card(
-                      color: Colors.white,
+                      color: AppColor.mainFGColor,
                       elevation: 4,
                       margin: EdgeInsets.all(0),
                       shape: RoundedRectangleBorder(
@@ -534,7 +534,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Card(
-                    color: Colors.white,
+                    color: AppColor.mainFGColor,
                     elevation: 4,
                     margin: EdgeInsets.all(0),
                     shape: RoundedRectangleBorder(

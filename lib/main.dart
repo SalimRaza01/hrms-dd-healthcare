@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       darkTheme: ThemeData(brightness: Brightness.dark),
       debugShowCheckedModeBanner: false,
-      initialRoute: "/BottomNavigation",
+      initialRoute: "/SplashScreen",
       routes: {
         "/SplashScreen": (context) => SplashScreen(),
         "/OnBoarding": (context) => OnboardingScreen(),

@@ -52,7 +52,7 @@ class _TeamPunchrecordsState extends State<TeamPunchrecords> {
                       punchOut.substring(0, min(5, punchOut.length));
 
                   return Card(
-                    color: Colors.white,
+                    color: AppColor.mainFGColor,
                     elevation: 4,
                     margin: EdgeInsets.all(0),
                     shape: RoundedRectangleBorder(

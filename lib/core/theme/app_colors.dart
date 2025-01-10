@@ -8,6 +8,8 @@ class AppColor {
   static Color primaryThemeColor = Color(0xFFA787FF);
   static Color bgColor = Color.fromARGB(255, 0, 41, 113);
   static Color mainBGColor = Color.fromARGB(255, 244, 249, 255);
+    static Color mainFGColor = Color.fromARGB(255, 255, 255, 255);
+
   
 
   static Color mainThemeColor = Color(0xFF795FFC);

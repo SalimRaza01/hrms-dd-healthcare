@@ -53,7 +53,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
           child: role == 'Manager'
               ? NavigationBar(
                   shadowColor: Colors.transparent,
-                  backgroundColor: Colors.white,
+                  backgroundColor: AppColor.mainFGColor,
                   onDestinationSelected: (int index) {
                     setState(() {
                       currentPageIndex = index;
@@ -121,7 +121,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                 )
               : NavigationBar(
                   shadowColor: Colors.transparent,
-                  backgroundColor: Colors.white,
+                  backgroundColor: AppColor.mainFGColor,
                   onDestinationSelected: (int index) {
                     setState(() {
                       currentPageIndex = index;

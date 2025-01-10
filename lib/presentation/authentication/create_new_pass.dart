@@ -78,7 +78,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                 height: height * 0.45,
                 width: width,
                 decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColor.mainFGColor,
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(30),
                         topRight: Radius.circular(30))),
@@ -214,7 +214,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                               child: Text(
                                 'SUBMIT',
                                 style: TextStyle(
-                                    color: Colors.white,
+                                    color: AppColor.mainFGColor,
                                     fontWeight: FontWeight.w500),
                               ),
                             ),
