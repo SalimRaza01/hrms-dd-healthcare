@@ -8,9 +8,10 @@ import 'package:hive_flutter/hive_flutter.dart';
 class PunchRecordScreen extends StatefulWidget {
   final String? punchRecords;
   final String? regularizationDate;
+  final int lateMinutes;
 
   PunchRecordScreen(
-      {required this.punchRecords, required this.regularizationDate});
+      {required this.punchRecords, required this.regularizationDate, required this.lateMinutes});
 
   @override
   State<PunchRecordScreen> createState() => _PunchRecordScreenState();
@@ -19,10 +20,12 @@ class PunchRecordScreen extends StatefulWidget {
 class _PunchRecordScreenState extends State<PunchRecordScreen> {
   TextEditingController reasonController = TextEditingController();
   String? maxRegularization;
+  DateTime? date;
 
   @override
   void initState() {
     super.initState();
+    date = DateTime.parse(widget.regularizationDate!);
     checkEmployeeId();
      SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -67,87 +70,95 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              color: Colors.white,
-              elevation: 4,
-              margin: EdgeInsets.all(0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              shadowColor: Colors.black.withOpacity(0.1),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                child: SizedBox(
-                    height: height * 0.12,
-                    width: width,
-                    child: TextFormField(
-                      textAlignVertical: TextAlignVertical.top,
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                      expands: true,
-                      controller: reasonController,
-                      style: TextStyle(
-                        overflow: TextOverflow.ellipsis,
-                        color: const Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      decoration: InputDecoration(
-                        filled: false,
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                        enabledBorder:
-                            OutlineInputBorder(borderSide: BorderSide.none),
-                        border: OutlineInputBorder(borderSide: BorderSide.none),
-                        focusedBorder:
-                            OutlineInputBorder(borderSide: BorderSide.none),
-                        label: Text('Describe Reason'),
-                      ),
-                    )),
-              ),
-            ),
-            SizedBox(height: height * 0.03),
-            Center(
-              child: Text(
-                'Regularization Limit - $maxRegularization',
-                style: TextStyle(
-                  fontSize: height * 0.015,
-                  fontWeight: FontWeight.w400,
-                  color: AppColor.mainTextColor,
+            Visibility(
+              visible: widget.lateMinutes > 15 && date != DateTime.now( ) && date!.isAfter(DateTime.now().subtract(Duration(days:7))),
+              child: Column(
+                children: [
+                  Card(
+                    color: Colors.white,
+                    elevation: 4,
+                    margin: EdgeInsets.all(0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    shadowColor: Colors.black.withOpacity(0.1),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: SizedBox(
+                          height: height * 0.12,
+                          width: width,
+                          child: TextFormField(
+                            textAlignVertical: TextAlignVertical.top,
+                            keyboardType: TextInputType.multiline,
+                            maxLines: null,
+                            expands: true,
+                            controller: reasonController,
+                            style: TextStyle(
+                              overflow: TextOverflow.ellipsis,
+                              color: const Color.fromARGB(255, 0, 0, 0),
+                            ),
+                            decoration: InputDecoration(
+                              filled: false,
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              enabledBorder:
+                                  OutlineInputBorder(borderSide: BorderSide.none),
+                              border: OutlineInputBorder(borderSide: BorderSide.none),
+                              focusedBorder:
+                                  OutlineInputBorder(borderSide: BorderSide.none),
+                              label: Text('Describe Reason'),
+                            ),
+                          )),
+                    ),
+                  ),
+                   SizedBox(height: height * 0.03),
+              Center(
+                child: Text(
+                  'Regularization Limit - $maxRegularization',
+                  style: TextStyle(
+                    fontSize: height * 0.015,
+                    fontWeight: FontWeight.w400,
+                    color: AppColor.mainTextColor,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: height * 0.01),
-            InkWell(
-              onTap: () async {
-                if (reasonController.text.isNotEmpty) {
-                  print('sign in button');
-                  await applyRegularize(context, widget.regularizationDate!,
-                      reasonController.text);
-                } else {
-                  // setState(() {
-                  //   showError = true;
-                  // });
-                }
-              },
-              child: Center(
-                child: Container(
-                  width: width / 2,
-                  decoration: BoxDecoration(
-                    color: AppColor.mainThemeColor,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
-                    child: Center(
-                      child: Text(
-                        'SUBMIT',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.w500),
+              SizedBox(height: height * 0.01),
+              InkWell(
+                onTap: () async {
+                  if (reasonController.text.isNotEmpty) {
+                    print('sign in button');
+                    await applyRegularize(context, widget.regularizationDate!,
+                        reasonController.text);
+                  } else {
+                    // setState(() {
+                    //   showError = true;
+                    // });
+                  }
+                },
+                child: Center(
+                  child: Container(
+                    width: width / 2,
+                    decoration: BoxDecoration(
+                      color: AppColor.mainThemeColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      child: Center(
+                        child: Text(
+                          'SUBMIT',
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.w500),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
+                ],
+              ),
             ),
+           
             SizedBox(height: height * 0.03),
             Text(
               'Punch Records',

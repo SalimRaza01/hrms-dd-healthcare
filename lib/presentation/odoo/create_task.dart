@@ -53,10 +53,9 @@ class _CreateTaskState extends State<CreateTask> {
         print(formattedDate);
       },
     );
-    
   }
 
-    endDate(BuildContext context) {
+  endDate(BuildContext context) {
     return DatePicker.showDatePicker(
       context,
       dateFormat: 'dd MMMM yyyy HH:mm',
@@ -314,11 +313,11 @@ class _CreateTaskState extends State<CreateTask> {
   Widget _buildDateSelection(String text) {
     return GestureDetector(
       onTap: () {
-       if(text.contains('Start')){
- startDate(context);
-       } else {
-         endDate(context);
-       }
+        if (text.contains('Start')) {
+          startDate(context);
+        } else {
+          endDate(context);
+        }
       },
       child: Card(
         color: Colors.white,
@@ -349,10 +348,18 @@ class _CreateTaskState extends State<CreateTask> {
             selectedUsers.isNotEmpty &&
             startDateController.text.isNotEmpty &&
             endDateController.text.isNotEmpty) {
-          List<String> assigneeEmails = selectedUsers.map((e) => e.email).toList();
+          List<String> assigneeEmails =
+              selectedUsers.map((e) => e.email).toList();
 
-          await createTask(context, taskNameController.text,
-              widget.projectID, descriptionController.text, _selectedText, startDateController.text, endDateController.text,  assigneeEmails);
+          await createTask(
+              context,
+              taskNameController.text,
+              widget.projectID,
+              descriptionController.text,
+              _selectedText,
+              startDateController.text,
+              endDateController.text,
+              assigneeEmails);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

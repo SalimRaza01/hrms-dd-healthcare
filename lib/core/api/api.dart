@@ -56,6 +56,10 @@ Future<ShiftTimeModel> fetchShiftTime(String empID) async {
     if (response.statusCode == 200) {
       String mgrId = response.data['data']['managerId'];
       await _authBox.put('managerId', mgrId);
+      await _authBox.put(
+          'lateby', response.data['data']['shiftTime']['startAt'].replaceAll(' ',''));
+      await _authBox.put(
+          'earlyby', response.data['data']['shiftTime']['endAt']);
       return ShiftTimeModel.fromJson(response.data['data']['shiftTime']);
     } else {
       throw Exception('Failed to load shift time data');
@@ -597,5 +601,23 @@ Future<void> createTask(
         backgroundColor: Colors.red,
       ),
     );
+  }
+}
+
+Future<List<EmployeeOnLeave>> fetchEmployeeOnLeave() async {
+  try {
+    final response = await dio.get(getEmployeeOnLeave);
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = response.data['data'];
+
+      return data
+          .map((leaveData) => EmployeeOnLeave.fromJson(leaveData))
+          .toList();
+    } else {
+      throw Exception('Failed to load employee onleave');
+    }
+  } catch (e) {
+    throw Exception('Error fetching data: $e');
   }
 }

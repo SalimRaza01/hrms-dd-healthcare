@@ -499,3 +499,22 @@ class OdooTaskList {
     };
   }
 }
+
+class EmployeeOnLeave {
+  final String employeeName;
+  final String gender;
+
+
+  EmployeeOnLeave({
+    required this.employeeName,
+    required this.gender,
+
+  });
+
+  factory EmployeeOnLeave.fromJson(Map<String, dynamic> json) {
+    return EmployeeOnLeave(
+      employeeName: json['employeeName'].toString(),
+      gender: json['gender'],
+    );
+  }
+}

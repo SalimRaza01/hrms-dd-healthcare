@@ -6,7 +6,6 @@ import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_stack/flutter_image_stack.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/presentation/odoo/odoo_dashboard.dart';
 import 'package:intl/intl.dart';
@@ -25,33 +24,14 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   late Future<List<HolidayModel>> holidayList;
+  late Future<List<EmployeeOnLeave>> employeeOnLeaveList;
   late String? empID;
   String? empName;
   String? empDesign;
   String? empGender;
   DateTime today = DateTime.now();
 
-  List<Widget> _images = [
-    CircleAvatar(
-      backgroundColor: AppColor.mainThemeColor,
-      child: Icon(
-        Icons.person,
-        color: AppColor.mainBGColor,
-      ),
-    ),
-    CircleAvatar(
-      backgroundColor: AppColor.mainThemeColor,
-      child: Icon(
-        Icons.person,
-        color: AppColor.mainBGColor,
-      ),
-    ),
-  ];
 
-  List<String> name = [
-    'Shiv,',
-    'Rahul',
-  ];
 
   @override
   void initState() {
@@ -62,6 +42,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       DeviceOrientation.portraitDown,
     ]);
     holidayList = fetchHolidayList();
+    employeeOnLeaveList = fetchEmployeeOnLeave();
   }
 
   Future<void> checkEmployeeId() async {
@@ -103,14 +84,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                 empName != null ? empName! : '',
                 style: TextStyle(
-                    fontSize: height * 0.018,
+                    fontSize: height * 0.017,
                     color: AppColor.mainTextColor,
                     fontWeight: FontWeight.w500),
               ),
               Text(
                 empDesign != null ? empDesign! : '',
                 style: TextStyle(
-                  fontSize: height * 0.014,
+                  fontSize: height * 0.013,
                   color: AppColor.mainTextColor2,
                 ),
               )
@@ -182,7 +163,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         style: TextStyle(
                                             fontSize: height * 0.015,
                                             color: AppColor.mainTextColor,
-                                            fontWeight: FontWeight.bold),
+                                            fontWeight: FontWeight.w500),
                                       ),
                                       Row(
                                         children: [
@@ -224,7 +205,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     InkWell(
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=> OdooDashboard()));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => OdooDashboard()));
                       },
                       child: Container(
                           width: width,
@@ -259,7 +243,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     Text(
                                       'View Task Dashbaord',
                                       style: TextStyle(
-                                          fontSize: height * 0.018,
+                                          fontSize: height * 0.015,
                                           color: Colors.white,
                                           fontWeight: FontWeight.w400),
                                     ),
@@ -268,7 +252,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 Icon(
                                   Icons.arrow_forward_ios_outlined,
                                   color: Colors.white,
-                                  size: height * 0.022,
+                                  size: height * 0.018,
                                 ),
                               ],
                             ),
@@ -291,7 +275,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: CalendarTimeline(
                           height: height * 0.075,
                           dayNameFontSize: 10,
-                          fontSize: 20,
+                          fontSize: 18,
                           showYears: false,
                           initialDate: today,
                           firstDate: today.subtract(Duration(days: 30)),
@@ -300,7 +284,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           leftMargin: 0,
                           monthColor: Colors.blueGrey,
                           dayColor: Colors.blueGrey,
-                          activeDayColor: Colors.amber,
+                          activeDayColor: Colors.amberAccent,
                           activeBackgroundDayColor: AppColor.mainThemeColor,
                           locale: 'en_ISO',
                         ),
@@ -326,42 +310,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             children: [
                               Text(
                                 'On Leave Today',
-                                style: TextStyle(
-                                    fontSize: height * 0.018,
+                              style: TextStyle(
+                                    fontSize: height * 0.015,
                                     color: AppColor.mainTextColor,
-                                    fontWeight: FontWeight.w500),
+                                    fontWeight: FontWeight.w400),
                               ),
                               SizedBox(
                                 height: height * 0.01,
                               ),
-                              FlutterImageStack.widgets(
-                                children: _images,
-                                showTotalCount: true,
-                                totalCount: _images.length,
-                                itemRadius: 50,
-                                itemCount: _images.length,
-                                itemBorderColor: Colors.white,
-                              ),
-                              SizedBox(
-                                height: 5,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8),
-                                child: SizedBox(
-                                  width: width,
-                                  height: height * 0.02,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: name.length,
-                                    itemBuilder: (context, index) {
-                                      final item = name[index];
-                                      return Text(
-                                        '$item ',
+                              FutureBuilder<List<EmployeeOnLeave>>(
+                                  future: employeeOnLeaveList,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return Center(
+                                          child: CircularProgressIndicator());
+                                    } else if (snapshot.hasError) {
+                                      return Center(
+                                          child:
+                                              Text('No Employee is On Leave'));
+                                    } else if (!snapshot.hasData ||
+                                        snapshot.data!.isEmpty) {
+                                      return Center(
+                                          child:
+                                              Text('No Employee is On Leave'));
+                                    } else {
+                                      List<EmployeeOnLeave> items =
+                                          snapshot.data!;
+
+                                      return SizedBox(
+                                        width: width,
+                                        height: height * 0.07,
+                                        child: ListView.builder(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: items.length,
+                                          itemBuilder: (context, index) {
+                                            final item = items[index];
+                                            return Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 8),
+                                              child: Column(
+                                                children: [
+                                                  CircleAvatar(
+                                                    backgroundColor:
+                                                        const Color.fromARGB(
+                                                            255, 235, 244, 254),
+                                                    child: Text(
+                                                      item.employeeName[0],
+                                                      style: TextStyle(
+                                                        fontSize: height * 0.018,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: height * 0.002,
+                                                  ),
+                                                  Text(
+                                                    '${item.employeeName.substring(0, item.employeeName.indexOf(' '))} ',
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            height * 0.013,
+                                                        color: AppColor
+                                                            .mainTextColor,
+                                                        fontWeight:
+                                                            FontWeight.w400),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        ),
                                       );
-                                    },
-                                  ),
-                                ),
-                              )
+                                    }
+                                  })
                             ],
                           ),
                         ),
@@ -388,9 +411,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               Text(
                                 'Leave Balance',
                                 style: TextStyle(
-                                    fontSize: height * 0.018,
+                                    fontSize: height * 0.015,
                                     color: AppColor.mainTextColor,
-                                    fontWeight: FontWeight.w500),
+                                    fontWeight: FontWeight.w400),
                               ),
                               SizedBox(
                                 height: height * 0.01,
@@ -472,10 +495,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             Text(
                               'Upcoming Holiday',
-                              style: TextStyle(
-                                  fontSize: height * 0.018,
-                                  color: AppColor.mainTextColor,
-                                  fontWeight: FontWeight.w500),
+                           style: TextStyle(
+                                    fontSize: height * 0.015,
+                                    color: AppColor.mainTextColor,
+                                    fontWeight: FontWeight.w400),
                             ),
                             SizedBox(
                               height: height * 0.01,
@@ -527,13 +550,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                       AppColor.mainThemeColor,
                                                   borderRadius:
                                                       BorderRadius.all(
-                                                    Radius.circular(15),
+                                                    Radius.circular(10),
                                                   )),
                                               child: Padding(
                                                 padding:
                                                     const EdgeInsets.symmetric(
                                                   horizontal: 15,
-                                                  vertical: 8,
+                                                  vertical: 4,
                                                 ),
                                                 child: Column(
                                                   mainAxisAlignment:
@@ -569,7 +592,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             Padding(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                      vertical: 10,
+                                                      vertical: 4,
                                                       horizontal: 20),
                                               child: Column(
                                                 mainAxisAlignment:
@@ -586,7 +609,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                       item.holidayName,
                                                       style: TextStyle(
                                                           fontSize:
-                                                              height * 0.018,
+                                                              height * 0.015,
                                                           fontWeight:
                                                               FontWeight.bold,
                                                           color: AppColor
@@ -645,10 +668,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             Text(
                               'Today Task',
-                              style: TextStyle(
-                                  fontSize: height * 0.018,
-                                  color: AppColor.mainTextColor,
-                                  fontWeight: FontWeight.w500),
+                           style: TextStyle(
+                                    fontSize: height * 0.015,
+                                    color: AppColor.mainTextColor,
+                                    fontWeight: FontWeight.w400),
                             ),
                             SizedBox(
                               height: height * 0.005,
@@ -832,10 +855,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             Text(
                               'Announcement',
-                              style: TextStyle(
-                                  fontSize: height * 0.018,
-                                  color: AppColor.mainTextColor,
-                                  fontWeight: FontWeight.w500),
+                           style: TextStyle(
+                                    fontSize: height * 0.015,
+                                    color: AppColor.mainTextColor,
+                                    fontWeight: FontWeight.w400),
                             ),
                             SizedBox(
                               height: height * 0.005,
