@@ -365,22 +365,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                   height: 5,
                                 ),
                                 Text(
-                                  leave.leaveType == 'earnedLeave'
-                                      ? 'Earned'
-                                      : leave.leaveType == 'medicalLeave'
-                                          ? 'Medical'
-                                          : leave.leaveType == 'casualLeave'
-                                              ? 'Casual'
-                                              : leave.leaveType ==
-                                                      'paternityLeave'
-                                                  ? 'Paternity'
-                                                  : leave.leaveType ==
-                                                          'maternityLeave'
-                                                      ? 'Maternity'
-                                                      : leave.leaveType ==
-                                                              'regularized'
-                                                          ? 'Regularization'
-                                                          : leave.leaveType,
+                                  _leaveTypeLabel(leave.leaveType),
                                   style:
                                       TextStyle(color: AppColor.mainThemeColor),
                                 )
@@ -398,6 +383,19 @@ class _LeaveScreenState extends State<LeaveScreenManager>
         ],
       ),
     );
+  }
+
+  String _leaveTypeLabel(String leaveType) {
+    final leaveTypeMap = {
+      'earnedLeave': 'Earned',
+      'medicalLeave': 'Medical',
+      'casualLeave': 'Casual',
+      'paternityLeave': 'Paternity',
+      'maternityLeave': 'Maternity',
+      'regularized': 'Regularization',
+    };
+
+    return leaveTypeMap[leaveType] ?? leaveType;
   }
 
   teamSection(double height, double width) {

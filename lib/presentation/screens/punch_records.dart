@@ -28,6 +28,9 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
   void initState() {
     super.initState();
     date = DateTime.parse(widget.regularizationDate!);
+
+    print(widget.lateMinutes);
+    print(DateTime.now());
     checkEmployeeId();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -78,8 +81,10 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
           children: [
             Visibility(
               visible: widget.lateMinutes > 15 &&
-                  date != DateTime.now() &&
-                  date!.isAfter(DateTime.now().subtract(Duration(days: 8))),
+                  date!.day !=
+                      DateTime.now()
+                          .day && date!.isAfter(DateTime.now().subtract(Duration(days: 8))),
+
               child: Column(
                 children: [
                   Card(

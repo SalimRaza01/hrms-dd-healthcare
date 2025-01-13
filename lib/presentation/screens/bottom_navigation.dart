@@ -37,8 +37,6 @@ class _BottomNavigationState extends State<BottomNavigation> {
       role = box.get('role');
       empID = box.get('employeeId');
     });
-
-    print('Stored Employee ID: $role');
   }
 
   @override

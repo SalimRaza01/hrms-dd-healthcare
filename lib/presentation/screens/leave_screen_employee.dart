@@ -363,29 +363,33 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                                           SizedBox(
                                             height: 5,
                                           ),
-                                          Text(
-                                            leave.leaveType == 'earnedLeave'
-                                                ? 'Earned'
-                                                : leave.leaveType ==
-                                                        'medicalLeave'
-                                                    ? 'Medical'
-                                                    : leave.leaveType ==
-                                                            'casualLeave'
-                                                        ? 'Casual'
-                                                        : leave.leaveType ==
-                                                                'paternityLeave'
-                                                            ? 'Paternity'
-                                                            : leave.leaveType ==
-                                                                    'maternityLeave'
-                                                                ? 'Maternity'
-                                                                : leave.leaveType ==
-                                                                        'regularized'
-                                                                    ? 'Regularization'
-                                                                    : leave
-                                                                        .leaveType,
-                                            style: TextStyle(
-                                                color: AppColor.mainThemeColor),
-                                          )
+                                          // Text(
+                                          //   leave.leaveType == 'earnedLeave'
+                                          //       ? 'Earned'
+                                          //       : leave.leaveType ==
+                                          //               'medicalLeave'
+                                          //           ? 'Medical'
+                                          //           : leave.leaveType ==
+                                          //                   'casualLeave'
+                                          //               ? 'Casual'
+                                          //               : leave.leaveType ==
+                                          //                       'paternityLeave'
+                                          //                   ? 'Paternity'
+                                          //                   : leave.leaveType ==
+                                          //                           'maternityLeave'
+                                          //                       ? 'Maternity'
+                                          //                       : leave.leaveType ==
+                                          //                               'regularized'
+                                          //                           ? 'Regularization'
+                                          //                           : leave
+                                          //                               .leaveType,
+                                          //   style: TextStyle(
+                                          //       color: AppColor.mainThemeColor),
+                                          // )
+                                            Text(
+  _leaveTypeLabel(leave.leaveType),
+  style: TextStyle(color: AppColor.mainThemeColor),
+)
                                         ],
                                       ),
                                     ),
@@ -418,6 +422,22 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
           )),
     );
   }
+
+
+
+String _leaveTypeLabel(String leaveType) {
+  final leaveTypeMap = {
+    'earnedLeave': 'Earned',
+    'medicalLeave': 'Medical',
+    'casualLeave': 'Casual',
+    'paternityLeave': 'Paternity',
+    'maternityLeave': 'Maternity',
+    'regularized': 'Regularization',
+  };
+
+  return leaveTypeMap[leaveType] ?? leaveType; 
+}
+
 
   SizedBox leaveWidget(
       double height, double width, String leave, String leaveCount) {
