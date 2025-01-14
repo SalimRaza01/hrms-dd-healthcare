@@ -88,7 +88,10 @@ class _ViewProjectsState extends State<ViewProjects> {
         ),
         title: Text(
           widget.projectName,
-    style: TextStyle(color: AppColor.mainFGColor, fontWeight: FontWeight.w400, fontSize: height * 0.02),
+          style: TextStyle(
+              color: AppColor.mainFGColor,
+              fontWeight: FontWeight.w400,
+              fontSize: height * 0.02),
         ),
         centerTitle: true,
       ),
@@ -168,11 +171,19 @@ class _ViewProjectsState extends State<ViewProjects> {
                                         children: [
                                           Row(
                                             children: [
-                                              Icon(
-                                                Icons.circle_outlined,
-                                     color: AppColor.mainThemeColor,
-                                                size: height * 0.018,
-                                              ),
+                                              task['stage_name'] == "Completed"
+                                                  ? Icon(
+                                                      Icons
+                                                          .check_circle_outline,
+                                                      color: Colors.green,
+                                                      size: height * 0.018,
+                                                    )
+                                                  : Icon(
+                                                      Icons.circle_outlined,
+                                                      color: AppColor
+                                                          .mainThemeColor,
+                                                      size: height * 0.018,
+                                                    ),
                                               SizedBox(width: width * 0.02),
                                               SizedBox(
                                                 width: width / 1.5,
@@ -183,7 +194,7 @@ class _ViewProjectsState extends State<ViewProjects> {
                                                   style: TextStyle(
                                                     color:
                                                         AppColor.mainTextColor,
-                                                         fontSize: height * 0.016,
+                                                    fontSize: height * 0.016,
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
@@ -229,31 +240,57 @@ class _ViewProjectsState extends State<ViewProjects> {
                                         ],
                                       ),
                                     ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: priority == 'High'
-                                            ? Colors.red
-                                            : priority == 'Medium'
-                                                ? Colors.amber
-                                                : Colors.green,
-                                        borderRadius: BorderRadius.only(
-                                          topRight: Radius.circular(10),
-                                          bottomLeft: Radius.circular(10),
-                                        ),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 5.0, horizontal: 30.0),
-                                        child: Text(
-                                          priority,
-                                          style: TextStyle(
-                                            color: AppColor.mainFGColor,
-                                            fontSize: height * 0.015,
-                                            fontWeight: FontWeight.w400,
+                                    task['stage_name'] == "Completed"
+                                        ? Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.green,
+                                              borderRadius: BorderRadius.only(
+                                                topRight: Radius.circular(10),
+                                                bottomLeft: Radius.circular(10),
+                                              ),
+                                            ),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 5.0,
+                                                      horizontal: 15.0),
+                                              child: Text(
+                                                task['stage_name'],
+                                                style: TextStyle(
+                                                  color: AppColor.mainFGColor,
+                                                  fontSize: height * 0.015,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        : Container(
+                                            decoration: BoxDecoration(
+                                              color: priority == 'High' || priority == 'high'
+                                                  ? Colors.red
+                                                  : priority == 'Medium'
+                                                      ? Colors.amber
+                                                      : Colors.green,
+                                              borderRadius: BorderRadius.only(
+                                                topRight: Radius.circular(10),
+                                                bottomLeft: Radius.circular(10),
+                                              ),
+                                            ),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 5.0,
+                                                      horizontal: 30.0),
+                                              child: Text(
+                                                priority,
+                                                style: TextStyle(
+                                                  color: AppColor.mainFGColor,
+                                                  fontSize: height * 0.015,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ),
@@ -270,7 +307,8 @@ class _ViewProjectsState extends State<ViewProjects> {
         backgroundColor: AppColor.mainThemeColor,
         onPressed: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CreateTask(projectID:  widget.projectID)),
+          MaterialPageRoute(
+              builder: (context) => CreateTask(projectID: widget.projectID)),
         ),
         label: Text(
           'Create Task',

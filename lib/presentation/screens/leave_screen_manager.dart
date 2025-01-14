@@ -464,7 +464,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                             Text(
                                               leave.employeeName,
                                               style: TextStyle(
-                                                fontSize: height * 0.02,
+                                                fontSize: height * 0.016,
                                                 color: AppColor.mainTextColor,
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -520,7 +520,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                                           : leave
                                                                               .leaveType,
                                               style: TextStyle(
-                                                fontSize: height * 0.016,
+                                                fontSize: height * 0.012,
                                                 fontWeight: FontWeight.w600,
                                                 color: AppColor.mainThemeColor,
                                               ),
@@ -532,7 +532,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                       .format(startDate)
                                                   : '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
                                               style: TextStyle(
-                                                fontSize: height * 0.016,
+                                                fontSize: height * 0.012,
                                                 fontWeight: FontWeight.bold,
                                                 color: AppColor.mainTextColor,
                                               ),
@@ -556,11 +556,11 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                         // ],
                                       ),
                                       child: Padding(
-                                        padding: const EdgeInsets.all(12),
+                                        padding: const EdgeInsets.all(8),
                                         child: Text(
                                           leave.reason,
                                           style: TextStyle(
-                                            fontSize: height * 0.016,
+                                            fontSize: height * 0.014,
                                             color: Colors.black54,
                                             fontWeight: FontWeight.w400,
                                           ),
@@ -582,13 +582,13 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                             color: Colors.white,
                                           ),
                                           child: Padding(
-                                            padding: const EdgeInsets.all(12),
+                                            padding: const EdgeInsets.all(8.0),
                                             child: Row(
                                               children: [
                                                 Icon(
                                                   Icons.file_copy_rounded,
                                                   color: Colors.blue,
-                                                  size: height * 0.02,
+                                                  size: height * 0.013,
                                                 ),
                                                 SizedBox(width: width * 0.03),
                                                 Text(
@@ -596,7 +596,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                   style: TextStyle(
                                                     color:
                                                         AppColor.mainTextColor2,
-                                                    fontSize: 15,
+                                                    fontSize:height * 0.012,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -628,18 +628,18 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                 decoration: BoxDecoration(
                                                   borderRadius:
                                                       BorderRadius.circular(8),
-                                                  color: const Color.fromARGB(
-                                                      255, 20, 183, 26),
+                                                  color: const Color.fromARGB(126, 20, 183, 25),
                                                 ),
                                                 child: Padding(
                                                   padding: EdgeInsets.symmetric(
-                                                      horizontal: width / 8,
+                                         horizontal: width / 9,
                                                       vertical: 8),
                                                   child: Text(
                                                     'Accept',
                                                     style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: height * 0.016,
+                                                     color: AppColor
+                                                          .mainTextColor,
+                                                      fontSize: height * 0.012,
                                                       fontWeight:
                                                           FontWeight.w500,
                                                     ),
@@ -666,14 +666,14 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                         AppColor.mainBGColor),
                                                 child: Padding(
                                                   padding: EdgeInsets.symmetric(
-                                                      horizontal: width / 8,
+                                                     horizontal: width / 9,
                                                       vertical: 8),
                                                   child: Text(
                                                     'Decline',
                                                     style: TextStyle(
                                                       color: AppColor
                                                           .mainTextColor,
-                                                      fontSize: height * 0.016,
+                                                      fontSize: height * 0.012,
                                                       fontWeight:
                                                           FontWeight.w500,
                                                     ),
@@ -703,11 +703,11 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 0, horizontal: 20),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
+                                    padding: const EdgeInsets.all(7.0),
                                     child: Text(
                                       leave.status,
                                       style: TextStyle(
-                                          fontSize: height * 0.013,
+                                          fontSize: height * 0.012,
                                           fontWeight: FontWeight.w400,
                                           color: leave.status == 'Pending'
                                               ? Colors.black

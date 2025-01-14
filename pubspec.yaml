@@ -60,6 +60,7 @@ dependencies:
   url_launcher: ^6.3.1
   device_info_plus: ^11.2.0
   flutter_cupertino_datetime_picker: ^3.0.0
+  easy_stepper: 
 
 
 dev_dependencies:

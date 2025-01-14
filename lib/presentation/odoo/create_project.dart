@@ -43,7 +43,7 @@ class _CreateProjectState extends State<CreateProject> {
           style: TextStyle(
             fontSize: height * 0.02,
             fontWeight: FontWeight.w500,
-            color: AppColor.mainTextColor,
+          color: Colors.white
           ),
         ),
         backgroundColor: AppColor.mainBGColor,
@@ -263,15 +263,16 @@ class _CreateProjectState extends State<CreateProject> {
                   if (projectNameController.text.isNotEmpty &&
                       projectDescriptionController.text.isNotEmpty &&
                       selectedUsers.isNotEmpty) {
-                    List<int> assigneeIDs =
-                        selectedUsers.map((e) => e.id).toList();
+                    List<String> assigneeEmails =
+                        selectedUsers.map((e) => e.email).toList();
 
                     await createProject(
                       context,
                       projectNameController.text,
                       projectDescriptionController.text,
-                      assigneeIDs,
+                      assigneeEmails,
                     );
+                    // Navigator.pop(context);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(

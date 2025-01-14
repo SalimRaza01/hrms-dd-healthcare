@@ -504,17 +504,18 @@ Future<void> createProject(
   BuildContext context,
   String projectNameController,
   String projectDescriptionController,
-  List<int> userIDs,
+  List<String> assigneeEmails,
 ) async {
-  print(userIDs);
-  try {
+
+
     final response = await dio.post(postOdooProject, data: {
       "name": projectNameController,
-      "user_ids": userIDs,
+      "assignes_emails": assigneeEmails,
       "description": projectDescriptionController,
+      "task_creator_email": _authBox.get('email')
     });
 
-    if (response.statusCode == 200) {
+    if (response.data['result']['status'] == 'success') {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Project Created Successfully'),
@@ -529,14 +530,7 @@ Future<void> createProject(
         ),
       );
     }
-  } on DioException {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Something Went Wrong'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
+  
 }
 
 Future<List<OdooProjectList>> fetchOdooProjects() async {
@@ -550,8 +544,9 @@ Future<List<OdooProjectList>> fetchOdooProjects() async {
 
     final List<dynamic> data = projects.where((project) {
       var assignedEmails = project['assignes_emails'];
+      var creatorEmail = project['task_creator_email'];
 
-      return assignedEmails is List && assignedEmails.contains(email);
+      return assignedEmails is List && assignedEmails.contains(email) || creatorEmail == email;
     }).toList();
 
     return data.map((item) => OdooProjectList.fromJson(item)).toList();
@@ -570,9 +565,8 @@ Future<void> createTask(
   String taskEndDate,
   List<String> userEmails,
 ) async {
-  String email = _authBox.get('email');
-  try {
-    final response = await dio.post(postOdooProject, data: {
+
+    final response = await dio.post(postOdootasks, data: {
       "name": taskName,
       "project_id": projectID,
       "assignees_emails": userEmails,
@@ -580,10 +574,11 @@ Future<void> createTask(
       "start_date": taskStartDate,
       "date_deadline": taskEndDate,
       "description": taskDescription,
-      "ownerEmail": email,
+      "task_creator_email": _authBox.get('email')
     });
 
-    if (response.statusCode == 200) {
+
+    if (response.data['result']['status'] == 'success') {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Task Created Successfully'),
@@ -593,19 +588,12 @@ Future<void> createTask(
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Something Went Wrong'),
+          content: Text(response.data['result']['message']),
           backgroundColor: Colors.red,
         ),
       );
     }
-  } on DioException {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Something Went Wrong'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
+ 
 }
 
 Future<List<EmployeeOnLeave>> fetchEmployeeOnLeave() async {

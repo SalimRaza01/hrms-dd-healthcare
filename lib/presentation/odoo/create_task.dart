@@ -19,6 +19,7 @@ class CreateTask extends StatefulWidget {
 class _CreateTaskState extends State<CreateTask> {
   late int projectID;
   TextEditingController taskNameController = TextEditingController();
+  TextEditingController commentController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController assigneeEmailController = TextEditingController();
   TextEditingController startDateController = TextEditingController();
@@ -39,19 +40,19 @@ class _CreateTaskState extends State<CreateTask> {
   }
 
   startDate(BuildContext context) {
-    return DatePicker.showDatePicker(
-      context,
-      dateFormat: 'dd MMMM yyyy HH:mm',
-      initialDateTime: DateTime.now(),
-      minDateTime: DateTime(2000),
-      maxDateTime: DateTime(3000),
-      onMonthChangeStartWithFirstDate: true,
-      onConfirm: (dateTime, List<int> index) {
+    return DatePicker.showDatePicker(context,
+        dateFormat: 'dd MMMM yyyy HH:mm',
+        initialDateTime: DateTime.now(),
+        minDateTime: DateTime(2000),
+        maxDateTime: DateTime(3000),
+        onMonthChangeStartWithFirstDate: true,
+        onConfirm: (dateTime, List<int> index) {
+      setState(() {
         DateTime selectdate = dateTime;
         startDateController.text =
-            DateFormat('dd-MMM-yyyy - HH:mm').format(selectdate);
-      },
-    );
+            DateFormat('yyyy-MM-dd').format(selectdate);
+      });
+    });
   }
 
   endDate(BuildContext context) {
@@ -63,10 +64,12 @@ class _CreateTaskState extends State<CreateTask> {
       maxDateTime: DateTime(3000),
       onMonthChangeStartWithFirstDate: true,
       onConfirm: (dateTime, List<int> index) {
-        DateTime selectdate = dateTime;
-           endDateController.text =
-            DateFormat('dd-MMM-yyyy - HH:mm').format(selectdate);
-
+       setState(() {
+          DateTime selectdate = dateTime;
+        endDateController.text =
+              DateFormat('yyyy-MM-dd').format(selectdate);
+              print(endDateController.text);
+       });
       },
     );
   }
@@ -91,10 +94,10 @@ class _CreateTaskState extends State<CreateTask> {
         ),
         title: Text(
           'CREATE TASK',
- style: TextStyle(
+           style: TextStyle(
             fontSize: height * 0.02,
             fontWeight: FontWeight.w500,
-            color: AppColor.mainTextColor,
+            color: Colors.white
           ),
         ),
         centerTitle: true,
@@ -108,6 +111,7 @@ class _CreateTaskState extends State<CreateTask> {
               _buildTextField('Task Name', taskNameController),
               _buildTextField('Description', descriptionController,
                   maxLines: 3),
+                   _buildTextField('Comment', commentController),
               _buildSelectedUsers(),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
@@ -124,20 +128,19 @@ class _CreateTaskState extends State<CreateTask> {
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
-                    
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
                   onChanged: (value) {
-                     setState(() {
-                        filteredUsers = value.isEmpty
-                            ? []
-                            : filteredUsers
-                                .where((user) => user.email
-                                    .toLowerCase()
-                                    .contains(value.toLowerCase()))
-                                .toList();
-                      });
+                    setState(() {
+                      filteredUsers = value.isEmpty
+                          ? []
+                          : filteredUsers
+                              .where((user) => user.email
+                                  .toLowerCase()
+                                  .contains(value.toLowerCase()))
+                              .toList();
+                    });
                   },
                 ),
               ),
@@ -148,8 +151,12 @@ class _CreateTaskState extends State<CreateTask> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildDateSelection(startDateController.text.isNotEmpty ? startDateController.text : 'Start Date'),
-                   _buildDateSelection(endDateController.text.isNotEmpty ? endDateController.text : 'End Date'),
+                  _buildDateSelection(startDateController.text.isNotEmpty
+                      ? startDateController.text
+                      : 'Start Date'),
+                  _buildDateSelection(endDateController.text.isNotEmpty
+                      ? endDateController.text
+                      : 'End Date'),
                 ],
               ),
               SizedBox(height: height * 0.02),
@@ -217,8 +224,9 @@ class _CreateTaskState extends State<CreateTask> {
           foregroundColor: _selectedText == label
               ? AppColor.mainFGColor
               : const Color.fromARGB(255, 128, 128, 128),
-          backgroundColor:
-              _selectedText == label ? AppColor.mainThemeColor : AppColor.mainFGColor,
+          backgroundColor: _selectedText == label
+              ? AppColor.mainThemeColor
+              : AppColor.mainFGColor,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
