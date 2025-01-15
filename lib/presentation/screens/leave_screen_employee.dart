@@ -5,7 +5,6 @@ import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
@@ -21,7 +20,6 @@ class LeaveScreenEmployee extends StatefulWidget {
 }
 
 class _LeaveScreenState extends State<LeaveScreenEmployee> {
-  final Box _authBox = Hive.box('authBox');
   late String? empID;
   int touchedIndex = -1;
   String _selectedText = 'Pending';
@@ -143,13 +141,6 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
                                   } else if (snapshot.hasData) {
                                     final leave = snapshot.data!;
 
-                                    _authBox.put('casual', leave.casualLeave);
-                                    _authBox.put('medical', leave.medicalLeave);
-                                    _authBox.put(
-                                        'maternity', leave.maternityLeave);
-                                    _authBox.put('earned', leave.earnedLeave);
-                                    _authBox.put(
-                                        'paternity', leave.paternityLeave);
 
                                     return SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
@@ -433,6 +424,7 @@ String _leaveTypeLabel(String leaveType) {
     'paternityLeave': 'Paternity',
     'maternityLeave': 'Maternity',
     'regularized': 'Regularization',
+        'shortLeave': 'Short-leave',
   };
 
   return leaveTypeMap[leaveType] ?? leaveType; 

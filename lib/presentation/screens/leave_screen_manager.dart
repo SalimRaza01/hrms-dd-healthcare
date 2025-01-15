@@ -5,7 +5,6 @@ import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
@@ -21,7 +20,6 @@ class LeaveScreenManager extends StatefulWidget {
 
 class _LeaveScreenState extends State<LeaveScreenManager>
     with SingleTickerProviderStateMixin {
-  final Box _authBox = Hive.box('authBox');
 
   late String? empID;
   bool isLoading = true;
@@ -184,12 +182,6 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                           return Center(child: Text('No Data Found'));
                         } else if (snapshot.hasData) {
                           final leave = snapshot.data!;
-
-                          _authBox.put('casual', leave.casualLeave);
-                          _authBox.put('medical', leave.medicalLeave);
-                          _authBox.put('maternity', leave.maternityLeave);
-                          _authBox.put('earned', leave.earnedLeave);
-                          _authBox.put('paternity', leave.paternityLeave);
 
                           return SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
@@ -393,6 +385,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
       'paternityLeave': 'Paternity',
       'maternityLeave': 'Maternity',
       'regularized': 'Regularization',
+              'shortLeave': 'Short-leave',
     };
 
     return leaveTypeMap[leaveType] ?? leaveType;
@@ -596,7 +589,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                   style: TextStyle(
                                                     color:
                                                         AppColor.mainTextColor2,
-                                                    fontSize:height * 0.012,
+                                                    fontSize: height * 0.012,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -628,16 +621,17 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                 decoration: BoxDecoration(
                                                   borderRadius:
                                                       BorderRadius.circular(8),
-                                                  color: const Color.fromARGB(126, 20, 183, 25),
+                                                  color: const Color.fromARGB(
+                                                      126, 20, 183, 25),
                                                 ),
                                                 child: Padding(
                                                   padding: EdgeInsets.symmetric(
-                                         horizontal: width / 9,
+                                                      horizontal: width / 9,
                                                       vertical: 8),
                                                   child: Text(
                                                     'Accept',
                                                     style: TextStyle(
-                                                     color: AppColor
+                                                      color: AppColor
                                                           .mainTextColor,
                                                       fontSize: height * 0.012,
                                                       fontWeight:
@@ -666,7 +660,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                         AppColor.mainBGColor),
                                                 child: Padding(
                                                   padding: EdgeInsets.symmetric(
-                                                     horizontal: width / 9,
+                                                      horizontal: width / 9,
                                                       vertical: 8),
                                                   child: Text(
                                                     'Decline',

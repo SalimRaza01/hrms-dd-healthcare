@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class ViewProjects extends StatefulWidget {
 }
 
 class _ViewProjectsState extends State<ViewProjects> {
+    final Box _authBox = Hive.box('authBox');
   late String projectName;
   late int projectID;
   String _selectedText = 'All Task';
@@ -303,7 +305,7 @@ class _ViewProjectsState extends State<ViewProjects> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton:  _authBox.get('role') == 'Manager' ?  FloatingActionButton.extended(
         backgroundColor: AppColor.mainThemeColor,
         onPressed: () => Navigator.push(
           context,
@@ -314,7 +316,7 @@ class _ViewProjectsState extends State<ViewProjects> {
           'Create Task',
           style: TextStyle(color: AppColor.mainFGColor),
         ),
-      ),
+      ) : null
     );
   }
 

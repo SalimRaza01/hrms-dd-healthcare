@@ -58,8 +58,20 @@ Future<ShiftTimeModel> fetchShiftTime(String empID) async {
     final response = await dio.get('$getEmployeeData/$empID');
 
     if (response.statusCode == 200) {
-      String mgrId = response.data['data']['managerId'];
-      await _authBox.put('managerId', mgrId);
+      await _authBox.put(
+          'casual', response.data['data']['leaveBalance']['casualLeave']);
+      await _authBox.put(
+          'medical', response.data['data']['leaveBalance']['medicalLeave']);
+      await _authBox.put(
+          'maternity', response.data['data']['leaveBalance']['maternityLeave']);
+      await _authBox.put(
+          'earned', response.data['data']['leaveBalance']['earnedLeave']);
+      await _authBox.put(
+          'paternity', response.data['data']['leaveBalance']['paternityLeave']);
+      await _authBox.put('short', response.data['data']['maxShortLeave']);
+
+      await _authBox.put('managerId', response.data['data']['managerId']);
+
       await _authBox.put('lateby',
           response.data['data']['shiftTime']['startAt'].replaceAll(' ', ''));
       await _authBox.put(
@@ -125,17 +137,18 @@ class AuthProvider with ChangeNotifier {
 }
 
 Future<void> applyLeave(
-  BuildContext context,
-  String leaveType,
-  String startDate,
-  String endDate,
-  String totalDays,
-  String reason,
-) async {
+    BuildContext context,
+    String leaveType,
+    String startDate,
+    String endDate,
+    String totalDays,
+    String reason,
+    String _selectedText) async {
   String mgrId = _authBox.get('managerId');
   String empID = _authBox.get('employeeId');
   String token = _authBox.get('token');
-  print('managerId $mgrId');
+  print(
+      '$leaveType $startDate $endDate $totalDays $_selectedText $empID $mgrId');
 
   try {
     final response = await dio.post('$employeeApplyLeave/$empID',
@@ -144,20 +157,23 @@ Future<void> applyLeave(
           "Authorization": "Bearer $token"
         }),
         data: {
-          "leaveType": leaveType == 'Comp-off Leave'
-              ? 'compOffLeave'
-              : leaveType == 'Casual Leave'
-                  ? 'casualLeave'
-                  : leaveType == 'Medical Leave'
-                      ? 'medicalLeave'
-                      : leaveType == 'Earned Leave'
-                          ? 'earnedLeave'
+          "leaveType": leaveType == 'Casual Leave'
+              ? 'casualLeave'
+              : leaveType == 'Medical Leave'
+                  ? 'medicalLeave'
+                  : leaveType == 'Earned Leave'
+                      ? 'earnedLeave'
+                      : leaveType == 'Short-Leave'
+                          ? 'shortLeave'
                           : null,
           "leaveStartDate": startDate,
-          "leaveEndDate": endDate,
+          "leaveEndDate": _selectedText.contains('1st Half') ? " " : endDate,
           "totalDays": totalDays,
           "reason": reason,
-          "approvedBy": mgrId
+          "approvedBy": mgrId,
+          "shift": leaveType == 'Casual Leave' || leaveType == 'Earned Leave'
+              ? _selectedText
+              : ""
         });
     if (response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -169,7 +185,7 @@ Future<void> applyLeave(
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: ${response}'),
+          content: Text('Error: ${response.data}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -506,31 +522,28 @@ Future<void> createProject(
   String projectDescriptionController,
   List<String> assigneeEmails,
 ) async {
+  final response = await dio.post(postOdooProject, data: {
+    "name": projectNameController,
+    "assignes_emails": assigneeEmails,
+    "description": projectDescriptionController,
+    "task_creator_email": _authBox.get('email')
+  });
 
-
-    final response = await dio.post(postOdooProject, data: {
-      "name": projectNameController,
-      "assignes_emails": assigneeEmails,
-      "description": projectDescriptionController,
-      "task_creator_email": _authBox.get('email')
-    });
-
-    if (response.data['result']['status'] == 'success') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Project Created Successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Something Went Wrong'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  
+  if (response.data['result']['status'] == 'success') {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Project Created Successfully'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Something Went Wrong'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
 }
 
 Future<List<OdooProjectList>> fetchOdooProjects() async {
@@ -546,7 +559,8 @@ Future<List<OdooProjectList>> fetchOdooProjects() async {
       var assignedEmails = project['assignes_emails'];
       var creatorEmail = project['task_creator_email'];
 
-      return assignedEmails is List && assignedEmails.contains(email) || creatorEmail == email;
+      return assignedEmails is List && assignedEmails.contains(email) ||
+          creatorEmail == email;
     }).toList();
 
     return data.map((item) => OdooProjectList.fromJson(item)).toList();
@@ -565,35 +579,32 @@ Future<void> createTask(
   String taskEndDate,
   List<String> userEmails,
 ) async {
+  final response = await dio.post(postOdootasks, data: {
+    "name": taskName,
+    "project_id": projectID,
+    "assignees_emails": userEmails,
+    "priority": taskPriority,
+    "start_date": taskStartDate,
+    "date_deadline": taskEndDate,
+    "description": taskDescription,
+    "task_creator_email": _authBox.get('email')
+  });
 
-    final response = await dio.post(postOdootasks, data: {
-      "name": taskName,
-      "project_id": projectID,
-      "assignees_emails": userEmails,
-      "priority": taskPriority,
-      "start_date": taskStartDate,
-      "date_deadline": taskEndDate,
-      "description": taskDescription,
-      "task_creator_email": _authBox.get('email')
-    });
-
-
-    if (response.data['result']['status'] == 'success') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Task Created Successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(response.data['result']['message']),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
- 
+  if (response.data['result']['status'] == 'success') {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Task Created Successfully'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(response.data['result']['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
 }
 
 Future<List<EmployeeOnLeave>> fetchEmployeeOnLeave() async {

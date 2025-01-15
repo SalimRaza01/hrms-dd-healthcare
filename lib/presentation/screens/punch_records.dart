@@ -10,10 +10,12 @@ class PunchRecordScreen extends StatefulWidget {
   final String? regularizationDate;
   final int lateMinutes;
 
+
   PunchRecordScreen(
       {required this.punchRecords,
       required this.regularizationDate,
-      required this.lateMinutes});
+      required this.lateMinutes,
+});
 
   @override
   State<PunchRecordScreen> createState() => _PunchRecordScreenState();
@@ -56,12 +58,13 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
         (widget.punchRecords?.split(',') ?? []).toSet().toList();
     // ..sort();
 
+
     return Scaffold(
       backgroundColor: AppColor.mainBGColor,
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          widget.lateMinutes > 15 &&
+          widget.lateMinutes > 15 && widget.lateMinutes < 30 &&
                   date != DateTime.now() &&
                   date!.isAfter(DateTime.now().subtract(Duration(days: 8)))
               ? 'Apply Regularization'
@@ -80,11 +83,9 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Visibility(
-              visible: widget.lateMinutes > 15 &&
-                  date!.day !=
-                      DateTime.now()
-                          .day && date!.isAfter(DateTime.now().subtract(Duration(days: 8))),
-
+              visible:     widget.lateMinutes > 15 && widget.lateMinutes < 30 &&
+                  date!.day != DateTime.now().day &&
+                  date!.isAfter(DateTime.now().subtract(Duration(days: 8))),
               child: Column(
                 children: [
                   Card(

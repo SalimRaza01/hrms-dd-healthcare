@@ -1,14 +1,14 @@
-// ignore_for_file: unused_import
+// ignore_for_file: unused_import, prefer_interpolation_to_compose_strings, unnecessary_string_interpolations
 
 import 'dart:convert';
 import 'dart:io';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cupertino_datetime_picker/flutter_cupertino_datetime_picker.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -24,30 +24,82 @@ class ApplyLeave extends StatefulWidget {
 }
 
 class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
+  final Box _authBox = Hive.box('authBox');
   String _selectedText = 'Full Day';
   String? _selectedLeaveType;
   Color? activeColor;
   Color? activeText;
-  TextEditingController startDateController = TextEditingController();
-  TextEditingController endDateController = TextEditingController();
-  TextEditingController selectFromTime = TextEditingController();
-  TextEditingController selectToTime = TextEditingController();
+  final startDateController = TextEditingController();
+  final endDateController = TextEditingController();
   TextEditingController reasonController = TextEditingController();
-  DateTime selectedStartDate = DateTime.now();
-  DateTime selectedendDate = DateTime.now();
-  DateTime? fromtime;
-  DateTime? toTime;
+  List<PlatformFile>? _paths;
+  bool _isLoading = false;
+  String? empID;
+  List<Leave> leaveList = [];
   String? casualLeave;
   String? earnedLeave;
   String? medicalLeave;
   String? maternityLeave;
   String? paternityLeave;
-  List<PlatformFile>? _paths;
-  bool _isLoading = false;
-  String? empID;
-  List<Leave> leaveList = [];
+  String? shortLeave;
 
-  void checkConditions() {
+  startDate(
+      BuildContext context, String? _selectedLeaveType, String _selectedText) {
+    return DatePicker.showDatePicker(context,
+        dateFormat: 'dd MMMM yyyy',
+        initialDateTime: DateTime.now(),
+        minDateTime: _selectedLeaveType!.contains('Medical')
+            ? DateTime.now().subtract(Duration(days: 6))
+            : DateTime.now(),
+        maxDateTime: _selectedLeaveType.contains('Medical')
+            ? DateTime.now().subtract(Duration(days: 1))
+            : DateTime(3000),
+        onMonthChangeStartWithFirstDate: true,
+        onConfirm: (dateTime, List<int> index) {
+      setState(() {
+        DateTime selectdate = dateTime;
+        startDateController.clear();
+        endDateController.clear();
+        startDateController.text = DateFormat('yyyy-MM-dd').format(selectdate);
+        print(startDateController.text);
+        print(endDateController.text);
+      });
+    });
+  }
+
+  endDate(
+      BuildContext context, String? _selectedLeaveType, String _selectedText) {
+    return DatePicker.showDatePicker(
+      context,
+      dateFormat: 'dd MMMM yyyy',
+      initialDateTime: DateTime.now(),
+      minDateTime: _selectedLeaveType!.contains('Medical')
+          ? DateTime.now().subtract(Duration(days: 6))
+          : _selectedLeaveType.contains('Earned') ||
+                  _selectedLeaveType.contains('Casual')
+              ? DateTime.parse(startDateController.text)
+              : null,
+      maxDateTime: _selectedLeaveType.contains('Medical')
+          ? DateTime.now().subtract(Duration(days: 1))
+          : _selectedLeaveType.contains('Earned')
+              ? DateTime.parse(startDateController.text).add(Duration(days: 6))
+              : _selectedLeaveType.contains('Casual')
+                  ? DateTime.parse(startDateController.text)
+                      .add(Duration(days: 1))
+                  : null,
+      onMonthChangeStartWithFirstDate: true,
+      onConfirm: (dateTime2, List<int> index) {
+        setState(() {
+          DateTime selectdate2 = dateTime2;
+          endDateController.text = DateFormat('yyyy-MM-dd').format(selectdate2);
+          print(startDateController.text);
+          print(endDateController.text);
+        });
+      },
+    );
+  }
+
+  void validation()  async {
     num? totalDays;
 
     Leave selectedLeave = leaveList.firstWhere(
@@ -55,146 +107,106 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       orElse: () => Leave('Unknown', '0'),
     );
 
-    if (_selectedLeaveType!.contains('Casual')) {
-      DateTime startDate = DateTime.parse(startDateController.text);
-      DateTime now = DateTime.now();
+    if (_selectedText != '1st Half' &&
+        _selectedText != '2nd Half' &&
+        _selectedLeaveType != 'Short-Leave') {
+      if (startDateController.text.isEmpty) {
+        showSnackBar('Please select start date');
+        return;
+      } else if (endDateController.text.isEmpty) {
+        showSnackBar('Please select end date');
+        return;
+      }
+    }
 
-      if (startDate.year != now.year || startDate.month != now.month) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text('Casual leave can only be applied for the current month.'),
-            backgroundColor: Colors.red,
-          ),
-        );
+    if (_selectedText == '1st Half' || _selectedText == '2nd Half') {
+      totalDays = 0.5;
+    } else if (_selectedLeaveType!.contains('Medical')) {
+      if (_paths == null) {
+        showSnackBar('Please Upload Prescription First');
         return;
       }
 
-      if (_selectedText == 'Full Day') {
-        setState(() {
-          totalDays = 1;
-        });
-      } else if (_selectedText == '1st Half' || _selectedText == '2nd Half') {
-        setState(() {
-          totalDays = 0.5;
-        });
-      } else {
-        totalDays = 1;
+      DateTime startDate = DateTime.parse(startDateController.text);
+      DateTime endDate = DateTime.parse(endDateController.text);
+
+      if (startDate.isBefore(DateTime.now().subtract(Duration(days: 6)))) {
+        showSnackBar(
+            'Medical leave can only be applied within the last 6 days');
+        return;
       }
-    } else {
-      totalDays = selectedendDate.difference(selectedStartDate).inDays;
+
+      if (endDate.isAfter(DateTime.now().subtract(Duration(days: 1)))) {
+        showSnackBar('Medical leave cannot extend beyond yesterday');
+        return;
+      }
+
+      totalDays = endDate.difference(startDate).inDays + 1;
+    } else if (_selectedLeaveType!.contains('Casual')) {
+      DateTime startDate = DateTime.parse(startDateController.text);
+      DateTime endDate = DateTime.parse(endDateController.text);
+
+      int leaveDuration = endDate.difference(startDate).inDays + 1;
+      if (leaveDuration < 1 || leaveDuration > 2) {
+        showSnackBar('Casual leaves must be between 1 and 2 days');
+        return;
+      }
+
+      totalDays = leaveDuration;
+    } else if (_selectedLeaveType!.contains('Earned')) {
+      DateTime startDate = DateTime.parse(startDateController.text);
+      DateTime endDate = DateTime.parse(endDateController.text);
+
+      int leaveDuration = endDate.difference(startDate).inDays + 1;
+      if (leaveDuration < 1 || leaveDuration > 7) {
+        showSnackBar('Earned leaves must be between 1 and 7 days');
+        return;
+      }
+
+      totalDays = leaveDuration;
     }
 
     if (selectedLeave.balanceInt < totalDays!) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Not enough leave balance for ${selectedLeave.name}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      showSnackBar('Not enough leave balance for ${selectedLeave.name}');
       return;
     }
 
-    DateTime startDate = DateTime.parse(startDateController.text);
-    DateTime now = DateTime.now();
+  await  applyLeave(
+        context,
+        _selectedLeaveType!,
+        startDateController.text,
+        endDateController.text,
+        totalDays.toString(),
+        reasonController.text,
+        _selectedText);
+  }
 
-    if (startDate.day == now.day && now.hour >= 9) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Leave must be applied before 9 AM for today.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    if (startDate.isAtSameMomentAs(now)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('leave must be applied for a future date.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    if (_selectedLeaveType!.contains('Casual')) {
-      DateTime startDate = DateTime.parse(startDateController.text);
-      DateTime now = DateTime.now();
-
-      if (startDate.isAtSameMomentAs(now)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('leave must be applied for a future date.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      if (startDate.day == now.day && now.hour >= 9) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('leave must be applied before 9 AM for today.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-    }
-
-    if (_selectedLeaveType!.contains('Medical')) {
-      DateTime startDate = DateTime.parse(startDateController.text);
-      DateTime endDate = DateTime.parse(endDateController.text);
-      int medicalLeaveDuration = endDate.difference(startDate).inDays + 1;
-      print(medicalLeaveDuration);
-
-      if (startDate.isAfter(DateTime.now())) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Medical leave can only be applied for past days.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      if (medicalLeaveDuration < 2 || medicalLeaveDuration > 6) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Medical leave must be between 2 to 6 days.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-      if (_paths == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Please Upload Prescription First'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
+  void showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   Future<void> getleaveBalance() async {
-    var box = await Hive.openBox('authBox');
+    var authBox = await Hive.openBox('authBox');
 
     setState(() {
-      casualLeave = box.get('casual');
-      medicalLeave = box.get('medical');
-      maternityLeave = box.get('maternity');
-      earnedLeave = box.get('earned');
-      paternityLeave = box.get('paternity');
-      empID = box.get('employeeId');
+      casualLeave = authBox.get('casual');
+      medicalLeave = authBox.get('medical');
+      maternityLeave = authBox.get('maternity');
+      earnedLeave = authBox.get('earned');
+      paternityLeave = authBox.get('paternity');
+      shortLeave = authBox.get('short');
+      empID = authBox.get('employeeId');
 
       leaveList = [
         Leave('Casual Leave', casualLeave!),
         Leave('Medical Leave', medicalLeave!),
         Leave('Earned Leave', earnedLeave!),
-        Leave('Short-Leave', '1'),
+        Leave('Short-Leave', shortLeave!),
         Leave('Maternity Leave', maternityLeave!),
         Leave('Paternity Leave', paternityLeave!),
       ];
@@ -261,6 +273,14 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
+    DateTime shiftendTime = DateTime.parse(
+      DateFormat('yyyy-MM-dd').format(DateTime.now()) +
+          ' ' +
+          '0${_authBox.get('earlyby')}',
+    );
+
+    String shortLeaveDate = DateFormat('yyyy-MM-dd').format(shiftendTime);
+
     return SafeArea(
         child: Scaffold(
             backgroundColor: AppColor.mainBGColor,
@@ -292,6 +312,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               _selectedLeaveType = value.name;
                               startDateController.clear();
                               endDateController.clear();
+                              _selectedText = 'Full Day';
                             }
                           });
                         },
@@ -306,59 +327,115 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                         visible: _selectedLeaveType != null,
                         child: Column(
                           children: [
-                            SizedBox(
-                              height: height * 0.015,
-                            ),
                             Visibility(
                               visible: _selectedLeaveType == 'Casual Leave' ||
-                                  _selectedLeaveType == 'Comp-off Leave',
-                              child: Card(
-                                color: AppColor.mainFGColor,
-                                elevation: 4,
-                                margin: EdgeInsets.all(0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                shadowColor: Colors.black.withOpacity(0.1),
-                                child: Padding(
-                                  padding: EdgeInsets.all(3),
-                                  child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        _selectButton(
-                                            'Full Day', height, width),
-                                        _selectButton(
-                                            '1st Half', height, width),
-                                        _selectButton(
-                                            '2nd Half', height, width),
-                                      ]),
+                                  _selectedLeaveType == 'Earned Leave',
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                child: Card(
+                                  color: AppColor.mainFGColor,
+                                  elevation: 4,
+                                  margin: EdgeInsets.all(0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  shadowColor: Colors.black.withOpacity(0.1),
+                                  child: Padding(
+                                    padding: EdgeInsets.all(3),
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          _selectButton(
+                                              'Full Day', height, width),
+                                          _selectButton(
+                                              '1st Half', height, width),
+                                          _selectButton(
+                                              '2nd Half', height, width),
+                                        ]),
+                                  ),
                                 ),
                               ),
                             ),
                             Visibility(
-                              visible: _selectedLeaveType == 'Casual Leave',
-                              child: SizedBox(
-                                height: height * 0.015,
-                              ),
-                            ),
-                            Visibility(
-                                visible: _selectedLeaveType == 'Casual Leave',
-                                child: startDateLeave(height, width, context)),
-                            Visibility(
-                                visible: _selectedLeaveType != 'Casual Leave',
-                                child: Column(
+                              visible: _selectedLeaveType == 'Short-Leave',
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 11),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
                                   children: [
-                                    startDateLeave(height, width, context),
-                                    SizedBox(
-                                      height: height * 0.015,
+                                    Card(
+                                      color: AppColor.mainFGColor,
+                                      elevation: 4,
+                                      margin: EdgeInsets.all(0),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      shadowColor:
+                                          Colors.black.withOpacity(0.1),
+                                      child: SizedBox(
+                                          width: width / 2.5,
+                                          height: height * 0.05,
+                                          child: Center(
+                                              child: Text(
+                                                  'Date : $shortLeaveDate'))),
                                     ),
-                                    endDateLeave(height, width, context)
+                                    Card(
+                                      color: AppColor.mainFGColor,
+                                      elevation: 4,
+                                      margin: EdgeInsets.all(0),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      shadowColor:
+                                          Colors.black.withOpacity(0.1),
+                                      child: SizedBox(
+                                          width: width / 2.5,
+                                          height: height * 0.05,
+                                          child: Center(
+                                              child: Text(
+                                                  'Time : ${DateFormat('HH:mm').format(shiftendTime.subtract(Duration(hours: 1)))}'))),
+                                    ),
                                   ],
-                                )),
-                            SizedBox(
-                              height: height * 0.015,
+                                ),
+                              ),
                             ),
+                            Visibility(
+                                visible: _selectedLeaveType != 'Short-Leave',
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          _buildDateSelection(
+                                              startDateController
+                                                      .text.isNotEmpty
+                                                  ? startDateController.text
+                                                  : 'Select Start Date',
+                                              height,
+                                              width),
+                                          if (_selectedText == 'Full Day' ||
+                                              _selectedLeaveType!
+                                                  .contains('Medical'))
+                                            _buildDateSelection2(
+                                                endDateController
+                                                        .text.isNotEmpty
+                                                    ? endDateController.text
+                                                    : 'Select End Date',
+                                                height,
+                                                width),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                )),
                             Card(
                               color: AppColor.mainFGColor,
                               elevation: 4,
@@ -498,11 +575,11 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               ),
                             ),
                             SizedBox(
-                              height: height * 0.05,
+                              height: height * 0.03,
                             ),
                             InkWell(
                               onTap: () async {
-                                checkConditions();
+                                validation();
                               },
                               child: Container(
                                 width: width / 2,
@@ -531,22 +608,85 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               ),
                             ),
                             SizedBox(
-                              height: height * 0.01,
+                              height: height * 0.02,
+                            ),
+                            Column(
+                              children: [
+                                Text(
+                                  "Leave Instructions",
+                                  style: TextStyle(
+                                    fontSize: height * 0.014,
+                                    fontWeight: FontWeight.w400,
+                                    color: AppColor.mainThemeColor,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: height * 0.02,
+                                ),
+                                SizedBox(
+                                    height: height * 0.2,
+                                    child: _selectedLeaveType != null &&
+                                            _selectedLeaveType!
+                                                .contains('Casual')
+                                        ? ListView(
+                                            children: [
+                                              _buildBulletPoint(
+                                                  'Casual leaves can be applied for a minimum of 1 day and a maximum of 2 days at a time, including half-days'),
+                                              _buildBulletPoint(
+                                                  'Applying for past day is not allowed'),
+                                              _buildBulletPoint(
+                                                  'Uninformed leaves will automatically be deducted as Casual Leaves.'),
+                                              _buildBulletPoint(
+                                                  'Any unused Casual Leaves will lapse at the end of each quarter.'),
+                                            ],
+                                          )
+                                        : _selectedLeaveType != null &&
+                                                _selectedLeaveType!
+                                                    .contains('Medical')
+                                            ? ListView(
+                                                children: [
+                                                  _buildBulletPoint(
+                                                      'Medical leaves can be applied only for past days'),
+                                                  _buildBulletPoint(
+                                                      'Medical leaves can be applied for a minimum of 1 day and a maximum of 6 days at a time.'),
+                                                  _buildBulletPoint(
+                                                      'A valid medical certificate or prescription is mandatory for availing Medical Leaves.'),
+                                                  _buildBulletPoint(
+                                                      'These leaves lapse after 6 months if unused.'),
+                                                ],
+                                              )
+                                            : _selectedLeaveType != null &&
+                                                    _selectedLeaveType!
+                                                        .contains('Short')
+                                                ? ListView(
+                                                    children: [
+                                                      _buildBulletPoint(
+                                                          'Short leave can only be applied for today, before leaving the office.'),
+                                                      _buildBulletPoint(
+                                                          'The leave timing will be auto-selected for 1 hour before your shift end time.'),
+                                                      _buildBulletPoint(
+                                                          'Make sure to apply for short leave before your shift concludes.'),
+                                                    ],
+                                                  )
+                                                : _selectedLeaveType != null &&
+                                                        _selectedLeaveType!
+                                                            .contains('Earned')
+                                                    ? ListView(
+                                                        children: [
+                                                          _buildBulletPoint(
+                                                              'Earned leave can be applied for a minimum of 1 day and a maximum of 7 days, depending on available leave balance.'),
+                                                          _buildBulletPoint(
+                                                              'Earned leave can also be taken as half days if required.'),
+                                                          _buildBulletPoint(
+                                                              'Make sure you have enough leave balance before applying for earned leave.'),
+                                                        ],
+                                                      )
+                                                    : SizedBox())
+                              ],
                             ),
                           ],
                         ),
                       ),
-                      TextButton(
-                          onPressed: () => showCupertinoModalBottomSheet(
-                                expand: true,
-                                context: context,
-                                barrierColor:
-                                    const Color.fromARGB(130, 0, 0, 0),
-                                backgroundColor:
-                                    const Color.fromARGB(255, 255, 255, 255),
-                                builder: (context) => LeavePolicyScreen(),
-                              ),
-                          child: Text('See Leave Policy'))
                     ],
                   ),
                 ),
@@ -554,638 +694,91 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
             )));
   }
 
-  Card endDateLeave(double height, double width, BuildContext context) {
-    return Card(
-      color: AppColor.mainFGColor,
-      elevation: 4,
-      margin: EdgeInsets.all(0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      shadowColor: Colors.black.withOpacity(0.1),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(
-              height: height * 0.03,
-              width: width / 1.2,
-              child: TextField(
-                textAlign: TextAlign.center,
-                readOnly: true,
-                controller: endDateController,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
-                ),
-                decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  contentPadding: EdgeInsets.all(0),
-                  enabledBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none),
-                  border: OutlineInputBorder(borderSide: BorderSide.none),
-                  focusedBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none),
-                  hintText: 'Select End Date',
-                ),
-                onTap: () {
-                  showModalBottomSheet(
-                    backgroundColor: AppColor.mainFGColor,
-                    context: context,
-                    builder: (context) {
-                      return Container(
-                        height: height * 0.35,
-                        width: MediaQuery.of(context).size.width,
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Column(
-                            children: [
-                              Container(
-                                height: height * 0.22,
-                                child: CupertinoTheme(
-                                  data: CupertinoThemeData(
-                                    brightness: Brightness.light,
-                                  ),
-                                  child: CupertinoDatePicker(
-                                    mode: CupertinoDatePickerMode.date,
-                                    use24hFormat: false,
-                                    maximumDate: _selectedLeaveType!
-                                            .contains('Medical')
-                                        ? DateTime.now()
-                                            .subtract(Duration(days: 1))
-                                        : _selectedLeaveType!.contains('Earned')
-                                            ? DateTime.parse(
-                                                    startDateController.text)
-                                                .add(Duration(days: 6))
-                                            : null,
-                                    minimumDate: _selectedLeaveType!
-                                            .contains('Medical')
-                                        ? DateTime.now()
-                                            .subtract(Duration(days: 5))
-                                        : _selectedLeaveType!.contains('Earned')
-                                            ? DateTime.parse(
-                                                startDateController.text)
-                                            : null,
-                                    initialDateTime:
-                                        _selectedLeaveType!.contains('Earned')
-                                            ? DateTime.parse(
-                                                startDateController.text)
-                                            : null,
-                                    onDateTimeChanged: (DateTime newDate) {
-                                      selectedendDate = newDate;
-                                    },
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      InkWell(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                3,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                color: AppColor.mainBGColor),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 30,
-                                                      vertical: 10),
-                                              child: Center(
-                                                child: Text(
-                                                  'CANCEL',
-                                                  style: TextStyle(
-                                                      color: Colors.black87,
-                                                      fontSize: height * 0.016),
-                                                ),
-                                              ),
-                                            )),
-                                      ),
-                                      InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            endDateController.text =
-                                                DateFormat('yyyy-MM-dd')
-                                                    .format(selectedendDate);
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                3,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                color:
-                                                    AppColor.primaryThemeColor),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 30,
-                                                      vertical: 10),
-                                              child: Center(
-                                                child: Text(
-                                                  'SELECT',
-                                                  style: TextStyle(
-                                                      color:
-                                                          AppColor.mainFGColor,
-                                                      fontSize: height * 0.016),
-                                                ),
-                                              ),
-                                            )),
-                                      ),
-                                    ]),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+  Widget _buildBulletPoint(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Icon(Icons.circle, size: 8, color: AppColor.mainThemeColor),
+          ),
+          SizedBox(width: 8),
+          Expanded(
+              child: Padding(
+            padding: const EdgeInsets.only(left: 24.0),
+            child: Text(
+              text,
+              style: TextStyle(fontSize: 13, color: AppColor.mainTextColor2),
             ),
-          ],
-        ),
+          )),
+        ],
       ),
     );
   }
 
-  Card startDateLeave(double height, double width, BuildContext context) {
-    return Card(
-      color: AppColor.mainFGColor,
-      elevation: 4,
-      margin: EdgeInsets.all(0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      shadowColor: Colors.black.withOpacity(0.1),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(
-              height: height * 0.03,
-              width: width / 1.2,
-              child: TextField(
-                textAlign: TextAlign.center,
-                readOnly: true,
-                controller: startDateController,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
-                ),
-                decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  contentPadding: EdgeInsets.all(0),
-                  enabledBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none),
-                  border: OutlineInputBorder(borderSide: BorderSide.none),
-                  focusedBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none),
-                  hintText: _selectedLeaveType == 'Casual Leave'
-                      ? 'Select Date'
-                      : 'Select Start Date',
-                ),
-                onTap: () {
-                  DateTime minDate = DateTime.now();
-                  if (_selectedLeaveType == 'Medical Leave') {
-                    minDate = DateTime.now().subtract(Duration(days: 6));
-                    print(minDate.day);
-                  }
-
-                  showModalBottomSheet(
-                    backgroundColor: AppColor.mainFGColor,
-                    context: context,
-                    builder: (context) {
-                      return SizedBox(
-                        height: height * 0.35,
-                        width: MediaQuery.of(context).size.width,
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: height * 0.22,
-                                child: CupertinoTheme(
-                                    data: CupertinoThemeData(
-                                      brightness: Brightness.light,
-                                    ),
-                                    child: _selectedLeaveType!
-                                            .contains('Medical')
-                                        ? CupertinoDatePicker(
-                                            mode: CupertinoDatePickerMode.date,
-                                            use24hFormat: false,
-                                            maximumDate: DateTime.now()
-                                                .subtract(Duration(days: 2)),
-                                            minimumDate: DateTime.now()
-                                                .subtract(Duration(days: 6)),
-                                            onDateTimeChanged:
-                                                (DateTime newDate) {
-                                              selectedStartDate = newDate;
-                                            },
-                                          )
-                                        : CupertinoDatePicker(
-                                            mode: CupertinoDatePickerMode.date,
-                                            use24hFormat: false,
-                                            minimumDate: _selectedLeaveType!
-                                                    .contains('Earned')
-                                                ? DateTime.now()
-                                                    .add(Duration(days: 1))
-                                                : _selectedLeaveType!
-                                                        .contains('Casual')
-                                                    ? DateTime(
-                                                        DateTime.now().year,
-                                                        DateTime.now().month,
-                                                        1)
-                                                    : null,
-                                            maximumDate: _selectedLeaveType!
-                                                    .contains('Casual')
-                                                ? DateTime(DateTime.now().year,
-                                                    DateTime.now().month + 1, 0)
-                                                : null,
-                                            onDateTimeChanged:
-                                                (DateTime newDate) {
-                                              setState(() {
-                                                selectedStartDate = newDate;
-                                              });
-                                            },
-                                          )),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      InkWell(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                3,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                color: AppColor.mainBGColor),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 30,
-                                                      vertical: 10),
-                                              child: Center(
-                                                child: Text(
-                                                  'CANCEL',
-                                                  style: TextStyle(
-                                                      color: Colors.black87,
-                                                      fontSize: height * 0.016),
-                                                ),
-                                              ),
-                                            )),
-                                      ),
-                                      InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            startDateController.text =
-                                                DateFormat('yyyy-MM-dd')
-                                                    .format(selectedStartDate);
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                3,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                color:
-                                                    AppColor.primaryThemeColor),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 30,
-                                                      vertical: 10),
-                                              child: Center(
-                                                child: Text(
-                                                  'SELECT',
-                                                  style: TextStyle(
-                                                      color:
-                                                          AppColor.mainFGColor,
-                                                      fontSize: height * 0.016),
-                                                ),
-                                              ),
-                                            )),
-                                      ),
-                                    ]),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Container forHalfDay(double height, double width, BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+  Widget _buildDateSelection(
+    String text,
+    double height,
+    double width,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        startDate(context, _selectedLeaveType!, _selectedText);
+      },
+      child: Card(
         color: AppColor.mainFGColor,
+        elevation: 4,
+        margin: EdgeInsets.all(0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        shadowColor: Colors.black.withOpacity(0.1),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+          child: SizedBox(
+            width: width / 2.5,
+            child: Center(
+              child: Text(text,
+                  style: TextStyle(
+                      color: const Color.fromARGB(255, 128, 128, 128),
+                      fontSize: 16)),
+            ),
+          ),
+        ),
       ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(
-              height: height * 0.03,
-              width: width / 3,
-              child: TextField(
-                textAlign: TextAlign.center,
-                readOnly: true,
-                controller: selectFromTime,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
-                ),
-                decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  contentPadding: EdgeInsets.all(0),
-                  enabledBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none),
-                  border: OutlineInputBorder(borderSide: BorderSide.none),
-                  focusedBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none),
-                  hintText: 'Select Time',
-                ),
-                onTap: () {
-                  showModalBottomSheet(
-                    backgroundColor: AppColor.mainFGColor,
-                    context: context,
-                    builder: (context) {
-                      return Container(
-                        height: height * 0.35,
-                        width: MediaQuery.of(context).size.width,
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Column(
-                            children: [
-                              Container(
-                                height: height * 0.22,
-                                child: CupertinoTheme(
-                                  data: CupertinoThemeData(
-                                    brightness: Brightness.light,
-                                  ),
-                                  child: CupertinoDatePicker(
-                                      initialDateTime: DateTime.now(),
-                                      mode: CupertinoDatePickerMode.time,
-                                      use24hFormat: false,
-                                      showDayOfWeek: true,
-                                      minimumDate: DateTime.now(),
-                                      onDateTimeChanged: (DateTime newDate) {
-                                        fromtime = newDate;
-                                      }),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      InkWell(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                3,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                color: AppColor.mainBGColor),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 30,
-                                                      vertical: 10),
-                                              child: Center(
-                                                child: Text(
-                                                  'CANCEL',
-                                                  style: TextStyle(
-                                                      color: Colors.black87,
-                                                      fontSize: height * 0.016),
-                                                ),
-                                              ),
-                                            )),
-                                      ),
-                                      InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            selectFromTime.text ==
-                                                "${fromtime!.hour}:${fromtime!.minute}";
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                3,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                color:
-                                                    AppColor.primaryThemeColor),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 30,
-                                                      vertical: 10),
-                                              child: Center(
-                                                child: Text(
-                                                  'SELECT',
-                                                  style: TextStyle(
-                                                      color:
-                                                          AppColor.mainFGColor,
-                                                      fontSize: height * 0.016),
-                                                ),
-                                              ),
-                                            )),
-                                      ),
-                                    ]),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+    );
+  }
+
+  Widget _buildDateSelection2(
+    String text,
+    double height,
+    double width,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        endDate(context, _selectedLeaveType!, _selectedText);
+      },
+      child: Card(
+        color: AppColor.mainFGColor,
+        elevation: 4,
+        margin: EdgeInsets.all(0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        shadowColor: Colors.black.withOpacity(0.1),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+          child: SizedBox(
+            width: width / 2.5,
+            child: Center(
+              child: Text(text,
+                  style: TextStyle(
+                      color: const Color.fromARGB(255, 128, 128, 128),
+                      fontSize: 16)),
             ),
-            Text(
-              'To',
-              style: TextStyle(color: Colors.black87, fontSize: height * 0.016),
-            ),
-            SizedBox(
-              height: height * 0.03,
-              width: width / 3,
-              child: TextField(
-                textAlign: TextAlign.center,
-                readOnly: true,
-                controller: selectToTime,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
-                ),
-                decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  contentPadding: EdgeInsets.all(0),
-                  enabledBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none),
-                  border: OutlineInputBorder(borderSide: BorderSide.none),
-                  focusedBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none),
-                  hintText: 'Select Time',
-                ),
-                onTap: () {
-                  showModalBottomSheet(
-                    backgroundColor: AppColor.mainFGColor,
-                    context: context,
-                    builder: (context) {
-                      return Container(
-                        height: height * 0.35,
-                        width: MediaQuery.of(context).size.width,
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Column(
-                            children: [
-                              Container(
-                                height: height * 0.22,
-                                child: CupertinoTheme(
-                                  data: CupertinoThemeData(
-                                    brightness: Brightness.light,
-                                  ),
-                                  child: CupertinoDatePicker(
-                                      initialDateTime: DateTime.now(),
-                                      mode: CupertinoDatePickerMode.time,
-                                      use24hFormat: false,
-                                      showDayOfWeek: true,
-                                      minimumDate: DateTime.now(),
-                                      onDateTimeChanged: (DateTime newDate) {
-                                        toTime = newDate;
-                                      }),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      InkWell(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                3,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                color: AppColor.mainBGColor),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 30,
-                                                      vertical: 10),
-                                              child: Center(
-                                                child: Text(
-                                                  'CANCEL',
-                                                  style: TextStyle(
-                                                      color: Colors.black87,
-                                                      fontSize: height * 0.016),
-                                                ),
-                                              ),
-                                            )),
-                                      ),
-                                      InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            selectToTime.text ==
-                                                "${toTime!.hour}:${toTime!.minute}";
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                3,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                color:
-                                                    AppColor.primaryThemeColor),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 30,
-                                                      vertical: 10),
-                                              child: Center(
-                                                child: Text(
-                                                  'SELECT',
-                                                  style: TextStyle(
-                                                      color:
-                                                          AppColor.mainFGColor,
-                                                      fontSize: height * 0.016),
-                                                ),
-                                              ),
-                                            )),
-                                      ),
-                                    ]),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

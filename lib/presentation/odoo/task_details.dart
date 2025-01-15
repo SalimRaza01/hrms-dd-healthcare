@@ -334,21 +334,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                             ),
                           ),
                         ),
-                        SizedBox(height: height * 0.02,),
-                         _activityCard(
-                          context,
-                          userName: 'Nadeem Akhtar',
-                          timeAgo: '4 days ago',
-                          mainContent: 'None → Task Created',
-                          subContent: 'Created Date: 10/01/2025 15:36:12',
-                        ),
-                        _activityCard(
-                          context,
-                          userName: 'Salim Raza',
-                          timeAgo: '4 days ago',
-                          mainContent: 'Running Late → Review',
-                          subContent: 'Submission Date: 10/01/2025 15:36:12',
-                        ),
+                        
                        
                       ],
                     );
@@ -356,55 +342,6 @@ class _TaskDetailsState extends State<TaskDetails> {
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _activityCard(
-    BuildContext context, {
-    required String userName,
-    required String timeAgo,
-    required String mainContent,
-    required String subContent,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      userName,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      timeAgo,
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4),
-                Text(
-                  mainContent,
-                  style: TextStyle(fontSize: 14),
-                ),
-                if (subContent.isNotEmpty) ...[
-                  SizedBox(height: 4),
-                  Text(
-                    subContent,
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 

@@ -390,7 +390,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton.extended(
+ floatingActionButton:        _authBox.get('role') == 'Manager' ? FloatingActionButton.extended(
           backgroundColor: AppColor.mainThemeColor,
           onPressed: () => showCupertinoModalBottomSheet(
             expand: true,
@@ -403,7 +403,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
             'Create Project',
             style: TextStyle(color: AppColor.mainFGColor),
           ),
-        ));
+        ) : null );
   }
 
   projectCard(double height, double width, String projectCount,

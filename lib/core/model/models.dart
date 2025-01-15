@@ -18,7 +18,6 @@ class LeaveBalance {
   final String earnedLeave;
   final String paternityLeave;
   final String maternityLeave;
-  final String compOffLeave;
 
   LeaveBalance({
     required this.casualLeave,
@@ -26,7 +25,6 @@ class LeaveBalance {
     required this.earnedLeave,
     required this.paternityLeave,
     required this.maternityLeave,
-    required this.compOffLeave,
   });
 
   factory LeaveBalance.fromJson(Map<String, dynamic> json) {
@@ -36,7 +34,6 @@ class LeaveBalance {
       earnedLeave: json['earnedLeave'],
       paternityLeave: json['paternityLeave'],
       maternityLeave: json['maternityLeave'],
-      compOffLeave: json['compOffLeave'],
     );
   }
 }
@@ -56,6 +53,8 @@ class Attendance {
   final int earlyBy;
   final int weekOff;
   final int isHoliday;
+  final String leaveType;
+  final bool isLeaveTaken;
   Attendance(
       {required this.employeeName,
       required this.employeeCode,
@@ -70,24 +69,29 @@ class Attendance {
       required this.lateby,
       required this.earlyBy,
       required this.weekOff,
-      required this.isHoliday});
+      required this.isHoliday,
+      required this.leaveType,
+      required this.isLeaveTaken});
 
   factory Attendance.fromJson(Map<String, dynamic> json) {
     return Attendance(
-        employeeName: json['EmployeeName'] ?? '',
-        employeeCode: json['EmployeeCode'] ?? '',
-        gender: json['Gender'] ?? '',
-        employmentType: json['EmployementType'] ?? '',
-        attendanceDate: json['AttendanceDate'] ?? '',
-        inTime: json['InTime'] ?? '',
-        outTime: json['OutTime'] ?? '',
-        status: json['Status'] ?? '',
-        duration: json['Duration'] ?? 0,
-        punchRecords: json['PunchRecords'] ?? '',
-        lateby: json['LateBy'] ?? 0,
-        earlyBy: json['EarlyBy'] ?? 0,
-        weekOff: json['WeeklyOff'] ?? '',
-        isHoliday: json['Holiday'] ?? 0);
+      employeeName: json['EmployeeName'] ?? '',
+      employeeCode: json['EmployeeCode'] ?? '',
+      gender: json['Gender'] ?? '',
+      employmentType: json['EmployementType'] ?? '',
+      attendanceDate: json['AttendanceDate'] ?? '',
+      inTime: json['InTime'] ?? '',
+      outTime: json['OutTime'] ?? '',
+      status: json['Status'] ?? '',
+      duration: json['Duration'] ?? 0,
+      punchRecords: json['PunchRecords'] ?? '',
+      lateby: json['LateBy'] ?? 0,
+      earlyBy: json['EarlyBy'] ?? 0,
+      weekOff: json['WeeklyOff'] ?? '',
+      isHoliday: json['Holiday'] ?? 0,
+      leaveType: json['leaveType'] ?? '',
+      isLeaveTaken: json['isLeaveTaken'] ?? false,
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -106,6 +110,8 @@ class Attendance {
       'EarlyBy': earlyBy,
       'WeeklyOff': weekOff,
       'Holiday': isHoliday,
+      'leaveType': leaveType,
+      'isLeaveTaken': isLeaveTaken,
     };
   }
 }
@@ -451,7 +457,6 @@ class OdooProjectList {
   }
 }
 
-
 class OdooTaskList {
   final int id;
   final String name;
@@ -504,11 +509,9 @@ class EmployeeOnLeave {
   final String employeeName;
   final String gender;
 
-
   EmployeeOnLeave({
     required this.employeeName,
     required this.gender,
-
   });
 
   factory EmployeeOnLeave.fromJson(Map<String, dynamic> json) {
