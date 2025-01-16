@@ -2,6 +2,8 @@ import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:dio/dio.dart';
@@ -16,6 +18,7 @@ class TaskDetails extends StatefulWidget {
 }
 
 class _TaskDetailsState extends State<TaskDetails> {
+  final Box _authBox = Hive.box('authBox');
   late int taskID;
   TextEditingController noteController = TextEditingController();
   List<String> assignees = [];
@@ -114,7 +117,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                 ? 0
                                 : task['stage_name'] == 'In Progress'
                                     ? 1
-                                    : task['stage_name'] == 'On Hold'
+                                    : task['stage_name'] == 'Hold'
                                         ? 2
                                         : task['stage_name'] == 'Review'
                                             ? 2
@@ -122,7 +125,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                                 ? 3
                                                 : task['stage_name'] ==
                                                         'Running Late'
-                                                    ? 4
+                                                    ? 3
                                                     : 0,
                             lineStyle: const LineStyle(
                               lineLength: 50,
@@ -153,7 +156,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                 icon: Icon(CupertinoIcons.timelapse),
                                 title: 'Progress',
                               ),
-                              task['stage_name'] == 'On Hold'
+                              task['stage_name'] == 'Hold'
                                   ? EasyStep(
                                       icon: Icon(CupertinoIcons.hand_raised),
                                       title: 'Hold',
@@ -163,14 +166,15 @@ class _TaskDetailsState extends State<TaskDetails> {
                                           Icon(CupertinoIcons.doc_text_search),
                                       title: 'Review',
                                     ),
-                              EasyStep(
-                                icon: Icon(CupertinoIcons.flag),
-                                title: 'Completed',
-                              ),
-                              EasyStep(
-                                icon: Icon(CupertinoIcons.timer),
-                                title: 'Late',
-                              ),
+                              task['stage_name'] == 'Running Late'
+                                  ? EasyStep(
+                                      icon: Icon(CupertinoIcons.timer),
+                                      title: 'Late',
+                                    )
+                                  : EasyStep(
+                                      icon: Icon(CupertinoIcons.flag),
+                                      title: 'Completed',
+                                    )
                             ],
                           ),
                         ),
@@ -334,14 +338,168 @@ class _TaskDetailsState extends State<TaskDetails> {
                             ),
                           ),
                         ),
-                        
-                       
+                        //for user or assigness
+                        Visibility(
+                          visible: task['task_creator_email'] ==
+                              _authBox.get('email'),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Visibility(
+                                  visible: task['stage_name'] == 'Hold',
+                                  child: taskActionButtons(
+                                      height,
+                                      width,
+                                      CupertinoIcons.multiply_square_fill,
+                                      'Cancel',
+                                      Colors.red,
+                                      task['id']),
+                                ),
+                                Visibility(
+                                  visible: task['stage_name'] == 'Redo' ||
+                                      task['stage_name'] == 'Running Late' ||
+                                      task['stage_name'] == 'Review',
+                                  child: taskActionButtons(
+                                      height,
+                                      width,
+                                      CupertinoIcons.flag_fill,
+                                      'Completed',
+                                      Colors.green,
+                                      task['id']),
+                                ),
+                                Visibility(
+                                  visible: task['stage_name'] == 'Review',
+                                  child: taskActionButtons(
+                                      height,
+                                      width,
+                                      CupertinoIcons.arrow_up_left_circle_fill,
+                                      'Redo',
+                                      Colors.red,
+                                      task['id']),
+                                ),
+                                Visibility(
+                                  visible: task['stage_name'] == 'Created' ||
+                                      task['stage_name'] == 'Redo' ||
+                                      task['stage_name'] == 'Running Late' ||
+                                      task['stage_name'] == 'Completed' ||
+                                      task['stage_name'] == 'Cancel' ||
+                                      task['stage_name'] == 'In Progress',
+                                  child: taskActionButtons(
+                                      height,
+                                      width,
+                                      CupertinoIcons.hand_raised_fill,
+                                      'Hold',
+                                      Colors.amber,
+                                      task['id']),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: task['task_creator_email'] !=
+                              _authBox.get('email'),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Visibility(
+                                  visible: task['stage_name'] == 'Created' ||
+                                      task['stage_name'] == 'Redo' ||
+                                      task['stage_name'] == 'Running Late' ||
+                                      task['stage_name'] == 'Hold' ||
+                                      task['stage_name'] == 'Cancel',
+                                  child: taskActionButtons(
+                                      height,
+                                      width,
+                                      CupertinoIcons.play_fill,
+                                      'Start Task',
+                                      Colors.green,
+                                      task['id']),
+                                ),
+                                Visibility(
+                                  visible:
+                                      task['stage_name'] == 'In Progress' ||
+                                          task['stage_name'] == 'Running Late',
+                                  child: taskActionButtons(
+                                      height,
+                                      width,
+                                      CupertinoIcons.doc_text_search,
+                                      'Send for Review',
+                                      Colors.blue,
+                                      task['id']),
+                                ),
+                                Visibility(
+                                  visible: task['stage_name'] == 'Hold',
+                                  child: taskActionButtons(
+                                      height,
+                                      width,
+                                      CupertinoIcons.multiply_square_fill,
+                                      'Cancel',
+                                      Colors.red,
+                                      task['id']),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     );
                   }).toList(),
                 ),
               ),
             ),
+    );
+  }
+
+  taskActionButtons(double height, double width, IconData icon, String text,
+      Color? color, int taskID) {
+    return InkWell(
+      onTap: () async {
+        await changeTaskStage(
+            context,
+            taskID,
+            text == 'Start Task'
+                ? 'In Progress'
+                : text == 'Send for Review'
+                    ? 'Review'
+                    : text);
+        await _fetchTasks();
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(right: 10),
+        child: Container(
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              child: Center(
+                child: Row(
+                  children: [
+                    Icon(
+                      icon,
+                      size: height * 0.018,
+                      color: Colors.white,
+                    ),
+                    SizedBox(
+                      width: width * 0.02,
+                    ),
+                    Text(
+                      text,
+                      style: TextStyle(
+                          color: AppColor.mainFGColor,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ),
+            )),
+      ),
     );
   }
 

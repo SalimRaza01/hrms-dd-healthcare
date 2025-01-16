@@ -560,45 +560,45 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                         ),
                                       ),
                                     ),
-                                    Visibility(
-                                      visible: leave.location.isNotEmpty,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(top: 12),
-                                        child: Container(
-                                          width: width,
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: AppColor.mainBGColor,
-                                                width: 2),
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            color: Colors.white,
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.file_copy_rounded,
-                                                  color: Colors.blue,
-                                                  size: height * 0.013,
-                                                ),
-                                                SizedBox(width: width * 0.03),
-                                                Text(
-                                                  'IMG_45544871.JPG',
-                                                  style: TextStyle(
-                                                    color:
-                                                        AppColor.mainTextColor2,
-                                                    fontSize: height * 0.012,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    // Visibility(
+                                    //   visible: leave.location.isNotEmpty,
+                                    //   child: Padding(
+                                    //     padding: const EdgeInsets.only(top: 12),
+                                    //     child: Container(
+                                    //       width: width,
+                                    //       decoration: BoxDecoration(
+                                    //         border: Border.all(
+                                    //             color: AppColor.mainBGColor,
+                                    //             width: 2),
+                                    //         borderRadius:
+                                    //             BorderRadius.circular(12),
+                                    //         color: Colors.white,
+                                    //       ),
+                                    //       child: Padding(
+                                    //         padding: const EdgeInsets.all(8.0),
+                                    //         child: Row(
+                                    //           children: [
+                                    //             Icon(
+                                    //               Icons.file_copy_rounded,
+                                    //               color: Colors.blue,
+                                    //               size: height * 0.013,
+                                    //             ),
+                                    //             SizedBox(width: width * 0.03),
+                                    //             Text(
+                                    //               'IMG_45544871.JPG',
+                                    //               style: TextStyle(
+                                    //                 color:
+                                    //                     AppColor.mainTextColor2,
+                                    //                 fontSize: height * 0.012,
+                                    //                 fontWeight: FontWeight.w500,
+                                    //               ),
+                                    //             ),
+                                    //           ],
+                                    //         ),
+                                    //       ),
+                                    //     ),
+                                    //   ),
+                                    // ),
                                     Visibility(
                                       visible: leave.status == 'Pending',
                                       child: Padding(

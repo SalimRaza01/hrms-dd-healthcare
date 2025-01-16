@@ -128,7 +128,7 @@ class AuthProvider with ChangeNotifier {
       print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Invalid user credential'),
+           content: Text(e.response!.data['message']),
           backgroundColor: Colors.red,
         ),
       );
@@ -147,8 +147,6 @@ Future<void> applyLeave(
   String mgrId = _authBox.get('managerId');
   String empID = _authBox.get('employeeId');
   String token = _authBox.get('token');
-  print(
-      '$leaveType $startDate $endDate $totalDays $_selectedText $empID $mgrId');
 
   try {
     final response = await dio.post('$employeeApplyLeave/$empID',
@@ -167,7 +165,10 @@ Future<void> applyLeave(
                           ? 'shortLeave'
                           : null,
           "leaveStartDate": startDate,
-          "leaveEndDate": _selectedText.contains('1st Half') ? " " : endDate,
+          "leaveEndDate": _selectedText.contains('1st Half') ||
+                  _selectedText.contains('2nd Half')
+              ? " "
+              : endDate,
           "totalDays": totalDays,
           "reason": reason,
           "approvedBy": mgrId,
@@ -182,19 +183,12 @@ Future<void> applyLeave(
           backgroundColor: Colors.green,
         ),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${response.data}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    } 
   } on DioException catch (e) {
-    print('Dio Exception: ${e.message}');
+    print(e.response);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Request failed: ${e.message}'),
+        content: Text(e.response!.data['message']),
         backgroundColor: Colors.red,
       ),
     );
@@ -283,18 +277,48 @@ Future<void> applyRegularize(
           backgroundColor: Colors.green,
         ),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Something Wrong : ${response.statusMessage}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  } on DioException {
+    } 
+  } on DioException catch(e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Request failed: No regularization available'),
+        content: Text(e.response!.data['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+Future<void> applyShortLeave(
+  BuildContext context,
+  String startDate,
+  String reason,
+) async {
+  String empID = _authBox.get('employeeId');
+  String token = _authBox.get('token');
+
+  try {
+    final response = await dio.post('$applyRegularization/$empID',
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }),
+        data: {
+          "leaveType": 'shortLeave',
+          "leaveStartDate": startDate,
+          "reason": reason,
+        });
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Request submitted successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } 
+  } on DioException catch(e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.response!.data['message']),
         backgroundColor: Colors.red,
       ),
     );
@@ -349,10 +373,9 @@ Future<void> leaveAction(
       );
     }
   } on DioException catch (e) {
-    print('Dio Exception: ${e.message}');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('failed: ${e.message}'),
+        content: Text(e.response!.data['message']),
         backgroundColor: Colors.red,
       ),
     );
@@ -381,10 +404,13 @@ Future<List<EmployeeProfile>> fetchTeamList() async {
 
 Future<void> sendPasswordOTP(
     BuildContext context, String email, String screen) async {
+      try{
   final response = await dio.post(sentOTP, data: {
     "email": email,
   });
-  if (response.statusCode == 200) {
+ 
+
+ if (response.statusCode == 200) {
     print(response.data);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -398,22 +424,15 @@ Future<void> sendPasswordOTP(
             context, MaterialPageRoute(builder: (context) => OTPScren(email)));
       });
     }
-  } else {
+  } 
+  } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Something Wrong ${response}'),
+          content: Text(e.response!.data['message']),
         backgroundColor: Colors.red,
       ),
     );
   }
-  // } on DioException {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text('Failed to send OTP ${}'),
-  //       backgroundColor: Colors.red,
-  //     ),
-  //   );
-  // }
 }
 
 Future<void> verifyPasswordOTP(
@@ -442,10 +461,10 @@ Future<void> verifyPasswordOTP(
         ),
       );
     }
-  } on DioException {
+  } on DioException catch(e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Something Went Wrong'),
+          content: Text(e.response!.data['message']),
         backgroundColor: Colors.red,
       ),
     );
@@ -479,10 +498,10 @@ Future<void> createNewPass(
         ),
       );
     }
-  } on DioException {
+  } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Something Went Wrong'),
+         content: Text(e.response!.data['message']),
         backgroundColor: Colors.red,
       ),
     );
@@ -622,5 +641,41 @@ Future<List<EmployeeOnLeave>> fetchEmployeeOnLeave() async {
     }
   } catch (e) {
     throw Exception('Error fetching data: $e');
+  }
+}
+
+Future<void> changeTaskStage(
+  BuildContext context,
+  int taskID,
+  String stageName,
+) async {
+  print(taskID);
+  print(stageName);
+  try {
+    final response = await dio.put('$putTaskStage/$taskID', data: {
+      "stage_name": stageName,
+    });
+    if (response.data['result']['status'] == 'success') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Status Updated'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Request Failed $response'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } on DioException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+         content: Text(e.response!.data['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 }

@@ -38,8 +38,6 @@ class _OdooDashboardState extends State<OdooDashboard> {
     ]);
   }
 
-
-
   Future<void> _fetchTasks() async {
     try {
       final response = await Dio().get(getOdootasks);
@@ -74,22 +72,22 @@ class _OdooDashboardState extends State<OdooDashboard> {
 
   List<Map<String, dynamic>> _getFilteredTasks() {
     List<Map<String, dynamic>> filteredTasks = tasks;
-    
 
     if (searchQuery.isNotEmpty) {
       filteredTasks = filteredTasks.where((task) {
         return task['name'].toLowerCase().contains(searchQuery.toLowerCase()) ||
-               task['description'].toLowerCase().contains(searchQuery.toLowerCase());
+            task['description']
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase());
       }).toList();
     }
-    
 
     if (selectedFilter == 'Today') {
       final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
       filteredTasks = filteredTasks.where((task) {
         return task['deadline_date']?.startsWith(today) ?? false;
       }).toList();
-    }  else if (selectedFilter == 'Deadline') {
+    } else if (selectedFilter == 'Deadline') {
       final today = DateTime.now();
       filteredTasks = filteredTasks.where((task) {
         DateTime? deadline = DateTime.tryParse(task['deadline_date'] ?? '');
@@ -135,7 +133,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
                 setState(() {
                   showSearch = !showSearch;
                   if (!showSearch) {
-                    searchQuery = ''; 
+                    searchQuery = '';
                   }
                 });
               },
@@ -150,7 +148,6 @@ class _OdooDashboardState extends State<OdooDashboard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-    
                 if (showSearch)
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 10),
@@ -170,7 +167,6 @@ class _OdooDashboardState extends State<OdooDashboard> {
                     ),
                   ),
 
-
                 // DropdownButton<String>(
                 //   value: selectedFilter,
                 //   onChanged: (value) {
@@ -186,7 +182,6 @@ class _OdooDashboardState extends State<OdooDashboard> {
                 //     );
                 //   }).toList(),
                 // ),
-
 
                 Text(
                   "Projects",
@@ -223,15 +218,18 @@ class _OdooDashboardState extends State<OdooDashboard> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        ViewProjects(projectName: item.name, projectID: item.id),
+                                    builder: (context) => ViewProjects(
+                                        projectName: item.name,
+                                        projectID: item.id),
                                   ),
                                 );
                               },
                               child: projectCard(
                                 height,
                                 width,
-                                index <= 8 ? 'Project : 0${index + 1}' : 'Project : ${index + 1}',
+                                index <= 8
+                                    ? 'Project : 0${index + 1}'
+                                    : 'Project : ${index + 1}',
                                 item.name,
                                 formattedDate,
                               ),
@@ -248,7 +246,6 @@ class _OdooDashboardState extends State<OdooDashboard> {
                   ),
                 ),
 
-       
                 SizedBox(height: height * 0.02),
                 Text(
                   "Today's Tasks",
@@ -264,8 +261,12 @@ class _OdooDashboardState extends State<OdooDashboard> {
                           itemCount: _getFilteredTasks().length,
                           itemBuilder: (context, index) {
                             final task = _getFilteredTasks()[index];
-                            String priority = task['priority'] != null && task['priority'].isNotEmpty
-                                ? task['priority'].toString().replaceAll('[', '').replaceAll(']', '')
+                            String priority = task['priority'] != null &&
+                                    task['priority'].isNotEmpty
+                                ? task['priority']
+                                    .toString()
+                                    .replaceAll('[', '')
+                                    .replaceAll(']', '')
                                 : 'Not Set';
 
                             return Padding(
@@ -294,49 +295,62 @@ class _OdooDashboardState extends State<OdooDashboard> {
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
                                                 Icon(
                                                   Icons.circle_outlined,
-                                                  color: AppColor.mainThemeColor,
+                                                  color:
+                                                      AppColor.mainThemeColor,
                                                   size: height * 0.018,
                                                 ),
                                                 SizedBox(width: width * 0.02),
                                                 SizedBox(
                                                   width: width / 1.5,
                                                   child: Text(
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                     task['name'],
                                                     style: TextStyle(
-                                                      color: AppColor.mainTextColor,
+                                                      color: AppColor
+                                                          .mainTextColor,
                                                       fontSize: height * 0.016,
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                   ),
                                                 ),
                                               ],
                                             ),
                                             Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 8.0),
                                               child: Container(
                                                 width: width,
                                                 decoration: BoxDecoration(
                                                   border: Border.all(
-                                                      color: const Color.fromARGB(14, 0, 0, 0)),
+                                                      color:
+                                                          const Color.fromARGB(
+                                                              14, 0, 0, 0)),
                                                   color: AppColor.mainBGColor,
-                                                  borderRadius: BorderRadius.circular(5),
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
                                                 ),
                                                 child: Padding(
-                                                  padding: const EdgeInsets.all(8.0),
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
                                                   child: Text(
                                                     //task['description'],
                                                     'Tap to View Task Details',
                                                     style: TextStyle(
-                                                      color: AppColor.mainTextColor2,
+                                                      color: AppColor
+                                                          .mainTextColor2,
                                                       fontSize: height * 0.015,
-                                                      fontWeight: FontWeight.w400,
+                                                      fontWeight:
+                                                          FontWeight.w400,
                                                     ),
                                                   ),
                                                 ),
@@ -390,20 +404,22 @@ class _OdooDashboardState extends State<OdooDashboard> {
             ),
           ),
         ),
- floatingActionButton:        _authBox.get('role') == 'Manager' ? FloatingActionButton.extended(
-          backgroundColor: AppColor.mainThemeColor,
-          onPressed: () => showCupertinoModalBottomSheet(
-            expand: true,
-            context: context,
-            barrierColor: const Color.fromARGB(130, 0, 0, 0),
-            backgroundColor: Colors.transparent,
-            builder: (context) => CreateProject(),
-          ),
-          label: Text(
-            'Create Project',
-            style: TextStyle(color: AppColor.mainFGColor),
-          ),
-        ) : null );
+        floatingActionButton: _authBox.get('role') == 'Manager'
+            ? FloatingActionButton.extended(
+                backgroundColor: AppColor.mainThemeColor,
+                onPressed: () => showCupertinoModalBottomSheet(
+                  expand: true,
+                  context: context,
+                  barrierColor: const Color.fromARGB(130, 0, 0, 0),
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => CreateProject(),
+                ),
+                label: Text(
+                  'Create Project',
+                  style: TextStyle(color: AppColor.mainFGColor),
+                ),
+              )
+            : null);
   }
 
   projectCard(double height, double width, String projectCount,
@@ -421,7 +437,6 @@ class _OdooDashboardState extends State<OdooDashboard> {
         child: Padding(
           padding: const EdgeInsets.all(2),
           child: Container(
-   
             width: width / 2,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),

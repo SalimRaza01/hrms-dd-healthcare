@@ -10,12 +10,11 @@ class PunchRecordScreen extends StatefulWidget {
   final String? regularizationDate;
   final int lateMinutes;
 
-
-  PunchRecordScreen(
-      {required this.punchRecords,
-      required this.regularizationDate,
-      required this.lateMinutes,
-});
+  PunchRecordScreen({
+    required this.punchRecords,
+    required this.regularizationDate,
+    required this.lateMinutes,
+  });
 
   @override
   State<PunchRecordScreen> createState() => _PunchRecordScreenState();
@@ -40,6 +39,15 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
     ]);
   }
 
+  void showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
   Future<void> checkEmployeeId() async {
     var box = await Hive.openBox('authBox');
     setState(() {
@@ -58,13 +66,13 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
         (widget.punchRecords?.split(',') ?? []).toSet().toList();
     // ..sort();
 
-
     return Scaffold(
       backgroundColor: AppColor.mainBGColor,
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          widget.lateMinutes > 15 && widget.lateMinutes < 30 &&
+          widget.lateMinutes > 15 &&
+                  widget.lateMinutes < 30 &&
                   date != DateTime.now() &&
                   date!.isAfter(DateTime.now().subtract(Duration(days: 8)))
               ? 'Apply Regularization'
@@ -83,7 +91,8 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Visibility(
-              visible:     widget.lateMinutes > 15 && widget.lateMinutes < 30 &&
+              visible: widget.lateMinutes > 15 &&
+                  widget.lateMinutes < 30 &&
                   date!.day != DateTime.now().day &&
                   date!.isAfter(DateTime.now().subtract(Duration(days: 8))),
               child: Column(
@@ -140,14 +149,11 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                   SizedBox(height: height * 0.01),
                   InkWell(
                     onTap: () async {
-                      if (reasonController.text.isNotEmpty) {
-                        print('sign in button');
+                      if (reasonController.text.isEmpty) {
+                        showSnackBar('Please describe the reason');
+                      } else {
                         await applyRegularize(context,
                             widget.regularizationDate!, reasonController.text);
-                      } else {
-                        // setState(() {
-                        //   showError = true;
-                        // });
                       }
                     },
                     child: Center(

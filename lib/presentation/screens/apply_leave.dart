@@ -42,6 +42,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   String? maternityLeave;
   String? paternityLeave;
   String? shortLeave;
+  String? reasonError;
 
   startDate(
       BuildContext context, String? _selectedLeaveType, String _selectedText) {
@@ -83,10 +84,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
           ? DateTime.now().subtract(Duration(days: 1))
           : _selectedLeaveType.contains('Earned')
               ? DateTime.parse(startDateController.text).add(Duration(days: 6))
-              : _selectedLeaveType.contains('Casual')
-                  ? DateTime.parse(startDateController.text)
-                      .add(Duration(days: 1))
-                  : null,
+              : null,
       onMonthChangeStartWithFirstDate: true,
       onConfirm: (dateTime2, List<int> index) {
         setState(() {
@@ -99,87 +97,150 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     );
   }
 
-  void validation()  async {
+  void validation() {
     num? totalDays;
 
     Leave selectedLeave = leaveList.firstWhere(
       (leave) => leave.name == _selectedLeaveType,
       orElse: () => Leave('Unknown', '0'),
     );
-
-    if (_selectedText != '1st Half' &&
-        _selectedText != '2nd Half' &&
-        _selectedLeaveType != 'Short-Leave') {
+    if (_selectedLeaveType != 'Short-Leave') {
       if (startDateController.text.isEmpty) {
         showSnackBar('Please select start date');
         return;
-      } else if (endDateController.text.isEmpty) {
-        showSnackBar('Please select end date');
+      }
+
+      if (reasonController.text.isEmpty) {
+        showSnackBar('Please provide a reason');
         return;
       }
+
+      if (_selectedLeaveType!.contains('Casual')) {
+        if (_selectedText == 'Full Day' ||
+            _selectedText == '1st Half' ||
+            _selectedText == '2nd Half') {
+          if (startDateController.text.isEmpty) {
+            showSnackBar('Please Select Start Date');
+            return;
+          } else if (reasonController.text.isEmpty) {
+            showSnackBar('Please Describe Reason');
+            return;
+          }
+          totalDays = _selectedText == '1st Half' || _selectedText == '2nd Half'
+              ? 0.5
+              : 1;
+        }
+      } else if (_selectedLeaveType!.contains('Earned')) {
+        if (_selectedText == 'Full Day') {
+          if (startDateController.text.isEmpty) {
+            showSnackBar('Please Select Start Date');
+            return;
+          } else if (endDateController.text.isEmpty) {
+            showSnackBar('Please Select End Date');
+            return;
+          } else if (reasonController.text.isEmpty) {
+            showSnackBar('Please Describe Reason');
+            return;
+          }
+          DateTime startDate = DateTime.parse(startDateController.text);
+          DateTime endDate = DateTime.parse(endDateController.text);
+
+          int leaveDuration = endDate.difference(startDate).inDays + 1;
+
+          totalDays = leaveDuration;
+        } else if (_selectedText == '1st Half' || _selectedText == '2nd Half') {
+          if (startDateController.text.isEmpty) {
+            showSnackBar('Please select start date');
+            return;
+          } else if (reasonController.text.isEmpty) {
+            showSnackBar('Please provide a reason');
+            return;
+          }
+          totalDays = 0.5;
+        }
+      } else if (_selectedLeaveType!.contains('Medical')) {
+        if (startDateController.text.isEmpty) {
+          showSnackBar('Please Select Start Date');
+          return;
+        } else if (endDateController.text.isEmpty) {
+          showSnackBar('Please Select End Date');
+        } else if (reasonController.text.isEmpty) {
+          showSnackBar('Please Describe Reason');
+        }
+
+        if (_paths == null) {
+          showSnackBar('Please upload a prescription');
+          return;
+        }
+
+        DateTime startDate = DateTime.parse(startDateController.text);
+        DateTime endDate = DateTime.parse(endDateController.text);
+
+        if (startDate.isBefore(DateTime.now().subtract(Duration(days: 6)))) {
+          showSnackBar(
+              'Medical leave can only be applied within the last 6 days');
+          return;
+        }
+
+        totalDays = endDate.difference(startDate).inDays + 1;
+      }
+      if (selectedLeave.balanceInt < totalDays!) {
+        showSnackBar('Not enough leave balance for ${selectedLeave.name}');
+        return;
+      }
+
+
+    } else {
+      if (reasonController.text.isEmpty) {
+        showSnackBar('Please describe the reason for short leave');
+        return;
+      }
+
+      DateTime shiftendTime = DateTime.parse(
+        DateFormat('yyyy-MM-dd').format(DateTime.now()) +
+            ' ' +
+            '0${_authBox.get('earlyby')}',
+      );
+
+      DateTime currentTime = DateTime.now();
+
+      DateTime shortLeaveStartTime = shiftendTime.subtract(Duration(hours: 1));
+      DateTime shortLeaveEndTime = shiftendTime;
+
+      if (currentTime.isBefore(shortLeaveStartTime) &&
+          currentTime.isAfter(shortLeaveEndTime)) {
+        showSnackBar('Short leave must be applied within  one-hour before');
+        return;
+      }
+
     }
-
-    if (_selectedText == '1st Half' || _selectedText == '2nd Half') {
-      totalDays = 0.5;
-    } else if (_selectedLeaveType!.contains('Medical')) {
-      if (_paths == null) {
-        showSnackBar('Please Upload Prescription First');
-        return;
-      }
-
-      DateTime startDate = DateTime.parse(startDateController.text);
-      DateTime endDate = DateTime.parse(endDateController.text);
-
-      if (startDate.isBefore(DateTime.now().subtract(Duration(days: 6)))) {
-        showSnackBar(
-            'Medical leave can only be applied within the last 6 days');
-        return;
-      }
-
-      if (endDate.isAfter(DateTime.now().subtract(Duration(days: 1)))) {
-        showSnackBar('Medical leave cannot extend beyond yesterday');
-        return;
-      }
-
-      totalDays = endDate.difference(startDate).inDays + 1;
-    } else if (_selectedLeaveType!.contains('Casual')) {
-      DateTime startDate = DateTime.parse(startDateController.text);
-      DateTime endDate = DateTime.parse(endDateController.text);
-
-      int leaveDuration = endDate.difference(startDate).inDays + 1;
-      if (leaveDuration < 1 || leaveDuration > 2) {
-        showSnackBar('Casual leaves must be between 1 and 2 days');
-        return;
-      }
-
-      totalDays = leaveDuration;
-    } else if (_selectedLeaveType!.contains('Earned')) {
-      DateTime startDate = DateTime.parse(startDateController.text);
-      DateTime endDate = DateTime.parse(endDateController.text);
-
-      int leaveDuration = endDate.difference(startDate).inDays + 1;
-      if (leaveDuration < 1 || leaveDuration > 7) {
-        showSnackBar('Earned leaves must be between 1 and 7 days');
-        return;
-      }
-
-      totalDays = leaveDuration;
-    }
-
-    if (selectedLeave.balanceInt < totalDays!) {
-      showSnackBar('Not enough leave balance for ${selectedLeave.name}');
-      return;
-    }
-
-  await  applyLeave(
-        context,
-        _selectedLeaveType!,
-        startDateController.text,
-        endDateController.text,
-        totalDays.toString(),
-        reasonController.text,
-        _selectedText);
+   _selectedLeaveType == 'Short-Leave' ? applyShortLeave(context, DateFormat('yyyy-MM-dd').format(DateTime.now()).toString(), reasonController.text) : applyLeave(
+    context,
+    _selectedLeaveType!,
+    startDateController.text,
+    endDateController.text,
+    totalDays.toString(),
+    reasonController.text,
+    _selectedText,
+  );
   }
+
+  
+  // applyLeave(
+  //   context,
+  //   _selectedLeaveType!,
+  //   startDateController.text,
+  //   endDateController.text,
+  //   totalDays.toString(),
+  //   reasonController.text,
+  //   _selectedText,
+  // );
+
+// if selected leave is casual and for full day or 1st half o 2nd half make sure startDate and reason not empty
+// if selected leave is earned and for 1st half o 2nd half make sure startDate and reason not empty
+// if selected leave is earned and for Full day make sure startDate and endDate and reason not empty
+// if selected leave is medical make sure startDate and endDate and reason not empty and prescription is required
+// if selected leave is shortleave make sure reason not empty and must be applied 1 hour before shortLeaveTime
 
   void showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -421,9 +482,9 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                   : 'Select Start Date',
                                               height,
                                               width),
-                                          if (_selectedText == 'Full Day' ||
-                                              _selectedLeaveType!
-                                                  .contains('Medical'))
+                                          if (_selectedText == 'Full Day' &&
+                                              _selectedLeaveType !=
+                                                  'Casual Leave')
                                             _buildDateSelection2(
                                                 endDateController
                                                         .text.isNotEmpty
@@ -462,6 +523,9 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                             const Color.fromARGB(255, 0, 0, 0),
                                       ),
                                       decoration: InputDecoration(
+                                        errorText: reasonController.text.isEmpty
+                                            ? reasonError
+                                            : null,
                                         filled: false,
                                         floatingLabelBehavior:
                                             FloatingLabelBehavior.always,
@@ -631,7 +695,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                         ? ListView(
                                             children: [
                                               _buildBulletPoint(
-                                                  'Casual leaves can be applied for a minimum of 1 day and a maximum of 2 days at a time, including half-days'),
+                                                  'Casual leaves can be applied for a minimum of 1 day at a time, including half-days'),
                                               _buildBulletPoint(
                                                   'Applying for past day is not allowed'),
                                               _buildBulletPoint(
