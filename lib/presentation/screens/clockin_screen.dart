@@ -477,7 +477,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                       vertical: 0,
                                                       horizontal: 20),
                                                   child: Text(
-                                                    'Late by : $lateMinutes mins',
+                                                   'Late by ${(lateMinutes/60).toInt()}:${(lateMinutes -  ((lateMinutes/60).toInt()) * 60)} mins',
                                                     style: TextStyle(
                                                         fontSize:
                                                             height * 0.013,

@@ -32,6 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late String empID;
   File? _image;
   String? filepath;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -50,6 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
+
     PermissionStatus permissionStatus;
 
     permissionStatus = await Permission.camera.request();
@@ -92,6 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     //     await Permission.manageExternalStorage.request();
 
     if (permissionStatus.isGranted) {
+          isLoading = true;
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: source);
 
@@ -134,6 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Response response = await dio.post(uploadURL!, data: formData);
 
           if (response.statusCode == 200) {
+                isLoading = false;
             print(response);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -272,7 +276,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                             shape: BoxShape.circle,
                           ),
-                          child: CircleAvatar(
+                          child: isLoading ? CircularProgressIndicator( color: Colors.green,) : CircleAvatar(
                             backgroundImage:
                                 employee.employeePhoto.contains("NA")
                                     ? AssetImage(

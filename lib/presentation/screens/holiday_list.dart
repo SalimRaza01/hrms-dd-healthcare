@@ -17,6 +17,8 @@ class _HolidayListState extends State<HolidayList> {
   @override
   void initState() {
     super.initState();
+
+
  SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,

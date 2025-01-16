@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:concentric_transition/concentric_transition.dart';
 import 'package:flutter/services.dart';
 import 'package:hrms/presentation/authentication/login_screen.dart';
@@ -51,38 +53,45 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      body: ConcentricPageView(
-        duration: Duration(milliseconds: 800),
-        colors: pages.map((p) => p.bgColor).toList(),
-        radius: screenWidth * 0.1,
-        nextButtonBuilder: (context) => Padding(
-          padding: const EdgeInsets.only(left: 3), 
-          child: Icon(
-            Icons.navigate_next,
-            size: screenWidth * 0.08,
-          ),
-        ),
-        scaleFactor: 2,
-        itemBuilder: (index) {
-          final page = pages[index % pages.length];
+    return PopScope(
 
-          
-          if (index == pages.length) {
+      onPopInvoked:(didPop) {
+        // SystemNavigator.pop();
+        exit(0);
+      },
+      child: Scaffold(
+        body: ConcentricPageView(
+          duration: Duration(milliseconds: 800),
+          colors: pages.map((p) => p.bgColor).toList(),
+          radius: screenWidth * 0.1,
+          nextButtonBuilder: (context) => Padding(
+            padding: const EdgeInsets.only(left: 3), 
+            child: Icon(
+              Icons.navigate_next,
+              size: screenWidth * 0.08,
+            ),
+          ),
+          scaleFactor: 2,
+          itemBuilder: (index) {
+            final page = pages[index % pages.length];
+      
             
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
+            if (index == pages.length) {
+              
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                );
+              });
+              return SizedBox(); 
+            } else {
+              return SafeArea(
+                child: _Page(page: page),
               );
-            });
-            return SizedBox(); 
-          } else {
-            return SafeArea(
-              child: _Page(page: page),
-            );
-          }
-        },
+            }
+          },
+        ),
       ),
     );
   }
