@@ -28,7 +28,7 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
       DeviceOrientation.portraitDown,
     ]);
     super.initState();
-    attendenceLog = fetchAttendence(widget.empID,1);
+    attendenceLog = fetchAttendence(widget.empID, 1);
   }
 
   @override
@@ -210,9 +210,9 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                                 fontWeight: FontWeight.w500,
                                                 color: AppColor.mainTextColor),
                                           ),
-                                      SizedBox(
-                                                      height: height * 0.01,
-                                                    ),
+                                          SizedBox(
+                                            height: height * 0.01,
+                                          ),
                                         ],
                                       ),
                                       VerticalDivider(
@@ -226,7 +226,8 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                             CrossAxisAlignment.center,
                                         children: [
                                           Text(
-                                            punchIn == '00:00'
+                                            punchIn == '00:00' ||
+                                                    punchOut == '23:59'
                                                 ? '--/--'
                                                 : '$punchOut',
                                             style: TextStyle(
@@ -244,9 +245,9 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                                 fontWeight: FontWeight.w500,
                                                 color: AppColor.mainTextColor),
                                           ),
-                                        SizedBox(
-                                                      height: height * 0.01,
-                                                    ),
+                                          SizedBox(
+                                            height: height * 0.01,
+                                          ),
                                         ],
                                       ),
                                       VerticalDivider(
@@ -260,7 +261,10 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                             CrossAxisAlignment.center,
                                         children: [
                                           Text(
-                                            formattedDuration,
+                                            punchIn == '00:00' ||
+                                                    punchOut == '23:59'
+                                                ? '--/--'
+                                                : formattedDuration,
                                             style: TextStyle(
                                               fontSize: height * 0.02,
                                               fontWeight: FontWeight.bold,
@@ -278,8 +282,8 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                                 color: AppColor.mainTextColor),
                                           ),
                                           SizedBox(
-                                                      height: height * 0.01,
-                                                    ),
+                                            height: height * 0.01,
+                                          ),
                                         ],
                                       ),
                                       SizedBox(
@@ -290,80 +294,61 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                 ),
                               ),
                               Stack(
-                                          alignment:
-                                              AlignmentDirectional.bottomEnd,
-                                          children: [
-                                            Visibility(
-                                              visible:
-                                                  item.isLeaveTaken == true,
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                    color:
-                                                        AppColor.mainThemeColor,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                            topLeft:
-                                                                Radius.circular(
-                                                                    15),
-                                                            bottomRight: Radius
-                                                                .circular(15))),
-                                                child: Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      vertical: 0,
-                                                      horizontal: 20),
-                                                  child: SizedBox(
-                                                    width: lateMinutes != 0
-                                                        ? width / 2
-                                                        : null,
-                                                    child: Text(
-                                                      item.leaveType,
-                                                      style: TextStyle(
-                                                          fontSize:
-                                                              height * 0.013,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color: AppColor
-                                                              .mainFGColor),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Visibility(
-                                              visible: lateMinutes != 0,
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                    color: lateMinutes > 15
-                                                        ? Colors.redAccent
-                                                        : Colors.green,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                            topLeft: Radius
-                                                                .circular(15),
-                                                            bottomRight:
-                                                                Radius.circular(
-                                                                    15))),
-                                                child: Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      vertical: 0,
-                                                      horizontal: 20),
-                                                  child: Text(
-                                                   'Late by ${(lateMinutes/60).toInt()}:${(lateMinutes -  ((lateMinutes/60).toInt()) * 60)} mins',
-                                                    style: TextStyle(
-                                                        fontSize:
-                                                            height * 0.013,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                        color: AppColor
-                                                            .mainFGColor),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                                alignment: AlignmentDirectional.bottomEnd,
+                                children: [
+                                  Visibility(
+                                    visible: item.isLeaveTaken == true,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          color: AppColor.mainThemeColor,
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(15),
+                                              bottomRight:
+                                                  Radius.circular(15))),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 0, horizontal: 20),
+                                        child: SizedBox(
+                                          width: lateMinutes != 0
+                                              ? width / 2
+                                              : null,
+                                          child: Text(
+                                            item.leaveType,
+                                            style: TextStyle(
+                                                fontSize: height * 0.013,
+                                                fontWeight: FontWeight.w400,
+                                                color: AppColor.mainFGColor),
+                                          ),
                                         ),
+                                      ),
+                                    ),
+                                  ),
+                                  Visibility(
+                                    visible: lateMinutes != 0,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          color: lateMinutes > 15
+                                              ? Colors.redAccent
+                                              : Colors.green,
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(15),
+                                              bottomRight:
+                                                  Radius.circular(15))),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 0, horizontal: 20),
+                                        child: Text(
+                                          'Late by ${(lateMinutes / 60).toInt()}:${(lateMinutes - ((lateMinutes / 60).toInt()) * 60)} mins',
+                                          style: TextStyle(
+                                              fontSize: height * 0.013,
+                                              fontWeight: FontWeight.w400,
+                                              color: AppColor.mainFGColor),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ));

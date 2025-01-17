@@ -262,58 +262,33 @@ class _TeamScreenState extends State<TeamScreen> {
                                                           final leave =
                                                               snapshot.data!;
 
-                                                          return SingleChildScrollView(
-                                                            scrollDirection:
-                                                                Axis.horizontal,
-                                                            child: Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceAround,
-                                                              children: [
-                                                                leaveWidget(
-                                                                    height,
-                                                                    width,
-                                                                    'Casual',
-                                                                    leave
-                                                                        .casualLeave),
-                                                                SizedBox(
-                                                                  width: 5,
-                                                                ),
-                                                                leaveWidget(
-                                                                    height,
-                                                                    width,
-                                                                    'Medical',
-                                                                    leave
-                                                                        .medicalLeave),
-                                                                SizedBox(
-                                                                  width: 5,
-                                                                ),
-                                                                leaveWidget(
-                                                                    height,
-                                                                    width,
-                                                                    'Earned',
-                                                                    leave
-                                                                        .earnedLeave),
-                                                                SizedBox(
-                                                                  width: 5,
-                                                                ),
-                                                                leaveWidget(
-                                                                    height,
-                                                                    width,
-                                                                    'Maternity',
-                                                                    leave
-                                                                        .maternityLeave),
-                                                                SizedBox(
-                                                                  width: 5,
-                                                                ),
-                                                                leaveWidget(
-                                                                    height,
-                                                                    width,
-                                                                    'Paternity',
-                                                                    leave
-                                                                        .paternityLeave),
-                                                              ],
-                                                            ),
+                                                          return Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              leaveWidget(
+                                                                  height,
+                                                                  width,
+                                                                  'Casual',
+                                                                  leave
+                                                                      .casualLeave),
+                                                          
+                                                              leaveWidget(
+                                                                  height,
+                                                                  width,
+                                                                  'Medical',
+                                                                  leave
+                                                                      .medicalLeave),
+                                                          
+                                                              leaveWidget(
+                                                                  height,
+                                                                  width,
+                                                                  'Earned',
+                                                                  leave
+                                                                      .earnedLeave),
+                                                                                                           
+                                                            ],
                                                           );
                                                         } else {
                                                           return Text(
@@ -449,13 +424,13 @@ class _TeamScreenState extends State<TeamScreen> {
 
   leaveWidget(double height, double width, String leave, String leaveCount) {
     return Container(
-      width: width / 5,
+      width: width / 3.5,
 
       decoration: BoxDecoration(
           color: AppColor.primaryThemeColor,
           borderRadius: BorderRadius.circular(5)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [

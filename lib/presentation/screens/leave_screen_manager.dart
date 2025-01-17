@@ -160,67 +160,52 @@ class _LeaveScreenState extends State<LeaveScreenManager>
       child: Column(
         children: [
           Card(
-            color: AppColor.mainFGColor,
-            elevation: 4,
-            margin: EdgeInsets.all(0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            shadowColor: Colors.black.withOpacity(0.1),
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FutureBuilder<LeaveBalance>(
-                      future: fetchLeaves(widget.empID),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return _shimmerLoader(height, width);
-                        } else if (snapshot.hasError) {
-                          return Center(child: Text('No Data Found'));
-                        } else if (snapshot.hasData) {
-                          final leave = snapshot.data!;
-
-                          return SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  leaveWidget(height, width, 'Casual',
-                                      leave.casualLeave),
-                                  SizedBox(
-                                    width: width * 0.025,
-                                  ),
-                                  leaveWidget(height, width, 'Medical',
-                                      leave.medicalLeave),
-                                  SizedBox(
-                                    width: width * 0.025,
-                                  ),
-                                  leaveWidget(height, width, 'Earned',
-                                      leave.earnedLeave),
-                                  SizedBox(
-                                    width: width * 0.025,
-                                  ),
-                                  leaveWidget(height, width, 'Maternity',
-                                      leave.maternityLeave),
-                                  SizedBox(
-                                    width: width * 0.025,
-                                  ),
-                                  leaveWidget(height, width, 'Paternity',
-                                      leave.paternityLeave),
-                                ],
-                              ));
-                        } else {
-                          return Center(child: Text('No Data Found'));
-                        }
-                      }),
-                ],
-              ),
-            ),
-          ),
+                      color: AppColor.mainFGColor,
+                      elevation: 4,
+                      margin: EdgeInsets.all(0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      shadowColor: Colors.black.withOpacity(0.1),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: SizedBox(
+                          width: width,
+                          child: FutureBuilder<LeaveBalance>(
+                              future: fetchLeaves(widget.empID),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return _shimmerLoader(height, width);
+                                } else if (snapshot.hasError) {
+                                  return Center(child: Text('No Data Found'));
+                                } else if (snapshot.hasData) {
+                                  final leave = snapshot.data!;
+                          
+                          
+                                  return Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      leaveWidget(height, width, 'Casual',
+                                          leave.casualLeave),
+                                     
+                                      leaveWidget(height, width,
+                                          'Medical', leave.medicalLeave),
+                                     
+                                      leaveWidget(height, width, 'Earned',
+                                          leave.earnedLeave),
+                                                                      
+                                      
+                                    ],
+                                  );
+                                } else {
+                                  return Center(child: Text('No Data Found'));
+                                }
+                              }),
+                        ),
+                      ),
+                    ),
           SizedBox(
             height: height * 0.02,
           ),
@@ -728,7 +713,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
   SizedBox leaveWidget(
       double height, double width, String leave, String leaveCount) {
     return SizedBox(
-      width: width * 0.2,
+      width: width * 0.27,
       child: Card(
         color: AppColor.mainBGColor,
         elevation: 4,

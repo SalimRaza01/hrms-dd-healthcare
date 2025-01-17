@@ -106,32 +106,44 @@ class _LoginScreenState extends State<LoginScreen> {
                                 controller: _emailController,
                                 decoration: InputDecoration(
                                   errorText: _emailErrorText,
-                                  labelText: 'Email',
+                                  labelText: 'Email/Employee Code',
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12)),
                                 ),
-                                onChanged: (value) {
-                                  setState(() {
-                                    final hasEmail = RegExp(
-                                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                                    final hasSpace = RegExp(r'\s');
-                                    final containsDomain =
-                                        RegExp(r'@agvahealthtech.com$');
-      
-                                    if (value.isEmpty) {
-                                      _emailErrorText = null;
-                                    } else if (!hasEmail.hasMatch(value)) {
-                                      _emailErrorText = 'Invalid Email';
-                                    } else if (hasSpace.hasMatch(value)) {
-                                      _emailErrorText =
-                                          "Email can't contain spaces";
-                                    } else if (!containsDomain.hasMatch(value)) {
-                                      _emailErrorText = 'Invalid Email';
-                                    } else {
-                                      _emailErrorText = null;
-                                    }
-                                  });
-                                },
+                           onChanged: (value) {
+      setState(() {
+        bool isDigit = int.tryParse(value) != null;  
+        
+        if (isDigit) {
+       
+          final employeeCode = RegExp(r'^\d{3,}$'); 
+          if (value.isEmpty) {
+            _emailErrorText = 'Employee Code is required';
+          } else if (!employeeCode.hasMatch(value)) {
+            _emailErrorText = 'Employee Code must have at least 3 digits';
+          } else {
+            _emailErrorText = null;
+          }
+        } else {
+
+          final hasEmail = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+          final hasSpace = RegExp(r'\s');
+          final containsDomain = RegExp(r'@agvahealthtech.com$');
+          
+          if (value.isEmpty) {
+            _emailErrorText = null;
+          } else if (!hasEmail.hasMatch(value)) {
+            _emailErrorText = 'Invalid Email';
+          } else if (hasSpace.hasMatch(value)) {
+            _emailErrorText = "Email can't contain spaces";
+          } else if (!containsDomain.hasMatch(value)) {
+            _emailErrorText = 'Email must belong to agvahealthtech.com';
+          } else {
+            _emailErrorText = null;
+          }
+        }
+      });
+    },
                               ),
                             ),
                             SizedBox(height: 20),

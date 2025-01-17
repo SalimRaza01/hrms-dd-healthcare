@@ -46,8 +46,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> logout() async {
     var box = await Hive.openBox('authBox');
-
+    box.put('photo', null);
     box.put('token', null);
+    box.put('maxRegularization', null);
+    box.put('casual', null);
+    box.put('medical', null);
+    box.put('maternity', null);
+    box.put('paternity', null);
+    box.put('earned', null);
+    box.put('short', null);
+    box.put('managerId', null);
+    box.put('earlyby', null);
+    box.put('lateby', null);
+    box.put('employeeId', null);
+    box.put('employeeName', null);
+    box.put('employeeDesign', null);
+    box.put('gender', null);
+    box.put('email', null);
+    box.put('role', null);
   }
 
   // Future<void> _pickImage(ImageSource source) async {
@@ -113,6 +129,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             size: fileSize,
           ),
         ]);
+      } else {
+        setState(() {
+          isLoading = false;
+        });
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -261,8 +281,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => PhotoView(
-                                        imageProvider:
-                                            NetworkImage(employee.employeePhoto),
+                                        imageProvider: NetworkImage(
+                                            employee.employeePhoto),
                                       )));
                         },
                         child: Container(

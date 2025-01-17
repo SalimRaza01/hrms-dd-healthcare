@@ -342,7 +342,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                       CrossAxisAlignment.center,
                                                   children: [
                                                     Text(
-                                                      punchIn == '00:00'
+                                                      punchIn == '00:00' || punchOut == '23:59'
                                                           ? '--/--'
                                                           : '$punchOut',
                                                       style: TextStyle(
@@ -382,7 +382,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                       CrossAxisAlignment.center,
                                                   children: [
                                                     Text(
-                                                      formattedDuration,
+                                                         punchIn == '00:00' || punchOut == '23:59' ? '--/--' : formattedDuration,
                                                       style: TextStyle(
                                                         fontSize: height * 0.02,
                                                         fontWeight:

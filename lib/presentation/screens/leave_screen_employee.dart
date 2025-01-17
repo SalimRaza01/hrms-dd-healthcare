@@ -33,6 +33,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+    print(widget.empID);
     _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
     super.initState();
   }

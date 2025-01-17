@@ -105,7 +105,7 @@ class _TeamPunchrecordsState extends State<TeamPunchrecords> {
                                 ),
                                 SizedBox(height: height * 0.005),
                                 Text(
-                                  punchOutTime.isNotEmpty
+                                punchOutTime != '23:59'
                                       ? punchOutTime
                                       : '--/--',
                                   style: TextStyle(

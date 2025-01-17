@@ -85,7 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           leading: Padding(
             padding: const EdgeInsets.only(left: 15),
             child: CircleAvatar(
-              backgroundImage: _authBox.get('photo') == null
+              backgroundImage: _authBox.get('photo') == "NA" || _authBox.get('photo') == null
                   ? AssetImage(
                       _authBox.get('gender') == 'Male'
                           ? 'assets/image/MaleAvatar.png'
@@ -311,112 +311,106 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
-                    Visibility(
-                      visible: _authBox.get('role') == 'Manager',
-                      child: SizedBox(
-                        height: height * 0.015,
-                      ),
+                    SizedBox(
+                      height: height * 0.015,
                     ),
-                    Visibility(
-                      visible: _authBox.get('role') == 'Manager',
-                      child: SizedBox(
-                        width: width,
-                        child: Card(
-                          color: AppColor.mainFGColor,
-                          elevation: 4,
-                          margin: EdgeInsets.all(0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          shadowColor: Colors.black.withOpacity(0.1),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'On Leave Today',
-                                  style: TextStyle(
-                                      fontSize: height * 0.015,
-                                      color: AppColor.mainTextColor,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                                SizedBox(
-                                  height: height * 0.01,
-                                ),
-                                FutureBuilder<List<EmployeeOnLeave>>(
-                                    future: employeeOnLeaveList,
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return Center(
-                                            child: CircularProgressIndicator());
-                                      } else if (snapshot.hasError) {
-                                        return Center(
-                                            child: Text(
-                                                'No Employee is On Leave'));
-                                      } else if (!snapshot.hasData ||
-                                          snapshot.data!.isEmpty) {
-                                        return Center(
-                                            child: Text(
-                                                'No Employee is On Leave'));
-                                      } else {
-                                        List<EmployeeOnLeave> items =
-                                            snapshot.data!;
-
-                                        return SizedBox(
-                                          width: width,
-                                          height: height * 0.07,
-                                          child: ListView.builder(
-                                            scrollDirection: Axis.horizontal,
-                                            itemCount: items.length,
-                                            itemBuilder: (context, index) {
-                                              final item = items[index];
-                                              return Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 8),
-                                                child: Column(
-                                                  children: [
-                                                    CircleAvatar(
-                                                      backgroundColor:
-                                                          const Color.fromARGB(
-                                                              255,
-                                                              235,
-                                                              244,
-                                                              254),
-                                                      child: Text(
-                                                        item.employeeName[0],
-                                                        style: TextStyle(
-                                                          fontSize:
-                                                              height * 0.018,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                        ),
+                    SizedBox(
+                      width: width,
+                      child: Card(
+                        color: AppColor.mainFGColor,
+                        elevation: 4,
+                        margin: EdgeInsets.all(0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        shadowColor: Colors.black.withOpacity(0.1),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'On Leave Today',
+                                style: TextStyle(
+                                    fontSize: height * 0.015,
+                                    color: AppColor.mainTextColor,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                              SizedBox(
+                                height: height * 0.01,
+                              ),
+                              FutureBuilder<List<EmployeeOnLeave>>(
+                                  future: employeeOnLeaveList,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return Center(
+                                          child: CircularProgressIndicator());
+                                    } else if (snapshot.hasError) {
+                                      return Center(
+                                          child: Text(
+                                              'No Employee is On Leave'));
+                                    } else if (!snapshot.hasData ||
+                                        snapshot.data!.isEmpty) {
+                                      return Center(
+                                          child: Text(
+                                              'No Employee is On Leave'));
+                                    } else {
+                                      List<EmployeeOnLeave> items =
+                                          snapshot.data!;
+                    
+                                      return SizedBox(
+                                        width: width,
+                                        height: height * 0.07,
+                                        child: ListView.builder(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: items.length,
+                                          itemBuilder: (context, index) {
+                                            final item = items[index];
+                                            return Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 8),
+                                              child: Column(
+                                                children: [
+                                                  CircleAvatar(
+                                                    backgroundColor:
+                                                        const Color.fromARGB(
+                                                            255,
+                                                            235,
+                                                            244,
+                                                            254),
+                                                    child: Text(
+                                                      item.employeeName[0],
+                                                      style: TextStyle(
+                                                        fontSize:
+                                                            height * 0.018,
+                                                        fontWeight:
+                                                            FontWeight.w400,
                                                       ),
                                                     ),
-                                                    SizedBox(
-                                                      height: height * 0.002,
-                                                    ),
-                                                    Text(
-                                                      '${item.employeeName.substring(0, item.employeeName.indexOf(' '))} ',
-                                                      style: TextStyle(
-                                                          fontSize:
-                                                              height * 0.013,
-                                                          color: AppColor
-                                                              .mainTextColor,
-                                                          fontWeight:
-                                                              FontWeight.w400),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        );
-                                      }
-                                    })
-                              ],
-                            ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: height * 0.002,
+                                                  ),
+                                                  Text(
+                                                    '${item.employeeName.substring(0, item.employeeName.indexOf(' '))} ',
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            height * 0.013,
+                                                        color: AppColor
+                                                            .mainTextColor,
+                                                        fontWeight:
+                                                            FontWeight.w400),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    }
+                                  })
+                            ],
                           ),
                         ),
                       ),

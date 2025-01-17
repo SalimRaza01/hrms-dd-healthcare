@@ -119,7 +119,7 @@ class AuthProvider with ChangeNotifier {
         await _authBox.put('gender', gender);
         await _authBox.put('role', role);
 
-        print('successfull');
+     
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Login Successfully'),
@@ -335,6 +335,7 @@ Future<void> applyShortLeave(
 
 Future<List<LeaveRequests>> fetchLeaveRequest() async {
   String token = _authBox.get('token');
+  print(token);
 
   try {
     final response = await dio.get(getLeaveRequest,
