@@ -199,7 +199,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
+                        return Center(child: Text('No projects found.'));
                       } else if (snapshot.hasData &&
                           snapshot.data!.isNotEmpty) {
                         List<OdooProjectList> items = snapshot.data!;

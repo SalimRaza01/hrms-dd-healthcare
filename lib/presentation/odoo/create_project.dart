@@ -272,7 +272,7 @@ class _CreateProjectState extends State<CreateProject> {
                       projectDescriptionController.text,
                       assigneeEmails,
                     );
-                    // Navigator.pop(context);
+                    Navigator.pop(context);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(

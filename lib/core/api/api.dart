@@ -68,14 +68,19 @@ Future<ShiftTimeModel> fetchShiftTime(String empID) async {
           'earned', response.data['data']['leaveBalance']['earnedLeave']);
       await _authBox.put(
           'paternity', response.data['data']['leaveBalance']['paternityLeave']);
+
+      await _authBox.put('photo', response.data['data']['employeePhoto']);
+
       await _authBox.put('short', response.data['data']['maxShortLeave']);
 
       await _authBox.put('managerId', response.data['data']['managerId']);
 
       await _authBox.put('lateby',
           response.data['data']['shiftTime']['startAt'].replaceAll(' ', ''));
+
       await _authBox.put(
           'earlyby', response.data['data']['shiftTime']['endAt']);
+
       return ShiftTimeModel.fromJson(response.data['data']['shiftTime']);
     } else {
       throw Exception('Failed to load shift time data');
@@ -125,10 +130,9 @@ class AuthProvider with ChangeNotifier {
             MaterialPageRoute(builder: (context) => BottomNavigation()));
       } else {}
     } on DioException catch (e) {
-      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-           content: Text(e.response!.data['message']),
+          content: Text(e.response!.data['message']),
           backgroundColor: Colors.red,
         ),
       );
@@ -183,9 +187,8 @@ Future<void> applyLeave(
           backgroundColor: Colors.green,
         ),
       );
-    } 
+    }
   } on DioException catch (e) {
-    print(e.response);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(e.response!.data['message']),
@@ -198,7 +201,7 @@ Future<void> applyLeave(
 Future<List<LeaveHistory>> fetchLeaveHistory(
     String status, String empID) async {
   String token = _authBox.get('token');
-  print('status $token');
+
   try {
     final response = await dio.get('$getLeaveHistory/$empID',
         options: Options(headers: {
@@ -224,25 +227,30 @@ Future<EmployeeProfile> fetchEmployeeDetails(String empID) async {
   Dio dio = Dio();
   try {
     final response = await dio.get('$getEmployeeData/$empID');
-    print(empID);
+
     return EmployeeProfile.fromJson(response.data['data']);
   } catch (e) {
     throw Exception('Failed to load employee profile');
   }
 }
 
-Future<List<HolidayModel>> fetchHolidayList() async {
+Future<List<HolidayModel>> fetchHolidayList(String screenName) async {
   try {
-    final response = await dio.get(
-      getHolidayList,
-    );
+    final response = await dio.get(getHolidayList);
 
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data['data'];
-      // final List<dynamic> data = response.data['data'].where((date) => DateTime.parse(date['holidayDate']).day < DateTime.now().day)
-      //     .toList();
 
-      return data.map((item) => HolidayModel.fromJson(item)).toList();
+      String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+      final upcomingHolidays = data.where((item) {
+        String holidayDate = item['holidayDate'];
+        return DateTime.parse(holidayDate).isAfter(DateTime.parse(todayDate));
+      }).toList();
+
+      return screenName == 'HomeScreen'
+          ? upcomingHolidays.map((item) => HolidayModel.fromJson(item)).toList()
+          : data.map((item) => HolidayModel.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load Holiday data');
     }
@@ -277,8 +285,8 @@ Future<void> applyRegularize(
           backgroundColor: Colors.green,
         ),
       );
-    } 
-  } on DioException catch(e) {
+    }
+  } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(e.response!.data['message']),
@@ -314,8 +322,8 @@ Future<void> applyShortLeave(
           backgroundColor: Colors.green,
         ),
       );
-    } 
-  } on DioException catch(e) {
+    }
+  } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(e.response!.data['message']),
@@ -327,7 +335,7 @@ Future<void> applyShortLeave(
 
 Future<List<LeaveRequests>> fetchLeaveRequest() async {
   String token = _authBox.get('token');
-  print('status $token');
+
   try {
     final response = await dio.get(getLeaveRequest,
         options: Options(headers: {
@@ -337,7 +345,7 @@ Future<List<LeaveRequests>> fetchLeaveRequest() async {
 
     if (response.statusCode == 200) {
       List<dynamic> data = response.data['data'];
-      print("Team Leave Request Data $data");
+
       return data
           .map((leaveData) => LeaveRequests.fromJson(leaveData))
           .toList();
@@ -404,31 +412,30 @@ Future<List<EmployeeProfile>> fetchTeamList() async {
 
 Future<void> sendPasswordOTP(
     BuildContext context, String email, String screen) async {
-      try{
-  final response = await dio.post(sentOTP, data: {
-    "email": email,
-  });
- 
+  try {
+    final response = await dio.post(sentOTP, data: {
+      "email": email,
+    });
 
- if (response.statusCode == 200) {
-    print(response.data);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('OTP sent successfully'),
-        backgroundColor: Colors.green,
-      ),
-    );
-    if (screen == 'LOGIN') {
-      Future.delayed(Duration(seconds: 1), () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => OTPScren(email)));
-      });
+    if (response.statusCode == 200) {
+      print(response.data);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('OTP sent successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      if (screen == 'LOGIN') {
+        Future.delayed(Duration(seconds: 1), () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => OTPScren(email)));
+        });
+      }
     }
-  } 
   } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-          content: Text(e.response!.data['message']),
+        content: Text(e.response!.data['message']),
         backgroundColor: Colors.red,
       ),
     );
@@ -442,7 +449,6 @@ Future<void> verifyPasswordOTP(
       "otp": otp,
     });
     if (response.statusCode == 200) {
-      print(response.data);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('OTP Verified Successfully'),
@@ -461,10 +467,10 @@ Future<void> verifyPasswordOTP(
         ),
       );
     }
-  } on DioException catch(e) {
+  } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-          content: Text(e.response!.data['message']),
+        content: Text(e.response!.data['message']),
         backgroundColor: Colors.red,
       ),
     );
@@ -479,7 +485,6 @@ Future<void> createNewPass(
       "loginPassword": newPassword,
     });
     if (response.statusCode == 200) {
-      print(response.data);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Password Created Successfully'),
@@ -501,7 +506,7 @@ Future<void> createNewPass(
   } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-         content: Text(e.response!.data['message']),
+        content: Text(e.response!.data['message']),
         backgroundColor: Colors.red,
       ),
     );
@@ -527,7 +532,6 @@ Future<List<OdooUserModel>> fetchOddoUsers(String documentType) async {
   final response = await dio.get(getodooUsers);
 
   if (response.statusCode == 200) {
-    print(response.data['users']);
     final List<dynamic> data = response.data['users'];
     return data.map((item) => OdooUserModel.fromJson(item)).toList();
   } else {
@@ -555,6 +559,7 @@ Future<void> createProject(
         backgroundColor: Colors.green,
       ),
     );
+    Navigator.pop(context);
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -570,8 +575,6 @@ Future<List<OdooProjectList>> fetchOdooProjects() async {
   final response = await dio.get(getOdooProject);
 
   if (response.statusCode == 200) {
-    print(response.data['projects']);
-
     final List<dynamic> projects = response.data['projects'];
 
     final List<dynamic> data = projects.where((project) {
@@ -616,6 +619,7 @@ Future<void> createTask(
         backgroundColor: Colors.green,
       ),
     );
+    Navigator.pop(context);
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -649,8 +653,6 @@ Future<void> changeTaskStage(
   int taskID,
   String stageName,
 ) async {
-  print(taskID);
-  print(stageName);
   try {
     final response = await dio.put('$putTaskStage/$taskID', data: {
       "stage_name": stageName,
@@ -673,7 +675,7 @@ Future<void> changeTaskStage(
   } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-         content: Text(e.response!.data['message']),
+        content: Text(e.response!.data['message']),
         backgroundColor: Colors.red,
       ),
     );

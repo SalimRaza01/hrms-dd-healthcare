@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             SizedBox(
-                              height: height * 0.07,
+                              height: height * 0.08,
                               child: TextField(
                                 controller: _emailController,
                                 decoration: InputDecoration(

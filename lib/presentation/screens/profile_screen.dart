@@ -1,7 +1,6 @@
 // ignore_for_file: unused_element
 
 import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api_config.dart';
@@ -17,7 +16,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/presentation/screens/document_list.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import 'package:photo_view/photo_view.dart';
 import 'splash_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -31,12 +30,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late Future<EmployeeProfile> employeeProfile;
   late String empID;
   File? _image;
+  String? viewPhoto;
   String? filepath;
   bool isLoading = false;
 
   @override
   void initState() {
-     SystemChrome.setPreferredOrientations([
+    SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
@@ -50,51 +50,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
     box.put('token', null);
   }
 
-  Future<void> _pickImage(ImageSource source) async {
+  // Future<void> _pickImage(ImageSource source) async {
 
-    PermissionStatus permissionStatus;
+  //   PermissionStatus permissionStatus;
 
-    permissionStatus = await Permission.camera.request();
+  //   permissionStatus = await Permission.camera.request();
 
-    if (permissionStatus.isGranted) {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: source);
-      if (pickedFile != null) {
-        setState(() {
-          _image = File(pickedFile.path);
-          filepath = pickedFile.path;
-          print('This is my set image $_image');
-        });
+  //   if (permissionStatus.isGranted) {
+  //               isLoading = true;
+  //     final picker = ImagePicker();
+  //     final pickedFile = await picker.pickImage(source: source);
+  //     if (pickedFile != null) {
+  //       setState(() {
+  //         _image = File(pickedFile.path);
+  //         filepath = pickedFile.path;
+  //       });
 
-        final fileSize = await _image!.length();
+  //       final fileSize = await _image!.length();
 
-        uploadPrescription([
-          PlatformFile(
-            path: filepath,
-            name: pickedFile.name,
-            size: fileSize,
-          ),
-        ]);
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Permission not granted')),
-      );
-    }
-  }
+  //       uploadAvatar([
+  //         PlatformFile(
+  //           path: filepath,
+  //           name: pickedFile.name,
+  //           size: fileSize,
+  //         ),
+  //       ]);
+  //     }
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Permission not granted')),
+  //     );
+  //   }
+  // }
 
   Future<void> _filepicker(ImageSource source) async {
-     final plugin = DeviceInfoPlugin();
-  final android = await plugin.androidInfo;
-     final permissionStatus = android.version.sdkInt < 33
-      ? await Permission.manageExternalStorage.request()
-      : PermissionStatus.granted;
+    final plugin = DeviceInfoPlugin();
+    final android = await plugin.androidInfo;
+    final permissionStatus = android.version.sdkInt < 33
+        ? await Permission.manageExternalStorage.request()
+        : PermissionStatus.granted;
 
     // PermissionStatus permissionStatus =
     //     await Permission.manageExternalStorage.request();
 
     if (permissionStatus.isGranted) {
-          isLoading = true;
+      isLoading = true;
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: source);
 
@@ -102,12 +102,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _image = File(pickedFile.path);
           filepath = pickedFile.path;
-          print('This is my set image $_image');
         });
 
         final fileSize = await _image!.length();
 
-        uploadPrescription([
+        uploadAvatar([
           PlatformFile(
             path: filepath,
             name: pickedFile.name,
@@ -123,7 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   String? get uploadURL => '$profileImageUpload/${widget.empID}';
-  Future<void> uploadPrescription(List<PlatformFile> files) async {
+  Future<void> uploadAvatar(List<PlatformFile> files) async {
     final dio = Dio();
 
     for (var file in files) {
@@ -137,8 +136,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Response response = await dio.post(uploadURL!, data: formData);
 
           if (response.statusCode == 200) {
-                isLoading = false;
-            print(response);
+            isLoading = false;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                   content: Text('Avatar Updated'),
@@ -154,9 +152,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   backgroundColor: Colors.red),
             );
           }
-        } catch (e) {
+        } on DioException catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+            SnackBar(
+                content: Text(e.response!.data['message']),
+                backgroundColor: Colors.red),
           );
         }
       } else {
@@ -184,17 +184,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Navigator.of(context).pop();
               },
             ),
-            ListTile(
-              leading: Icon(Icons.photo_camera, color: AppColor.mainTextColor2),
-              title: Text(
-                'Camera',
-                style: TextStyle(color: AppColor.mainTextColor2),
-              ),
-              onTap: () {
-                _pickImage(ImageSource.camera);
-                Navigator.of(context).pop();
-              },
-            ),
+            // ListTile(
+            //   leading: Icon(Icons.photo_camera, color: AppColor.mainTextColor2),
+            //   title: Text(
+            //     'Camera',
+            //     style: TextStyle(color: AppColor.mainTextColor2),
+            //   ),
+            //   onTap: () {
+            //     _pickImage(ImageSource.camera);
+            //     Navigator.of(context).pop();
+            //   },
+            // ),
             ListTile(
               leading: Icon(
                 Icons.cancel,
@@ -228,9 +228,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return ProfileShimmerAnimation();
           } else if (snapshot.hasError) {
-            return Center(
-                child:
-                    Text('No Data Found'));
+            return Center(child: Text('No Data Found'));
           } else if (!snapshot.hasData) {
             return Center(child: Text('No data found'));
           } else {
@@ -258,13 +256,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onTap: () {
                           _showPicker(context);
                         },
+                        onLongPress: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => PhotoView(
+                                        imageProvider:
+                                            NetworkImage(employee.employeePhoto),
+                                      )));
+                        },
                         child: Container(
                           width: 120,
                           height: height * 0.14,
                           decoration: BoxDecoration(
                             border: Border.all(
                               width: width * 0.01,
-                              color: Theme.of(context).scaffoldBackgroundColor,
+                              color: AppColor.mainBGColor,
                             ),
                             boxShadow: [
                               BoxShadow(
@@ -276,17 +283,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                             shape: BoxShape.circle,
                           ),
-                          child: isLoading ? CircularProgressIndicator( color: Colors.green,) : CircleAvatar(
-                            backgroundImage:
-                                employee.employeePhoto.contains("NA")
-                                    ? AssetImage(
-                                        employee.gender == 'Male'
-                                            ? 'assets/image/MaleAvatar.png'
-                                            : 'assets/image/FemaleAvatar.png',
-                                      )
-                                    : NetworkImage(employee.employeePhoto),
-                            radius: 50,
-                          ),
+                          child: isLoading
+                              ? Padding(
+                                  padding: const EdgeInsets.all(30.0),
+                                  child: CircularProgressIndicator(
+                                    color: Colors.green,
+                                  ),
+                                )
+                              : CircleAvatar(
+                                  backgroundImage: employee.employeePhoto
+                                          .contains("NA")
+                                      ? AssetImage(
+                                          employee.gender == 'Male'
+                                              ? 'assets/image/MaleAvatar.png'
+                                              : 'assets/image/FemaleAvatar.png',
+                                        )
+                                      : NetworkImage(employee.employeePhoto),
+                                  radius: 50,
+                                ),
                         ),
                       ),
                       SizedBox(height: height * 0.01),
@@ -360,16 +374,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   color: AppColor.mainTextColor2,
                                 ),
                               ),
-                              SizedBox(height: height *0.005),
-
-                              _buildProfileInfo(
-                                  'Gender :', employee.gender, Icons.person, height),
+                              SizedBox(height: height * 0.005),
+                              _buildProfileInfo('Gender :', employee.gender,
+                                  Icons.person, height),
                               _buildProfileInfo('Date of Birth :', employee.dob,
                                   Icons.calendar_today, height),
-                              _buildProfileInfo('Marital Status :',
-                                  employee.maritalStatus, Icons.favorite, height),
-                              _buildProfileInfo('Address :',
-                                  employee.permanentAddress, Icons.flag, height),
+                              _buildProfileInfo(
+                                  'Marital Status :',
+                                  employee.maritalStatus,
+                                  Icons.favorite,
+                                  height),
+                              _buildProfileInfo(
+                                  'Address :',
+                                  employee.permanentAddress,
+                                  Icons.flag,
+                                  height),
                             ],
                           ),
                         ),
@@ -399,12 +418,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               SizedBox(height: height * 0.005),
                               _buildProfileInfo('Contact No :',
                                   employee.contactNo, Icons.phone, height),
-                              _buildProfileInfo(
-                                  'Email :', employee.email, Icons.email, height),
+                              _buildProfileInfo('Email :', employee.email,
+                                  Icons.email, height),
                               _buildProfileInfo(
                                   'Emergency Contact :',
                                   employee.emergencyContact,
-                                  Icons.local_hospital, height),
+                                  Icons.local_hospital,
+                                  height),
                             ],
                           ),
                         ),
@@ -438,10 +458,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   employee.doj, Icons.work, height),
                               _buildProfileInfo('Workplace :',
                                   employee.workPlace, Icons.business, height),
-                              _buildProfileInfo('Designation :',
-                                  employee.designation, Icons.assignment, height),
-                              _buildProfileInfo('Employee Type :',
-                                  employee.employmentType, Icons.assignment, height),
+                              _buildProfileInfo(
+                                  'Designation :',
+                                  employee.designation,
+                                  Icons.assignment,
+                                  height),
+                              _buildProfileInfo(
+                                  'Employee Type :',
+                                  employee.employmentType,
+                                  Icons.assignment,
+                                  height),
                             ],
                           ),
                         ),
@@ -450,49 +476,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
-            
               InkWell(
                 onTap: () {
-                     Navigator.push(context, MaterialPageRoute(builder: (context)=> DocumentListScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DocumentListScreen()));
                 },
                 child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Card(
-                      color: AppColor.mainFGColor,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadowColor: Colors.black.withOpacity(0.1),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 13),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.file_copy_rounded,
-                              color: AppColor.mainThemeColor,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Card(
+                    color: AppColor.mainFGColor,
+                    elevation: 4,
+                    margin: EdgeInsets.all(0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    shadowColor: Colors.black.withOpacity(0.1),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 13),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.file_copy_rounded,
+                            color: AppColor.mainThemeColor,
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            'Documents',
+                            style: TextStyle(
+                              fontSize: height * 0.016,
+                              fontWeight: FontWeight.w500,
+                              color: AppColor.mainTextColor,
                             ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              'Documents',
-                              style: TextStyle(
-                                fontSize: height * 0.016,
-                                fontWeight: FontWeight.w500,
-                                color: AppColor.mainTextColor,
-                              ),
-                              textAlign: TextAlign.end,
-                            ),
-                          ],
-                        ),
+                            textAlign: TextAlign.end,
+                          ),
+                        ],
                       ),
                     ),
                   ),
+                ),
               ),
-                  SizedBox(
+              SizedBox(
                 height: height * 0.02,
               ),
               InkWell(
@@ -572,7 +600,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
-                SizedBox(
+              SizedBox(
                 height: height * 0.02,
               ),
             ]);
@@ -582,7 +610,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileInfo(String label, String value, IconData icon, double height) {
+  Widget _buildProfileInfo(
+      String label, String value, IconData icon, double height) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
@@ -593,7 +622,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             label,
             style: TextStyle(
               fontWeight: FontWeight.w500,
-              fontSize:     height * 0.014,
+              fontSize: height * 0.014,
               color: const Color.fromARGB(139, 0, 0, 0),
             ),
           ),
@@ -602,7 +631,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text(
               value,
               style: TextStyle(
-              fontSize:     height * 0.014,
+                fontSize: height * 0.014,
                 color: const Color.fromARGB(139, 0, 0, 0),
               ),
               textAlign: TextAlign.end,

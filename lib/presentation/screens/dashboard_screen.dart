@@ -1,13 +1,16 @@
 // ignore_for_file: sort_child_properties_last, prefer_final_fields
 
 import 'package:calendar_timeline/calendar_timeline.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/presentation/odoo/odoo_dashboard.dart';
+import 'package:hrms/presentation/odoo/task_details.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
@@ -25,25 +28,57 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   late Future<List<HolidayModel>> holidayList;
   late Future<List<EmployeeOnLeave>> employeeOnLeaveList;
+  List<Map<String, dynamic>> tasks = [];
   late String? empID;
+  String? empEmail;
   String? empName;
   String? empDesign;
   String? empGender;
   String? role;
+  String? employeePhoto;
   DateTime today = DateTime.now();
-
-
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
     checkEmployeeId();
+    _fetchTasks();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    holidayList = fetchHolidayList();
+    holidayList = fetchHolidayList('HomeScreen');
     employeeOnLeaveList = fetchEmployeeOnLeave();
+  }
+
+  Future<void> _fetchTasks() async {
+    try {
+      final response = await Dio().get(getOdootasks);
+
+      if (response.data['status'] == 'success') {
+        final myTasks = List<Map<String, dynamic>>.from(response.data['tasks']);
+
+        setState(() {
+          tasks = myTasks.where((project) {
+            bool isAssigneeMatch =
+                project['assignees_emails'].contains(empEmail!);
+
+            bool isInProgress = project['stage_name'] == 'In Progress' ||
+                project['stage_name'] == 'Created';
+
+            return isAssigneeMatch && isInProgress;
+          }).toList();
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+
+      print('Error fetching tasks: $e');
+    }
   }
 
   Future<void> checkEmployeeId() async {
@@ -52,7 +87,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       empDesign = box.get('employeeDesign');
       empName = box.get('employeeName');
       empGender = box.get('gender');
+      empEmail = box.get('email');
       role = box.get('role');
+      employeePhoto = box.get('photo');
       print(box.get('token'));
     });
 
@@ -70,13 +107,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           leading: Padding(
             padding: const EdgeInsets.only(left: 15),
             child: CircleAvatar(
-              child: Image.asset(
-                empGender == 'Male'
-                    ? 'assets/image/MaleAvatar.png'
-                    : 'assets/image/FemaleAvatar.png',
-                height: height * 0.045,
-              ),
-              backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+              backgroundImage: employeePhoto == null
+                  ? AssetImage(
+                      empGender == 'Male'
+                          ? 'assets/image/MaleAvatar.png'
+                          : 'assets/image/FemaleAvatar.png',
+                    )
+                  : NetworkImage(employeePhoto!),
             ),
           ),
           title: Column(
@@ -293,7 +330,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                     Visibility(
-                                 visible: role == 'Manager',
+                      visible: role == 'Manager',
                       child: SizedBox(
                         height: height * 0.015,
                       ),
@@ -317,7 +354,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               children: [
                                 Text(
                                   'On Leave Today',
-                                style: TextStyle(
+                                  style: TextStyle(
                                       fontSize: height * 0.015,
                                       color: AppColor.mainTextColor,
                                       fontWeight: FontWeight.w400),
@@ -334,17 +371,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             child: CircularProgressIndicator());
                                       } else if (snapshot.hasError) {
                                         return Center(
-                                            child:
-                                                Text('No Employee is On Leave'));
+                                            child: Text(
+                                                'No Employee is On Leave'));
                                       } else if (!snapshot.hasData ||
                                           snapshot.data!.isEmpty) {
                                         return Center(
-                                            child:
-                                                Text('No Employee is On Leave'));
+                                            child: Text(
+                                                'No Employee is On Leave'));
                                       } else {
                                         List<EmployeeOnLeave> items =
                                             snapshot.data!;
-                      
+
                                         return SizedBox(
                                           width: width,
                                           height: height * 0.07,
@@ -361,11 +398,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                     CircleAvatar(
                                                       backgroundColor:
                                                           const Color.fromARGB(
-                                                              255, 235, 244, 254),
+                                                              255,
+                                                              235,
+                                                              244,
+                                                              254),
                                                       child: Text(
                                                         item.employeeName[0],
                                                         style: TextStyle(
-                                                          fontSize: height * 0.018,
+                                                          fontSize:
+                                                              height * 0.018,
                                                           fontWeight:
                                                               FontWeight.w400,
                                                         ),
@@ -439,42 +480,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     } else if (snapshot.hasData) {
                                       final leave = snapshot.data!;
 
-                                      return SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            leaveWidget(height, width, 'Casual',
-                                                leave.casualLeave),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            leaveWidget(height, width,
-                                                'Medical', leave.medicalLeave),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            leaveWidget(height, width, 'Earned',
-                                                leave.earnedLeave),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            leaveWidget(
-                                                height,
-                                                width,
-                                                'Maternity',
-                                                leave.maternityLeave),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            leaveWidget(
-                                                height,
-                                                width,
-                                                'Paternity',
-                                                leave.paternityLeave),
-                                          ],
-                                        ),
+                                      return Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          leaveWidget(height, width, 'Casual',
+                                              leave.casualLeave),
+                                          leaveWidget(height, width, 'Medical',
+                                              leave.medicalLeave),
+                                          leaveWidget(height, width, 'Earned',
+                                              leave.earnedLeave),
+                                        ],
                                       );
                                     } else {
                                       return Text('No data Found');
@@ -503,10 +519,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             Text(
                               'Upcoming Holiday',
-                           style: TextStyle(
-                                    fontSize: height * 0.015,
-                                    color: AppColor.mainTextColor,
-                                    fontWeight: FontWeight.w400),
+                              style: TextStyle(
+                                  fontSize: height * 0.015,
+                                  color: AppColor.mainTextColor,
+                                  fontWeight: FontWeight.w400),
                             ),
                             SizedBox(
                               height: height * 0.01,
@@ -579,7 +595,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                         fontSize: height * 0.02,
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        color: AppColor.mainFGColor,
+                                                        color: AppColor
+                                                            .mainFGColor,
                                                       ),
                                                     ),
                                                     Text(
@@ -591,7 +608,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                               height * 0.014,
                                                           fontWeight:
                                                               FontWeight.bold,
-                                                          color: AppColor.mainFGColor),
+                                                          color: AppColor
+                                                              .mainFGColor),
                                                     ),
                                                   ],
                                                 ),
@@ -661,193 +679,198 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     SizedBox(
                       height: height * 0.015,
                     ),
-                    Card(
-                      color: AppColor.mainFGColor,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadowColor: Colors.black.withOpacity(0.1),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Today Task',
-                           style: TextStyle(
-                                    fontSize: height * 0.015,
-                                    color: AppColor.mainTextColor,
-                                    fontWeight: FontWeight.w400),
-                            ),
-                            SizedBox(
-                              height: height * 0.005,
-                            ),
-                            Text(
-                              'The tasks assigned to you for today',
-                              style: TextStyle(
-                                fontSize: height * 0.012,
-                                color: AppColor.mainTextColor2,
+                    isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : tasks.isEmpty
+                            ? NoTaskWidget(height: height)
+                            : SizedBox(
+                                width: width,
+                                height: height * 0.2,
+                                child: ListView.builder(
+                                  itemCount: 1,
+                                  itemBuilder: (context, index) {
+                                    final task = tasks[tasks.length - 1];
+
+                                    return InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    TaskDetails(
+                                                        taskID: task['id'])));
+                                      },
+                                      child: Card(
+                                        color: AppColor.mainFGColor,
+                                        elevation: 4,
+                                        margin: EdgeInsets.all(0),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        shadowColor:
+                                            Colors.black.withOpacity(0.1),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Current Task ',
+                                                style: TextStyle(
+                                                    fontSize: height * 0.018,
+                                                    color:
+                                                        AppColor.mainTextColor,
+                                                    fontWeight:
+                                                        FontWeight.w500),
+                                              ),
+                                              SizedBox(
+                                                height: height * 0.003,
+                                              ),
+                                              Text(
+                                                'The task assigned to you',
+                                                style: TextStyle(
+                                                  fontSize: height * 0.015,
+                                                  color: Color.fromARGB(
+                                                      141, 0, 0, 0),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: height * 0.01,
+                                              ),
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            14, 0, 0, 0)),
+                                                    color: AppColor.mainBGColor,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10)),
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 12),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons
+                                                                .circle_outlined,
+                                                            color: AppColor
+                                                                .primaryThemeColor,
+                                                            size:
+                                                                height * 0.022,
+                                                          ),
+                                                          SizedBox(
+                                                            width: 5,
+                                                          ),
+                                                          Text(
+                                                            task['name'] ??
+                                                                'No Task Name',
+                                                            style: TextStyle(
+                                                                fontSize:
+                                                                    height *
+                                                                        0.018,
+                                                                color: AppColor
+                                                                    .mainTextColor,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      SizedBox(
+                                                        height: height * 0.015,
+                                                      ),
+                                                      Row(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          TaskWidgets(
+                                                            height: height,
+                                                            icon: Icons
+                                                                .timelapse_rounded,
+                                                            text: task[
+                                                                'stage_name'],
+                                                            color: const Color
+                                                                .fromARGB(86,
+                                                                158, 158, 158),
+                                                            textcolor:
+                                                                const Color
+                                                                    .fromARGB(
+                                                                    158,
+                                                                    0,
+                                                                    0,
+                                                                    0),
+                                                          ),
+                                                          SizedBox(
+                                                            width: width * 0.02,
+                                                          ),
+                                                          TaskWidgets(
+                                                            height: height,
+                                                            icon: Icons.flag,
+                                                            text: task['priority']
+                                                                    ?.join(
+                                                                        ', ') ??
+                                                                'No Priority',
+                                                            color: const Color
+                                                                .fromARGB(201,
+                                                                229, 27, 27),
+                                                            textcolor:
+                                                                const Color
+                                                                    .fromARGB(
+                                                                    255,
+                                                                    255,
+                                                                    255,
+                                                                    255),
+                                                          ),
+                                                          SizedBox(
+                                                            width: width * 0.02,
+                                                          ),
+                                                          // TaskWidgets(
+                                                          //   height: height,
+                                                          //   icon: Icons
+                                                          //       .calendar_month,
+                                                          //   text: DateFormat(
+                                                          //           'yyyy-MM-dd')
+                                                          //       .format(DateTime
+                                                          //           .parse(task[
+                                                          //               'deadline_date']))
+                                                          //       .toString(),
+                                                          //   color: const Color
+                                                          //       .fromARGB(201,
+                                                          //       229, 27, 27),
+                                                          //   textcolor:
+                                                          //       const Color
+                                                          //           .fromARGB(
+                                                          //           255,
+                                                          //           255,
+                                                          //           255,
+                                                          //           255),
+                                                          // )
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                            SizedBox(
-                              height: height * 0.01,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Center(
-                                child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(5),
-                                    child: Image.asset(
-                                      'assets/image/Frame.png',
-                                      height: height * 0.08,
-                                    )),
-                              ),
-                            ),
-                            SizedBox(
-                              height: height * 0.01,
-                            ),
-                            Center(
-                              child: Text(
-                                'No Tasks Assigned',
-                                style: TextStyle(
-                                    fontSize: height * 0.015,
-                                    color: AppColor.mainTextColor,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                            ),
-                            SizedBox(
-                              height: height * 0.01,
-                            ),
-                            Text(
-                              'It looks like you don’t have any tasks assigned to you right now. Don’t worry, this space will be updated as new tasks become available.',
-                              style: TextStyle(
-                                fontSize: height * 0.012,
-                                color: AppColor.mainTextColor2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // Card(
-                    //   color: AppColor.mainFGColor,
-                    //   elevation: 4,
-                    //   margin: EdgeInsets.all(0),
-                    //   shape: RoundedRectangleBorder(
-                    //     borderRadius: BorderRadius.circular(10),
-                    //   ),
-                    //   shadowColor: Colors.black.withOpacity(0.1),
-                    //   child: Padding(
-                    //     padding: const EdgeInsets.all(10),
-                    //     child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         Text(
-                    //           'Today Task ',
-                    //           style: TextStyle(
-                    //               fontSize: height * 0.018,
-                    //               color: AppColor.mainTextColor,
-                    //               fontWeight: FontWeight.w500),
-                    //         ),
-                    //         SizedBox(
-                    //           height: 3,
-                    //         ),
-                    //         Text(
-                    //           'The tasks assigned to you for today',
-                    //           style: TextStyle(
-                    //             fontSize: height * 0.015,
-                    //             color: Color.fromARGB(141, 0, 0, 0),
-                    //           ),
-                    //         ),
-                    //         SizedBox(
-                    //           height: height * 0.01,
-                    //         ),
-                    // Container(
-                    //   decoration: BoxDecoration(
-                    //       border: Border.all(
-                    //           color: const Color.fromARGB(14, 0, 0, 0)),
-                    //       color: AppColor.mainBGColor,
-                    //       borderRadius: BorderRadius.circular(10)),
-                    //   child: Padding(
-                    //     padding: const EdgeInsets.symmetric(
-                    //         horizontal: 10, vertical: 12),
-                    //     child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         Row(
-                    //           children: [
-                    //             Icon(
-                    // Icons.circle_outlined,
-                    // color: AppColor.primaryThemeColor,
-                    // size: height * 0.022,
-                    //             ),
-                    //             SizedBox(
-                    //               width: 5,
-                    //             ),
-                    //             Text(
-                    //               'Complete HRMS UI',
-                    //               style: TextStyle(
-                    //                   fontSize: height * 0.018,
-                    //                   color: AppColor.mainTextColor,
-                    //                   fontWeight: FontWeight.w500),
-                    //             ),
-                    //           ],
-                    //         ),
-                    //         SizedBox(
-                    //           height: height * 0.015,
-                    //         ),
-                    //         Row(
-                    //           crossAxisAlignment:
-                    //               CrossAxisAlignment.start,
-                    //           children: [
-                    //             TaskWidgets(
-                    //               height: height,
-                    //               icon: Icons.timelapse_rounded,
-                    //               text: 'In Progress',
-                    //               color: const Color.fromARGB(
-                    //                   86, 158, 158, 158),
-                    //               textcolor: const Color.fromARGB(
-                    //                   158, 0, 0, 0),
-                    //             ),
-                    //             SizedBox(
-                    //               width: 10,
-                    //             ),
-                    //             TaskWidgets(
-                    //               height: height,
-                    //               icon: Icons.flag,
-                    //               text: 'High',
-                    //               color: const Color.fromARGB(
-                    //                   201, 229, 27, 27),
-                    //               textcolor: const Color.fromARGB(
-                    //                   255, 255, 255, 255),
-                    //             ),
-                    //             SizedBox(
-                    //               width: 10,
-                    //             ),
-                    //             TaskWidgets(
-                    //               height: height,
-                    //               icon: Icons.calendar_month,
-                    //               text: '5 Dec',
-                    //               color: const Color.fromARGB(
-                    //                   201, 229, 27, 27),
-                    //               textcolor: const Color.fromARGB(
-                    //                   255, 255, 255, 255),
-                    //             )
-                    //           ],
-                    //         ),
-                    //       ],
-                    //     ),
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                    SizedBox(
-                      height: height * 0.015,
-                    ),
                     Card(
                       color: AppColor.mainFGColor,
                       elevation: 4,
@@ -863,10 +886,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             Text(
                               'Announcement',
-                           style: TextStyle(
-                                    fontSize: height * 0.015,
-                                    color: AppColor.mainTextColor,
-                                    fontWeight: FontWeight.w400),
+                              style: TextStyle(
+                                  fontSize: height * 0.015,
+                                  color: AppColor.mainTextColor,
+                                  fontWeight: FontWeight.w400),
                             ),
                             SizedBox(
                               height: height * 0.005,
@@ -968,14 +991,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   SizedBox leaveWidget(
       double height, double width, String leave, String leaveCount) {
     return SizedBox(
-      width: width * 0.22,
+      width: width * 0.27,
       child: Container(
         decoration: BoxDecoration(
             border: Border.all(color: const Color.fromARGB(14, 0, 0, 0)),
             color: AppColor.mainBGColor,
             borderRadius: BorderRadius.circular(10)),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
           child: Column(
             children: [
               Text(
@@ -990,6 +1013,92 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: TextStyle(
                     color: Color.fromARGB(141, 0, 0, 0),
                     fontSize: height * 0.022),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class NoTaskWidget extends StatelessWidget {
+  const NoTaskWidget({
+    super.key,
+    required this.height,
+  });
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        color: AppColor.mainFGColor,
+        elevation: 4,
+        margin: EdgeInsets.all(0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        shadowColor: Colors.black.withOpacity(0.1),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Today Task',
+                style: TextStyle(
+                    fontSize: height * 0.015,
+                    color: AppColor.mainTextColor,
+                    fontWeight: FontWeight.w400),
+              ),
+              SizedBox(
+                height: height * 0.005,
+              ),
+              Text(
+                'The tasks assigned to you for today',
+                style: TextStyle(
+                  fontSize: height * 0.012,
+                  color: AppColor.mainTextColor2,
+                ),
+              ),
+              SizedBox(
+                height: height * 0.01,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Center(
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Image.asset(
+                        'assets/image/Frame.png',
+                        height: height * 0.08,
+                      )),
+                ),
+              ),
+              SizedBox(
+                height: height * 0.01,
+              ),
+              Center(
+                child: Text(
+                  'No Tasks Assigned',
+                  style: TextStyle(
+                      fontSize: height * 0.015,
+                      color: AppColor.mainTextColor,
+                      fontWeight: FontWeight.w500),
+                ),
+              ),
+              SizedBox(
+                height: height * 0.01,
+              ),
+              Text(
+                'It looks like you don’t have any tasks assigned to you right now. Don’t worry, this space will be updated as new tasks become available.',
+                style: TextStyle(
+                  fontSize: height * 0.012,
+                  color: AppColor.mainTextColor2,
+                ),
               ),
             ],
           ),

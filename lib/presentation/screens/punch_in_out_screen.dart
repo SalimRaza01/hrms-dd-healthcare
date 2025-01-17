@@ -441,16 +441,16 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                           top: -height * 0.12,
                           child: GestureDetector(
                             onTap: () {
-                              if (_selfie != null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ImageViewerScreen(
-                                      imageFile: _selfie!,
-                                    ),
-                                  ),
-                                );
-                              }
+                              // if (_selfie != null) {
+                              //   Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //       builder: (context) => ImageViewerScreen(
+                              //         imageFile: _selfie!,
+                              //       ),
+                              //     ),
+                              //   );
+                              // }
                             },
                             child: Container(
                               decoration: BoxDecoration(

@@ -23,7 +23,7 @@ class _HolidayListState extends State<HolidayList> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    holidayList = fetchHolidayList();
+    holidayList = fetchHolidayList('MainScreen');
   }
 
   @override

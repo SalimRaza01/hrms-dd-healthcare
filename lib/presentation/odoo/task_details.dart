@@ -44,7 +44,7 @@ class _TaskDetailsState extends State<TaskDetails> {
         final myTasks = List<Map<String, dynamic>>.from(response.data['tasks']);
         setState(() {
           tasks = myTasks
-              .where((project) => project['id'] == widget.taskID)
+              .where((task) => task['id'] == widget.taskID)
               .toList();
           isLoading = false;
         });
