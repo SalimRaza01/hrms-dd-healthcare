@@ -34,6 +34,7 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
 
     return SafeArea(
         child: Scaffold(
@@ -47,7 +48,7 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
+                return Center(child: Text('No attendance records available.'));
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return Center(child: Text('No attendance records available.'));
               } else {
@@ -288,29 +289,81 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                   ),
                                 ),
                               ),
-                              Visibility(
-                                visible: lateMinutes != 0,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      color: lateMinutes > 15
-                                          ? Colors.redAccent
-                                          : Colors.green,
-                                      borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(15),
-                                          bottomRight: Radius.circular(15))),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 0, horizontal: 20),
-                                    child: Text(
-                                      'Late by : $lateMinutes mins',
-                                      style: TextStyle(
-                                          fontSize: height * 0.013,
-                                          fontWeight: FontWeight.w400,
-                                          color: AppColor.mainFGColor),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              Stack(
+                                          alignment:
+                                              AlignmentDirectional.bottomEnd,
+                                          children: [
+                                            Visibility(
+                                              visible:
+                                                  item.isLeaveTaken == true,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                    color:
+                                                        AppColor.mainThemeColor,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            topLeft:
+                                                                Radius.circular(
+                                                                    15),
+                                                            bottomRight: Radius
+                                                                .circular(15))),
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 0,
+                                                      horizontal: 20),
+                                                  child: SizedBox(
+                                                    width: lateMinutes != 0
+                                                        ? width / 2
+                                                        : null,
+                                                    child: Text(
+                                                      item.leaveType,
+                                                      style: TextStyle(
+                                                          fontSize:
+                                                              height * 0.013,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          color: AppColor
+                                                              .mainFGColor),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Visibility(
+                                              visible: lateMinutes != 0,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                    color: lateMinutes > 15
+                                                        ? Colors.redAccent
+                                                        : Colors.green,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            topLeft: Radius
+                                                                .circular(15),
+                                                            bottomRight:
+                                                                Radius.circular(
+                                                                    15))),
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 0,
+                                                      horizontal: 20),
+                                                  child: Text(
+                                                   'Late by ${(lateMinutes/60).toInt()}:${(lateMinutes -  ((lateMinutes/60).toInt()) * 60)} mins',
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            height * 0.013,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: AppColor
+                                                            .mainFGColor),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                             ],
                           ),
                         ));

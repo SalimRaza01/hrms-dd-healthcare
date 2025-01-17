@@ -75,7 +75,6 @@ class _ViewDocumentState extends State<ViewDocument> {
         isDownloading = false;
       });
 
-      print('Download error: $e');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Failed to download the document'),
         backgroundColor: Colors.red,
