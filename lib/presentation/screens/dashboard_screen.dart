@@ -1,6 +1,5 @@
 // ignore_for_file: sort_child_properties_last, prefer_final_fields
 
-import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
@@ -14,9 +13,9 @@ import 'package:hrms/presentation/odoo/task_details.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
-
 import 'holiday_list.dart';
 import 'notification_screen.dart';
+import 'package:calendar_timeline/calendar_timeline.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String empID;

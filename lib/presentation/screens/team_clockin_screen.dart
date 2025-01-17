@@ -210,9 +210,9 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                                 fontWeight: FontWeight.w500,
                                                 color: AppColor.mainTextColor),
                                           ),
-                                          SizedBox(
-                                            height: height * 0.005,
-                                          ),
+                                      SizedBox(
+                                                      height: height * 0.01,
+                                                    ),
                                         ],
                                       ),
                                       VerticalDivider(
@@ -244,9 +244,9 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                                 fontWeight: FontWeight.w500,
                                                 color: AppColor.mainTextColor),
                                           ),
-                                          SizedBox(
-                                            height: height * 0.005,
-                                          ),
+                                        SizedBox(
+                                                      height: height * 0.01,
+                                                    ),
                                         ],
                                       ),
                                       VerticalDivider(
@@ -278,8 +278,8 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                                 color: AppColor.mainTextColor),
                                           ),
                                           SizedBox(
-                                            height: height * 0.005,
-                                          ),
+                                                      height: height * 0.01,
+                                                    ),
                                         ],
                                       ),
                                       SizedBox(

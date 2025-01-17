@@ -50,7 +50,9 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         initialDateTime: DateTime.now(),
         minDateTime: _selectedLeaveType!.contains('Medical')
             ? DateTime.now().subtract(Duration(days: 6))
-            : DateTime.now(),
+            : _selectedLeaveType.contains('Earned')
+                ? DateTime.now().add(Duration(days: 1))
+                : DateTime.now(),
         maxDateTime: _selectedLeaveType.contains('Medical')
             ? DateTime.now().subtract(Duration(days: 1))
             : DateTime(3000),
@@ -187,8 +189,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         showSnackBar('Not enough leave balance for ${selectedLeave.name}');
         return;
       }
-
-
     } else {
       if (reasonController.text.isEmpty) {
         showSnackBar('Please describe the reason for short leave');
@@ -211,35 +211,22 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         showSnackBar('Short leave must be applied within  one-hour before');
         return;
       }
-
     }
-   _selectedLeaveType == 'Short-Leave' ? applyShortLeave(context, DateFormat('yyyy-MM-dd').format(DateTime.now()).toString(), reasonController.text) : applyLeave(
-    context,
-    _selectedLeaveType!,
-    startDateController.text,
-    endDateController.text,
-    totalDays.toString(),
-    reasonController.text,
-    _selectedText,
-  );
+    _selectedLeaveType == 'Short-Leave'
+        ? applyShortLeave(
+            context,
+            DateFormat('yyyy-MM-dd').format(DateTime.now()).toString(),
+            reasonController.text)
+        : applyLeave(
+            context,
+            _selectedLeaveType!,
+            startDateController.text,
+            endDateController.text,
+            totalDays.toString(),
+            reasonController.text,
+            _selectedText,
+          );
   }
-
-  
-  // applyLeave(
-  //   context,
-  //   _selectedLeaveType!,
-  //   startDateController.text,
-  //   endDateController.text,
-  //   totalDays.toString(),
-  //   reasonController.text,
-  //   _selectedText,
-  // );
-
-// if selected leave is casual and for full day or 1st half o 2nd half make sure startDate and reason not empty
-// if selected leave is earned and for 1st half o 2nd half make sure startDate and reason not empty
-// if selected leave is earned and for Full day make sure startDate and endDate and reason not empty
-// if selected leave is medical make sure startDate and endDate and reason not empty and prescription is required
-// if selected leave is shortleave make sure reason not empty and must be applied 1 hour before shortLeaveTime
 
   void showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -737,6 +724,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                     ? ListView(
                                                         children: [
                                                           _buildBulletPoint(
+                                                              'Earned leave can be applied for future days only'),
+                                                          _buildBulletPoint(
                                                               'Earned leave can be applied for a minimum of 1 day and a maximum of 7 days, depending on available leave balance.'),
                                                           _buildBulletPoint(
                                                               'Earned leave can also be taken as half days if required.'),
@@ -821,7 +810,15 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   ) {
     return GestureDetector(
       onTap: () {
-        endDate(context, _selectedLeaveType!, _selectedText);
+        if (startDateController.text.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Please Select StartDate First'),
+                backgroundColor: Colors.red),
+          );
+        } else {
+          endDate(context, _selectedLeaveType!, _selectedText);
+        }
       },
       child: Card(
         color: AppColor.mainFGColor,

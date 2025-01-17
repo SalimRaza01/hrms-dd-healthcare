@@ -1,6 +1,5 @@
 import 'package:hrms/presentation/odoo/odoo_dashboard.dart';
 import 'package:hrms/presentation/odoo/view_projects.dart';
-import 'package:hrms/presentation/screens/punch_in_out_screen.dart';
 import 'package:hrms/presentation/screens/splash_screen.dart';
 import 'core/api/api.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +62,6 @@ class MyApp extends StatelessWidget {
         "/leaveSecondScreen": (context) => LeaveScreenManager(''),
         "/holidayList": (context) => HolidayList(),
         "/notificationScreen": (context) => NotificationScreen(),
-        "/punchinout": (context) => PunchInOutScreen(),
         "/odooDashbaord": (context) => OdooDashboard(),
         "/createTask": (context) => CreateTask(projectID: 0,),
         "/taskDetails": (context) => TaskDetails(taskID: 0,),
