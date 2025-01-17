@@ -28,21 +28,15 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   late Future<List<HolidayModel>> holidayList;
   late Future<List<EmployeeOnLeave>> employeeOnLeaveList;
+  final Box _authBox = Hive.box('authBox');
   List<Map<String, dynamic>> tasks = [];
   late String? empID;
-  String? empEmail;
-  String? empName;
-  String? empDesign;
-  String? empGender;
-  String? role;
-  String? employeePhoto;
   DateTime today = DateTime.now();
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    checkEmployeeId();
     _fetchTasks();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -62,7 +56,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         setState(() {
           tasks = myTasks.where((project) {
             bool isAssigneeMatch =
-                project['assignees_emails'].contains(empEmail!);
+                project['assignees_emails'].contains(_authBox.get('email')!);
 
             bool isInProgress = project['stage_name'] == 'In Progress' ||
                 project['stage_name'] == 'Created';
@@ -81,21 +75,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  Future<void> checkEmployeeId() async {
-    var box = await Hive.openBox('authBox');
-    setState(() {
-      empDesign = box.get('employeeDesign');
-      empName = box.get('employeeName');
-      empGender = box.get('gender');
-      empEmail = box.get('email');
-      role = box.get('role');
-      employeePhoto = box.get('photo');
-      print(box.get('token'));
-    });
-
-    print('Stored Employee ID: $empName');
-  }
-
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
@@ -107,13 +86,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           leading: Padding(
             padding: const EdgeInsets.only(left: 15),
             child: CircleAvatar(
-              backgroundImage: employeePhoto == null
+              backgroundImage: _authBox.get('photo') == null
                   ? AssetImage(
-                      empGender == 'Male'
+                      _authBox.get('gender') == 'Male'
                           ? 'assets/image/MaleAvatar.png'
                           : 'assets/image/FemaleAvatar.png',
                     )
-                  : NetworkImage(employeePhoto!),
+                  : NetworkImage(_authBox.get('photo')!),
             ),
           ),
           title: Column(
@@ -121,14 +100,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                empName != null ? empName! : '',
+                _authBox.get('employeeName') != null
+                    ? _authBox.get('employeeName')!
+                    : '',
                 style: TextStyle(
                     fontSize: height * 0.017,
                     color: AppColor.mainTextColor,
                     fontWeight: FontWeight.w500),
               ),
               Text(
-                empDesign != null ? empDesign! : '',
+                _authBox.get('employeeDesign') != null
+                    ? _authBox.get('employeeDesign')!
+                    : '',
                 style: TextStyle(
                   fontSize: height * 0.013,
                   color: AppColor.mainTextColor2,
@@ -330,13 +313,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                     Visibility(
-                      visible: role == 'Manager',
+                      visible: _authBox.get('role') == 'Manager',
                       child: SizedBox(
                         height: height * 0.015,
                       ),
                     ),
                     Visibility(
-                      visible: role == 'Manager',
+                      visible: _authBox.get('role') == 'Manager',
                       child: SizedBox(
                         width: width,
                         child: Card(

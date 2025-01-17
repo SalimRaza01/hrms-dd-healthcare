@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:concentric_transition/concentric_transition.dart';
 import 'package:flutter/services.dart';
 import 'package:hrms/presentation/authentication/login_screen.dart';
@@ -42,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 @override
   void initState() {
-    // TODO: implement initState
+
     super.initState();
      SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,

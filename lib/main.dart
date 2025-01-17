@@ -23,9 +23,9 @@ import 'presentation/screens/profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  print('First Time');
   await Hive.initFlutter();
   await Hive.openBox('authBox');
+     
   runApp(
     MultiProvider(
       providers: [

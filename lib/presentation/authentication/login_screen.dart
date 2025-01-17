@@ -1,5 +1,6 @@
 
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,12 @@ class _LoginScreenState extends State<LoginScreen> {
   bool notfilledpass = false;
   String? _emailErrorText;
   String? _passwordErrorText;
+  final Box _authBox = Hive.box('authBox');
+  @override
+  void initState() {
+    super.initState();
+      _authBox.put('FreshInstall', false);
+  }
 
   @override
   Widget build(BuildContext context) {

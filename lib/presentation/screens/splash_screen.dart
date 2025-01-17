@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hrms/presentation/authentication/login_screen.dart';
 import 'onboarding_screen.dart';
 import 'bottom_navigation.dart';
 
@@ -19,32 +20,38 @@ class _SplashScreenState extends State<SplashScreen>
   final Box _authBox = Hive.box('authBox');
   late Animation<double> _fadeAnim;
   late AnimationController _controller;
-  
+
   late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
- SystemChrome.setPreferredOrientations([
+
+    SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 200));
 
-        _fadeAnim = Tween<double>(begin: 1.0, end: 0.0).animate(_controller);
+    _fadeAnim = Tween<double>(begin: 1.0, end: 0.0).animate(_controller);
 
-        _animationController = AnimationController(vsync: this);
+    _animationController = AnimationController(vsync: this);
 
     Future.delayed(Duration(seconds: 2), () {
- 
       _controller.forward().then((_) {
-
-        if (_authBox.get('token') != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => BottomNavigation()),
-          );
+        if (_authBox.get('FreshInstall') == false) {
+          if (_authBox.get('token') != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BottomNavigation()),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LoginScreen()),
+            );
+          }
         } else {
           Navigator.push(
             context,
