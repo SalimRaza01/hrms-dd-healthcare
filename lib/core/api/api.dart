@@ -17,16 +17,16 @@ Future<List<Attendance>> fetchAttendence(String empID, int count) async {
   final dateTo = DateFormat('yyyy-MM-dd').format(DateTime.now());
   final dateFrom = DateFormat('yyyy-MM-dd')
       .format(DateTime.now().subtract(Duration(days: 365)));
-
   try {
-    final response = await dio.get('$getAttendenceData/$empID',
+    final response = await dio.get('$getAttendenceData/61',
         queryParameters: {
           "dateFrom": dateFrom,
           "dateTo": dateTo,
-          "page": count
+          "page": 1
         });
 
     if (response.statusCode == 200) {
+      print(response.data);
       final List<dynamic> data = response.data['data'];
       return data.map((item) => Attendance.fromJson(item)).toList();
     } else {
@@ -101,7 +101,7 @@ class AuthProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final responseData = response.data;
-        print('Login Response $responseData');
+     
         final token = responseData['token'];
         final employeeId = responseData['data']['employeeId'];
         final employeeName = responseData['data']['employeeName'];

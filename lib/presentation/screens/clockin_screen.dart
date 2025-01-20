@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_interpolation_to_compose_strings
+// ignore_for_file: prefer_interpolation_to_compose_strings, use_key_in_widget_constructors, library_private_types_in_public_api
 
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -93,7 +93,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
-                            'Let’s Clock-In!',
+                            'Attendence',
                             style: TextStyle(
                                 fontSize: height * 0.023,
                                 color: AppColor.mainFGColor,
@@ -117,7 +117,9 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                       ),
                     ],
                   ),
-                  SizedBox(
+                 
+                  SizedBox(height: height * 0.063, width: width, child: MonthList()),
+                   SizedBox(
                     height: height * 0.01,
                   ),
                   Expanded(
@@ -149,7 +151,6 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
 
                               int hours = duration.inHours;
                               int minutes = duration.inMinutes % 60;
-
                               String formattedDuration = hours == 0 &&
                                       minutes == 0
                                   ? '--/--'
@@ -179,12 +180,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                               Duration lateByDuration =
                                   dateTime.difference(scheduledTime);
 
-
-                              int lateMinutes = lateByDuration.inMinutes;
-
-                              if (lateMinutes < 0) {
-                                lateMinutes = 0;
-                              }
+                              int lateMinutes = (lateByDuration.inMinutes) - 20;
 
                               return InkWell(
                                   onTap: () {
@@ -198,11 +194,11 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                         backgroundColor:
                                             const Color.fromARGB(0, 0, 0, 0),
                                         builder: (context) => PunchRecordScreen(
-                                            punchRecords: item.punchRecords,
-                                            regularizationDate:
-                                                regularizationDate,
-                                            lateMinutes: lateMinutes,
-                                          ),
+                                          punchRecords: item.punchRecords,
+                                          regularizationDate:
+                                              regularizationDate,
+                                          lateMinutes: lateMinutes,
+                                        ),
                                       );
                                     } else {
                                       ScaffoldMessenger.of(context)
@@ -235,13 +231,10 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                   CrossAxisAlignment.center,
                                               children: [
                                                 Card(
-                                                  color: attendDay == 'Sun' ||
-                                                          attendDay == 'Sat'
+                                                  color: item.weekOff == 1 ||
+                                                          item.isHoliday == 1
                                                       ? AppColor.mainBGColor
-                                                      : item.isHoliday != 0
-                                                          ? Colors.amber
-                                                          : AppColor
-                                                              .mainThemeColor,
+                                                      : AppColor.mainThemeColor,
                                                   elevation: 4,
                                                   margin: EdgeInsets.all(0),
                                                   shape: RoundedRectangleBorder(
@@ -268,10 +261,10 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                                 height * 0.03,
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            color: attendDay ==
-                                                                        'Sun' ||
-                                                                    attendDay ==
-                                                                        'Sat'
+                                                            color: item.weekOff ==
+                                                                        1 ||
+                                                                    item.isHoliday ==
+                                                                        1
                                                                 ? Colors.black87
                                                                 : Colors.white,
                                                           ),
@@ -283,10 +276,10 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                                 height * 0.014,
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            color: attendDay ==
-                                                                        'Sun' ||
-                                                                    attendDay ==
-                                                                        'Sat'
+                                                            color: item.weekOff ==
+                                                                        1 ||
+                                                                    item.isHoliday ==
+                                                                        1
                                                                 ? Colors.black87
                                                                 : Colors.white,
                                                           ),
@@ -342,7 +335,9 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                       CrossAxisAlignment.center,
                                                   children: [
                                                     Text(
-                                                      punchIn == '00:00' || punchOut == '23:59'
+                                                      punchIn == '00:00' ||
+                                                              punchOut ==
+                                                                  '23:59'
                                                           ? '--/--'
                                                           : '$punchOut',
                                                       style: TextStyle(
@@ -382,7 +377,11 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                       CrossAxisAlignment.center,
                                                   children: [
                                                     Text(
-                                                         punchIn == '00:00' || punchOut == '23:59' ? '--/--' : formattedDuration,
+                                                      punchIn == '00:00' ||
+                                                              punchOut ==
+                                                                  '23:59'
+                                                          ? '--/--'
+                                                          : formattedDuration,
                                                       style: TextStyle(
                                                         fontSize: height * 0.02,
                                                         fontWeight:
@@ -421,49 +420,14 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                               AlignmentDirectional.bottomEnd,
                                           children: [
                                             Visibility(
-                                              visible:
-                                                  item.isLeaveTaken == true,
+                                              visible: (item.weekOff != 1 &&
+                                                      item.isLeaveTaken ==
+                                                          false) &&
+                                                  (duration.inMinutes > 200 &&
+                                                      duration.inMinutes < 450),
                                               child: Container(
                                                 decoration: BoxDecoration(
-                                                    color:
-                                                        AppColor.mainThemeColor,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                            topLeft:
-                                                                Radius.circular(
-                                                                    15),
-                                                            bottomRight: Radius
-                                                                .circular(15))),
-                                                child: Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      vertical: 0,
-                                                      horizontal: 20),
-                                                  child: SizedBox(
-                                                    width: lateMinutes != 0
-                                                        ? width / 2
-                                                        : null,
-                                                    child: Text(
-                                                      item.leaveType,
-                                                      style: TextStyle(
-                                                          fontSize:
-                                                              height * 0.013,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color: AppColor
-                                                              .mainFGColor),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Visibility(
-                                              visible: lateMinutes != 0,
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                    color: lateMinutes > 15
-                                                        ? Colors.redAccent
-                                                        : Colors.green,
+                                                    color: Colors.redAccent,
                                                     borderRadius:
                                                         BorderRadius.only(
                                                             topLeft: Radius
@@ -477,7 +441,74 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                       vertical: 0,
                                                       horizontal: 20),
                                                   child: Text(
-                                                   'Late by ${(lateMinutes/60).toInt()}:${(lateMinutes -  ((lateMinutes/60).toInt()) * 60)} mins',
+                                                    'Half-Day',
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            height * 0.013,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: AppColor
+                                                            .mainFGColor),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Visibility(
+                                              visible: (item.weekOff != 1 &&
+                                                      item.isLeaveTaken ==
+                                                          false) &&
+                                                  (lateMinutes >= 1 &&
+                                                      lateMinutes <= 30),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                    color: Colors.redAccent,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            topLeft: Radius
+                                                                .circular(15),
+                                                            bottomRight:
+                                                                Radius.circular(
+                                                                    15))),
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 0,
+                                                      horizontal: 20),
+                                                  child: Text(
+                                                    'Late by ${(lateMinutes / 60).toInt()}:${(lateMinutes - ((lateMinutes / 60).toInt()) * 60)} mins',
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            height * 0.013,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: AppColor
+                                                            .mainFGColor),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Visibility(
+                                              visible: (item.weekOff != 1 &&
+                                                      item.isLeaveTaken !=
+                                                          true) &&
+                                                  item.absent == 1,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                    color: Colors.redAccent,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            topLeft: Radius
+                                                                .circular(15),
+                                                            bottomRight:
+                                                                Radius.circular(
+                                                                    15))),
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 0,
+                                                      horizontal: 20),
+                                                  child: Text(
+                                                    'Absent',
                                                     style: TextStyle(
                                                         fontSize:
                                                             height * 0.013,
@@ -527,5 +558,101 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
         // )
       ),
     );
+  }
+}
+
+
+class MonthList extends StatefulWidget {
+  @override
+  _MonthListState createState() => _MonthListState();
+}
+
+class _MonthListState extends State<MonthList> {
+  int selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+
+    final width = MediaQuery.of(context).size.width;
+    DateTime currentDate = DateTime.now();
+
+    List<String> months = [];
+    for (int i = 0; i < 12; i++) {
+      DateTime monthDate = DateTime(currentDate.year, currentDate.month - i);
+      String monthString =
+          getMonthName(monthDate.month) + " " + monthDate.year.toString();
+      months.add(monthString);
+    }
+
+    return Container(
+      padding: EdgeInsets.all(5),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: months.length,
+        itemBuilder: (context, index) {
+          bool isSelected = selectedIndex == index;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 5.0),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedIndex = index;
+                });
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                decoration: BoxDecoration(
+                    border: Border(
+                        bottom: BorderSide(
+                          color: isSelected ? Colors.white : Colors.transparent,
+                          width: 2,
+                        ))),
+                child: Text(
+                  months[index],
+                  style: TextStyle(
+                    fontSize: width * 0.035, 
+                    color: isSelected ? Colors.white : Colors.grey,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  String getMonthName(int month) {
+    switch (month) {
+      case 1:
+        return 'January';
+      case 2:
+        return 'February';
+      case 3:
+        return 'March';
+      case 4:
+        return 'April';
+      case 5:
+        return 'May';
+      case 6:
+        return 'June';
+      case 7:
+        return 'July';
+      case 8:
+        return 'August';
+      case 9:
+        return 'September';
+      case 10:
+        return 'October';
+      case 11:
+        return 'November';
+      case 12:
+        return 'December';
+      default:
+        return '';
+    }
   }
 }

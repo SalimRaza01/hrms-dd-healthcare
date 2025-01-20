@@ -29,9 +29,6 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
   void initState() {
     super.initState();
     date = DateTime.parse(widget.regularizationDate!);
-
-    print(widget.lateMinutes);
-    print(DateTime.now());
     checkEmployeeId();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -53,8 +50,6 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
     setState(() {
       maxRegularization = box.get('maxRegularization');
     });
-
-    print('Stored maxRegularization Count: $maxRegularization');
   }
 
   @override
@@ -71,7 +66,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          widget.lateMinutes > 15 &&
+          widget.lateMinutes > 20 &&
                   widget.lateMinutes < 30 &&
                   date != DateTime.now() &&
                   date!.isAfter(DateTime.now().subtract(Duration(days: 8)))
@@ -91,7 +86,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Visibility(
-              visible: widget.lateMinutes > 15 &&
+              visible: widget.lateMinutes > 20 &&
                   widget.lateMinutes < 30 &&
                   date!.day != DateTime.now().day &&
                   date!.isAfter(DateTime.now().subtract(Duration(days: 8))),

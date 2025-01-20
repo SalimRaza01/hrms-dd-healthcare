@@ -38,8 +38,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   String? casualLeave;
   String? earnedLeave;
   String? medicalLeave;
-  String? maternityLeave;
-  String? paternityLeave;
   String? shortLeave;
   String? reasonError;
 
@@ -243,9 +241,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     setState(() {
       casualLeave = authBox.get('casual');
       medicalLeave = authBox.get('medical');
-      maternityLeave = authBox.get('maternity');
       earnedLeave = authBox.get('earned');
-      paternityLeave = authBox.get('paternity');
       shortLeave = authBox.get('short');
       empID = authBox.get('employeeId');
 
@@ -254,8 +250,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         Leave('Medical Leave', medicalLeave!),
         Leave('Earned Leave', earnedLeave!),
         Leave('Short-Leave', shortLeave!),
-        Leave('Maternity Leave', maternityLeave!),
-        Leave('Paternity Leave', paternityLeave!),
       ];
     });
   }

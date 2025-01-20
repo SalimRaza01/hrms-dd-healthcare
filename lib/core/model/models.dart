@@ -55,6 +55,8 @@ class Attendance {
   final int isHoliday;
   final String leaveType;
   final bool isLeaveTaken;
+  final int absent;
+
   Attendance(
       {required this.employeeName,
       required this.employeeCode,
@@ -71,27 +73,28 @@ class Attendance {
       required this.weekOff,
       required this.isHoliday,
       required this.leaveType,
-      required this.isLeaveTaken});
+      required this.isLeaveTaken,
+      required this.absent});
 
   factory Attendance.fromJson(Map<String, dynamic> json) {
     return Attendance(
-      employeeName: json['EmployeeName'] ?? '',
-      employeeCode: json['EmployeeCode'] ?? '',
-      gender: json['Gender'] ?? '',
-      employmentType: json['EmployementType'] ?? '',
-      attendanceDate: json['AttendanceDate'] ?? '',
-      inTime: json['InTime'] ?? '',
-      outTime: json['OutTime'] ?? '',
-      status: json['Status'] ?? '',
-      duration: json['Duration'] ?? 0,
-      punchRecords: json['PunchRecords'] ?? '',
-      lateby: json['LateBy'] ?? 0,
-      earlyBy: json['EarlyBy'] ?? 0,
-      weekOff: json['WeeklyOff'] ?? '',
-      isHoliday: json['Holiday'] ?? 0,
-      leaveType: json['leaveType'] ?? '',
-      isLeaveTaken: json['isLeaveTaken'] ?? false,
-    );
+        employeeName: json['EmployeeName'] ?? '',
+        employeeCode: json['EmployeeCode'] ?? '',
+        gender: json['Gender'] ?? '',
+        employmentType: json['EmployementType'] ?? '',
+        attendanceDate: json['AttendanceDate'] ?? '',
+        inTime: json['InTime'] ?? '',
+        outTime: json['OutTime'] ?? '',
+        status: json['Status'] ?? '',
+        duration: json['Duration'] ?? 0,
+        punchRecords: json['PunchRecords'] ?? '',
+        lateby: json['LateBy'] ?? 0,
+        earlyBy: json['EarlyBy'] ?? 0,
+        weekOff: json['WeeklyOff'] ?? '',
+        isHoliday: json['Holiday'] ?? 0,
+        leaveType: json['leaveType'] ?? '',
+        isLeaveTaken: json['isLeaveTaken'] ?? false,
+        absent: json['Absent'] ?? 0);
   }
 
   Map<String, dynamic> toJson() {
@@ -112,6 +115,7 @@ class Attendance {
       'Holiday': isHoliday,
       'leaveType': leaveType,
       'isLeaveTaken': isLeaveTaken,
+      'Absent': absent,
     };
   }
 }

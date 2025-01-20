@@ -98,7 +98,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                           'assets/image/ClockIn.png',
                           height: 25,
                         ),
-                        label: 'Clock-In',
+                        label: 'Attendance',
                       ),
                       NavigationDestination(
                         selectedIcon: Image.asset(
@@ -166,7 +166,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                           'assets/image/ClockIn.png',
                           height: 25,
                         ),
-                        label: 'Clock-In',
+                        label: 'Attendance',
                       ),
                       NavigationDestination(
                         selectedIcon: Image.asset(

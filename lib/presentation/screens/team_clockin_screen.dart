@@ -34,7 +34,6 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    final width = MediaQuery.of(context).size.width;
 
     return SafeArea(
         child: Scaffold(
@@ -90,11 +89,7 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                     Duration lateByDuration =
                         dateTime.difference(scheduledTime);
 
-                    int lateMinutes = lateByDuration.inMinutes;
-
-                    if (lateMinutes < 0) {
-                      lateMinutes = 0;
-                    }
+                    int lateMinutes = (lateByDuration.inMinutes) - 20;
 
                     return InkWell(
                         onTap: () {
@@ -138,12 +133,10 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       Card(
-                                        color: attendDay == 'Sun' ||
-                                                attendDay == 'Sat'
+                                        color: item.weekOff == 1 ||
+                                                item.isHoliday == 1
                                             ? AppColor.mainBGColor
-                                            : item.isHoliday != 0
-                                                ? Colors.amber
-                                                : AppColor.mainThemeColor,
+                                            : AppColor.mainThemeColor,
                                         elevation: 4,
                                         margin: EdgeInsets.all(0),
                                         shape: RoundedRectangleBorder(
@@ -164,10 +157,10 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                                 style: TextStyle(
                                                   fontSize: height * 0.03,
                                                   fontWeight: FontWeight.bold,
-                                                  color: attendDay == 'Sun' ||
-                                                          attendDay == 'Sat'
+                                                  color: item.weekOff == 1 ||
+                                                          item.isHoliday == 1
                                                       ? Colors.black87
-                                                      : AppColor.mainFGColor,
+                                                      : Colors.white,
                                                 ),
                                               ),
                                               Text(
@@ -175,10 +168,10 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                                 style: TextStyle(
                                                   fontSize: height * 0.014,
                                                   fontWeight: FontWeight.bold,
-                                                  color: attendDay == 'Sun' ||
-                                                          attendDay == 'Sat'
+                                                  color: item.weekOff == 1 ||
+                                                          item.isHoliday == 1
                                                       ? Colors.black87
-                                                      : AppColor.mainFGColor,
+                                                      : Colors.white,
                                                 ),
                                               ),
                                             ],
@@ -296,57 +289,102 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                               Stack(
                                 alignment: AlignmentDirectional.bottomEnd,
                                 children: [
-                                  Visibility(
-                                    visible: item.isLeaveTaken == true,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          color: AppColor.mainThemeColor,
-                                          borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              bottomRight:
-                                                  Radius.circular(15))),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 0, horizontal: 20),
-                                        child: SizedBox(
-                                          width: lateMinutes != 0
-                                              ? width / 2
-                                              : null,
-                                          child: Text(
-                                            item.leaveType,
-                                            style: TextStyle(
-                                                fontSize: height * 0.013,
-                                                fontWeight: FontWeight.w400,
-                                                color: AppColor.mainFGColor),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Visibility(
-                                    visible: lateMinutes != 0,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          color: lateMinutes > 15
-                                              ? Colors.redAccent
-                                              : Colors.green,
-                                          borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              bottomRight:
-                                                  Radius.circular(15))),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 0, horizontal: 20),
-                                        child: Text(
-                                          'Late by ${(lateMinutes / 60).toInt()}:${(lateMinutes - ((lateMinutes / 60).toInt()) * 60)} mins',
-                                          style: TextStyle(
-                                              fontSize: height * 0.013,
-                                              fontWeight: FontWeight.w400,
-                                              color: AppColor.mainFGColor),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                 Visibility(
+                                              visible: (item.weekOff != 1 &&
+                                                      item.isLeaveTaken ==
+                                                          false) && (duration.inMinutes > 200 && duration.inMinutes < 450),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                    color: Colors.redAccent,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            topLeft: Radius
+                                                                .circular(15),
+                                                            bottomRight:
+                                                                Radius.circular(
+                                                                    15))),
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 0,
+                                                      horizontal: 20),
+                                                  child: Text(
+                                                     'Half-Day',
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            height * 0.013,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: AppColor
+                                                            .mainFGColor),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Visibility(
+                                              visible: (item.weekOff != 1 &&
+                                                      item.isLeaveTaken ==
+                                                          false) && (lateMinutes >= 1 && lateMinutes <= 30),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                    color: Colors.redAccent,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            topLeft: Radius
+                                                                .circular(15),
+                                                            bottomRight:
+                                                                Radius.circular(
+                                                                    15))),
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 0,
+                                                      horizontal: 20),
+                                                  child: Text(
+                                                    'Late by ${(lateMinutes / 60).toInt()}:${(lateMinutes - ((lateMinutes / 60).toInt()) * 60)} mins',
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            height * 0.013,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: AppColor
+                                                            .mainFGColor),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Visibility(
+                                              visible: (item.weekOff != 1 &&
+                                                      item.isLeaveTaken !=
+                                                          true) && item.absent == 1,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                    color: Colors.redAccent,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            topLeft: Radius
+                                                                .circular(15),
+                                                            bottomRight:
+                                                                Radius.circular(
+                                                                    15))),
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 0,
+                                                      horizontal: 20),
+                                                  child: Text(
+                                                   'Absent',
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            height * 0.013,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: AppColor
+                                                            .mainFGColor),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                                 ],
                               ),
                             ],
