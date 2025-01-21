@@ -213,12 +213,12 @@
 //     return Scaffold(
 //       backgroundColor: Colors.transparent,
 //       body: _isLoading
-//           ? Center(
-//               child: LoadingAnimationWidget.inkDrop(
-//                 color: AppColor.mainFGColor,
-//                 size: height * 0.04,
-//               ),
-//             )
+          // ? Center(
+          //     child: LoadingAnimationWidget.inkDrop(
+          //       color: AppColor.mainFGColor,
+          //       size: height * 0.04,
+          //     ),
+          //   )
 //           : Stack(
 //               children: [
 //                 FlutterMap(

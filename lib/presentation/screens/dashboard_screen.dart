@@ -8,18 +8,17 @@ import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hrms/presentation/odoo/odoo_dashboard.dart';
 import 'package:hrms/presentation/odoo/task_details.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:shimmer/shimmer.dart';
 import 'holiday_list.dart';
 import 'notification_screen.dart';
 import 'package:calendar_timeline/calendar_timeline.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String empID;
-  const DashboardScreen(this.empID);
+  const DashboardScreen(this.empID, {super.key});
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
@@ -85,13 +84,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           leading: Padding(
             padding: const EdgeInsets.only(left: 15),
             child: CircleAvatar(
-              backgroundImage: _authBox.get('photo') == "NA" || _authBox.get('photo') == null
-                  ? AssetImage(
-                      _authBox.get('gender') == 'Male'
-                          ? 'assets/image/MaleAvatar.png'
-                          : 'assets/image/FemaleAvatar.png',
-                    )
-                  : NetworkImage(_authBox.get('photo')!),
+              backgroundImage:
+                  _authBox.get('photo') == "NA" || _authBox.get('photo') == null
+                      ? AssetImage(
+                          _authBox.get('gender') == 'Male'
+                              ? 'assets/image/MaleAvatar.png'
+                              : 'assets/image/FemaleAvatar.png',
+                        )
+                      : NetworkImage(_authBox.get('photo')!),
             ),
           ),
           title: Column(
@@ -147,7 +147,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return _shimmerEffectshiftTime(height, width);
+                            return Center(
+                              child: LoadingAnimationWidget.threeArchedCircle(
+                                color: AppColor.mainTextColor2,
+                                size: height * 0.03,
+                              ),
+                            );
                           } else if (snapshot.hasError) {
                             return Card(
                               color: AppColor.mainFGColor,
@@ -221,64 +226,64 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             return Text('No data Found');
                           }
                         }),
-                    SizedBox(
-                      height: height * 0.015,
-                    ),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => OdooDashboard()));
-                      },
-                      child: Container(
-                          width: width,
-                          decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.centerRight,
-                                colors: [
-                                  AppColor.primaryThemeColor,
-                                  AppColor.mainThemeColor,
-                                ],
-                              ),
-                              border: Border.all(
-                                  color: const Color.fromARGB(14, 0, 0, 0)),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 12),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.check_circle_outline_outlined,
-                                      color: AppColor.mainFGColor,
-                                      size: height * 0.022,
-                                    ),
-                                    SizedBox(
-                                      width: width * 0.02,
-                                    ),
-                                    Text(
-                                      'View Task Dashbaord',
-                                      style: TextStyle(
-                                          fontSize: height * 0.015,
-                                          color: AppColor.mainFGColor,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ],
-                                ),
-                                Icon(
-                                  Icons.arrow_forward_ios_outlined,
-                                  color: AppColor.mainFGColor,
-                                  size: height * 0.018,
-                                ),
-                              ],
-                            ),
-                          )),
-                    ),
+                    // SizedBox(
+                    //   height: height * 0.015,
+                    // ),
+                    // InkWell(
+                    //   onTap: () {
+                    //     Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //             builder: (context) => OdooDashboard()));
+                    //   },
+                    //   child: Container(
+                    //       width: width,
+                    //       decoration: BoxDecoration(
+                    //           gradient: LinearGradient(
+                    //             begin: Alignment.topLeft,
+                    //             end: Alignment.centerRight,
+                    //             colors: [
+                    //               AppColor.primaryThemeColor,
+                    //               AppColor.mainThemeColor,
+                    //             ],
+                    //           ),
+                    //           border: Border.all(
+                    //               color: const Color.fromARGB(14, 0, 0, 0)),
+                    //           borderRadius: BorderRadius.circular(10)),
+                    //       child: Padding(
+                    //         padding: const EdgeInsets.symmetric(
+                    //             horizontal: 10, vertical: 12),
+                    //         child: Row(
+                    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //           children: [
+                    //             Row(
+                    //               children: [
+                    //                 Icon(
+                    //                   Icons.check_circle_outline_outlined,
+                    //                   color: AppColor.mainFGColor,
+                    //                   size: height * 0.022,
+                    //                 ),
+                    //                 SizedBox(
+                    //                   width: width * 0.02,
+                    //                 ),
+                    //                 Text(
+                    //                   'View Task Dashbaord',
+                    //                   style: TextStyle(
+                    //                       fontSize: height * 0.015,
+                    //                       color: AppColor.mainFGColor,
+                    //                       fontWeight: FontWeight.w400),
+                    //                 ),
+                    //               ],
+                    //             ),
+                    //             Icon(
+                    //               Icons.arrow_forward_ios_outlined,
+                    //               color: AppColor.mainFGColor,
+                    //               size: height * 0.018,
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       )),
+                    // ),
                     SizedBox(
                       height: height * 0.015,
                     ),
@@ -345,20 +350,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {
                                       return Center(
-                                          child: CircularProgressIndicator());
+                                        child: LoadingAnimationWidget
+                                            .threeArchedCircle(
+                                          color: AppColor.mainTextColor2,
+                                          size: height * 0.03,
+                                        ),
+                                      );
                                     } else if (snapshot.hasError) {
                                       return Center(
                                           child: Text(
-                                              'No Employee is On Leave'));
+                                        'No Employee is On Leave',
+                                        style: TextStyle(
+                                            fontSize: height * 0.014,
+                                            color: AppColor.mainTextColor2),
+                                      ));
                                     } else if (!snapshot.hasData ||
                                         snapshot.data!.isEmpty) {
                                       return Center(
-                                          child: Text(
-                                              'No Employee is On Leave'));
+                                          child: Text('No Employee is On Leave',
+                                              style: TextStyle(
+                                                  fontSize: height * 0.014,
+                                                  color: AppColor
+                                                      .mainTextColor2)));
                                     } else {
                                       List<EmployeeOnLeave> items =
                                           snapshot.data!;
-                    
+
                                       return SizedBox(
                                         width: width,
                                         height: height * 0.07,
@@ -375,10 +392,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                   CircleAvatar(
                                                     backgroundColor:
                                                         const Color.fromARGB(
-                                                            255,
-                                                            235,
-                                                            244,
-                                                            254),
+                                                            255, 235, 244, 254),
                                                     child: Text(
                                                       item.employeeName[0],
                                                       style: TextStyle(
@@ -448,8 +462,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {
-                                      return _shimmerEffectForLeaveBalance(
-                                          height, width);
+                                      return Center(
+                                        child: LoadingAnimationWidget
+                                            .threeArchedCircle(
+                                          color: AppColor.mainTextColor2,
+                                          size: height * 0.03,
+                                        ),
+                                      );
                                     } else if (snapshot.hasError) {
                                       return Center(
                                           child: Text('No Data Found'));
@@ -509,7 +528,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
                                   return Center(
-                                      child: CircularProgressIndicator());
+                                      child: 
+        LoadingAnimationWidget.threeArchedCircle(
+                color: AppColor.mainTextColor2,
+                size: height * 0.03,
+      
+            ));
                                 } else if (snapshot.hasError) {
                                   return Center(
                                       child: Text('No Holiday List Found'));
@@ -656,7 +680,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       height: height * 0.015,
                     ),
                     isLoading
-                        ? Center(child: CircularProgressIndicator())
+                        ? Center(child: 
+             LoadingAnimationWidget.threeArchedCircle(
+                color: AppColor.mainTextColor2,
+                size: height * 0.03,
+      
+            ))
                         : tasks.isEmpty
                             ? NoTaskWidget(height: height)
                             : SizedBox(
@@ -890,72 +919,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ],
                 ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  SizedBox _shimmerEffectForLeaveBalance(double height, double width) {
-    return SizedBox(
-      height: height * 0.1,
-      child: Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: 5,
-          itemBuilder: (context, index) {
-            return Container(
-              height: height * 0.15,
-              color: AppColor.mainFGColor,
-              width: width * 0.2,
-              margin: EdgeInsets.symmetric(horizontal: 5),
-            );
-          },
-          separatorBuilder: (context, index) => SizedBox(height: 10),
-        ),
-      ),
-    );
-  }
-
-  SizedBox _shimmerEffectshiftTime(double height, double width) {
-    return SizedBox(
-      child: Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
-        child: Container(
-          color: AppColor.mainFGColor,
-          width: width,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    '      ',
-                    style: TextStyle(
-                      fontSize: height * 0.02,
-                      color: Color.fromARGB(141, 0, 0, 0),
-                    ),
-                  ),
-                  Text(
-                    '  -  ',
-                    style: TextStyle(
-                      fontSize: height * 0.02,
-                      color: Color.fromARGB(141, 0, 0, 0),
-                    ),
-                  ),
-                  Text(
-                    '           ',
-                    style: TextStyle(
-                      fontSize: height * 0.02,
-                      color: Color.fromARGB(141, 0, 0, 0),
-                    ),
-                  ),
-                ],
               )
             ],
           ),

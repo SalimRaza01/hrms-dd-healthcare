@@ -8,6 +8,7 @@ import 'package:hrms/core/theme/app_colors.dart';
 import 'package:hrms/presentation/screens/team_punchrecords.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class TeamClockinScreen extends StatefulWidget {
@@ -28,7 +29,9 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
       DeviceOrientation.portraitDown,
     ]);
     super.initState();
-    attendenceLog = fetchAttendence(widget.empID, 1);
+    attendenceLog = fetchAttendence(widget.empID, DateFormat('MMMM yyyy').format(DateTime.now()).toString());
+
+    
   }
 
   @override
@@ -45,7 +48,13 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
             future: attendenceLog,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+                return Center(
+                                        child: LoadingAnimationWidget
+                                            .threeArchedCircle(
+                                          color: AppColor.mainTextColor2,
+                                          size: height * 0.03,
+                                        ),
+                                      );
               } else if (snapshot.hasError) {
                 return Center(child: Text('No attendance records available.'));
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

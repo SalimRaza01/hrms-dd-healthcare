@@ -1,9 +1,9 @@
-
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -22,10 +22,11 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _emailErrorText;
   String? _passwordErrorText;
   final Box _authBox = Hive.box('authBox');
+  bool isloading = false;
   @override
   void initState() {
     super.initState();
-      _authBox.put('FreshInstall', false);
+    _authBox.put('FreshInstall', false);
   }
 
   @override
@@ -35,10 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final width = MediaQuery.of(context).size.width;
 
     return PopScope(
-
-      onPopInvoked:(didPop) {
+      onPopInvoked: (didPop) {
         SystemNavigator.pop();
-  
       },
       child: Scaffold(
         body: Container(
@@ -110,40 +109,46 @@ class _LoginScreenState extends State<LoginScreen> {
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12)),
                                 ),
-                           onChanged: (value) {
-      setState(() {
-        bool isDigit = int.tryParse(value) != null;  
-        
-        if (isDigit) {
-       
-          final employeeCode = RegExp(r'^\d{3,}$'); 
-          if (value.isEmpty) {
-            _emailErrorText = 'Employee Code is required';
-          } else if (!employeeCode.hasMatch(value)) {
-            _emailErrorText = 'Employee Code must have at least 3 digits';
-          } else {
-            _emailErrorText = null;
-          }
-        } else {
+                                onChanged: (value) {
+                                  setState(() {
+                                    bool isDigit = int.tryParse(value) != null;
 
-          final hasEmail = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-          final hasSpace = RegExp(r'\s');
-          final containsDomain = RegExp(r'@agvahealthtech.com$');
-          
-          if (value.isEmpty) {
-            _emailErrorText = null;
-          } else if (!hasEmail.hasMatch(value)) {
-            _emailErrorText = 'Invalid Email';
-          } else if (hasSpace.hasMatch(value)) {
-            _emailErrorText = "Email can't contain spaces";
-          } else if (!containsDomain.hasMatch(value)) {
-            _emailErrorText = 'Email must belong to agvahealthtech.com';
-          } else {
-            _emailErrorText = null;
-          }
-        }
-      });
-    },
+                                    if (isDigit) {
+                                      final employeeCode = RegExp(r'^\d{3,}$');
+                                      if (value.isEmpty) {
+                                        _emailErrorText =
+                                            'Employee Code is required';
+                                      } else if (!employeeCode
+                                          .hasMatch(value)) {
+                                        _emailErrorText =
+                                            'Employee Code must have at least 3 digits';
+                                      } else {
+                                        _emailErrorText = null;
+                                      }
+                                    } else {
+                                      final hasEmail = RegExp(
+                                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                                      final hasSpace = RegExp(r'\s');
+                                      final containsDomain =
+                                          RegExp(r'@agvahealthtech.com$');
+
+                                      if (value.isEmpty) {
+                                        _emailErrorText = null;
+                                      } else if (!hasEmail.hasMatch(value)) {
+                                        _emailErrorText = 'Invalid Email';
+                                      } else if (hasSpace.hasMatch(value)) {
+                                        _emailErrorText =
+                                            "Email can't contain spaces";
+                                      } else if (!containsDomain
+                                          .hasMatch(value)) {
+                                        _emailErrorText =
+                                            'Email must belong to agvahealthtech.com';
+                                      } else {
+                                        _emailErrorText = null;
+                                      }
+                                    }
+                                  });
+                                },
                               ),
                             ),
                             SizedBox(height: 20),
@@ -166,7 +171,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                     onPressed: () {
                                       setState(() {
-                                        _isPasswordVisible = !_isPasswordVisible;
+                                        _isPasswordVisible =
+                                            !_isPasswordVisible;
                                       });
                                     },
                                   ),
@@ -225,14 +231,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                 _passwordErrorText = "Please Enter Password";
                               });
                             } else {
-                              print('sign in button');
+                              setState(() {
+                                isloading = true;
+                              });
                               await authProvider.login(
                                   _emailController.text.toString(),
                                   _passwordController.text.toString(),
                                   context);
+                              setState(() {
+                                isloading = false;
+                              });
                             }
                           },
                           child: Container(
+                            width: width,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                   begin: Alignment.topCenter,
@@ -245,15 +257,22 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 52, vertical: 12),
-                              child: Center(
-                                child: Text(
-                                  'Sign In',
-                                  style: TextStyle(
-                                      color: AppColor.mainFGColor,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              ),
+                                  horizontal: 0, vertical: 12),
+                              child: isloading
+                                  ?           Center(
+              child: LoadingAnimationWidget.threeArchedCircle(
+                color: AppColor.mainFGColor,
+                size: height * 0.03,
+              ),
+            )
+                                  : Center(
+                                      child: Text(
+                                        'Sign In',
+                                        style: TextStyle(
+                                            color: AppColor.mainFGColor,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    ),
                             ),
                           ),
                         ),

@@ -12,6 +12,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -528,7 +529,13 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   _selectedLeaveType!.contains('Medical'),
                               child: Builder(
                                 builder: (BuildContext context) => _isLoading
-                                    ? Center(child: CircularProgressIndicator())
+                                    ? Center(
+                                        child: LoadingAnimationWidget
+                                            .threeArchedCircle(
+                                          color: AppColor.mainTextColor2,
+                                          size: height * 0.03,
+                                        ),
+                                      )
                                     : _paths == null
                                         ? SizedBox()
                                         : ListView.builder(
@@ -581,7 +588,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             ),
                             Visibility(
                               visible: _selectedLeaveType != null &&
-                                  _selectedLeaveType!.contains('Medical'),
+                                  _selectedLeaveType!.contains('Medical') ,
                               child: InkWell(
                                 onTap: () async {
                                   FilePickerResult? result =

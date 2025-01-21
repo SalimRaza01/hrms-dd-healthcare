@@ -5,6 +5,7 @@ import 'package:hrms/core/theme/app_colors.dart';
 import 'package:hrms/presentation/screens/team_clockin_screen.dart';
 import 'package:hrms/presentation/screens/team_profile.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class TeamScreen extends StatefulWidget {
@@ -156,263 +157,271 @@ class _TeamScreenState extends State<TeamScreen> {
                   ),
                   SizedBox(height: 16),
                   // Employee List
-                  FutureBuilder<List<EmployeeProfile>>(
-                      future: employeeProfiles,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Center(child: Text('Loading'));
-                        } else if (snapshot.hasError) {
-                          return Center(
-                              child: Text(
-                                  'No Data Found'));
-                        } else if (!snapshot.hasData) {
-                          return Center(child: Text('No data found'));
-                        } else {
-                          final employees = snapshot.data!;
-                          final filteredEmployees = employees
-                              .where((employee) => employee.employeeName
-                                  .toLowerCase()
-                                  .contains(searchQuery.toLowerCase()))
-                              .toList();
-
-                          return Expanded(
-                            child: ListView.separated(
-                              itemCount: filteredEmployees.length,
-                              itemBuilder: (context, index) {
-                                final employee = filteredEmployees[index];
-                                return InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      employee.isExpanded =
-                                          !employee.isExpanded;
-                                    });
-                                  },
-                                  child: Card(
-                                    color: AppColor.mainFGColor,
-                                    elevation: 5,
-                                    margin: EdgeInsets.all(0),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    shadowColor: Colors.black.withOpacity(0.1),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(5),
-                                      child: Column(
-                                        
-                                        children: [
-                                          // Header
-                                          ListTile(
-                                            leading: CircleAvatar(
-                                              backgroundColor:
-                                                  const Color.fromARGB(
-                                                      255, 235, 244, 254),
-                                              child: Text(
-                                                employee.employeeName[0],
+                  Expanded(
+                    child: FutureBuilder<List<EmployeeProfile>>(
+                        future: employeeProfiles,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(
+                                          child: LoadingAnimationWidget
+                                              .threeArchedCircle(
+                                            color: AppColor.mainTextColor2,
+                                            size: height * 0.03,
+                                          ),
+                                        );
+                          } else if (snapshot.hasError) {
+                            return Center(
+                                child: Text(
+                                    'No Data Found'));
+                          } else if (!snapshot.hasData) {
+                            return Center(child: Text('No data found'));
+                          } else {
+                            final employees = snapshot.data!;
+                            final filteredEmployees = employees
+                                .where((employee) => employee.employeeName
+                                    .toLowerCase()
+                                    .contains(searchQuery.toLowerCase()))
+                                .toList();
+                    
+                            return Expanded(
+                              child: ListView.separated(
+                                itemCount: filteredEmployees.length,
+                                itemBuilder: (context, index) {
+                                  final employee = filteredEmployees[index];
+                                  return InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        employee.isExpanded =
+                                            !employee.isExpanded;
+                                      });
+                                    },
+                                    child: Card(
+                                      color: AppColor.mainFGColor,
+                                      elevation: 5,
+                                      margin: EdgeInsets.all(0),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      shadowColor: Colors.black.withOpacity(0.1),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(5),
+                                        child: Column(
+                                          
+                                          children: [
+                                            // Header
+                                            ListTile(
+                                              leading: CircleAvatar(
+                                                backgroundColor:
+                                                    const Color.fromARGB(
+                                                        255, 235, 244, 254),
+                                                child: Text(
+                                                  employee.employeeName[0],
+                                                  style: TextStyle(
+                                                    fontSize: height * 0.022,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                              ),
+                                              title: Text(
+                                                employee.employeeName,
                                                 style: TextStyle(
-                                                  fontSize: height * 0.022,
-                                                  fontWeight: FontWeight.w400,
+                                                  fontSize: height * 0.019,
+                                                  color: AppColor.mainTextColor2,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              subtitle: Text(
+                                                employee.designation,
+                                                style: TextStyle(
+                                                    fontSize: height * 0.013,
+                                                    color: Colors.grey.shade600),
+                                              ),
+                                            ),
+                                            AnimatedContainer(
+                                              duration:
+                                                  Duration(milliseconds: 300),
+                                              height: employee.isExpanded
+                                                  ? height * 0.12
+                                                  : 0,
+                                              child: SingleChildScrollView(
+                                        
+                                                child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                  spacing: 3.0,
+                                                  children: [
+                                                    FutureBuilder<LeaveBalance>(
+                                                        future: fetchLeaves(
+                                                            employee.employeeId),
+                                                        builder:
+                                                            (context, snapshot) {
+                                                          if (snapshot
+                                                                  .connectionState ==
+                                                              ConnectionState
+                                                                  .waiting) {
+                                                            return SizedBox();
+                                                          } else if (snapshot
+                                                              .hasError) {
+                                                            return Center(
+                                                                child: Text(
+                                                                    'No Data Found'));
+                                                          } else if (snapshot
+                                                              .hasData) {
+                                                            final leave =
+                                                                snapshot.data!;
+                    
+                                                            return Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                leaveWidget(
+                                                                    height,
+                                                                    width,
+                                                                    'Casual',
+                                                                    leave
+                                                                        .casualLeave),
+                                                            
+                                                                leaveWidget(
+                                                                    height,
+                                                                    width,
+                                                                    'Medical',
+                                                                    leave
+                                                                        .medicalLeave),
+                                                            
+                                                                leaveWidget(
+                                                                    height,
+                                                                    width,
+                                                                    'Earned',
+                                                                    leave
+                                                                        .earnedLeave),
+                                                                                                             
+                                                              ],
+                                                            );
+                                                          } else {
+                                                            return Text(
+                                                                'No data Found');
+                                                          }
+                                                        }),
+                                                    InkWell(
+                                                      onTap: () {
+                                                        showCupertinoModalBottomSheet(
+                                                          expand: true,
+                                                          context: context,
+                                                          barrierColor:
+                                                              const Color
+                                                                  .fromARGB(
+                                                                  130, 0, 0, 0),
+                                                          backgroundColor:
+                                                              Colors.transparent,
+                                                          builder: (context) =>
+                                                              TeamProfile(employee
+                                                                  .employeeId),
+                                                        );
+                                                      },
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius.only(
+                                                                  topLeft: Radius
+                                                                      .circular(
+                                                                          0),
+                                                                  topRight: Radius
+                                                                      .circular(
+                                                                          0)),
+                                                          color: const Color
+                                                              .fromARGB(
+                                                              255, 235, 244, 254),
+                                                        ),
+                                                        width: width,
+                                                        height: height * 0.04,
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(8.0),
+                                                          child: Text(
+                                                            'Profile',
+                                                            style: TextStyle(
+                                                                fontSize: height *
+                                                                    0.015,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    InkWell(
+                                                      onTap: () {
+                                                        showCupertinoModalBottomSheet(
+                                                          expand: true,
+                                                          context: context,
+                                                          barrierColor:
+                                                              const Color
+                                                                  .fromARGB(
+                                                                  130, 0, 0, 0),
+                                                          backgroundColor:
+                                                              Colors.transparent,
+                                                          builder: (context) =>
+                                                              TeamClockinScreen(
+                                                                  employee
+                                                                      .employeeId),
+                                                        );
+                                                      },
+                                                      child: Container(
+                                                        width: width,
+                                                           height: height * 0.04,
+                                                        decoration: BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius.only(
+                                                                  bottomLeft: Radius
+                                                                      .circular(
+                                                                          15),
+                                                                  bottomRight:
+                                                                      Radius
+                                                                          .circular(
+                                                                              15)),
+                                                          color: const Color
+                                                              .fromARGB(
+                                                              255, 235, 244, 254),
+                                                        ),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(8.0),
+                                                          child: Text(
+                                                            'Attendance',
+                                                            style: TextStyle(
+                                                                fontSize: height *
+                                                                    0.015,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
-                                            title: Text(
-                                              employee.employeeName,
-                                              style: TextStyle(
-                                                fontSize: height * 0.019,
-                                                color: AppColor.mainTextColor2,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            subtitle: Text(
-                                              employee.designation,
-                                              style: TextStyle(
-                                                  fontSize: height * 0.013,
-                                                  color: Colors.grey.shade600),
-                                            ),
-                                          ),
-                                          AnimatedContainer(
-                                            duration:
-                                                Duration(milliseconds: 300),
-                                            height: employee.isExpanded
-                                                ? height * 0.12
-                                                : 0,
-                                            child: SingleChildScrollView(
-                                      
-                                              child: Column(
-                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                spacing: 3.0,
-                                                children: [
-                                                  FutureBuilder<LeaveBalance>(
-                                                      future: fetchLeaves(
-                                                          employee.employeeId),
-                                                      builder:
-                                                          (context, snapshot) {
-                                                        if (snapshot
-                                                                .connectionState ==
-                                                            ConnectionState
-                                                                .waiting) {
-                                                          return SizedBox();
-                                                        } else if (snapshot
-                                                            .hasError) {
-                                                          return Center(
-                                                              child: Text(
-                                                                  'No Data Found'));
-                                                        } else if (snapshot
-                                                            .hasData) {
-                                                          final leave =
-                                                              snapshot.data!;
-
-                                                          return Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceBetween,
-                                                            children: [
-                                                              leaveWidget(
-                                                                  height,
-                                                                  width,
-                                                                  'Casual',
-                                                                  leave
-                                                                      .casualLeave),
-                                                          
-                                                              leaveWidget(
-                                                                  height,
-                                                                  width,
-                                                                  'Medical',
-                                                                  leave
-                                                                      .medicalLeave),
-                                                          
-                                                              leaveWidget(
-                                                                  height,
-                                                                  width,
-                                                                  'Earned',
-                                                                  leave
-                                                                      .earnedLeave),
-                                                                                                           
-                                                            ],
-                                                          );
-                                                        } else {
-                                                          return Text(
-                                                              'No data Found');
-                                                        }
-                                                      }),
-                                                  InkWell(
-                                                    onTap: () {
-                                                      showCupertinoModalBottomSheet(
-                                                        expand: true,
-                                                        context: context,
-                                                        barrierColor:
-                                                            const Color
-                                                                .fromARGB(
-                                                                130, 0, 0, 0),
-                                                        backgroundColor:
-                                                            Colors.transparent,
-                                                        builder: (context) =>
-                                                            TeamProfile(employee
-                                                                .employeeId),
-                                                      );
-                                                    },
-                                                    child: Container(
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius.only(
-                                                                topLeft: Radius
-                                                                    .circular(
-                                                                        0),
-                                                                topRight: Radius
-                                                                    .circular(
-                                                                        0)),
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 235, 244, 254),
-                                                      ),
-                                                      width: width,
-                                                      height: height * 0.04,
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Text(
-                                                          'Profile',
-                                                          style: TextStyle(
-                                                              fontSize: height *
-                                                                  0.015,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  InkWell(
-                                                    onTap: () {
-                                                      showCupertinoModalBottomSheet(
-                                                        expand: true,
-                                                        context: context,
-                                                        barrierColor:
-                                                            const Color
-                                                                .fromARGB(
-                                                                130, 0, 0, 0),
-                                                        backgroundColor:
-                                                            Colors.transparent,
-                                                        builder: (context) =>
-                                                            TeamClockinScreen(
-                                                                employee
-                                                                    .employeeId),
-                                                      );
-                                                    },
-                                                    child: Container(
-                                                      width: width,
-                                                         height: height * 0.04,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius.only(
-                                                                bottomLeft: Radius
-                                                                    .circular(
-                                                                        15),
-                                                                bottomRight:
-                                                                    Radius
-                                                                        .circular(
-                                                                            15)),
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 235, 244, 254),
-                                                      ),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Text(
-                                                          'Attendance',
-                                                          style: TextStyle(
-                                                              fontSize: height *
-                                                                  0.015,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              },
-                              separatorBuilder:
-                                  (BuildContext context, int index) {
-                                return SizedBox(
-                                  height: height * 0.01,
-                                );
-                              },
-                            ),
-                          );
-                        }
-                      }),
+                                  );
+                                },
+                                separatorBuilder:
+                                    (BuildContext context, int index) {
+                                  return SizedBox(
+                                    height: height * 0.01,
+                                  );
+                                },
+                              ),
+                            );
+                          }
+                        }),
+                  ),
                 ],
               ),
             ),

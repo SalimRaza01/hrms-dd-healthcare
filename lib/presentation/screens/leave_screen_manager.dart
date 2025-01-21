@@ -5,9 +5,9 @@ import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:intl/intl.dart';
-import 'package:shimmer/shimmer.dart';
 import 'apply_leave.dart';
 
 class LeaveScreenManager extends StatefulWidget {
@@ -176,7 +176,13 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
-                                  return _shimmerLoader(height, width);
+                                  return Center(
+                                        child: LoadingAnimationWidget
+                                            .threeArchedCircle(
+                                          color: AppColor.mainTextColor2,
+                                          size: height * 0.03,
+                                        ),
+                                      );
                                 } else if (snapshot.hasError) {
                                   return Center(child: Text('No Data Found'));
                                 } else if (snapshot.hasData) {
@@ -236,7 +242,13 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                 future: _leaveHistory,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return _shimmerhistoryLoader(height, width);
+                    return Center(
+                                        child: LoadingAnimationWidget
+                                            .threeArchedCircle(
+                                          color: AppColor.mainTextColor2,
+                                          size: height * 0.03,
+                                        ),
+                                      );
                   } else if (snapshot.hasError) {
                     return Center(
                       child: Card(
@@ -385,7 +397,13 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                 future: _leaveRequest,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return _shimmerhistoryLoader(height, width);
+                    return Center(
+                                        child: LoadingAnimationWidget
+                                            .threeArchedCircle(
+                                          color: AppColor.mainTextColor2,
+                                          size: height * 0.03,
+                                        ),
+                                      );
                   } else if (snapshot.hasError) {
                     return Center(
                       child: Card(
@@ -784,48 +802,4 @@ class _LeaveScreenState extends State<LeaveScreenManager>
     );
   }
 
-  SizedBox _shimmerLoader(double height, double width) {
-    return SizedBox(
-      height: height * 0.1,
-      child: Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: 5,
-          itemBuilder: (context, index) {
-            return Container(
-              height: height * 0.15,
-              color: AppColor.mainFGColor,
-              width: width * 0.2,
-              margin: EdgeInsets.symmetric(horizontal: 5),
-            );
-          },
-          separatorBuilder: (context, index) => SizedBox(height: 10),
-        ),
-      ),
-    );
-  }
-
-  SizedBox _shimmerhistoryLoader(double height, double width) {
-    return SizedBox(
-      height: height * 0.1,
-      child: Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
-        child: ListView.separated(
-          itemCount: 5,
-          itemBuilder: (context, index) {
-            return Container(
-              height: height * 0.15,
-              color: AppColor.mainFGColor,
-              width: width * 0.9,
-              margin: EdgeInsets.symmetric(vertical: 5),
-            );
-          },
-          separatorBuilder: (context, index) => SizedBox(height: 10),
-        ),
-      ),
-    );
-  }
 }

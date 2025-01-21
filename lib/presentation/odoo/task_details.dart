@@ -9,6 +9,7 @@ import 'package:hrms/core/theme/app_colors.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 
+
 class TaskDetails extends StatefulWidget {
   final int taskID;
   const TaskDetails({super.key, required this.taskID});
@@ -20,6 +21,7 @@ class TaskDetails extends StatefulWidget {
 class _TaskDetailsState extends State<TaskDetails> {
   final Box _authBox = Hive.box('authBox');
   late int taskID;
+
   TextEditingController noteController = TextEditingController();
   List<String> assignees = [];
   List<Map<String, dynamic>> tasks = [];
@@ -43,9 +45,7 @@ class _TaskDetailsState extends State<TaskDetails> {
       if (response.statusCode == 200) {
         final myTasks = List<Map<String, dynamic>>.from(response.data['tasks']);
         setState(() {
-          tasks = myTasks
-              .where((task) => task['id'] == widget.taskID)
-              .toList();
+          tasks = myTasks.where((task) => task['id'] == widget.taskID).toList();
           isLoading = false;
         });
       }
@@ -88,6 +88,7 @@ class _TaskDetailsState extends State<TaskDetails> {
         ),
         centerTitle: true,
         elevation: 0,
+        
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -295,10 +296,11 @@ class _TaskDetailsState extends State<TaskDetails> {
                                 ),
                                 SizedBox(height: height * 0.015),
                                 TextField(
+                                  readOnly: true,
                                   controller: noteController,
-                                  maxLines: 2,
+                                  maxLines: null,
                                   decoration: InputDecoration(
-                                    hintText: 'Description',
+                                    hintText: task['task_description'],
                                     hintStyle: TextStyle(
                                       color: AppColor.mainTextColor2,
                                       fontSize: height * 0.016,

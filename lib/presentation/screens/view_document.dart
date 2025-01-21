@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:dio/dio.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 // import 'package:path_provider/path_provider.dart';
@@ -119,7 +120,13 @@ class _ViewDocumentState extends State<ViewDocument> {
                   future: documentList,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
+                      return Center(
+                                        child: LoadingAnimationWidget
+                                            .threeArchedCircle(
+                                          color: AppColor.mainTextColor2,
+                                          size: height * 0.03,
+                                        ),
+                                      );
                     } else if (snapshot.hasError) {
                       return Center(
                           child: Text('No document records available.'));

@@ -13,20 +13,31 @@ import '../../presentation/screens/bottom_navigation.dart';
 final Box _authBox = Hive.box('authBox');
 final Dio dio = Dio();
 
-Future<List<Attendance>> fetchAttendence(String empID, int count) async {
-  final dateTo = DateFormat('yyyy-MM-dd').format(DateTime.now());
+Future<List<Attendance>> fetchAttendence(
+    String empID, String selectedMonth) async {
+  DateTime monthDate = DateFormat("MMMM yyyy").parse(selectedMonth);
+
   final dateFrom = DateFormat('yyyy-MM-dd')
-      .format(DateTime.now().subtract(Duration(days: 365)));
+      .format(DateTime(monthDate.year, monthDate.month, 1));
+
+  final lastDayOfMonth = DateTime(monthDate.year, monthDate.month + 1, 0);
+  final dateTo = DateFormat('yyyy-MM-dd').format(lastDayOfMonth);
+
+  DateTime currentMonth = DateTime.now();
+  DateTime formattedCurrentMonth = DateFormat("MMMM yyyy")
+      .parse(DateFormat("MMMM yyyy").format(currentMonth));
+
   try {
-    final response = await dio.get('$getAttendenceData/61',
-        queryParameters: {
-          "dateFrom": dateFrom,
-          "dateTo": dateTo,
-          "page": 1
-        });
+    final response =
+        await dio.get('$getAttendenceData/$empID', queryParameters: {
+      "dateFrom": dateFrom,
+      "dateTo": monthDate == formattedCurrentMonth
+          ? DateFormat('yyyy-MM-dd').format(DateTime.now())
+          : dateTo,
+      "limit": lastDayOfMonth.day,
+    });
 
     if (response.statusCode == 200) {
-      print(response.data);
       final List<dynamic> data = response.data['data'];
       return data.map((item) => Attendance.fromJson(item)).toList();
     } else {
@@ -101,7 +112,7 @@ class AuthProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final responseData = response.data;
-     
+
         final token = responseData['token'];
         final employeeId = responseData['data']['employeeId'];
         final employeeName = responseData['data']['employeeName'];
@@ -119,7 +130,6 @@ class AuthProvider with ChangeNotifier {
         await _authBox.put('gender', gender);
         await _authBox.put('role', role);
 
-     
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Login Successfully'),
@@ -609,7 +619,7 @@ Future<void> createTask(
     "priority": taskPriority,
     "start_date": taskStartDate,
     "date_deadline": taskEndDate,
-    "description": taskDescription,
+    "task_description": taskDescription,
     "task_creator_email": _authBox.get('email')
   });
 
@@ -677,6 +687,51 @@ Future<void> changeTaskStage(
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(e.response!.data['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+Future<void> updateTask(
+  BuildContext context,
+  int taskID,
+  String taskName,
+  String taskDescription,
+  String taskPriority,
+  String taskEndDate,
+  List<String> userEmails,
+) async {
+  print('$taskName $taskDescription $taskPriority $taskEndDate $userEmails');
+  try {
+    final response = await dio.put('$postOdootasks/$taskID', data: {
+      "name": taskName,
+      "assignees_emails": userEmails,
+      "priority": taskPriority,
+      "date_deadline": taskEndDate,
+      "task_description": taskDescription,
+    });
+
+    if (response.data['result']['status'] == 'success') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Task Updated Successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.data['result']['message']),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } catch (error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error updating task $error'),
         backgroundColor: Colors.red,
       ),
     );

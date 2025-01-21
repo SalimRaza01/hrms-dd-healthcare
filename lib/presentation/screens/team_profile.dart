@@ -1,10 +1,10 @@
 import 'package:flutter/services.dart';
 import 'package:hrms/core/theme/app_colors.dart';
-import 'package:hrms/presentation/animations/profile_shimmer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class TeamProfile extends StatefulWidget {
   final String empID;
@@ -37,7 +37,13 @@ class _TeamProfileState extends State<TeamProfile> {
         future: employeeProfile,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return ProfileShimmerAnimation();
+            return Center(
+                                        child: LoadingAnimationWidget
+                                            .threeArchedCircle(
+                                          color: AppColor.mainTextColor2,
+                                          size: height * 0.03,
+                                        ),
+                                      );
           } else if (snapshot.hasError) {
             return Center(
                 child:

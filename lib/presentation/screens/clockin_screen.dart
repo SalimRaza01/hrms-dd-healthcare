@@ -7,6 +7,7 @@ import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'punch_records.dart';
 
@@ -24,12 +25,24 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
   String? empGender;
   late String empID;
   int pageCount = 1;
+  int selectedIndex = 0;
+  String? monthString;
+  List<String> months = [];
+  DateTime currentDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     empID = widget.empID;
-    attendenceLog = fetchAttendence(empID, pageCount);
+
+    for (int i = 0; i < 12; i++) {
+      DateTime monthDate = DateTime(currentDate.year, currentDate.month - i);
+      monthString =
+          getMonthName(monthDate.month) + " " + monthDate.year.toString();
+      months.add(monthString!);
+    }
+
+    attendenceLog = fetchAttendence(empID, DateFormat('MMMM yyyy').format(DateTime.now()).toString());
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -40,6 +53,37 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  String getMonthName(int month) {
+    switch (month) {
+      case 1:
+        return 'January';
+      case 2:
+        return 'February';
+      case 3:
+        return 'March';
+      case 4:
+        return 'April';
+      case 5:
+        return 'May';
+      case 6:
+        return 'June';
+      case 7:
+        return 'July';
+      case 8:
+        return 'August';
+      case 9:
+        return 'September';
+      case 10:
+        return 'October';
+      case 11:
+        return 'November';
+      case 12:
+        return 'December';
+      default:
+        return '';
+    }
   }
 
   @override
@@ -117,9 +161,58 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                       ),
                     ],
                   ),
-                 
-                  SizedBox(height: height * 0.063, width: width, child: MonthList()),
-                   SizedBox(
+                  SizedBox(
+                    width: width,
+                    height: height * 0.06,
+                    child: Container(
+                      padding: EdgeInsets.all(5),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: months.length,
+                        itemBuilder: (context, index) {
+                          final items = months[index];
+                          bool isSelected = selectedIndex == index;
+
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 5.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedIndex = index;
+    attendenceLog = fetchAttendence(empID, items);
+                                });
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 10),
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                  width: 2,
+                                ))),
+                                child: Text(
+                                  months[index],
+                                  style: TextStyle(
+                                    fontSize: width * 0.035,
+                                    color:
+                                        isSelected ? Colors.white : Colors.grey,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(
                     height: height * 0.01,
                   ),
                   Expanded(
@@ -128,7 +221,13 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
+                          return Center(
+                                        child: LoadingAnimationWidget
+                                            .threeArchedCircle(
+                                          color: AppColor.mainTextColor2,
+                                          size: height * 0.03,
+                                        ),
+                                      );
                         } else if (snapshot.hasError) {
                           return Center(
                               child: Text('No attendance records available.'));
@@ -491,7 +590,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                               visible: (item.weekOff != 1 &&
                                                       item.isLeaveTaken !=
                                                           true) &&
-                                                  item.absent == 1,
+                                                  (item.absent == 1 && punchIn == "00:00"),
                                               child: Container(
                                                 decoration: BoxDecoration(
                                                     color: Colors.redAccent,
@@ -558,101 +657,5 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
         // )
       ),
     );
-  }
-}
-
-
-class MonthList extends StatefulWidget {
-  @override
-  _MonthListState createState() => _MonthListState();
-}
-
-class _MonthListState extends State<MonthList> {
-  int selectedIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-
-    final width = MediaQuery.of(context).size.width;
-    DateTime currentDate = DateTime.now();
-
-    List<String> months = [];
-    for (int i = 0; i < 12; i++) {
-      DateTime monthDate = DateTime(currentDate.year, currentDate.month - i);
-      String monthString =
-          getMonthName(monthDate.month) + " " + monthDate.year.toString();
-      months.add(monthString);
-    }
-
-    return Container(
-      padding: EdgeInsets.all(5),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: months.length,
-        itemBuilder: (context, index) {
-          bool isSelected = selectedIndex == index;
-
-          return Padding(
-            padding: const EdgeInsets.only(right: 5.0),
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedIndex = index;
-                });
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                decoration: BoxDecoration(
-                    border: Border(
-                        bottom: BorderSide(
-                          color: isSelected ? Colors.white : Colors.transparent,
-                          width: 2,
-                        ))),
-                child: Text(
-                  months[index],
-                  style: TextStyle(
-                    fontSize: width * 0.035, 
-                    color: isSelected ? Colors.white : Colors.grey,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  String getMonthName(int month) {
-    switch (month) {
-      case 1:
-        return 'January';
-      case 2:
-        return 'February';
-      case 3:
-        return 'March';
-      case 4:
-        return 'April';
-      case 5:
-        return 'May';
-      case 6:
-        return 'June';
-      case 7:
-        return 'July';
-      case 8:
-        return 'August';
-      case 9:
-        return 'September';
-      case 10:
-        return 'October';
-      case 11:
-        return 'November';
-      case 12:
-        return 'December';
-      default:
-        return '';
-    }
   }
 }

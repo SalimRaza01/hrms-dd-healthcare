@@ -4,6 +4,7 @@ import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class HolidayList extends StatefulWidget {
   const HolidayList({super.key});
@@ -55,7 +56,13 @@ class _HolidayListState extends State<HolidayList> {
                 future: holidayList,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(
+                                        child: LoadingAnimationWidget
+                                            .threeArchedCircle(
+                                          color: AppColor.mainTextColor2,
+                                          size: height * 0.03,
+                                        ),
+                                      );
                   } else if (snapshot.hasError) {
                     return Center(
                         child: Text('No HolidayModel records available.'));

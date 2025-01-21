@@ -15,6 +15,7 @@ import 'package:hrms/core/model/models.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/presentation/screens/document_list.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
 import 'splash_screen.dart';
@@ -304,10 +305,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             shape: BoxShape.circle,
                           ),
                           child: isLoading
-                              ? Padding(
-                                  padding: const EdgeInsets.all(30.0),
-                                  child: CircularProgressIndicator(
-                                    color: Colors.green,
+                              ? Center(
+                                  child:
+                                      LoadingAnimationWidget.threeArchedCircle(
+                                    color: AppColor.mainBGColor,
+                                    size: height * 0.06,
                                   ),
                                 )
                               : CircleAvatar(

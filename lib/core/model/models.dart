@@ -55,7 +55,7 @@ class Attendance {
   final int isHoliday;
   final String leaveType;
   final bool isLeaveTaken;
-  final int absent;
+  final num absent;
 
   Attendance(
       {required this.employeeName,
