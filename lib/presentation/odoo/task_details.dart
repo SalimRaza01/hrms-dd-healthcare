@@ -9,7 +9,6 @@ import 'package:hrms/core/theme/app_colors.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 
-
 class TaskDetails extends StatefulWidget {
   final int taskID;
   const TaskDetails({super.key, required this.taskID});
@@ -61,7 +60,7 @@ class _TaskDetailsState extends State<TaskDetails> {
   String _formatDate(String dateString) {
     try {
       DateTime dateTime = DateTime.parse(dateString);
-      return DateFormat('dd MMM yyyy').format(dateTime);
+      return DateFormat('dd MMM yyyy HH:mm').format(dateTime);
     } catch (e) {
       return dateString;
     }
@@ -88,7 +87,6 @@ class _TaskDetailsState extends State<TaskDetails> {
         ),
         centerTitle: true,
         elevation: 0,
-        
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())

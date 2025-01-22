@@ -9,25 +9,36 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
-class CreateProject extends StatefulWidget {
-  CreateProject();
+class EditProject extends StatefulWidget {
+  final int projectID;
+  final String projectName;
+  final List<String> alreadyAssignedEmails;
+
+  const EditProject({
+    required this.projectID,
+    required this.projectName,
+    required this.alreadyAssignedEmails,
+  });
 
   @override
-  State<CreateProject> createState() => _CreateProjectState();
+  State<EditProject> createState() => _EditProjectState();
 }
 
-class _CreateProjectState extends State<CreateProject> {
-  final Box _authBox = Hive.box('authBox');
+class _EditProjectState extends State<EditProject> {
   TextEditingController projectNameController = TextEditingController();
   TextEditingController assigneeEmailController = TextEditingController();
   late Future<List<OdooUserModel>> odooUser;
-  List<OdooUserModel> selectedUsers = [];
+  List<String> selectedUsers = [];
   List<OdooUserModel> filteredUsers = [];
+  final Box _authBox = Hive.box('authBox');
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    widget.alreadyAssignedEmails.map((email) {
+      selectedUsers.add(email);
+    }).toList();
     odooUser = fetchOddoUsers('search user', 0);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -35,21 +46,22 @@ class _CreateProjectState extends State<CreateProject> {
     ]);
   }
 
-  Future<void> createProject(
+  Future<void> updateProject(
     BuildContext context,
+    int projectID,
     String projectNameController,
     List<String> assigneeEmails,
   ) async {
-    final response = await dio.post(postOdooProject, data: {
+    final response = await dio.put('$postOdooProject/$projectID', data: {
       "name": projectNameController,
-      "assignes_emails": assigneeEmails,
+      "assignees_emails": assigneeEmails,
       "task_creator_email": _authBox.get('email')
     });
 
     if (response.data['result']['status'] == 'success') {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Project Created Successfully'),
+          content: Text('Project Updated Successfully'),
           backgroundColor: Colors.green,
         ),
       );
@@ -62,7 +74,7 @@ class _CreateProjectState extends State<CreateProject> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Something Went Wrong'),
+          content: Text(response.data['result']['message']),
           backgroundColor: Colors.red,
         ),
       );
@@ -79,7 +91,7 @@ class _CreateProjectState extends State<CreateProject> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'Create Project',
+          'Update Project',
           style: TextStyle(
               fontSize: height * 0.02,
               fontWeight: FontWeight.w500,
@@ -102,6 +114,8 @@ class _CreateProjectState extends State<CreateProject> {
                     controller: projectNameController,
                     decoration: InputDecoration(
                       filled: false,
+                      hintText: widget.projectName,
+                      hintStyle: TextStyle(fontSize: height * 0.016),
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                       enabledBorder: OutlineInputBorder(
                           borderSide:
@@ -115,14 +129,47 @@ class _CreateProjectState extends State<CreateProject> {
                           borderSide:
                               BorderSide(width: 0.5, color: Colors.blueGrey),
                           borderRadius: BorderRadius.all(Radius.circular(10))),
-                      label: Text('Project Name'),
                     ),
-                    onChanged: (value) {},
                   ),
                 ),
               ),
 
-              _buildSelectedUsers(),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Assignees:',
+                      style: TextStyle(
+                          fontSize: height * 0.016,
+                          color: AppColor.mainTextColor2),
+                    ),
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 2.0,
+                      children: selectedUsers.map((email) {
+                        print(selectedUsers);
+                        return Chip(
+                          backgroundColor: AppColor.mainThemeColor,
+                          label: Text(
+                            email,
+                            style: TextStyle(color: AppColor.mainFGColor),
+                          ),
+                          deleteIcon:
+                              Icon(Icons.cancel, color: AppColor.mainFGColor),
+                          onDeleted: () {
+                            setState(() {
+                              selectedUsers.remove(email);
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+
               // Assignee Email Search
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 15),
@@ -235,8 +282,12 @@ class _CreateProjectState extends State<CreateProject> {
                                       setState(() {
                                         if (selectedUsers.contains(item)) {
                                           selectedUsers.remove(item);
+                                          assigneeEmailController.clear();
                                         } else {
-                                          selectedUsers.add(item);
+                                          selectedUsers.add(item.email);
+                                                  assigneeEmailController.clear();
+                                          print(
+                                              "selected user ${selectedUsers}");
                                         }
                                       });
                                     },
@@ -259,28 +310,18 @@ class _CreateProjectState extends State<CreateProject> {
 
               SizedBox(height: height * 0.02),
               InkWell(
-                onTap: isLoading ? null : () async {
-                  if (projectNameController.text.isNotEmpty &&
-                      selectedUsers.isNotEmpty) {
-                    List<String> assigneeEmails =
-                        selectedUsers.map((e) => e.email).toList();
-                    setState(() {
-                      isLoading = true;
-                    });
-                    await createProject(
-                      context,
-                      projectNameController.text,
-                      assigneeEmails,
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content:
-                            Text('Please fill all fields and select assignees'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
+                onTap: isLoading ? null :  () async {
+                  setState(() {
+                    isLoading = true;
+                  });
+                  await updateProject(
+                    context,
+                    widget.projectID,
+                    projectNameController.text.isNotEmpty
+                        ? projectNameController.text
+                        : widget.projectName,
+                    selectedUsers,
+                  );
                 },
                 child: Center(
                   child: Container(
@@ -301,7 +342,7 @@ class _CreateProjectState extends State<CreateProject> {
                             )
                           : Center(
                               child: Text(
-                                'SUBMIT',
+                                'Update Project',
                                 style: TextStyle(
                                     color: AppColor.mainFGColor,
                                     fontWeight: FontWeight.w500),
@@ -314,38 +355,6 @@ class _CreateProjectState extends State<CreateProject> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildSelectedUsers() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
-      child: Wrap(
-        spacing: 8.0,
-        runSpacing: 4.0,
-        children: selectedUsers.map((user) {
-          return Chip(
-            backgroundColor: AppColor.mainThemeColor,
-            label: Text(
-              user.name,
-              style: TextStyle(color: AppColor.mainFGColor),
-            ),
-            avatar: CircleAvatar(
-              backgroundColor: AppColor.mainFGColor,
-              child: Text(
-                user.name[0],
-                style: TextStyle(color: AppColor.mainThemeColor, fontSize: 10),
-              ),
-            ),
-            deleteIcon: Icon(Icons.cancel, color: AppColor.mainFGColor),
-            onDeleted: () {
-              setState(() {
-                selectedUsers.remove(user);
-              });
-            },
-          );
-        }).toList(),
       ),
     );
   }

@@ -539,8 +539,8 @@ Future<List<DocumentListModel>> fetchDocumentList(String documentType) async {
   }
 }
 
-Future<List<OdooUserModel>> fetchOddoUsers(String documentType) async {
-  final response = await dio.get(getodooUsers);
+Future<List<OdooUserModel>> fetchOddoUsers(String documentType, int projectid) async {
+  final response = await dio.get('$getodooUsers/$projectid');
 
   if (response.statusCode == 200) {
     final List<dynamic> data = response.data['users'];
@@ -550,36 +550,6 @@ Future<List<OdooUserModel>> fetchOddoUsers(String documentType) async {
   }
 }
 
-Future<void> createProject(
-  BuildContext context,
-  String projectNameController,
-  String projectDescriptionController,
-  List<String> assigneeEmails,
-) async {
-  final response = await dio.post(postOdooProject, data: {
-    "name": projectNameController,
-    "assignes_emails": assigneeEmails,
-    "description": projectDescriptionController,
-    "task_creator_email": _authBox.get('email')
-  });
-
-  if (response.data['result']['status'] == 'success') {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Project Created Successfully'),
-        backgroundColor: Colors.green,
-      ),
-    );
-    Navigator.pop(context);
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Something Went Wrong'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-}
 
 Future<List<OdooProjectList>> fetchOdooProjects() async {
   String email = _authBox.get('email');
@@ -599,45 +569,6 @@ Future<List<OdooProjectList>> fetchOdooProjects() async {
     return data.map((item) => OdooProjectList.fromJson(item)).toList();
   } else {
     throw Exception('Failed to load OdooProjects data');
-  }
-}
-
-Future<void> createTask(
-  BuildContext context,
-  String taskName,
-  int projectID,
-  String taskDescription,
-  String taskPriority,
-  String taskStartDate,
-  String taskEndDate,
-  List<String> userEmails,
-) async {
-  final response = await dio.post(postOdootasks, data: {
-    "name": taskName,
-    "project_id": projectID,
-    "assignees_emails": userEmails,
-    "priority": taskPriority,
-    "start_date": taskStartDate,
-    "date_deadline": taskEndDate,
-    "task_description": taskDescription,
-    "task_creator_email": _authBox.get('email')
-  });
-
-  if (response.data['result']['status'] == 'success') {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Task Created Successfully'),
-        backgroundColor: Colors.green,
-      ),
-    );
-    Navigator.pop(context);
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(response.data['result']['message']),
-        backgroundColor: Colors.red,
-      ),
-    );
   }
 }
 
@@ -693,47 +624,4 @@ Future<void> changeTaskStage(
   }
 }
 
-Future<void> updateTask(
-  BuildContext context,
-  int taskID,
-  String taskName,
-  String taskDescription,
-  String taskPriority,
-  String taskEndDate,
-  List<String> userEmails,
-) async {
-  print('$taskName $taskDescription $taskPriority $taskEndDate $userEmails');
-  try {
-    final response = await dio.put('$postOdootasks/$taskID', data: {
-      "name": taskName,
-      "assignees_emails": userEmails,
-      "priority": taskPriority,
-      "date_deadline": taskEndDate,
-      "task_description": taskDescription,
-    });
 
-    if (response.data['result']['status'] == 'success') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Task Updated Successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(response.data['result']['message']),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  } catch (error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error updating task $error'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-}

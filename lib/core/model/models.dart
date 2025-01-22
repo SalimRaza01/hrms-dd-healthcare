@@ -439,24 +439,33 @@ class OdooUserModel {
 class OdooProjectList {
   final int id;
   final String name;
-  final String date_start;
+  final String create_date;
+  final String task_creator_email;
+  final List assignes_emails;
 
-  OdooProjectList({
-    required this.id,
-    required this.name,
-    required this.date_start,
-  });
+  OdooProjectList(
+      {required this.id,
+      required this.name,
+      required this.create_date,
+      required this.task_creator_email,
+      required this.assignes_emails});
 
   factory OdooProjectList.fromJson(Map<String, dynamic> json) {
     return OdooProjectList(
-        id: json['id'], name: json['name'], date_start: json['date_start']);
+        id: json['id'],
+        name: json['name'],
+        create_date: json['create_date'],
+        task_creator_email: json['task_creator_email'],
+        assignes_emails: json['assignes_emails']);
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
-      'date_start': date_start,
+      'create_date': create_date,
+      'task_creator_email': task_creator_email,
+      'assignes_emails': assignes_emails,
     };
   }
 }

@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/model/models.dart';
+import 'package:hrms/core/provider/provider.dart';
+import 'package:hrms/presentation/odoo/edit_project.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:hrms/core/api/api.dart';
@@ -11,6 +13,7 @@ import 'package:hrms/core/theme/app_colors.dart';
 import 'package:hrms/presentation/odoo/create_project.dart';
 import 'package:hrms/presentation/odoo/task_details.dart';
 import 'package:hrms/presentation/odoo/view_projects.dart';
+import 'package:provider/provider.dart';
 
 class OdooDashboard extends StatefulWidget {
   const OdooDashboard({super.key});
@@ -41,7 +44,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
   Future<void> _fetchTasks() async {
     try {
       final response = await Dio().get(getOdootasks);
-      print(response);
+
 
       if (response.statusCode == 200) {
         final myTasks = List<Map<String, dynamic>>.from(response.data['tasks']);
@@ -57,7 +60,7 @@ class _OdooDashboardState extends State<OdooDashboard> {
       setState(() {
         isLoading = false;
       });
-      print('Error fetching tasks: $e');
+
     }
   }
 
@@ -140,280 +143,319 @@ class _OdooDashboardState extends State<OdooDashboard> {
             ),
           ],
         ),
-        body: SizedBox(
-          height: height,
-          width: width,
-          child: Padding(
-            padding: const EdgeInsets.all(15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (showSearch)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    child: TextField(
-                      onChanged: (query) {
-                        setState(() {
-                          searchQuery = query;
-                        });
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Search Projects/Tasks...',
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
+        body: Consumer<ProjectProvider>(builder: (context, value, child) {
+          if (value.projectUpdated == true) {
+            _projectsFuture = fetchOdooProjects();
+            Future.delayed(Duration(milliseconds: 1500), () {
+              Provider.of<ProjectProvider>(context, listen: false)
+                  .projectUpdatedStatus(false);
+            });
+          }
+
+          return SizedBox(
+            height: height,
+            width: width,
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (showSearch)
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: TextField(
+                        onChanged: (query) {
+                          setState(() {
+                            searchQuery = query;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Search Projects/Tasks...',
+                          prefixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                     ),
+
+                  // DropdownButton<String>(
+                  //   value: selectedFilter,
+                  //   onChanged: (value) {
+                  //     setState(() {
+                  //       selectedFilter = value!;
+                  //     });
+                  //   },
+                  //   items: ['All', 'Today', 'Deadline']
+                  //       .map((filter) {
+                  //     return DropdownMenuItem<String>(
+                  //       value: filter,
+                  //       child: Text(filter),
+                  //     );
+                  //   }).toList(),
+                  // ),
+
+                  Text(
+                    "Projects",
+                    style: TextStyle(
+                        fontSize: height * 0.018,
+                        color: AppColor.mainTextColor,
+                        fontWeight: FontWeight.w500),
                   ),
+                  SizedBox(height: height * 0.02),
+                  SizedBox(
+                    height: height * 0.18,
+                    child: FutureBuilder<List<OdooProjectList>>(
+                      future: _projectsFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(child: Text('No projects found.'));
+                        } else if (snapshot.hasData &&
+                            snapshot.data!.isNotEmpty) {
+                          List<OdooProjectList> items = snapshot.data!;
+                          return ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: items.length,
+                            itemBuilder: (context, index) {
+                              OdooProjectList item = items[index];
 
-                // DropdownButton<String>(
-                //   value: selectedFilter,
-                //   onChanged: (value) {
-                //     setState(() {
-                //       selectedFilter = value!;
-                //     });
-                //   },
-                //   items: ['All', 'Today', 'Deadline']
-                //       .map((filter) {
-                //     return DropdownMenuItem<String>(
-                //       value: filter,
-                //       child: Text(filter),
-                //     );
-                //   }).toList(),
-                // ),
 
-                Text(
-                  "Projects",
-                  style: TextStyle(
-                      fontSize: height * 0.018,
-                      color: AppColor.mainTextColor,
-                      fontWeight: FontWeight.w500),
-                ),
-                SizedBox(height: height * 0.02),
-                SizedBox(
-                  height: height * 0.18,
-                  child: FutureBuilder<List<OdooProjectList>>(
-                    future: _projectsFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('No projects found.'));
-                      } else if (snapshot.hasData &&
-                          snapshot.data!.isNotEmpty) {
-                        List<OdooProjectList> items = snapshot.data!;
-                        return ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: items.length,
-                          itemBuilder: (context, index) {
-                            OdooProjectList item = items[index];
-
-                            String formattedDate = item.date_start == "False"
-                                ? "No start date"
-                                : item.date_start;
-
-                            return InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ViewProjects(
-                                        projectName: item.name,
-                                        projectID: item.id),
-                                  ),
-                                );
-                              },
-                              child: projectCard(
-                                height,
-                                width,
-                                index <= 8
-                                    ? 'Project : 0${index + 1}'
-                                    : 'Project : ${index + 1}',
-                                item.name,
-                                formattedDate,
-                              ),
-                            );
-                          },
-                          separatorBuilder: (BuildContext context, int index) {
-                            return SizedBox(height: height * 0.01);
-                          },
-                        );
-                      } else {
-                        return Center(child: Text('No projects found.'));
-                      }
-                    },
-                  ),
-                ),
-
-                SizedBox(height: height * 0.02),
-                Text(
-                  "Today's Tasks",
-                  style: TextStyle(
-                      fontSize: height * 0.018,
-                      color: AppColor.mainTextColor,
-                      fontWeight: FontWeight.w500),
-                ),
-                isLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : Expanded(
-                        child: ListView.builder(
-                          itemCount: _getFilteredTasks().length,
-                          itemBuilder: (context, index) {
-                            final task = _getFilteredTasks()[index];
-                            String priority = task['priority'] != null &&
-                                    task['priority'].isNotEmpty
-                                ? task['priority']
-                                    .toString()
-                                    .replaceAll('[', '')
-                                    .replaceAll(']', '')
-                                : 'Not Set';
-
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: InkWell(
+                              return InkWell(
+                                onLongPress: (item.task_creator_email ==
+                                        _authBox.get('email'))
+                                    ? () => {
+                                          _projectsFuture = fetchOdooProjects(),
+                                          showCupertinoModalBottomSheet(
+                                              expand: true,
+                                              context: context,
+                                              barrierColor:
+                                                  const Color.fromARGB(
+                                                      130, 0, 0, 0),
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              builder: (context) => EditProject(
+                                                    projectID: item.id,
+                                                    projectName: item.name,
+                                                    alreadyAssignedEmails:
+                                                        List<String>.from(item
+                                                            .assignes_emails),
+                                                  ))
+                                        }
+                                    : null,
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          TaskDetails(taskID: task['id']),
+                                      builder: (context) => ViewProjects(
+                                          projectName: item.name,
+                                          projectID: item.id),
                                     ),
                                   );
                                 },
-                                child: Card(
-                                  color: AppColor.mainFGColor,
-                                  elevation: 4,
-                                  margin: EdgeInsets.all(0),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  shadowColor: Colors.black.withOpacity(0.1),
-                                  child: Stack(
-                                    alignment: AlignmentDirectional.topEnd,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.circle_outlined,
-                                                  color:
-                                                      AppColor.mainThemeColor,
-                                                  size: height * 0.018,
-                                                ),
-                                                SizedBox(width: width * 0.02),
-                                                SizedBox(
-                                                  width: width / 1.5,
-                                                  child: Text(
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    task['name'],
-                                                    style: TextStyle(
-                                                      color: AppColor
-                                                          .mainTextColor,
-                                                      fontSize: height * 0.016,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                child: projectCard(
+                                  height,
+                                  width,
+                                  index <= 8
+                                      ? 'Project : 0${index + 1}'
+                                      : 'Project : ${index + 1}',
+                                  item.name,
+                                  _formatDate(item.create_date),
+                                ),
+                              );
+                            },
+                            separatorBuilder:
+                                (BuildContext context, int index) {
+                              return SizedBox(height: height * 0.01);
+                            },
+                          );
+                        } else {
+                          return Center(child: Text('No projects found.'));
+                        }
+                      },
+                    ),
+                  ),
+
+                  SizedBox(height: height * 0.02),
+                  Text(
+                    "Today's Tasks",
+                    style: TextStyle(
+                        fontSize: height * 0.018,
+                        color: AppColor.mainTextColor,
+                        fontWeight: FontWeight.w500),
+                  ),
+                  isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : Expanded(
+                          child: ListView.builder(
+                            itemCount: _getFilteredTasks().length,
+                            itemBuilder: (context, index) {
+                              final task = _getFilteredTasks()[index];
+                              String priority = task['priority'] != null &&
+                                      task['priority'].isNotEmpty
+                                  ? task['priority']
+                                      .toString()
+                                      .replaceAll('[', '')
+                                      .replaceAll(']', '')
+                                  : 'Not Set';
+
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            TaskDetails(taskID: task['id']),
+                                      ),
+                                    );
+                                  },
+                                  child: Card(
+                                    color: AppColor.mainFGColor,
+                                    elevation: 4,
+                                    margin: EdgeInsets.all(0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    shadowColor: Colors.black.withOpacity(0.1),
+                                    child: Stack(
+                                      alignment: AlignmentDirectional.topEnd,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.circle_outlined,
+                                                    color:
+                                                        AppColor.mainThemeColor,
+                                                    size: height * 0.018,
+                                                  ),
+                                                  SizedBox(width: width * 0.02),
+                                                  SizedBox(
+                                                    width: width / 1.5,
+                                                    child: Text(
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      task['name'],
+                                                      style: TextStyle(
+                                                        color: AppColor
+                                                            .mainTextColor,
+                                                        fontSize:
+                                                            height * 0.016,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 8.0),
-                                              child: Container(
-                                                width: width,
-                                                decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                      color:
-                                                          const Color.fromARGB(
-                                                              14, 0, 0, 0)),
-                                                  color: AppColor.mainBGColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(5),
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    //task['description'],
-                                                    'Tap to View Task Details',
-                                                    style: TextStyle(
-                                                      color: AppColor
-                                                          .mainTextColor2,
-                                                      fontSize: height * 0.015,
-                                                      fontWeight:
-                                                          FontWeight.w400,
+                                                ],
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 8.0),
+                                                child: Container(
+                                                  width: width,
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            14, 0, 0, 0)),
+                                                    color: AppColor.mainBGColor,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            5),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Text(
+                                                      //task['description'],
+                                                      'Tap to View Task Details',
+                                                      style: TextStyle(
+                                                        color: AppColor
+                                                            .mainTextColor2,
+                                                        fontSize:
+                                                            height * 0.015,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
                                               ),
+                                              Text(
+                                                'Deadline: ${_formatDate(task['deadline_date'] ?? '')}',
+                                                style: TextStyle(
+                                                  color:
+                                                      AppColor.mainTextColor2,
+                                                  fontSize: height * 0.015,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: priority == 'High'
+                                                ? Colors.red
+                                                : priority == 'Medium'
+                                                    ? Colors.amber
+                                                    : Colors.green,
+                                            borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(10),
+                                              bottomLeft: Radius.circular(10),
                                             ),
-                                            Text(
-                                              'Deadline: ${_formatDate(task['deadline_date'] ?? '')}',
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 5.0,
+                                                horizontal: 30.0),
+                                            child: Text(
+                                              priority,
                                               style: TextStyle(
-                                                color: AppColor.mainTextColor2,
+                                                color: AppColor.mainFGColor,
                                                 fontSize: height * 0.015,
                                                 fontWeight: FontWeight.w400,
                                               ),
                                             ),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: priority == 'High'
-                                              ? Colors.red
-                                              : priority == 'Medium'
-                                                  ? Colors.amber
-                                                  : Colors.green,
-                                          borderRadius: BorderRadius.only(
-                                            topRight: Radius.circular(10),
-                                            bottomLeft: Radius.circular(10),
                                           ),
                                         ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 5.0, horizontal: 30.0),
-                                          child: Text(
-                                            priority,
-                                            style: TextStyle(
-                                              color: AppColor.mainFGColor,
-                                              fontSize: height * 0.015,
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
-                      ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        }),
         floatingActionButton: _authBox.get('role') == 'Manager'
             ? FloatingActionButton.extended(
                 backgroundColor: AppColor.mainThemeColor,
-                onPressed: () => showCupertinoModalBottomSheet(
-                  expand: true,
-                  context: context,
-                  barrierColor: const Color.fromARGB(130, 0, 0, 0),
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => CreateProject(),
-                ),
+                onPressed: () => {
+                  showCupertinoModalBottomSheet(
+                    expand: true,
+                    context: context,
+                    barrierColor: const Color.fromARGB(130, 0, 0, 0),
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => CreateProject(),
+                  )
+                },
                 label: Text(
                   'Create Project',
                   style: TextStyle(color: AppColor.mainFGColor),
@@ -474,10 +516,12 @@ class _OdooDashboardState extends State<OdooDashboard> {
                     ],
                   ),
                   Text(
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                     projectName,
                     style: TextStyle(
                         color: AppColor.mainFGColor,
-                        fontSize: height * 0.021,
+                        fontSize: height * 0.018,
                         fontWeight: FontWeight.bold),
                   ),
                   Text(

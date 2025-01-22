@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cupertino_datetime_picker/flutter_cupertino_datetime_picker.dart';
 import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/api/api_config.dart';
+import 'package:hrms/core/provider/provider.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
 
 class EditTask extends StatefulWidget {
   final int taskID;
@@ -33,12 +37,11 @@ class _EditTaskState extends State<EditTask> {
   final TextEditingController assigneeEmailController = TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
-
   // late Future<List<OdooUserModel>> odooUser;
   // List<OdooUserModel> filteredUsers = [];
   // List<OdooUserModel> selectedUsers = [];
   String? selectedPriority;
-
+  bool isLoading = false;
   @override
   void initState() {
     super.initState();
@@ -48,6 +51,57 @@ class _EditTaskState extends State<EditTask> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+  }
+
+  Future<void> updateTask(
+    BuildContext context,
+    int taskID,
+    String taskName,
+    String taskDescription,
+    String taskPriority,
+    String taskEndDate,
+    List<String> userEmails,
+  ) async {
+    try {
+      final response = await dio.put('$postOdootasks/$taskID', data: {
+        "name": taskName,
+        "assignees_emails": userEmails,
+        "priority": taskPriority,
+        "date_deadline": taskEndDate,
+        "task_description": taskDescription,
+      });
+
+      if (response.data['result']['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Task Updated Successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        setState(() {
+          isLoading = false;
+        });
+        Provider.of<TaskProvider>(context, listen: false)
+            .taskupdatedStatus(true);
+        Navigator.pop(
+          context,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.data['result']['message']),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating task $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -91,7 +145,7 @@ class _EditTaskState extends State<EditTask> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: TextFormField(
-                  controller: taskNameController..text = widget.taskname,
+                  controller: taskNameController,
                   maxLines: null,
                   style: TextStyle(
                       fontSize: height * 0.016, color: AppColor.mainTextColor),
@@ -117,7 +171,7 @@ class _EditTaskState extends State<EditTask> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: TextFormField(
-                  controller: descriptionController..text = widget.description,
+                  controller: descriptionController,
                   maxLines: 3,
                   style: TextStyle(
                       fontSize: height * 0.016, color: AppColor.mainTextColor),
@@ -281,8 +335,8 @@ class _EditTaskState extends State<EditTask> {
         readOnly: true,
         onTap: () => endDate(context),
         decoration: InputDecoration(
-          labelText: widget.taskDeadline,
-          labelStyle: TextStyle(color: Colors.black54),
+    hintText: widget.taskDeadline,
+      hintStyle: TextStyle(fontSize: height * 0.016),
           filled: true,
           fillColor: AppColor.mainFGColor,
           border: OutlineInputBorder(
@@ -306,7 +360,7 @@ class _EditTaskState extends State<EditTask> {
       onConfirm: (dateTime, List<int> index) {
         setState(() {
           DateTime selectdate = dateTime;
-          endDateController.text = DateFormat('yyyy-MM-dd').format(selectdate);
+          endDateController.text = DateFormat('yyyy-MM-dd HH:mm').format(selectdate);
         });
       },
     );
@@ -314,10 +368,10 @@ class _EditTaskState extends State<EditTask> {
 
   Widget _buildSubmitButton(double width, double height) {
     return InkWell(
-      onTap: () async {
-        // List<String> assigneeEmails = widget.alreadyAssignedEmails.isNotEmpty
-        //     ? widget.alreadyAssignedEmails
-        //     : selectedUsers.map((e) => e.email).toList();
+      onTap: isLoading ? null : () async {
+        setState(() {
+          isLoading = true;
+        });
 
         await updateTask(
           context,
@@ -331,7 +385,8 @@ class _EditTaskState extends State<EditTask> {
           selectedPriority != null ? selectedPriority! : widget.priority,
           endDateController.text.isNotEmpty
               ? endDateController.text
-              : DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.taskDeadline)),
+              : DateFormat('yyyy-MM-dd HH:mm')
+                  .format(DateTime.parse(widget.taskDeadline)),
           widget.alreadyAssignedEmails,
         );
       },
@@ -343,110 +398,22 @@ class _EditTaskState extends State<EditTask> {
             color: AppColor.mainThemeColor,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Center(
-            child: Text('Update Task',
-                style: TextStyle(
+          child: isLoading
+              ? Center(
+                  child: LoadingAnimationWidget.threeArchedCircle(
                     color: AppColor.mainFGColor,
-                    fontWeight: FontWeight.w500,
-                    fontSize: height * 0.018)),
-          ),
+                    size: height * 0.03,
+                  ),
+                )
+              : Center(
+                  child: Text('Update Task',
+                      style: TextStyle(
+                          color: AppColor.mainFGColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: height * 0.018)),
+                ),
         ),
       ),
     );
   }
-
-  // Widget _buildAssigneeList(double height) {
-  //   return FutureBuilder<List<OdooUserModel>>(
-  //     future: odooUser,
-  //     builder: (context, snapshot) {
-  //       if (snapshot.connectionState == ConnectionState.waiting) {
-  //         return Center(child: CircularProgressIndicator());
-  //       } else if (snapshot.hasError ||
-  //           !snapshot.hasData ||
-  //           snapshot.data!.isEmpty) {
-  //         return Center(child: Text('No User Found'));
-  //       } else {
-  //         List<OdooUserModel> items = snapshot.data!;
-
-  //         if (filteredUsers.isEmpty) {
-  //           filteredUsers = items;
-  //         }
-
-  //         return SizedBox(
-  //           height: height * 0.27,
-  //           child: ListView.separated(
-  //             itemCount: filteredUsers.length,
-  //             itemBuilder: (context, index) {
-  //               OdooUserModel item = filteredUsers[index];
-
-  //               return Card(
-  //                 color: AppColor.mainFGColor,
-  //                 elevation: 4,
-  //                 margin: EdgeInsets.all(0),
-  //                 shape: RoundedRectangleBorder(
-  //                   borderRadius: BorderRadius.circular(10),
-  //                 ),
-  //                 shadowColor: Colors.black.withOpacity(0.1),
-  //                 child: Padding(
-  //                   padding: const EdgeInsets.all(0.0),
-  //                   child: ListTile(
-  //                     leading: CircleAvatar(
-  //                       backgroundColor:
-  //                           const Color.fromARGB(255, 235, 244, 254),
-  //                       child: Text(
-  //                         item.name[0],
-  //                         style: TextStyle(
-  //                           fontSize: height * 0.022,
-  //                           fontWeight: FontWeight.w400,
-  //                         ),
-  //                       ),
-  //                     ),
-  //                     title: Text(
-  //                       item.name,
-  //                       style: TextStyle(
-  //                         fontSize: height * 0.016,
-  //                         color: AppColor.mainTextColor2,
-  //                         fontWeight: FontWeight.bold,
-  //                       ),
-  //                     ),
-  //                     subtitle: Text(
-  //                       item.email,
-  //                       style: TextStyle(
-  //                         fontSize: height * 0.013,
-  //                         color: Colors.grey.shade600,
-  //                       ),
-  //                     ),
-  //                     trailing: IconButton(
-  //                       icon: Icon(
-  //                         widget.alreadyAssignedEmails.contains(item.email)
-  //                             ? Icons.check_box
-  //                             : Icons.check_box_outline_blank,
-  //                         color: AppColor.mainThemeColor,
-  //                       ),
-  //                       onPressed: () {
-  //                         setState(() {
-  //                           // if (widget.alreadyAssignedEmails
-  //                           //     .contains(item.email)) {
-  //                           //   widget.alreadyAssignedEmails.remove(item.email);
-  //                           // } else {
-  //                             widget.alreadyAssignedEmails.add(item.email);
-  //                          // }
-  //                         });
-  //                       },
-  //                     ),
-  //                   ),
-  //                 ),
-  //               );
-  //             },
-  //             separatorBuilder: (BuildContext context, int index) {
-  //               return SizedBox(
-  //                 height: height * 0.01,
-  //               );
-  //             },
-  //           ),
-  //         );
-  //       }
-  //     },
-  //   );
-  // }
 }

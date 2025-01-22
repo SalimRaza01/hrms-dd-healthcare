@@ -1,3 +1,4 @@
+import 'package:hrms/core/provider/provider.dart';
 import 'package:hrms/presentation/odoo/odoo_dashboard.dart';
 import 'package:hrms/presentation/odoo/view_projects.dart';
 import 'package:hrms/presentation/screens/splash_screen.dart';
@@ -29,6 +30,8 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+         ChangeNotifierProvider(create: (_) => TaskProvider()),
+      ChangeNotifierProvider(create: (_) => ProjectProvider()),
       ],
       child: MyApp(),
     ),

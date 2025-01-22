@@ -3,10 +3,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cupertino_datetime_picker/flutter_cupertino_datetime_picker.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/model/models.dart';
+import 'package:hrms/core/provider/provider.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
 
 class CreateTask extends StatefulWidget {
   final int projectID;
@@ -28,15 +33,60 @@ class _CreateTaskState extends State<CreateTask> {
   List<OdooUserModel> selectedUsers = [];
   List<OdooUserModel> filteredUsers = [];
   String _selectedText = 'Low';
+  bool isLoading = false;
+  final Box _authBox = Hive.box('authBox');
 
   @override
   void initState() {
     super.initState();
-    odooUser = fetchOddoUsers('search user');
+    odooUser = fetchOddoUsers('search user', widget.projectID);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+  }
+
+  Future<void> createTask(
+    BuildContext context,
+    String taskName,
+    int projectID,
+    String taskDescription,
+    String taskPriority,
+    String taskStartDate,
+    String taskEndDate,
+    List<String> userEmails,
+  ) async {
+    final response = await dio.post(postOdootasks, data: {
+      "name": taskName,
+      "project_id": projectID,
+      "assignees_emails": userEmails,
+      "priority": taskPriority,
+      "start_date": taskStartDate,
+      "date_deadline": taskEndDate,
+      "task_description": taskDescription,
+      "task_creator_email": _authBox.get('email')
+    });
+
+    if (response.data['result']['status'] == 'success') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Task Created Successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      setState(() {
+        isLoading = false;
+      });
+      Provider.of<TaskProvider>(context, listen: false).taskupdatedStatus(true);
+      Navigator.pop(context, 'refresh');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.data['result']['message']),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   startDate(BuildContext context) {
@@ -49,8 +99,7 @@ class _CreateTaskState extends State<CreateTask> {
         onConfirm: (dateTime, List<int> index) {
       setState(() {
         DateTime selectdate = dateTime;
-        startDateController.text =
-            DateFormat('yyyy-MM-dd').format(selectdate);
+        startDateController.text = DateFormat('yyyy-MM-dd').format(selectdate);
       });
     });
   }
@@ -64,12 +113,12 @@ class _CreateTaskState extends State<CreateTask> {
       maxDateTime: DateTime(3000),
       onMonthChangeStartWithFirstDate: true,
       onConfirm: (dateTime, List<int> index) {
-       setState(() {
+        setState(() {
           DateTime selectdate = dateTime;
-        endDateController.text =
-              DateFormat('yyyy-MM-dd').format(selectdate);
-              print(endDateController.text);
-       });
+          endDateController.text =
+              DateFormat('yyyy-MM-dd HH:mm').format(selectdate);
+          print(endDateController.text);
+        });
       },
     );
   }
@@ -94,11 +143,10 @@ class _CreateTaskState extends State<CreateTask> {
         ),
         title: Text(
           'CREATE TASK',
-           style: TextStyle(
-            fontSize: height * 0.02,
-            fontWeight: FontWeight.w500,
-            color: Colors.white
-          ),
+          style: TextStyle(
+              fontSize: height * 0.02,
+              fontWeight: FontWeight.w500,
+              color: Colors.white),
         ),
         centerTitle: true,
       ),
@@ -111,7 +159,6 @@ class _CreateTaskState extends State<CreateTask> {
               _buildTextField('Task Name', taskNameController),
               _buildTextField('Description', descriptionController,
                   maxLines: 3),
-                   _buildTextField('Comment', commentController),
               _buildSelectedUsers(),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
@@ -383,12 +430,16 @@ class _CreateTaskState extends State<CreateTask> {
 
   Widget _buildSubmitButton(double width, double height) {
     return InkWell(
-      onTap: () async {
+      onTap:  isLoading ? null :  () async {
         if (taskNameController.text.isNotEmpty &&
             descriptionController.text.isNotEmpty &&
             selectedUsers.isNotEmpty &&
             startDateController.text.isNotEmpty &&
             endDateController.text.isNotEmpty) {
+          setState(() {
+            isLoading = true;
+          });
+
           List<String> assigneeEmails =
               selectedUsers.map((e) => e.email).toList();
 
@@ -401,7 +452,6 @@ class _CreateTaskState extends State<CreateTask> {
               startDateController.text,
               endDateController.text,
               assigneeEmails);
- 
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -418,13 +468,20 @@ class _CreateTaskState extends State<CreateTask> {
           color: AppColor.mainThemeColor,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Center(
-          child: Text('Create Task',
-              style: TextStyle(
+        child: isLoading
+            ? Center(
+                child: LoadingAnimationWidget.threeArchedCircle(
                   color: AppColor.mainFGColor,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 18)),
-        ),
+                  size: height * 0.03,
+                ),
+              )
+            : Center(
+                child: Text('Create Task',
+                    style: TextStyle(
+                        color: AppColor.mainFGColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18)),
+              ),
       ),
     );
   }

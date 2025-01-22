@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/core/api/api_config.dart';
+import 'package:hrms/core/provider/provider.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hrms/presentation/odoo/create_task.dart';
@@ -9,6 +10,7 @@ import 'package:hrms/presentation/odoo/edit_task.dart';
 import 'package:hrms/presentation/odoo/task_details.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:provider/provider.dart';
 
 class ViewProjects extends StatefulWidget {
   final String projectName;
@@ -24,7 +26,7 @@ class _ViewProjectsState extends State<ViewProjects> {
   final Box _authBox = Hive.box('authBox');
   late String projectName;
   late int projectID;
-  String _selectedText = 'All Task';
+  // String _selectedText = 'All Task';
   Color? activeColor;
   Color? activeText;
   List<Map<String, dynamic>> tasks = [];
@@ -43,7 +45,6 @@ class _ViewProjectsState extends State<ViewProjects> {
   Future<void> _fetchTasks(int projectID) async {
     try {
       final response = await Dio().get(getOdootasks);
-      print(response);
 
       if (response.statusCode == 200) {
         final myTasks = List<Map<String, dynamic>>.from(response.data['tasks']);
@@ -53,14 +54,11 @@ class _ViewProjectsState extends State<ViewProjects> {
               .toList();
           isLoading = false;
         });
-        print(tasks);
       }
     } catch (e) {
       setState(() {
         isLoading = false;
       });
-
-      print('Error fetching tasks: $e');
     }
   }
 
@@ -100,152 +98,253 @@ class _ViewProjectsState extends State<ViewProjects> {
           ),
           centerTitle: true,
         ),
-        body: SizedBox(
-          height: height,
-          width: width,
-          child: Padding(
-            padding: const EdgeInsets.all(15),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Card(
-                  color: AppColor.mainFGColor,
-                  elevation: 4,
-                  margin: EdgeInsets.all(0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+        body: Consumer<TaskProvider>(builder: (context, value, child) {
+          if (value.taskupdated == true) {
+            _fetchTasks(widget.projectID);
+            Future.delayed(Duration(milliseconds: 1500), () {
+              Provider.of<TaskProvider>(context, listen: false)
+                  .taskupdatedStatus(false);
+            });
+          }
+          return SizedBox(
+            height: height,
+            width: width,
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Card(
+                  //   color: AppColor.mainFGColor,
+                  //   elevation: 4,
+                  //   margin: EdgeInsets.all(0),
+                  //   shape: RoundedRectangleBorder(
+                  //     borderRadius: BorderRadius.circular(10),
+                  //   ),
+                  //   shadowColor: Colors.black.withOpacity(0.1),
+                  //   child: Padding(
+                  //     padding: EdgeInsets.all(4),
+                  //     child: Row(
+                  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //       children: [
+                  //         _selectButton('All Task', height, width),
+                  //         _selectButton('Pending', height, width),
+                  //         _selectButton('Completed', height, width),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
+                  Text(
+                    "Tasks",
+                    style: TextStyle(
+                        fontSize: height * 0.018,
+                        color: AppColor.mainTextColor,
+                        fontWeight: FontWeight.w500),
                   ),
-                  shadowColor: Colors.black.withOpacity(0.1),
-                  child: Padding(
-                    padding: EdgeInsets.all(4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _selectButton('All Task', height, width),
-                        _selectButton('Pending', height, width),
-                        _selectButton('Completed', height, width),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: height * 0.02),
-                isLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : Expanded(
-                        child: ListView.builder(
-                          itemCount: tasks.length,
-                          itemBuilder: (context, index) {
-                            final task = tasks[index];
-                            String priority = task['priority'] != null &&
-                                    task['priority'].isNotEmpty
-                                ? task['priority']
-                                    .toString()
-                                    .replaceAll('[', '')
-                                    .replaceAll(']', '')
-                                : 'Not Set';
+                  isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : Expanded(
+                          child: ListView.builder(
+                            itemCount: tasks.length,
+                            itemBuilder: (context, index) {
+                              final task = tasks[index];
+                              String priority = task['priority'] != null &&
+                                      task['priority'].isNotEmpty
+                                  ? task['priority']
+                                      .toString()
+                                      .replaceAll('[', '')
+                                      .replaceAll(']', '')
+                                  : 'Not Set';
 
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: InkWell(
-                                onLongPress: () =>
-                                    showCupertinoModalBottomSheet(
-                                  expand: true,
-                                  context: context,
-                                  barrierColor:
-                                      const Color.fromARGB(130, 0, 0, 0),
-                                  backgroundColor: Colors.transparent,
-                                  builder: (context) => EditTask(
-                                    taskID: task['id'],
-                                      taskname: task['name'],
-                                      description: task['task_description'],
-                                      priority: priority,
-                                      taskDeadline: task['deadline_date'],
-                              alreadyAssignedEmails: List<String>.from(task['assignees_emails']),)
-                                ),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          TaskDetails(taskID: task['id']),
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                child: InkWell(
+                                  onLongPress: (task['task_creator_email'] ==
+                                          _authBox.get('email'))
+                                      ? () => showCupertinoModalBottomSheet(
+                                          expand: true,
+                                          context: context,
+                                          barrierColor: const Color.fromARGB(
+                                              130, 0, 0, 0),
+                                          backgroundColor: Colors.transparent,
+                                          builder: (context) => EditTask(
+                                                taskID: task['id'],
+                                                taskname: task['name'],
+                                                description:
+                                                    task['task_description'],
+                                                priority: priority,
+                                                taskDeadline:
+                                                    task['deadline_date'],
+                                                alreadyAssignedEmails:
+                                                    List<String>.from(task[
+                                                        'assignees_emails']),
+                                              ))
+                                      : null,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            TaskDetails(taskID: task['id']),
+                                      ),
+                                    );
+                                  },
+                                  child: Card(
+                                    color: AppColor.mainFGColor,
+                                    elevation: 4,
+                                    margin: EdgeInsets.all(0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                  );
-                                },
-                                child: Card(
-                                  color: AppColor.mainFGColor,
-                                  elevation: 4,
-                                  margin: EdgeInsets.all(0),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  shadowColor: Colors.black.withOpacity(0.1),
-                                  child: Stack(
-                                    alignment: AlignmentDirectional.topEnd,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                task['stage_name'] ==
-                                                        "Completed"
-                                                    ? Icon(
-                                                        Icons
-                                                            .check_circle_outline,
-                                                        color: Colors.green,
-                                                        size: height * 0.018,
-                                                      )
-                                                    : Icon(
-                                                        Icons.circle_outlined,
+                                    shadowColor: Colors.black.withOpacity(0.1),
+                                    child: Stack(
+                                      alignment: AlignmentDirectional.topEnd,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  task['stage_name'] ==
+                                                          "Completed"
+                                                      ? Icon(
+                                                          Icons
+                                                              .check_circle_outline,
+                                                          color: Colors.green,
+                                                          size: height * 0.018,
+                                                        )
+                                                      : Icon(
+                                                          Icons.circle_outlined,
+                                                          color: AppColor
+                                                              .mainThemeColor,
+                                                          size: height * 0.018,
+                                                        ),
+                                                  SizedBox(width: width * 0.02),
+                                                  SizedBox(
+                                                    width: width / 2,
+                                                    child: Text(
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      maxLines: 2,
+                                                      task['name'],
+                                                      style: TextStyle(
                                                         color: AppColor
-                                                            .mainThemeColor,
-                                                        size: height * 0.018,
+                                                            .mainTextColor,
+                                                        fontSize:
+                                                            height * 0.016,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
-                                                SizedBox(width: width * 0.02),
-                                                SizedBox(
-                                                  width: width / 1.5,
-                                                  child: Text(
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    task['name'],
-                                                    style: TextStyle(
-                                                      color: AppColor
-                                                          .mainTextColor,
-                                                      fontSize: height * 0.016,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 8.0),
+                                                child: Container(
+                                                  width: width,
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            14, 0, 0, 0)),
+                                                    color: AppColor.mainBGColor,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            5),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Text(
+                                                      task['task_description'],
+                                                      style: TextStyle(
+                                                        color: AppColor
+                                                            .mainTextColor2,
+                                                        fontSize:
+                                                            height * 0.015,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 8.0),
-                                              child: Container(
-                                                width: width,
+                                              ),
+                                              Text(
+                                                'Deadline: ${_formatDate(task['deadline_date'] ?? '')}',
+                                                style: TextStyle(
+                                                  color:
+                                                      AppColor.mainTextColor2,
+                                                  fontSize: height * 0.015,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        task['stage_name'] == "Completed"
+                                            ? Container(
                                                 decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                      color:
-                                                          const Color.fromARGB(
-                                                              14, 0, 0, 0)),
-                                                  color: AppColor.mainBGColor,
+                                                  color: Colors.green,
                                                   borderRadius:
-                                                      BorderRadius.circular(5),
+                                                      BorderRadius.only(
+                                                    topRight:
+                                                        Radius.circular(10),
+                                                    bottomLeft:
+                                                        Radius.circular(10),
+                                                  ),
                                                 ),
                                                 child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 5.0,
+                                                      horizontal: 15.0),
                                                   child: Text(
-                                                    task['task_description'],
+                                                    task['stage_name'],
                                                     style: TextStyle(
-                                                      color: AppColor
-                                                          .mainTextColor2,
+                                                      color:
+                                                          AppColor.mainFGColor,
+                                                      fontSize: height * 0.015,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                            : Container(
+                                                decoration: BoxDecoration(
+                                                  color: priority == 'High' ||
+                                                          priority == 'high'
+                                                      ? Colors.red
+                                                      : priority == 'Medium'
+                                                          ? Colors.amber
+                                                          : Colors.green,
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topRight:
+                                                        Radius.circular(10),
+                                                    bottomLeft:
+                                                        Radius.circular(10),
+                                                  ),
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 5.0,
+                                                      horizontal: 30.0),
+                                                  child: Text(
+                                                    priority,
+                                                    style: TextStyle(
+                                                      color:
+                                                          AppColor.mainFGColor,
                                                       fontSize: height * 0.015,
                                                       fontWeight:
                                                           FontWeight.w400,
@@ -253,84 +352,19 @@ class _ViewProjectsState extends State<ViewProjects> {
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                            Text(
-                                              'Deadline: ${_formatDate(task['deadline_date'] ?? '')}',
-                                              style: TextStyle(
-                                                color: AppColor.mainTextColor2,
-                                                fontSize: height * 0.015,
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      task['stage_name'] == "Completed"
-                                          ? Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.green,
-                                                borderRadius: BorderRadius.only(
-                                                  topRight: Radius.circular(10),
-                                                  bottomLeft:
-                                                      Radius.circular(10),
-                                                ),
-                                              ),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 5.0,
-                                                        horizontal: 15.0),
-                                                child: Text(
-                                                  task['stage_name'],
-                                                  style: TextStyle(
-                                                    color: AppColor.mainFGColor,
-                                                    fontSize: height * 0.015,
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                ),
-                                              ),
-                                            )
-                                          : Container(
-                                              decoration: BoxDecoration(
-                                                color: priority == 'High' ||
-                                                        priority == 'high'
-                                                    ? Colors.red
-                                                    : priority == 'Medium'
-                                                        ? Colors.amber
-                                                        : Colors.green,
-                                                borderRadius: BorderRadius.only(
-                                                  topRight: Radius.circular(10),
-                                                  bottomLeft:
-                                                      Radius.circular(10),
-                                                ),
-                                              ),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 5.0,
-                                                        horizontal: 30.0),
-                                                child: Text(
-                                                  priority,
-                                                  style: TextStyle(
-                                                    color: AppColor.mainFGColor,
-                                                    fontSize: height * 0.015,
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
-                      ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        }),
         floatingActionButton: _authBox.get('role') == 'Manager'
             ? FloatingActionButton.extended(
                 backgroundColor: AppColor.mainThemeColor,
@@ -348,40 +382,40 @@ class _ViewProjectsState extends State<ViewProjects> {
             : null);
   }
 
-  Widget _selectButton(String text, double height, double width) {
-    Color activeColor;
-    Color activeText;
+  // Widget _selectButton(String text, double height, double width) {
+  //   Color activeColor;
+  //   Color activeText;
 
-    if (_selectedText == text) {
-      activeColor = AppColor.mainThemeColor;
-      activeText = AppColor.mainFGColor;
-    } else {
-      activeColor = Colors.transparent;
-      activeText = const Color.fromARGB(141, 0, 0, 0);
-    }
+  //   if (_selectedText == text) {
+  //     activeColor = AppColor.mainThemeColor;
+  //     activeText = AppColor.mainFGColor;
+  //   } else {
+  //     activeColor = Colors.transparent;
+  //     activeText = const Color.fromARGB(141, 0, 0, 0);
+  //   }
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedText = text;
-        });
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: activeColor,
-        ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 10),
-          child: Text(
-            text,
-            style: TextStyle(
-              color: activeText,
-              fontSize: height * 0.015,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  //   return GestureDetector(
+  //     onTap: () {
+  //       setState(() {
+  //         _selectedText = text;
+  //       });
+  //     },
+  //     child: Container(
+  //       decoration: BoxDecoration(
+  //         borderRadius: BorderRadius.circular(10),
+  //         color: activeColor,
+  //       ),
+  //       child: Padding(
+  //         padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: 10),
+  //         child: Text(
+  //           text,
+  //           style: TextStyle(
+  //             color: activeText,
+  //             fontSize: height * 0.015,
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }

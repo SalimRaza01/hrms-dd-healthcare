@@ -8,6 +8,7 @@ import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hrms/presentation/odoo/odoo_dashboard.dart';
 import 'package:hrms/presentation/odoo/task_details.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -226,64 +227,64 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             return Text('No data Found');
                           }
                         }),
-                    // SizedBox(
-                    //   height: height * 0.015,
-                    // ),
-                    // InkWell(
-                    //   onTap: () {
-                    //     Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //             builder: (context) => OdooDashboard()));
-                    //   },
-                    //   child: Container(
-                    //       width: width,
-                    //       decoration: BoxDecoration(
-                    //           gradient: LinearGradient(
-                    //             begin: Alignment.topLeft,
-                    //             end: Alignment.centerRight,
-                    //             colors: [
-                    //               AppColor.primaryThemeColor,
-                    //               AppColor.mainThemeColor,
-                    //             ],
-                    //           ),
-                    //           border: Border.all(
-                    //               color: const Color.fromARGB(14, 0, 0, 0)),
-                    //           borderRadius: BorderRadius.circular(10)),
-                    //       child: Padding(
-                    //         padding: const EdgeInsets.symmetric(
-                    //             horizontal: 10, vertical: 12),
-                    //         child: Row(
-                    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    //           children: [
-                    //             Row(
-                    //               children: [
-                    //                 Icon(
-                    //                   Icons.check_circle_outline_outlined,
-                    //                   color: AppColor.mainFGColor,
-                    //                   size: height * 0.022,
-                    //                 ),
-                    //                 SizedBox(
-                    //                   width: width * 0.02,
-                    //                 ),
-                    //                 Text(
-                    //                   'View Task Dashbaord',
-                    //                   style: TextStyle(
-                    //                       fontSize: height * 0.015,
-                    //                       color: AppColor.mainFGColor,
-                    //                       fontWeight: FontWeight.w400),
-                    //                 ),
-                    //               ],
-                    //             ),
-                    //             Icon(
-                    //               Icons.arrow_forward_ios_outlined,
-                    //               color: AppColor.mainFGColor,
-                    //               size: height * 0.018,
-                    //             ),
-                    //           ],
-                    //         ),
-                    //       )),
-                    // ),
+                    SizedBox(
+                      height: height * 0.015,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => OdooDashboard()));
+                      },
+                      child: Container(
+                          width: width,
+                          decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.centerRight,
+                                colors: [
+                                  AppColor.primaryThemeColor,
+                                  AppColor.mainThemeColor,
+                                ],
+                              ),
+                              border: Border.all(
+                                  color: const Color.fromARGB(14, 0, 0, 0)),
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle_outline_outlined,
+                                      color: AppColor.mainFGColor,
+                                      size: height * 0.022,
+                                    ),
+                                    SizedBox(
+                                      width: width * 0.02,
+                                    ),
+                                    Text(
+                                      'View Task Dashbaord',
+                                      style: TextStyle(
+                                          fontSize: height * 0.015,
+                                          color: AppColor.mainFGColor,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  ],
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios_outlined,
+                                  color: AppColor.mainFGColor,
+                                  size: height * 0.018,
+                                ),
+                              ],
+                            ),
+                          )),
+                    ),
                     SizedBox(
                       height: height * 0.015,
                     ),
