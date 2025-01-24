@@ -89,15 +89,24 @@ class _EditProjectState extends State<EditProject> {
     return Scaffold(
       backgroundColor: AppColor.mainBGColor,
       appBar: AppBar(
-        centerTitle: true,
+        backgroundColor: AppColor.mainThemeColor,
+        leading: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(
+            Icons.arrow_back_ios,
+            color: AppColor.mainFGColor,
+          ),
+        ),
         title: Text(
-          'Update Project',
+          'UPDATE PROJECT',
           style: TextStyle(
               fontSize: height * 0.02,
               fontWeight: FontWeight.w500,
               color: Colors.white),
         ),
-        backgroundColor: AppColor.mainBGColor,
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -149,7 +158,7 @@ class _EditProjectState extends State<EditProject> {
                       spacing: 8.0,
                       runSpacing: 2.0,
                       children: selectedUsers.map((email) {
-                        print(selectedUsers);
+           
                         return Chip(
                           backgroundColor: AppColor.mainThemeColor,
                           label: Text(

@@ -529,12 +529,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
                                   return Center(
-                                      child: 
-        LoadingAnimationWidget.threeArchedCircle(
-                color: AppColor.mainTextColor2,
-                size: height * 0.03,
-      
-            ));
+                                      child: LoadingAnimationWidget
+                                          .threeArchedCircle(
+                                    color: AppColor.mainTextColor2,
+                                    size: height * 0.03,
+                                  ));
                                 } else if (snapshot.hasError) {
                                   return Center(
                                       child: Text('No Holiday List Found'));
@@ -549,8 +548,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                                   final newDate =
                                       DateTime.parse(item.holidayDate);
-
-                                  print(newDate.day < DateTime.now().day);
 
                                   return InkWell(
                                     onTap: () => showCupertinoModalBottomSheet(
@@ -681,12 +678,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       height: height * 0.015,
                     ),
                     isLoading
-                        ? Center(child: 
-             LoadingAnimationWidget.threeArchedCircle(
-                color: AppColor.mainTextColor2,
-                size: height * 0.03,
-      
-            ))
+                        ? Center(
+                            child: LoadingAnimationWidget.threeArchedCircle(
+                            color: AppColor.mainTextColor2,
+                            size: height * 0.03,
+                          ))
                         : tasks.isEmpty
                             ? NoTaskWidget(height: height)
                             : SizedBox(
@@ -776,20 +772,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                                 height * 0.022,
                                                           ),
                                                           SizedBox(
-                                                            width: 5,
+                                                            width: width * 0.02,
                                                           ),
-                                                          Text(
-                                                            task['name'] ??
-                                                                'No Task Name',
-                                                            style: TextStyle(
-                                                                fontSize:
-                                                                    height *
-                                                                        0.018,
-                                                                color: AppColor
-                                                                    .mainTextColor,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500),
+                                                          SizedBox(
+                                                            width: width / 1.4,
+                                                            child: Text(
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              maxLines: 1,
+                                                              task['name']
+                                                                  .toString()
+                                                                  .toUpperCase(),
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                      height *
+                                                                          0.018,
+                                                                  color: AppColor
+                                                                      .mainTextColor,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500),
+                                                            ),
                                                           ),
                                                         ],
                                                       ),
