@@ -39,7 +39,7 @@ class _EditProjectState extends State<EditProject> {
     widget.alreadyAssignedEmails.map((email) {
       selectedUsers.add(email);
     }).toList();
-    odooUser = fetchOddoUsers('search user', 0);
+    odooUser = fetchOddoUsers(0);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -78,6 +78,9 @@ class _EditProjectState extends State<EditProject> {
           backgroundColor: Colors.red,
         ),
       );
+        setState(() {
+        isLoading = false;
+      });
     }
   }
 

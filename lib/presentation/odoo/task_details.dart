@@ -39,7 +39,6 @@ class _TaskDetailsState extends State<TaskDetails> {
   Future<void> _fetchTasks() async {
     try {
       final response = await Dio().get(getOdootasks);
-      print(response);
 
       if (response.statusCode == 200) {
         final myTasks = List<Map<String, dynamic>>.from(response.data['tasks']);
@@ -296,7 +295,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                 SizedBox(height: height * 0.015),
                                 TextField(
                                   readOnly: true,
-                                  controller: noteController,
+                                  controller: null,
                                   maxLines: null,
                                   decoration: InputDecoration(
                                     hintText:
@@ -337,7 +336,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                   ),
                                 ),
                                 SizedBox(height: height * 0.010),
-                                _buildNoteField(height),
+                                _buildNoteField(height, task['comments']),
                               ],
                             ),
                           ),
@@ -359,7 +358,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                       CupertinoIcons.multiply_square_fill,
                                       'Cancel',
                                       Colors.red,
-                                      task['id']),
+                                      task['id'], noteController.text),
                                 ),
                                 Visibility(
                                   visible: task['stage_name'] == 'Redo' ||
@@ -371,7 +370,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                       CupertinoIcons.flag_fill,
                                       'Completed',
                                       Colors.green,
-                                      task['id']),
+                                  task['id'], noteController.text),
                                 ),
                                 Visibility(
                                   visible: task['stage_name'] == 'Review',
@@ -381,7 +380,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                       CupertinoIcons.arrow_up_left_circle_fill,
                                       'Redo',
                                       Colors.red,
-                                      task['id']),
+                         task['id'], noteController.text),
                                 ),
                                 Visibility(
                                   visible: task['stage_name'] == 'Created' ||
@@ -396,7 +395,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                       CupertinoIcons.hand_raised_fill,
                                       'Hold',
                                       Colors.amber,
-                                      task['id']),
+                               task['id'], noteController.text),
                                 ),
                               ],
                             ),
@@ -422,7 +421,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                       CupertinoIcons.play_fill,
                                       'Start Task',
                                       Colors.green,
-                                      task['id']),
+                                task['id'], noteController.text),
                                 ),
                                 Visibility(
                                   visible:
@@ -434,7 +433,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                       CupertinoIcons.doc_text_search,
                                       'Send for Review',
                                       Colors.blue,
-                                      task['id']),
+                                task['id'], noteController.text),
                                 ),
                                 Visibility(
                                   visible: task['stage_name'] == 'Hold',
@@ -444,7 +443,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                       CupertinoIcons.multiply_square_fill,
                                       'Cancel',
                                       Colors.red,
-                                      task['id']),
+                                    task['id'], noteController.text),
                                 ),
                               ],
                             ),
@@ -460,7 +459,7 @@ class _TaskDetailsState extends State<TaskDetails> {
   }
 
   taskActionButtons(double height, double width, IconData icon, String text,
-      Color? color, int taskID) {
+      Color? color, int taskID, String noteController) {
     return InkWell(
       onTap: () async {
         await changeTaskStage(
@@ -470,7 +469,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                 ? 'In Progress'
                 : text == 'Send for Review'
                     ? 'Review'
-                    : text);
+                    : text, noteController );
         await _fetchTasks();
       },
       child: Padding(
@@ -526,12 +525,12 @@ class _TaskDetailsState extends State<TaskDetails> {
     );
   }
 
-  Widget _buildNoteField(double height) {
+  Widget _buildNoteField(double height, String comment) {
     return TextField(
       controller: noteController,
-      maxLines: 3,
+      maxLines: null,
       decoration: InputDecoration(
-        hintText: 'Write your feedback or comment...',
+        hintText: '$comment... \n\n\nWrite your feedback or comment',
         hintStyle: TextStyle(
           color: AppColor.mainTextColor2,
           fontSize: height * 0.016,

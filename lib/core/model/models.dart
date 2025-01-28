@@ -130,6 +130,7 @@ class LeaveHistory {
   final String status;
   final String approvedBy;
   final String dateTime;
+  final String? location;
 
   LeaveHistory({
     required this.id,
@@ -141,6 +142,7 @@ class LeaveHistory {
     required this.status,
     required this.approvedBy,
     required this.dateTime,
+    this.location
   });
 
   factory LeaveHistory.fromJson(Map<String, dynamic> json) {
@@ -154,6 +156,7 @@ class LeaveHistory {
       status: json['status'] ?? '',
       approvedBy: json['approvedBy'] ?? '',
       dateTime: json['dateTime'] ?? '',
+         location: json['location'] ?? '',
     );
   }
 
@@ -168,6 +171,7 @@ class LeaveHistory {
       'status': status,
       'approvedBy': approvedBy,
       'dateTime': dateTime,
+      'location' : location
     };
   }
 }
@@ -423,7 +427,7 @@ class OdooUserModel {
     return OdooUserModel(
       id: json['id'],
       name: json['name'],
-      email: json['email'],
+      email: json['email'] ?? '',
     );
   }
 

@@ -68,7 +68,7 @@ class MyApp extends StatelessWidget {
         "/odooDashbaord": (context) => OdooDashboard(),
         "/createTask": (context) => CreateTask(projectID: 0,),
         "/taskDetails": (context) => TaskDetails(taskID: 0,),
-                "/viewProject": (context) => ViewProjects(projectName: '', projectID: 0,),
+                "/viewProject": (context) => ViewProjects(projectName: '', projectID: 0, createDate: '', alreadyAssignedEmails: [],),
       },
     );
   }

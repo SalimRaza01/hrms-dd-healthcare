@@ -39,7 +39,7 @@ class _CreateTaskState extends State<CreateTask> {
   @override
   void initState() {
     super.initState();
-    odooUser = fetchOddoUsers('search user', widget.projectID);
+    odooUser = fetchOddoUsers(widget.projectID);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -286,23 +286,7 @@ class _CreateTaskState extends State<CreateTask> {
   }
 
   Widget _buildAssigneeList(double height) {
-    return FutureBuilder<List<OdooUserModel>>(
-      future: odooUser,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError ||
-            !snapshot.hasData ||
-            snapshot.data!.isEmpty) {
-          return Center(child: Text('No User Found'));
-        } else {
-          List<OdooUserModel> items = snapshot.data!;
-
-          if (filteredUsers.isEmpty) {
-            filteredUsers = items;
-          }
-
-          return SizedBox(
+    return SizedBox(
             height: height * 0.27,
             child: FutureBuilder<List<OdooUserModel>>(
               future: odooUser,
@@ -393,9 +377,6 @@ class _CreateTaskState extends State<CreateTask> {
               },
             ),
           );
-        }
-      },
-    );
   }
 
   Widget _buildDateSelection(String text) {

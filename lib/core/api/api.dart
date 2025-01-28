@@ -580,10 +580,11 @@ Future<List<DocumentListModel>> fetchDocumentList(String documentType) async {
   }
 }
 
-Future<List<OdooUserModel>> fetchOddoUsers(String documentType, int projectid) async {
+Future<List<OdooUserModel>> fetchOddoUsers(int projectid) async {
   final response = await dio.get('$getodooUsers/$projectid');
-
+    print(response);
   if (response.statusCode == 200) {
+
     final List<dynamic> data = response.data['users'];
     return data.map((item) => OdooUserModel.fromJson(item)).toList();
   } else {
@@ -635,10 +636,13 @@ Future<void> changeTaskStage(
   BuildContext context,
   int taskID,
   String stageName,
+    String comment,
 ) async {
+  print(comment);
   try {
     final response = await dio.put('$putTaskStage/$taskID', data: {
       "stage_name": stageName,
+         "comments": comment,
     });
     if (response.data['result']['status'] == 'success') {
       ScaffoldMessenger.of(context).showSnackBar(

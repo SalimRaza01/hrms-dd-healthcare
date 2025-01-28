@@ -28,7 +28,7 @@ class _CreateProjectState extends State<CreateProject> {
   @override
   void initState() {
     super.initState();
-    odooUser = fetchOddoUsers('search user', 0);
+    odooUser = fetchOddoUsers(0);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
