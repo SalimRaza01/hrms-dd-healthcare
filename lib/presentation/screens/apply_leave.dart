@@ -315,13 +315,16 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
+
+
     DateTime shiftendTime = DateTime.parse(
       DateFormat('yyyy-MM-dd').format(DateTime.now()) +
           ' ' +
-          '0${_authBox.get('earlyby')}',
+          '0${_authBox.get('earlyby').toString().trim()}',
     );
 
     String shortLeaveDate = DateFormat('yyyy-MM-dd').format(shiftendTime);
+
 
     return SafeArea(
         child: Scaffold(

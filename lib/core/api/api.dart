@@ -197,6 +197,7 @@ Future<void> applyLeave(
           backgroundColor: Colors.green,
         ),
       );
+                 Navigator.pop(context);
     }
   } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -295,6 +296,7 @@ Future<void> applyRegularize(
           backgroundColor: Colors.green,
         ),
       );
+            Navigator.pop(context);
     }
   } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -332,6 +334,7 @@ Future<void> applyShortLeave(
           backgroundColor: Colors.green,
         ),
       );
+          Navigator.pop(context);
     }
   } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -340,6 +343,44 @@ Future<void> applyShortLeave(
         backgroundColor: Colors.red,
       ),
     );
+
+  }
+}
+
+Future<void> applyCompoff(
+  BuildContext context,
+  String startDate,
+  String reason,
+) async {
+  String empID = _authBox.get('employeeId');
+
+  try {
+    final response = await dio.post('$generateCompoff/$empID',
+        // options: Options(headers: {
+        //   "Content-Type": "application/json",
+        //   "Authorization": "Bearer $token"
+        // }),
+        data: {
+          "compOffDate": startDate,
+          "reason": reason,
+        });
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Request submitted successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+          Navigator.pop(context);
+    }
+  } on DioException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.response!.data['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
+
   }
 }
 
@@ -623,5 +664,4 @@ Future<void> changeTaskStage(
     );
   }
 }
-
 

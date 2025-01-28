@@ -215,14 +215,13 @@ class _TaskDetailsState extends State<TaskDetails> {
                                     Container(
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(5),
-                                        color: priority == 'High'
+                                        color: priority == 'High' ||
+                                                priority == 'high'
                                             ? const Color.fromARGB(
-                                                150, 255, 17, 0)
+                                              143, 255, 17, 0)
                                             : priority == 'Medium'
-                                                ? const Color.fromARGB(
-                                                    150, 255, 193, 7)
-                                                : const Color.fromARGB(
-                                                    150, 76, 175, 79),
+                                                ?Colors.amber
+                                                : Colors.green
                                       ),
                                       child: Padding(
                                         padding: EdgeInsets.symmetric(
@@ -234,23 +233,25 @@ class _TaskDetailsState extends State<TaskDetails> {
                                               CupertinoIcons
                                                   .shield_lefthalf_fill,
                                               size: height * 0.018,
-                                              color: priority == 'High'
-                                                  ? Colors.white
-                                                  : priority == 'Medium'
-                                                      ? AppColor.mainTextColor
-                                                      : Colors.white,
+                                              color:  priority == 'High' ||
+                                                priority == 'high'
+                                            ? Colors.white
+                                            : priority == 'Medium'
+                                                ? Colors.black
+                                                : Colors.white
                                             ),
                                             SizedBox(
                                               width: width * 0.02,
                                             ),
                                             Text(
-                                              priority,
+                                              priority.toUpperCase(),
                                               style: TextStyle(
-                                                color: priority == 'High'
-                                                    ? Colors.white
-                                                    : priority == 'Medium'
-                                                        ? AppColor.mainTextColor
-                                                        : Colors.white,
+                                                 color:  priority == 'High' ||
+                                                priority == 'high'
+                                             ? Colors.white
+                                            : priority == 'Medium'
+                                                ? Colors.black
+                                                : Colors.white,
                                                 fontSize: height * 0.015,
                                               ),
                                             ),
@@ -298,7 +299,10 @@ class _TaskDetailsState extends State<TaskDetails> {
                                   controller: noteController,
                                   maxLines: null,
                                   decoration: InputDecoration(
-                                    hintText: task['task_description'],
+                                    hintText:
+                                        task['task_description'] == 'False'
+                                            ? 'Not Provided'
+                                            : task['task_description'],
                                     hintStyle: TextStyle(
                                       color: AppColor.mainTextColor2,
                                       fontSize: height * 0.016,
@@ -325,7 +329,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                                 _buildAssigneeList(task['assignees_emails']),
                                 SizedBox(height: height * 0.015),
                                 Text(
-                                  'Add a Note:',
+                                  'Comment',
                                   style: TextStyle(
                                     color: AppColor.mainTextColor,
                                     fontSize: height * 0.016,
@@ -511,10 +515,10 @@ class _TaskDetailsState extends State<TaskDetails> {
         runSpacing: 1.0,
         children: assignees.map((user) {
           return Chip(
-            backgroundColor: AppColor.mainThemeColor,
+            backgroundColor: AppColor.mainBGColor,
             label: Text(
               user ?? 'Unknown User',
-              style: TextStyle(color: AppColor.mainFGColor),
+              style: TextStyle(color: AppColor.mainTextColor2),
             ),
           );
         }).toList(),
@@ -527,7 +531,7 @@ class _TaskDetailsState extends State<TaskDetails> {
       controller: noteController,
       maxLines: 3,
       decoration: InputDecoration(
-        hintText: 'Write your feedback or note...',
+        hintText: 'Write your feedback or comment...',
         hintStyle: TextStyle(
           color: AppColor.mainTextColor2,
           fontSize: height * 0.016,

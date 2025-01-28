@@ -272,8 +272,11 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                               String punchOut =
                                   "${dateTime2.hour.toString().padLeft(2, '0')}:${dateTime2.minute.toString().padLeft(2, '0')}";
 
-                              DateTime scheduledTime = DateTime.parse(
-                                  DateFormat('yyyy-MM-dd').format(dateTime) +
+                              DateTime? scheduledTime;
+                          scheduledTime =    _authBox.get('lateby').toString().contains('10') ? DateTime.parse(
+                          DateFormat('yyyy-MM-dd').format(dateTime) +  
+                                      ' ${_authBox.get('lateby')}') : DateTime.parse(
+                          DateFormat('yyyy-MM-dd').format(dateTime) +  
                                       ' 0${_authBox.get('lateby')}');
 
                               Duration lateByDuration =

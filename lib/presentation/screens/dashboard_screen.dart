@@ -1,7 +1,9 @@
 // ignore_for_file: sort_child_properties_last, prefer_final_fields
 
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_image_stack/flutter_image_stack.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/model/models.dart';
@@ -43,6 +45,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ]);
     holidayList = fetchHolidayList('HomeScreen');
     employeeOnLeaveList = fetchEmployeeOnLeave();
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      DateTime dateTime = DateTime.parse(dateString);
+      return DateFormat('dd MMM yyyy').format(dateTime);
+    } catch (e) {
+      return dateString;
+    }
   }
 
   Future<void> _fetchTasks() async {
@@ -685,9 +696,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ))
                         : tasks.isEmpty
                             ? NoTaskWidget(height: height)
-                            : SizedBox(
+                            : Container(
                                 width: width,
-                                height: height * 0.2,
+                                height: height * 0.225,
                                 child: ListView.builder(
                                   itemCount: 1,
                                   itemBuilder: (context, index) {
@@ -712,169 +723,291 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         ),
                                         shadowColor:
                                             Colors.black.withOpacity(0.1),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(10),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Current Task ',
-                                                style: TextStyle(
-                                                    fontSize: height * 0.018,
-                                                    color:
-                                                        AppColor.mainTextColor,
-                                                    fontWeight:
-                                                        FontWeight.w500),
-                                              ),
-                                              SizedBox(
-                                                height: height * 0.003,
-                                              ),
-                                              Text(
-                                                'The task assigned to you',
-                                                style: TextStyle(
-                                                  fontSize: height * 0.015,
-                                                  color: Color.fromARGB(
-                                                      141, 0, 0, 0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              width: width,
+                                              decoration: BoxDecoration(
+                                                  color:
+                                                      Colors.green,
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  10),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  10))),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                                                child: Text(
+                                                  'Current Task ',
+                                                  style: TextStyle(
+                                                      fontSize: height * 0.015,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.w400),
                                                 ),
                                               ),
-                                              SizedBox(
-                                                height: height * 0.01,
-                                              ),
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            14, 0, 0, 0)),
-                                                    color: AppColor.mainBGColor,
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      SizedBox(
+                                                        width: width / 1.5,
+                                                        child: Text(
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          maxLines: 2,
+                                                          task['name'].toString().toUpperCase(),
+                                                          style: TextStyle(
+                                                            color: AppColor
+                                                                .mainTextColor,
+                                                            fontSize:
+                                                                height * 0.016,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                                color: task['priority'][0] ==
+                                                                            'High' ||
+                                                                        task['priority'][0] ==
+                                                                            'high'
+                                                                    ? const Color.fromARGB(
+                                                                        255,
+                                                                        249,
+                                                                        177,
+                                                                        177)
+                                                                    : task['priority'][0] ==
+                                                                            'Low'
+                                                                        ? const Color.fromARGB(
+                                                                            255,
+                                                                            226,
+                                                                            255,
+                                                                            193)
+                                                                        : const Color.fromARGB(
+                                                                            116,
+                                                                            255,
+                                                                            198,
+                                                                            124),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            5)),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal: 8,
+                                                                  vertical: 5),
+                                                          child: Text(
+                                                            task['priority'][0]
+                                                                .toString()
+                                                                .toUpperCase(),
+                                                            style: TextStyle(
+                                                              fontSize: height *
+                                                                  0.014,
+                                                              color: task['priority'][0] ==
+                                                                          'High' ||
+                                                                      task['priority'][0] ==
+                                                                          'high'
+                                                                  ? const Color.fromARGB(
+                                                                      255,
+                                                                      229,
+                                                                      45,
+                                                                      45)
+                                                                  : task['priority'][
+                                                                              0] ==
+                                                                          'Low'
+                                                                      ? const Color
+                                                                          .fromARGB(
+                                                                          255,
+                                                                          113,
+                                                                          163,
+                                                                          56)
+                                                                      : const Color
+                                                                          .fromARGB(
+                                                                          255,
+                                                                          227,
+                                                                          129,
+                                                                          0),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Text(
+                                                    'Deadline: ${_formatDate(task['deadline_date'] ?? '')}',
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                      fontSize: height * 0.014,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: height * 0.02,
+                                                  ),
+                                                  LinearProgressIndicator(
+                                                    backgroundColor:
+                                                        AppColor.mainBGColor,
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                            10)),
-                                                child: Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 10,
-                                                      vertical: 12),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
+                                                            20),
+                                                    minHeight: 6.0,
+                                                    color: task['stage_name'] ==
+                                                            'Created'
+                                                        ? const Color.fromARGB(
+                                                            167, 76, 175, 79)
+                                                        : task['stage_name'] ==
+                                                                'In Progress'
+                                                            ? const Color.fromARGB(
+                                                                167, 76, 175, 79)
+                                                            : task['stage_name'] ==
+                                                                    'Hold'
+                                                                ? const Color
+                                                                    .fromARGB(
+                                                                    167, 255, 193, 7)
+                                                                : task['stage_name'] ==
+                                                                        'Review'
+                                                                    ? const Color.fromARGB(
+                                                                        167,
+                                                                        33,
+                                                                        149,
+                                                                        243)
+                                                                    : task['stage_name'] ==
+                                                                            'Completed'
+                                                                        ? const Color.fromARGB(
+                                                                            167,
+                                                                            76,
+                                                                            175,
+                                                                            79)
+                                                                        : task['stage_name'] == 'Running Late'
+                                                                            ? const Color.fromARGB(167, 244, 67, 54)
+                                                                            : const Color.fromARGB(167, 76, 175, 79),
+                                                    value: task['stage_name'] ==
+                                                            'Created'
+                                                        ? 0.1
+                                                        : task['stage_name'] ==
+                                                                'In Progress'
+                                                            ? 0.3
+                                                            : task['stage_name'] ==
+                                                                    'Hold'
+                                                                ? 0.5
+                                                                : task['stage_name'] ==
+                                                                        'Review'
+                                                                    ? 0.7
+                                                                    : task['stage_name'] ==
+                                                                            'Completed'
+                                                                        ? 1.0
+                                                                        : task['stage_name'] ==
+                                                                                'Running Late'
+                                                                            ? 0.1
+                                                                            : 0.0,
+                                                  ),
+                                                  SizedBox(
+                                                    height: height * 0.02,
+                                                  ),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
                                                     children: [
-                                                      Row(
+                                                      FlutterImageStack.widgets(
                                                         children: [
-                                                          Icon(
-                                                            Icons
-                                                                .circle_outlined,
-                                                            color: AppColor
-                                                                .primaryThemeColor,
-                                                            size:
-                                                                height * 0.022,
-                                                          ),
-                                                          SizedBox(
-                                                            width: width * 0.02,
-                                                          ),
-                                                          SizedBox(
-                                                            width: width / 1.4,
-                                                            child: Text(
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                              maxLines: 1,
-                                                              task['name']
-                                                                  .toString()
-                                                                  .toUpperCase(),
-                                                              style: TextStyle(
+                                                          for (var n = 0;
+                                                              n <
+                                                                  task['assignees_emails']
+                                                                      .length;
+                                                              n++)
+                                                            CircleAvatar(
+                                                              backgroundColor:
+                                                                  const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      235,
+                                                                      244,
+                                                                      254),
+                                                              child: Text(
+                                                                task['assignees_emails']
+                                                                        [n][0]
+                                                                    .toString()
+                                                                    .toUpperCase(),
+                                                                style:
+                                                                    TextStyle(
                                                                   fontSize:
                                                                       height *
                                                                           0.018,
-                                                                  color: AppColor
-                                                                      .mainTextColor,
                                                                   fontWeight:
                                                                       FontWeight
-                                                                          .w500),
-                                                            ),
-                                                          ),
+                                                                          .w400,
+                                                                ),
+                                                              ),
+                                                            )
                                                         ],
-                                                      ),
-                                                      SizedBox(
-                                                        height: height * 0.015,
+                                                        showTotalCount: true,
+                                                        itemBorderColor:
+                                                            Colors.white,
+                                                        totalCount: task[
+                                                                'assignees_emails']
+                                                            .length,
+                                                        itemRadius: 40,
+                                                        itemBorderWidth: 2,
                                                       ),
                                                       Row(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
-                                                                .start,
+                                                                .center,
                                                         children: [
-                                                          TaskWidgets(
-                                                            height: height,
-                                                            icon: Icons
-                                                                .timelapse_rounded,
-                                                            text: task[
-                                                                'stage_name'],
+                                                          Icon(
+                                                            CupertinoIcons.dial,
                                                             color: const Color
-                                                                .fromARGB(86,
+                                                                .fromARGB(177,
                                                                 158, 158, 158),
-                                                            textcolor:
-                                                                const Color
-                                                                    .fromARGB(
-                                                                    158,
-                                                                    0,
-                                                                    0,
-                                                                    0),
                                                           ),
                                                           SizedBox(
                                                             width: width * 0.02,
                                                           ),
-                                                          TaskWidgets(
-                                                            height: height,
-                                                            icon: Icons.flag,
-                                                            text: task['priority']
-                                                                    ?.join(
-                                                                        ', ') ??
-                                                                'No Priority',
-                                                            color: const Color
-                                                                .fromARGB(201,
-                                                                229, 27, 27),
-                                                            textcolor:
-                                                                const Color
-                                                                    .fromARGB(
-                                                                    255,
-                                                                    255,
-                                                                    255,
-                                                                    255),
-                                                          ),
-                                                          SizedBox(
-                                                            width: width * 0.02,
-                                                          ),
-                                                          // TaskWidgets(
-                                                          //   height: height,
-                                                          //   icon: Icons
-                                                          //       .calendar_month,
-                                                          //   text: DateFormat(
-                                                          //           'yyyy-MM-dd')
-                                                          //       .format(DateTime
-                                                          //           .parse(task[
-                                                          //               'deadline_date']))
-                                                          //       .toString(),
-                                                          //   color: const Color
-                                                          //       .fromARGB(201,
-                                                          //       229, 27, 27),
-                                                          //   textcolor:
-                                                          //       const Color
-                                                          //           .fromARGB(
-                                                          //           255,
-                                                          //           255,
-                                                          //           255,
-                                                          //           255),
-                                                          // )
+                                                          Text(
+                                                            task['stage_name'],
+                                                            style: TextStyle(
+                                                              color:
+                                                                  Colors.grey,
+                                                              fontSize: height *
+                                                                  0.017,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400,
+                                                            ),
+                                                          )
                                                         ],
-                                                      ),
+                                                      )
                                                     ],
                                                   ),
-                                                ),
+                                                ],
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     );

@@ -1,5 +1,9 @@
+// ignore_for_file: sort_child_properties_last
+
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_image_stack/flutter_image_stack.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/provider/provider.dart';
@@ -142,6 +146,9 @@ class _ViewProjectsState extends State<ViewProjects> {
                         color: AppColor.mainTextColor,
                         fontWeight: FontWeight.w500),
                   ),
+                     SizedBox(
+                                            height: height * 0.01,
+                                          ),
                   isLoading
                       ? Center(child: CircularProgressIndicator())
                       : Expanded(
@@ -159,7 +166,7 @@ class _ViewProjectsState extends State<ViewProjects> {
 
                               return Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
+                                    const EdgeInsets.symmetric(vertical: 5),
                                 child: InkWell(
                                   onLongPress: (task['task_creator_email'] ==
                                           _authBox.get('email'))
@@ -191,7 +198,7 @@ class _ViewProjectsState extends State<ViewProjects> {
                                       ),
                                     );
                                   },
-                                  child: Card(
+                                  child:Card(
                                     color: AppColor.mainFGColor,
                                     elevation: 4,
                                     margin: EdgeInsets.all(0),
@@ -199,160 +206,213 @@ class _ViewProjectsState extends State<ViewProjects> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     shadowColor: Colors.black.withOpacity(0.1),
-                                    child: Stack(
-                                      alignment: AlignmentDirectional.topEnd,
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Row(
-                                                children: [
-                                                  task['stage_name'] ==
-                                                          "Completed"
-                                                      ? Icon(
-                                                          Icons
-                                                              .check_circle_outline,
-                                                          color: Colors.green,
-                                                          size: height * 0.018,
-                                                        )
-                                                      : Icon(
-                                                          Icons.circle_outlined,
-                                                          color: AppColor
-                                                              .mainThemeColor,
-                                                          size: height * 0.018,
-                                                        ),
-                                                  SizedBox(width: width * 0.02),
-                                                  SizedBox(
-                                                    width: width / 2,
-                                                    child: Text(
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      maxLines: 2,
-                                                      task['name'],
-                                                      style: TextStyle(
-                                                        color: AppColor
-                                                            .mainTextColor,
-                                                        fontSize:
-                                                            height * 0.016,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 8.0),
-                                                child: Container(
-                                                  width: width,
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            14, 0, 0, 0)),
-                                                    color: AppColor.mainBGColor,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            5),
-                                                  ),
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8.0),
-                                                    child: Text(
-                                                      task['task_description'],
-                                                      style: TextStyle(
-                                                        color: AppColor
-                                                            .mainTextColor2,
-                                                        fontSize:
-                                                            height * 0.015,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                      ),
-                                                    ),
+                                              SizedBox(
+                                                width: width / 1.5,
+                                                child: Text(
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 2,
+                                                  task['name'],
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppColor.mainTextColor,
+                                                    fontSize: height * 0.016,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
                                               ),
-                                              Text(
-                                                'Deadline: ${_formatDate(task['deadline_date'] ?? '')}',
-                                                style: TextStyle(
-                                                  color:
-                                                      AppColor.mainTextColor2,
-                                                  fontSize: height * 0.015,
-                                                  fontWeight: FontWeight.w400,
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                    color: task['priority']
+                                                                    [0] ==
+                                                                'High' ||
+                                                            task['priority']
+                                                                    [0] ==
+                                                                'high'
+                                                        ? const Color.fromARGB(
+                                                            255, 249, 177, 177)
+                                                        : task['priority'][0] ==
+                                                                'Low'
+                                                            ? const Color.fromARGB(
+                                                                255,
+                                                                226,
+                                                                255,
+                                                                193)
+                                                            : const Color
+                                                                .fromARGB(116,
+                                                                255, 198, 124),
+                                                    borderRadius:
+                                                        BorderRadius.circular(5)),
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 5),
+                                                  child: Text(
+                                                    task['priority'][0]
+                                                        .toString()
+                                                        .toUpperCase(),
+                                                    style: TextStyle(
+                                                      fontSize: height * 0.014,
+                                                      color: task['priority']
+                                                                      [0] ==
+                                                                  'High' ||
+                                                              task['priority']
+                                                                      [0] ==
+                                                                  'high'
+                                                          ? const Color.fromARGB(
+                                                              255, 229, 45, 45)
+                                                          : task['priority'][0] ==
+                                                                  'Low'
+                                                              ? const Color
+                                                                  .fromARGB(255,
+                                                                  113, 163, 56)
+                                                              : const Color
+                                                                  .fromARGB(255,
+                                                                  227, 129, 0),
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
                                             ],
                                           ),
-                                        ),
-                                        task['stage_name'] == "Completed"
-                                            ? Container(
-                                                decoration: BoxDecoration(
-                                                  color: Colors.green,
-                                                  borderRadius:
-                                                      BorderRadius.only(
-                                                    topRight:
-                                                        Radius.circular(10),
-                                                    bottomLeft:
-                                                        Radius.circular(10),
+                                          Text(
+                                            'Deadline: ${_formatDate(task['deadline_date'] ?? '')}',
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: height * 0.014,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: height * 0.02,
+                                          ),
+                                          LinearProgressIndicator(
+                                            backgroundColor: AppColor.mainBGColor,
+                                            borderRadius: BorderRadius.circular(20),
+                                            minHeight: 6.0,
+                                            color: task['stage_name'] ==
+                                                    'Created'
+                                                ? const Color.fromARGB(167, 76, 175, 79)
+                                                : task['stage_name'] ==
+                                                        'In Progress'
+                                                    ? const Color.fromARGB(167, 76, 175, 79)
+                                                    : task['stage_name'] ==
+                                                            'Hold'
+                                                        ? const Color.fromARGB(167, 255, 193, 7)
+                                                        : task['stage_name'] ==
+                                                                'Review'
+                                                            ? const Color.fromARGB(167, 33, 149, 243)
+                                                            : task['stage_name'] ==
+                                                                    'Completed'
+                                                                ? const Color.fromARGB(167, 76, 175, 79)
+                                                                : task['stage_name'] ==
+                                                                        'Running Late'
+                                                                    ? const Color.fromARGB(167, 244, 67, 54)
+                                                                    : const Color.fromARGB(167, 76, 175, 79),
+                                            value: task['stage_name'] ==
+                                                    'Created'
+                                                ? 0.1
+                                                : task['stage_name'] ==
+                                                        'In Progress'
+                                                    ? 0.3
+                                                    : task['stage_name'] ==
+                                                            'Hold'
+                                                        ? 0.5
+                                                        : task['stage_name'] ==
+                                                                'Review'
+                                                            ? 0.7
+                                                            : task['stage_name'] ==
+                                                                    'Completed'
+                                                                ? 1.0
+                                                                : task['stage_name'] ==
+                                                                        'Running Late'
+                                                                    ? 0.1
+                                                                    : 0.0,
+                                          ),
+                                          SizedBox(
+                                            height: height * 0.02,
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              FlutterImageStack.widgets(
+                                                children: [
+                                                  for (var n = 0;
+                                                      n <
+                                                          task['assignees_emails']
+                                                              .length;
+                                                      n++)
+                                                    CircleAvatar(
+                                                      backgroundColor:
+                                                          const Color.fromARGB(
+                                                              255,
+                                                              235,
+                                                              244,
+                                                              254),
+                                                      child: Text(
+                                                        task['assignees_emails']
+                                                                [n][0]
+                                                            .toString()
+                                                            .toUpperCase(),
+                                                        style: TextStyle(
+                                                          fontSize:
+                                                              height * 0.018,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                        ),
+                                                      ),
+                                                    )
+                                                ],
+                                                showTotalCount: true,
+                                                itemBorderColor: Colors.white,
+                                                totalCount:
+                                                    task['assignees_emails']
+                                                        .length,
+                                                itemRadius: 40,
+                                                itemBorderWidth: 2,
+                                              ),
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  Icon(
+                                                    CupertinoIcons
+                                                        .dial,
+                                                    color: const Color.fromARGB(
+                                                        177, 158, 158, 158),
                                                   ),
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      vertical: 5.0,
-                                                      horizontal: 15.0),
-                                                  child: Text(
+                                                  SizedBox(
+                                                    width: width * 0.02,
+                                                  ),
+                                                  Text(
                                                     task['stage_name'],
                                                     style: TextStyle(
-                                                      color:
-                                                          AppColor.mainFGColor,
-                                                      fontSize: height * 0.015,
+                                                      color: Colors.grey,
+                                                      fontSize: height * 0.017,
                                                       fontWeight:
                                                           FontWeight.w400,
                                                     ),
-                                                  ),
-                                                ),
+                                                  )
+                                                ],
                                               )
-                                            : Container(
-                                                decoration: BoxDecoration(
-                                                  color: priority == 'High' ||
-                                                          priority == 'high'
-                                                      ? Colors.red
-                                                      : priority == 'Medium'
-                                                          ? Colors.amber
-                                                          : Colors.green,
-                                                  borderRadius:
-                                                      BorderRadius.only(
-                                                    topRight:
-                                                        Radius.circular(10),
-                                                    bottomLeft:
-                                                        Radius.circular(10),
-                                                  ),
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      vertical: 5.0,
-                                                      horizontal: 30.0),
-                                                  child: Text(
-                                                    priority,
-                                                    style: TextStyle(
-                                                      color:
-                                                          AppColor.mainFGColor,
-                                                      fontSize: height * 0.015,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                      ],
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
