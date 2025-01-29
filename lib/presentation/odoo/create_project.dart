@@ -76,16 +76,25 @@ class _CreateProjectState extends State<CreateProject> {
 
     return Scaffold(
       backgroundColor: AppColor.mainBGColor,
-      appBar: AppBar(
-        centerTitle: true,
+     appBar: AppBar(
+        backgroundColor: AppColor.mainThemeColor,
+        leading: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(
+            Icons.arrow_back_ios,
+            color: AppColor.mainFGColor,
+          ),
+        ),
         title: Text(
-          'Create Project',
+          'CREATE PROJECT',
           style: TextStyle(
               fontSize: height * 0.02,
               fontWeight: FontWeight.w500,
               color: Colors.white),
         ),
-        backgroundColor: AppColor.mainBGColor,
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Padding(

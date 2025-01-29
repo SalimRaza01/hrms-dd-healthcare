@@ -18,4 +18,14 @@ class ProjectProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+class StageProvider extends ChangeNotifier {
+  bool stageManage = false;
+  bool get updateStage => stageManage;
+
+  void stageManageStatus(bool updateStage) {
+    stageManage = updateStage;
+    notifyListeners();
+  }
+}
               

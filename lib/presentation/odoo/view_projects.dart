@@ -426,7 +426,7 @@ class _ViewProjectsState extends State<ViewProjects> {
                                                   ],
                                                 ),
                                                 Text(
-                                                  'Deadline: ${_formatDate(task['deadline_date'] ?? '')}',
+                                                 task['deadline_date'] == 'False' ? 'Deadline: Not Provided' : 'Deadline: ${_formatDate(task['deadline_date'])}',
                                                   style: TextStyle(
                                                     color: Colors.grey,
                                                     fontSize: height * 0.014,

@@ -62,6 +62,7 @@ class _EditTaskState extends State<EditTask> {
     String taskEndDate,
     List<String> userEmails,
   ) async {
+      print('$taskID, $taskName, $taskDescription, $taskPriority, $taskEndDate $userEmails');
     try {
       final response = await dio.put('$postOdootasks/$taskID', data: {
         "name": taskName,
@@ -305,6 +306,7 @@ class _EditTaskState extends State<EditTask> {
         onPressed: () {
           setState(() {
             selectedPriority = label;
+            print(selectedPriority);
           });
         },
         style: ElevatedButton.styleFrom(
@@ -335,8 +337,8 @@ class _EditTaskState extends State<EditTask> {
         readOnly: true,
         onTap: () => endDate(context),
         decoration: InputDecoration(
-    hintText: widget.taskDeadline,
-      hintStyle: TextStyle(fontSize: height * 0.016),
+          hintText: widget.taskDeadline,
+          hintStyle: TextStyle(fontSize: height * 0.016),
           filled: true,
           fillColor: AppColor.mainFGColor,
           border: OutlineInputBorder(
@@ -360,7 +362,8 @@ class _EditTaskState extends State<EditTask> {
       onConfirm: (dateTime, List<int> index) {
         setState(() {
           DateTime selectdate = dateTime;
-          endDateController.text = DateFormat('yyyy-MM-dd HH:mm').format(selectdate);
+          endDateController.text =
+              DateFormat('yyyy-MM-dd HH:mm').format(selectdate);
         });
       },
     );
@@ -368,28 +371,30 @@ class _EditTaskState extends State<EditTask> {
 
   Widget _buildSubmitButton(double width, double height) {
     return InkWell(
-      onTap: isLoading ? null : () async {
-        setState(() {
-          isLoading = true;
-        });
-
-        await updateTask(
-          context,
-          widget.taskID,
-          taskNameController.text.isEmpty
-              ? widget.taskname
-              : taskNameController.text,
-          descriptionController.text.isNotEmpty
-              ? descriptionController.text
-              : widget.description,
-          selectedPriority != null ? selectedPriority! : widget.priority,
-          endDateController.text.isNotEmpty
-              ? endDateController.text
-              : DateFormat('yyyy-MM-dd HH:mm')
-                  .format(DateTime.parse(widget.taskDeadline)),
-          widget.alreadyAssignedEmails,
-        );
-      },
+      onTap: isLoading
+          ? null
+          : () async {
+              setState(() {
+                isLoading = true;
+              });
+              
+              await updateTask(
+                context,
+                widget.taskID,
+                taskNameController.text.isEmpty
+                    ? widget.taskname
+                    : taskNameController.text,
+                descriptionController.text.isNotEmpty
+                    ? descriptionController.text
+                    : widget.description,
+                selectedPriority!,
+                endDateController.text.isNotEmpty
+                    ? endDateController.text
+                    : DateFormat('yyyy-MM-dd HH:mm')
+                        .format(DateTime.parse(widget.taskDeadline)),
+                widget.alreadyAssignedEmails,
+              );
+            },
       child: Center(
         child: Container(
           width: width / 2,

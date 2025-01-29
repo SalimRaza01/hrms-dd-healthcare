@@ -1,5 +1,6 @@
 import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/model/models.dart';
+import 'package:hrms/core/provider/provider.dart';
 import 'package:hrms/presentation/authentication/create_new_pass.dart';
 import 'package:hrms/presentation/authentication/login_screen.dart';
 import 'package:hrms/presentation/authentication/otp_screen.dart';
@@ -7,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../presentation/screens/bottom_navigation.dart';
 
@@ -638,19 +640,22 @@ Future<void> changeTaskStage(
   String stageName,
     String comment,
 ) async {
-  print(comment);
+
   try {
     final response = await dio.put('$putTaskStage/$taskID', data: {
       "stage_name": stageName,
          "comments": comment,
     });
     if (response.data['result']['status'] == 'success') {
+      print(response);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Status Updated'),
           backgroundColor: Colors.green,
         ),
       );
+         Provider.of<TaskProvider>(context, listen: false)
+            .taskupdatedStatus(true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

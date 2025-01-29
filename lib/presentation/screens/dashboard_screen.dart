@@ -783,88 +783,98 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                         ),
                                                       ),
                                                       Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                                color: task['priority'][0] ==
-                                                                            'High' ||
-                                                                        task['priority'][0] ==
-                                                                            'high'
-                                                                    ? const Color.fromARGB(
-                                                                        255,
-                                                                        249,
-                                                                        177,
-                                                                        177)
-                                                                    : task['priority'][0] ==
-                                                                            'Low'
-                                                                        ? const Color.fromARGB(
-                                                                            255,
-                                                                            226,
-                                                                            255,
-                                                                            193)
-                                                                        : const Color.fromARGB(
-                                                                            116,
-                                                                            255,
-                                                                            198,
-                                                                            124),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            5)),
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                                  horizontal: 8,
-                                                                  vertical: 5),
-                                                          child: Text(
-                                                            task['priority'][0]
-                                                                .toString()
-                                                                .toUpperCase(),
-                                                            style: TextStyle(
-                                                              fontSize: height *
-                                                                  0.014,
-                                                              color: task['priority'][0] ==
+                                                      decoration: BoxDecoration(
+                                                          color: task['priority'] !=
+                                                                      null &&
+                                                                  task['priority']
+                                                                      .isNotEmpty
+                                                              ? task['priority'][0] ==
                                                                           'High' ||
                                                                       task['priority'][0] ==
                                                                           'high'
                                                                   ? const Color.fromARGB(
                                                                       255,
-                                                                      229,
-                                                                      45,
-                                                                      45)
-                                                                  : task['priority'][
-                                                                              0] ==
+                                                                      249,
+                                                                      177,
+                                                                      177)
+                                                                  : task['priority'][0] ==
                                                                           'Low'
-                                                                      ? const Color
-                                                                          .fromARGB(
+                                                                      ? const Color.fromARGB(
                                                                           255,
-                                                                          113,
-                                                                          163,
-                                                                          56)
-                                                                      : const Color
-                                                                          .fromARGB(
+                                                                          226,
                                                                           255,
-                                                                          227,
-                                                                          129,
-                                                                          0),
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                            ),
+                                                                          193)
+                                                                      : const Color.fromARGB(
+                                                                          116,
+                                                                          255,
+                                                                          198,
+                                                                          124)
+                                                              : Colors
+                                                                  .transparent,
+                                                          borderRadius:
+                                                              BorderRadius.circular(5)),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 8,
+                                                                vertical: 5),
+                                                        child: Text(
+                                                          task['priority'] !=
+                                                                      null &&
+                                                                  task['priority']
+                                                                      .isNotEmpty
+                                                              ? task['priority']
+                                                                      [0]
+                                                                  .toString()
+                                                                  .toUpperCase()
+                                                              : 'Not Set',
+                                                          style: TextStyle(
+                                                            fontSize:
+                                                                height * 0.014,
+                                                            color: task['priority'] !=
+                                                                        null &&
+                                                                    task['priority']
+                                                                        .isNotEmpty
+                                                                ? task['priority'][0] ==
+                                                                            'High' ||
+                                                                        task['priority'][0] ==
+                                                                            'high'
+                                                                    ? const Color
+                                                                        .fromARGB(
+                                                                        255,
+                                                                        229,
+                                                                        45,
+                                                                        45)
+                                                                    : task['priority'][0] ==
+                                                                            'Low'
+                                                                        ? const Color.fromARGB(
+                                                                            255,
+                                                                            113,
+                                                                            163,
+                                                                            56)
+                                                                        : const Color.fromARGB(
+                                                                            255,
+                                                                            227,
+                                                                            129,
+                                                                            0)
+                                                                : Colors.grey,
+                                                            fontWeight:
+                                                                FontWeight.w500,
                                                           ),
                                                         ),
                                                       ),
-                                                    ],
-                                                  ),
-                                                  Text(
-                                                    'Deadline: ${_formatDate(task['deadline_date'] ?? '')}',
-                                                    style: TextStyle(
-                                                      color: Colors.grey,
-                                                      fontSize: height * 0.014,
-                                                      fontWeight:
-                                                          FontWeight.w400,
                                                     ),
+                                                  ],
+                                                ),
+                                                Text(
+                                                 task['deadline_date'] == 'False' ? 'Deadline: Not Provided' : 'Deadline: ${_formatDate(task['deadline_date'])}',
+                                                  style: TextStyle(
+                                                    color: Colors.grey,
+                                                    fontSize: height * 0.014,
+                                                    fontWeight: FontWeight.w400,
                                                   ),
+                                                ),
                                                   SizedBox(
                                                     height: height * 0.02,
                                                   ),

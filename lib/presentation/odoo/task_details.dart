@@ -213,15 +213,15 @@ class _TaskDetailsState extends State<TaskDetails> {
                                   children: [
                                     Container(
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5),
-                                        color: priority == 'High' ||
-                                                priority == 'high'
-                                            ? const Color.fromARGB(
-                                              143, 255, 17, 0)
-                                            : priority == 'Medium'
-                                                ?Colors.amber
-                                                : Colors.green
-                                      ),
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          color: priority == 'High' ||
+                                                  priority == 'high'
+                                              ? const Color.fromARGB(
+                                                  143, 255, 17, 0)
+                                              : priority == 'Medium'
+                                                  ? Colors.amber
+                                                  : Colors.green),
                                       child: Padding(
                                         padding: EdgeInsets.symmetric(
                                             horizontal: width * 0.02,
@@ -229,28 +229,27 @@ class _TaskDetailsState extends State<TaskDetails> {
                                         child: Row(
                                           children: [
                                             Icon(
-                                              CupertinoIcons
-                                                  .shield_lefthalf_fill,
-                                              size: height * 0.018,
-                                              color:  priority == 'High' ||
-                                                priority == 'high'
-                                            ? Colors.white
-                                            : priority == 'Medium'
-                                                ? Colors.black
-                                                : Colors.white
-                                            ),
+                                                CupertinoIcons
+                                                    .shield_lefthalf_fill,
+                                                size: height * 0.018,
+                                                color: priority == 'High' ||
+                                                        priority == 'high'
+                                                    ? Colors.white
+                                                    : priority == 'Medium'
+                                                        ? Colors.black
+                                                        : Colors.white),
                                             SizedBox(
                                               width: width * 0.02,
                                             ),
                                             Text(
                                               priority.toUpperCase(),
                                               style: TextStyle(
-                                                 color:  priority == 'High' ||
-                                                priority == 'high'
-                                             ? Colors.white
-                                            : priority == 'Medium'
-                                                ? Colors.black
-                                                : Colors.white,
+                                                color: priority == 'High' ||
+                                                        priority == 'high'
+                                                    ? Colors.white
+                                                    : priority == 'Medium'
+                                                        ? Colors.black
+                                                        : Colors.white,
                                                 fontSize: height * 0.015,
                                               ),
                                             ),
@@ -353,34 +352,37 @@ class _TaskDetailsState extends State<TaskDetails> {
                                 Visibility(
                                   visible: task['stage_name'] == 'Hold',
                                   child: taskActionButtons(
-                                      height,
-                                      width,
-                                      CupertinoIcons.multiply_square_fill,
-                                      'Cancel',
-                                      Colors.red,
-                                      task['id'], noteController.text),
+                                    height,
+                                    width,
+                                    CupertinoIcons.multiply_square_fill,
+                                    'Cancel',
+                                    Colors.red,
+                                    task['id'],
+                                  ),
                                 ),
                                 Visibility(
                                   visible: task['stage_name'] == 'Redo' ||
                                       task['stage_name'] == 'Running Late' ||
                                       task['stage_name'] == 'Review',
                                   child: taskActionButtons(
-                                      height,
-                                      width,
-                                      CupertinoIcons.flag_fill,
-                                      'Completed',
-                                      Colors.green,
-                                  task['id'], noteController.text),
+                                    height,
+                                    width,
+                                    CupertinoIcons.flag_fill,
+                                    'Completed',
+                                    Colors.green,
+                                    task['id'],
+                                  ),
                                 ),
                                 Visibility(
                                   visible: task['stage_name'] == 'Review',
                                   child: taskActionButtons(
-                                      height,
-                                      width,
-                                      CupertinoIcons.arrow_up_left_circle_fill,
-                                      'Redo',
-                                      Colors.red,
-                         task['id'], noteController.text),
+                                    height,
+                                    width,
+                                    CupertinoIcons.arrow_up_left_circle_fill,
+                                    'Redo',
+                                    Colors.red,
+                                    task['id'],
+                                  ),
                                 ),
                                 Visibility(
                                   visible: task['stage_name'] == 'Created' ||
@@ -390,12 +392,13 @@ class _TaskDetailsState extends State<TaskDetails> {
                                       task['stage_name'] == 'Cancel' ||
                                       task['stage_name'] == 'In Progress',
                                   child: taskActionButtons(
-                                      height,
-                                      width,
-                                      CupertinoIcons.hand_raised_fill,
-                                      'Hold',
-                                      Colors.amber,
-                               task['id'], noteController.text),
+                                    height,
+                                    width,
+                                    CupertinoIcons.hand_raised_fill,
+                                    'Hold',
+                                    Colors.amber,
+                                    task['id'],
+                                  ),
                                 ),
                               ],
                             ),
@@ -416,34 +419,37 @@ class _TaskDetailsState extends State<TaskDetails> {
                                       task['stage_name'] == 'Hold' ||
                                       task['stage_name'] == 'Cancel',
                                   child: taskActionButtons(
-                                      height,
-                                      width,
-                                      CupertinoIcons.play_fill,
-                                      'Start Task',
-                                      Colors.green,
-                                task['id'], noteController.text),
+                                    height,
+                                    width,
+                                    CupertinoIcons.play_fill,
+                                    'Start Task',
+                                    Colors.green,
+                                    task['id'],
+                                  ),
                                 ),
                                 Visibility(
                                   visible:
                                       task['stage_name'] == 'In Progress' ||
                                           task['stage_name'] == 'Running Late',
                                   child: taskActionButtons(
-                                      height,
-                                      width,
-                                      CupertinoIcons.doc_text_search,
-                                      'Send for Review',
-                                      Colors.blue,
-                                task['id'], noteController.text),
+                                    height,
+                                    width,
+                                    CupertinoIcons.doc_text_search,
+                                    'Send for Review',
+                                    Colors.blue,
+                                    task['id'],
+                                  ),
                                 ),
                                 Visibility(
                                   visible: task['stage_name'] == 'Hold',
                                   child: taskActionButtons(
-                                      height,
-                                      width,
-                                      CupertinoIcons.multiply_square_fill,
-                                      'Cancel',
-                                      Colors.red,
-                                    task['id'], noteController.text),
+                                    height,
+                                    width,
+                                    CupertinoIcons.multiply_square_fill,
+                                    'Cancel',
+                                    Colors.red,
+                                    task['id'],
+                                  ),
                                 ),
                               ],
                             ),
@@ -458,8 +464,14 @@ class _TaskDetailsState extends State<TaskDetails> {
     );
   }
 
-  taskActionButtons(double height, double width, IconData icon, String text,
-      Color? color, int taskID, String noteController) {
+  taskActionButtons(
+    double height,
+    double width,
+    IconData icon,
+    String text,
+    Color? color,
+    int taskID,
+  ) {
     return InkWell(
       onTap: () async {
         await changeTaskStage(
@@ -469,7 +481,8 @@ class _TaskDetailsState extends State<TaskDetails> {
                 ? 'In Progress'
                 : text == 'Send for Review'
                     ? 'Review'
-                    : text, noteController );
+                    : text,
+            noteController.text);
         await _fetchTasks();
       },
       child: Padding(
@@ -530,7 +543,9 @@ class _TaskDetailsState extends State<TaskDetails> {
       controller: noteController,
       maxLines: null,
       decoration: InputDecoration(
-        hintText: '$comment... \n\n\nWrite your feedback or comment',
+        hintText: comment == 'False'
+            ? 'Write your feedback or comment'
+            : '$comment... \n\n\nWrite your feedback or comment',
         hintStyle: TextStyle(
           color: AppColor.mainTextColor2,
           fontSize: height * 0.016,
@@ -547,4 +562,4 @@ class _TaskDetailsState extends State<TaskDetails> {
   }
 }
 
-enum StepEnabling { sequential, individual }
+
