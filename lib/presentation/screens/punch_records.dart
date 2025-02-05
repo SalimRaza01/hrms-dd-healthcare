@@ -21,9 +21,13 @@ class PunchRecordScreen extends StatefulWidget {
 }
 
 class _PunchRecordScreenState extends State<PunchRecordScreen> {
+  final Box _authBox = Hive.box('authBox');
   TextEditingController reasonController = TextEditingController();
   String? maxRegularization;
   DateTime? date;
+  String _selectedText = 'Regularization';
+  Color? activeColor;
+  Color? activeText;
 
   @override
   void initState() {
@@ -66,12 +70,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          widget.lateMinutes > 20 &&
-                  widget.lateMinutes < 30 &&
-                  date != DateTime.now() &&
-                  date!.isAfter(DateTime.now().subtract(Duration(days: 8)))
-              ? 'Apply Regularization'
-              : 'Records',
+          'Records',
           style: TextStyle(
             fontSize: height * 0.02,
             fontWeight: FontWeight.w500,
@@ -86,12 +85,30 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Visibility(
-              visible: widget.lateMinutes > 20 &&
-                  widget.lateMinutes < 30 &&
-                  date!.day != DateTime.now().day &&
-                  date!.isAfter(DateTime.now().subtract(Duration(days: 8))),
+              visible: date!
+                      .isAfter(DateTime.now().subtract(Duration(days: 8))) &&
+                  date!.isBefore(DateTime.now().subtract(Duration(days: 1))),
               child: Column(
                 children: [
+                  Card(
+                    color: AppColor.mainFGColor,
+                    elevation: 4,
+                    margin: EdgeInsets.all(0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    shadowColor: Colors.black.withOpacity(0.1),
+                    child: Padding(
+                      padding: EdgeInsets.all(3),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _selectButton('Regularization', height, width),
+                            _selectButton('Comp-Off', height, width),
+                          ]),
+                    ),
+                  ),
+                  SizedBox(height: height * 0.015),
                   Card(
                     color: AppColor.mainFGColor,
                     elevation: 4,
@@ -130,25 +147,48 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                           )),
                     ),
                   ),
-                  SizedBox(height: height * 0.03),
-                  Center(
-                    child: Text(
-                      'Regularization Limit - $maxRegularization',
-                      style: TextStyle(
-                        fontSize: height * 0.015,
-                        fontWeight: FontWeight.w400,
-                        color: AppColor.mainTextColor,
+                  SizedBox(height: height * 0.02),
+                  Visibility(
+                    visible: _selectedText == 'Regularization',
+                    child: Center(
+                      child: Text(
+                        'Regularization Limit - $maxRegularization',
+                        style: TextStyle(
+                          fontSize: height * 0.015,
+                          fontWeight: FontWeight.w400,
+                          color: AppColor.mainTextColor,
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(height: height * 0.01),
+                  SizedBox(height: height * 0.02),
                   InkWell(
                     onTap: () async {
                       if (reasonController.text.isEmpty) {
                         showSnackBar('Please describe the reason');
-                      } else {
-                        await applyRegularize(context,
-                            widget.regularizationDate!, reasonController.text);
+                      } else if (_selectedText == 'Regularization') {
+                        if (widget.lateMinutes > 1 &&
+                            widget.lateMinutes <= 10) {
+                          await applyRegularize(
+                            context,
+                            widget.regularizationDate!,
+                            reasonController.text,
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Regularization can only be applied if late before ${_authBox.get('lateby') == '9:00' ? '09:30 AM' : _authBox.get('lateby') == '10:00' ? '10:30 AM' : _authBox.get('lateby') == '8:30' ? '09:00 AM' : ''}'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      } else if (_selectedText == 'Comp-Off') {
+                        await applyCompoff(
+                          context,
+                          widget.regularizationDate!,
+                          reasonController.text,
+                        );
                       }
                     },
                     child: Center(
@@ -275,6 +315,43 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
               ),
             )
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _selectButton(String text, double height, double width) {
+    Color activeColor;
+    Color activeText;
+
+    if (_selectedText == text) {
+      activeColor = AppColor.mainThemeColor;
+      activeText = AppColor.mainFGColor;
+    } else {
+      activeColor = Colors.transparent;
+      activeText = Colors.black87;
+    }
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedText = text;
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color: activeColor,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: width / 9, vertical: 6),
+          child: Text(
+            text,
+            style: TextStyle(
+              color: activeText,
+              fontSize: height * 0.015,
+            ),
+          ),
         ),
       ),
     );

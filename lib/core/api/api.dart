@@ -108,7 +108,7 @@ class AuthProvider with ChangeNotifier {
       BuildContext context) async {
     try {
       final response = await dio.post(employeeLogin, data: {
-        "email": emailController,
+        "email": emailController.toLowerCase(),
         "password": passController,
       });
 
@@ -279,7 +279,7 @@ Future<void> applyRegularize(
 ) async {
   String empID = _authBox.get('employeeId');
   String token = _authBox.get('token');
-
+  print('regularized-off');
   try {
     final response = await dio.post('$applyRegularization/$empID',
         options: Options(headers: {
@@ -354,6 +354,7 @@ Future<void> applyCompoff(
   String startDate,
   String reason,
 ) async {
+  print('comp-off');
   String empID = _authBox.get('employeeId');
 
   try {

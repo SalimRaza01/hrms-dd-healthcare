@@ -315,8 +315,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
-
-
     DateTime shiftendTime = DateTime.parse(
       DateFormat('yyyy-MM-dd').format(DateTime.now()) +
           ' ' +
@@ -324,7 +322,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     );
 
     String shortLeaveDate = DateFormat('yyyy-MM-dd').format(shiftendTime);
-
 
     return SafeArea(
         child: Scaffold(
@@ -591,7 +588,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             ),
                             Visibility(
                               visible: _selectedLeaveType != null &&
-                                  _selectedLeaveType!.contains('Medical') ,
+                                  _selectedLeaveType!.contains('Medical'),
                               child: InkWell(
                                 onTap: () async {
                                   FilePickerResult? result =
