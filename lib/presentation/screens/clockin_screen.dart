@@ -42,7 +42,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
       months.add(monthString!);
     }
 
-    attendenceLog = fetchAttendence(empID, DateFormat('MMMM yyyy').format(DateTime.now()).toString());
+    attendenceLog = fetchAttendence(
+        empID, DateFormat('MMMM yyyy').format(DateTime.now()).toString());
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -179,7 +180,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                               onTap: () {
                                 setState(() {
                                   selectedIndex = index;
-    attendenceLog = fetchAttendence(empID, items);
+                                  attendenceLog = fetchAttendence(empID, items);
                                 });
                               },
                               child: Container(
@@ -222,12 +223,11 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return Center(
-                                        child: LoadingAnimationWidget
-                                            .threeArchedCircle(
-                                          color: AppColor.mainTextColor2,
-                                          size: height * 0.03,
-                                        ),
-                                      );
+                            child: LoadingAnimationWidget.threeArchedCircle(
+                              color: AppColor.mainTextColor2,
+                              size: height * 0.03,
+                            ),
+                          );
                         } else if (snapshot.hasError) {
                           return Center(
                               child: Text('No attendance records available.'));
@@ -273,10 +273,15 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                   "${dateTime2.hour.toString().padLeft(2, '0')}:${dateTime2.minute.toString().padLeft(2, '0')}";
 
                               DateTime? scheduledTime;
-                          scheduledTime =    _authBox.get('lateby').toString().contains('10') ? DateTime.parse(
-                          DateFormat('yyyy-MM-dd').format(dateTime) +  
-                                      ' ${_authBox.get('lateby')}') : DateTime.parse(
-                          DateFormat('yyyy-MM-dd').format(dateTime) +  
+                              scheduledTime = _authBox
+                                      .get('lateby')
+                                      .toString()
+                                      .contains('10')
+                                  ? DateTime.parse(DateFormat('yyyy-MM-dd')
+                                          .format(dateTime) +
+                                      ' ${_authBox.get('lateby')}')
+                                  : DateTime.parse(DateFormat('yyyy-MM-dd')
+                                          .format(dateTime) +
                                       ' 0${_authBox.get('lateby')}');
 
                               Duration lateByDuration =
@@ -560,7 +565,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                       item.isLeaveTaken ==
                                                           false) &&
                                                   (lateMinutes >= 1 &&
-                                                      lateMinutes <= 30),
+                                                      lateMinutes <= 20),
                                               child: Container(
                                                 decoration: BoxDecoration(
                                                     color: Colors.redAccent,
@@ -591,9 +596,41 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                             ),
                                             Visibility(
                                               visible: (item.weekOff != 1 &&
-                                                      item.isLeaveTaken !=
-                                                          true) &&
-                                                  (item.absent == 1 && punchIn == "00:00"),
+                                                  item.isLeaveTaken == true),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                    color: Colors.green,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            topLeft: Radius
+                                                                .circular(15),
+                                                            bottomRight:
+                                                                Radius.circular(
+                                                                    15))),
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 0,
+                                                      horizontal: 20),
+                                                  child: Text(
+                                                    item.leaveType,
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            height * 0.013,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: AppColor
+                                                            .mainFGColor),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Visibility(
+                                              visible: (item.weekOff != 1 &&
+                                                      item.isLeaveTaken ==
+                                                          false) &&
+                                                  (item.absent == 1 &&
+                                                      punchIn == "00:00"),
                                               child: Container(
                                                 decoration: BoxDecoration(
                                                     color: Colors.redAccent,
