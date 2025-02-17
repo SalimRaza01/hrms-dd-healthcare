@@ -23,12 +23,12 @@ Future<List<Attendance>> fetchAttendence(
       .format(DateTime(monthDate.year, monthDate.month, 1));
 
   final lastDayOfMonth = DateTime(monthDate.year, monthDate.month + 1, 0);
+
   final dateTo = DateFormat('yyyy-MM-dd').format(lastDayOfMonth);
 
   DateTime currentMonth = DateTime.now();
   DateTime formattedCurrentMonth = DateFormat("MMMM yyyy")
       .parse(DateFormat("MMMM yyyy").format(currentMonth));
-
   try {
     final response =
         await dio.get('$getAttendenceData/$empID', queryParameters: {
@@ -36,7 +36,7 @@ Future<List<Attendance>> fetchAttendence(
       "dateTo": monthDate == formattedCurrentMonth
           ? DateFormat('yyyy-MM-dd').format(DateTime.now())
           : dateTo,
-      "limit": lastDayOfMonth.day,
+      "limit": 31,
     });
 
     if (response.statusCode == 200) {
@@ -131,6 +131,7 @@ class AuthProvider with ChangeNotifier {
         await _authBox.put('email', email);
         await _authBox.put('gender', gender);
         await _authBox.put('role', role);
+        print(responseData['token']);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -199,7 +200,7 @@ Future<void> applyLeave(
           backgroundColor: Colors.green,
         ),
       );
-                 Navigator.pop(context);
+      Navigator.pop(context);
     }
   } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -298,7 +299,7 @@ Future<void> applyRegularize(
           backgroundColor: Colors.green,
         ),
       );
-            Navigator.pop(context);
+      Navigator.pop(context);
     }
   } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -336,7 +337,7 @@ Future<void> applyShortLeave(
           backgroundColor: Colors.green,
         ),
       );
-          Navigator.pop(context);
+      Navigator.pop(context);
     }
   } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -345,7 +346,6 @@ Future<void> applyShortLeave(
         backgroundColor: Colors.red,
       ),
     );
-
   }
 }
 
@@ -374,7 +374,7 @@ Future<void> applyCompoff(
           backgroundColor: Colors.green,
         ),
       );
-          Navigator.pop(context);
+      Navigator.pop(context);
     }
   } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -383,7 +383,6 @@ Future<void> applyCompoff(
         backgroundColor: Colors.red,
       ),
     );
-
   }
 }
 
@@ -391,25 +390,23 @@ Future<List<LeaveRequests>> fetchLeaveRequest() async {
   String token = _authBox.get('token');
   print(token);
 
-  try {
-    final response = await dio.get(getLeaveRequest,
-        options: Options(headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token"
-        }));
+  // try {
+  final response = await dio.get(getLeaveRequest,
+      options: Options(headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      }));
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = response.data['data'];
+  if (response.statusCode == 200) {
+    List<dynamic> data = response.data['data'];
 
-      return data
-          .map((leaveData) => LeaveRequests.fromJson(leaveData))
-          .toList();
-    } else {
-      throw Exception('Failed to load leave history');
-    }
-  } catch (e) {
-    throw Exception('Error fetching data: $e');
+    return data.map((leaveData) => LeaveRequests.fromJson(leaveData)).toList();
+  } else {
+    return [];
   }
+  // } catch (e) {
+  //   throw Exception('Error fetching data: $e');
+  // }
 }
 
 Future<void> leaveAction(
@@ -585,16 +582,14 @@ Future<List<DocumentListModel>> fetchDocumentList(String documentType) async {
 
 Future<List<OdooUserModel>> fetchOddoUsers(int projectid) async {
   final response = await dio.get('$getodooUsers/$projectid');
-    print(response);
+  print(response);
   if (response.statusCode == 200) {
-
     final List<dynamic> data = response.data['users'];
     return data.map((item) => OdooUserModel.fromJson(item)).toList();
   } else {
     throw Exception('Failed to load OdooUsers data');
   }
 }
-
 
 Future<List<OdooProjectList>> fetchOdooProjects() async {
   String email = _authBox.get('email');
@@ -639,13 +634,12 @@ Future<void> changeTaskStage(
   BuildContext context,
   int taskID,
   String stageName,
-    String comment,
+  String comment,
 ) async {
-
   try {
     final response = await dio.put('$putTaskStage/$taskID', data: {
       "stage_name": stageName,
-         "comments": comment,
+      "comments": comment,
     });
     if (response.data['result']['status'] == 'success') {
       print(response);
@@ -655,8 +649,7 @@ Future<void> changeTaskStage(
           backgroundColor: Colors.green,
         ),
       );
-         Provider.of<TaskProvider>(context, listen: false)
-            .taskupdatedStatus(true);
+      Provider.of<TaskProvider>(context, listen: false).taskupdatedStatus(true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -675,3 +668,63 @@ Future<void> changeTaskStage(
   }
 }
 
+Future<List<CompOffRequest>> fetchCompOffRequest() async {
+  String token = _authBox.get('token');
+
+  // try {
+  final response = await dio.get(compOffRequestList,
+      options: Options(headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      }));
+
+  if (response.statusCode == 200) {
+    List<dynamic> data = response.data['data'];
+
+    return data.map((leaveData) => CompOffRequest.fromJson(leaveData)).toList();
+  } else {
+    return [];
+  }
+  // } catch (e) {
+  //   throw Exception('Error fetching data: $e');
+  // }
+}
+
+Future<void> compOffActionPut(
+  BuildContext context,
+  String action,
+  String id,
+) async {
+  String token = _authBox.get('token');
+  print(id);
+  try {
+    final response = await dio.put('$compOffActon/$id',
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }),
+        data: {"status": action});
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Request Approved'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Request Declined'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } on DioException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.response!.data['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}

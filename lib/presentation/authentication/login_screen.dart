@@ -114,15 +114,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                     bool isDigit = int.tryParse(value) != null;
 
                                     if (isDigit) {
-                                      final employeeCode = RegExp(r'^\d{3,}$');
+                                      final employeeCode = RegExp(r'^\d{0,3}$');
                                       if (value.isEmpty) {
                                         _emailErrorText =
                                             'Employee Code is required';
-                                      } else if (!employeeCode
+                                      } 
+                                      else if (!employeeCode
                                           .hasMatch(value)) {
                                         _emailErrorText =
-                                            'Employee Code must have at least 3 digits';
-                                      } else {
+                                            'Invalid Employee Code';
+                                      } 
+                                      else {
                                         _emailErrorText = null;
                                       }
                                     } else {

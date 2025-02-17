@@ -132,18 +132,17 @@ class LeaveHistory {
   final String dateTime;
   final String? location;
 
-  LeaveHistory({
-    required this.id,
-    required this.leaveType,
-    required this.leaveStartDate,
-    required this.leaveEndDate,
-    required this.totalDays,
-    required this.reason,
-    required this.status,
-    required this.approvedBy,
-    required this.dateTime,
-    this.location
-  });
+  LeaveHistory(
+      {required this.id,
+      required this.leaveType,
+      required this.leaveStartDate,
+      required this.leaveEndDate,
+      required this.totalDays,
+      required this.reason,
+      required this.status,
+      required this.approvedBy,
+      required this.dateTime,
+      this.location});
 
   factory LeaveHistory.fromJson(Map<String, dynamic> json) {
     return LeaveHistory(
@@ -156,7 +155,7 @@ class LeaveHistory {
       status: json['status'] ?? '',
       approvedBy: json['approvedBy'] ?? '',
       dateTime: json['dateTime'] ?? '',
-         location: json['location'] ?? '',
+      location: json['location'] ?? '',
     );
   }
 
@@ -171,7 +170,7 @@ class LeaveHistory {
       'status': status,
       'approvedBy': approvedBy,
       'dateTime': dateTime,
-      'location' : location
+      'location': location
     };
   }
 }
@@ -536,5 +535,49 @@ class EmployeeOnLeave {
       employeeName: json['employeeName'].toString(),
       gender: json['gender'],
     );
+  }
+}
+
+class CompOffRequest {
+  final String id;
+  final String compOffDate;
+  final String appliedDate;
+  final String totalDays;
+  final String reason;
+  final String status;
+  final String employeeName;
+
+  CompOffRequest({
+    required this.id,
+    required this.compOffDate,
+    required this.appliedDate,
+    required this.totalDays,
+    required this.reason,
+    required this.status,
+    required this.employeeName,
+  });
+
+  factory CompOffRequest.fromJson(Map<String, dynamic> json) {
+    return CompOffRequest(
+      id: json['_id'] ?? '',
+      compOffDate: json['compOffDate'] ?? '',
+      appliedDate: json['appliedDate'] ?? '',
+      totalDays: json['totalDays'] ?? '',
+      reason: json['reason'] ?? '',
+      status: json['status'] ?? '',
+      employeeName: json['employeeInfo']['employeeName'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'compOffDate': compOffDate,
+      'appliedDate': appliedDate,
+      'totalDays': totalDays,
+      'reason': reason,
+      'status': status,
+      'employeeName': employeeName,
+    };
   }
 }

@@ -30,11 +30,13 @@ class _LeaveScreenState extends State<LeaveScreenManager>
   late TabController _tabController;
   late Future<List<LeaveHistory>> _leaveHistory;
   late Future<List<LeaveRequests>> _leaveRequest;
+  late Future<List<CompOffRequest>> _compOffRequest;
 
   @override
   void initState() {
     _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
     _leaveRequest = fetchLeaveRequest();
+    _compOffRequest = fetchCompOffRequest();
     _tabController = TabController(vsync: this, length: 3);
     _tabController.addListener(_handleTabSelection);
     super.initState();
@@ -54,6 +56,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
         case 1:
           updateUser = 'Team';
           _leaveRequest = fetchLeaveRequest();
+          _compOffRequest = fetchCompOffRequest();
           break;
       }
     });
@@ -155,665 +158,939 @@ class _LeaveScreenState extends State<LeaveScreenManager>
   }
 
   selfSection(double height, double width) {
-    return Expanded(
-      child: Column(
-        children: [
-          Card(
-            color: AppColor.mainFGColor,
-            elevation: 4,
-            margin: EdgeInsets.all(0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            shadowColor: Colors.black.withOpacity(0.1),
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: SizedBox(
-                width: width,
-                child: FutureBuilder<LeaveBalance>(
-                    future: fetchLeaves(widget.empID),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(
-                          child: LoadingAnimationWidget.threeArchedCircle(
-                            color: AppColor.mainTextColor2,
-                            size: height * 0.03,
-                          ),
-                        );
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('No Data Found'));
-                      } else if (snapshot.hasData) {
-                        final leave = snapshot.data!;
+    return Column(
+      children: [
+        Card(
+          color: AppColor.mainFGColor,
+          elevation: 4,
+          margin: EdgeInsets.all(0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          shadowColor: Colors.black.withOpacity(0.1),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: SizedBox(
+              width: width,
+              child: FutureBuilder<LeaveBalance>(
+                  future: fetchLeaves(widget.empID),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: LoadingAnimationWidget.threeArchedCircle(
+                          color: AppColor.mainTextColor2,
+                          size: height * 0.03,
+                        ),
+                      );
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('No Data Found'));
+                    } else if (snapshot.hasData) {
+                      final leave = snapshot.data!;
 
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            leaveWidget(
-                                height, width, 'Casual', leave.casualLeave),
-                            leaveWidget(
-                                height, width, 'Medical', leave.medicalLeave),
-                            leaveWidget(
-                                height, width, 'Earned', leave.earnedLeave),
-                          ],
-                        );
-                      } else {
-                        return Center(child: Text('No Data Found'));
-                      }
-                    }),
-              ),
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          leaveWidget(
+                              height, width, 'Casual', leave.casualLeave),
+                          leaveWidget(
+                              height, width, 'Medical', leave.medicalLeave),
+                          leaveWidget(
+                              height, width, 'Earned', leave.earnedLeave),
+                        ],
+                      );
+                    } else {
+                      return Center(child: Text('No Data Found'));
+                    }
+                  }),
             ),
           ),
-          SizedBox(
-            height: height * 0.02,
+        ),
+        SizedBox(
+          height: height * 0.02,
+        ),
+        Card(
+          color: AppColor.mainFGColor,
+          elevation: 4,
+          margin: EdgeInsets.all(0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
-          Card(
-            color: AppColor.mainFGColor,
-            elevation: 4,
-            margin: EdgeInsets.all(0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            shadowColor: Colors.black.withOpacity(0.1),
-            child: Padding(
-              padding: EdgeInsets.all(4),
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _selectButton('Pending', height, width),
-                    _selectButton('Approved', height, width),
-                    _selectButton('Rejected', height, width),
-                  ]),
-            ),
+          shadowColor: Colors.black.withOpacity(0.1),
+          child: Padding(
+            padding: EdgeInsets.all(4),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _selectButton('Pending', height, width),
+                  _selectButton('Approved', height, width),
+                  _selectButton('Rejected', height, width),
+                ]),
           ),
-          SizedBox(
-            height: height * 0.015,
-          ),
-          Expanded(
-            child: FutureBuilder<List<LeaveHistory>>(
-                future: _leaveHistory,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: LoadingAnimationWidget.threeArchedCircle(
-                        color: AppColor.mainTextColor2,
-                        size: height * 0.03,
+        ),
+        SizedBox(
+          height: height * 0.015,
+        ),
+        Expanded(
+          child: FutureBuilder<List<LeaveHistory>>(
+              future: _leaveHistory,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: LoadingAnimationWidget.threeArchedCircle(
+                      color: AppColor.mainTextColor2,
+                      size: height * 0.03,
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Card(
+                      color: AppColor.mainFGColor,
+                      elevation: 4,
+                      margin: EdgeInsets.all(0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('No History Found'),
+                      ),
+                      shadowColor: Colors.black.withOpacity(0.1),
+                    ),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No History Found'));
+                } else {
+                  List<LeaveHistory> items = snapshot.data!;
+
+                  return ListView.separated(
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final leave = items[index];
+                      final startDate = DateTime.parse(leave.leaveStartDate);
+                      final endDate = DateTime.parse(leave.leaveEndDate);
+
+                      return Card(
                         color: AppColor.mainFGColor,
-                        elevation: 4,
+                        elevation: 8,
                         margin: EdgeInsets.all(0),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text('No History Found'),
-                        ),
-                        shadowColor: Colors.black.withOpacity(0.1),
-                      ),
-                    );
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text('No History Found'));
-                  } else {
-                    List<LeaveHistory> items = snapshot.data!;
-
-                    return ListView.separated(
-                      itemCount: items.length,
-                      itemBuilder: (context, index) {
-                        final leave = items[index];
-                        final startDate = DateTime.parse(leave.leaveStartDate);
-                        final endDate = DateTime.parse(leave.leaveEndDate);
-
-                        return Card(
-                          color: AppColor.mainFGColor,
-                          elevation: 8,
-                          margin: EdgeInsets.all(0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          shadowColor: Colors.black.withOpacity(0.2),
-                          child: Stack(
-                            alignment: AlignmentDirectional.topEnd,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 8),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              leave.leaveType == 'earnedLeave'
-                                                  ? leave.totalDays == '1'
-                                                      ? 'Earned - Full Day Application'
-                                                      : leave.totalDays == '0.5'
-                                                          ? 'Earned - Half-Day Application'
-                                                          : 'Earned - ${leave.totalDays} Days Application'
-                                                  : leave.leaveType ==
-                                                          'medicalLeave'
-                                                      ? leave.totalDays == '1'
-                                                          ? 'Medical - Full Day Application'
-                                                          : leave.totalDays ==
-                                                                  '0.5'
-                                                              ? 'Medical - Half-Day Application'
-                                                              : 'Medical - ${leave.totalDays} Days Application'
-                                                      : leave.leaveType ==
-                                                              'casualLeave'
-                                                          ? leave.totalDays ==
-                                                                  '1'
-                                                              ? 'Casual - Full Day Application'
-                                                              : leave.totalDays ==
-                                                                      '0.5'
-                                                                  ? 'Casual - Half-Day Application'
-                                                                  : 'Casual - ${leave.totalDays} Days Application'
-                                                          : leave.leaveType ==
-                                                                  'paternityLeave'
-                                                              ? leave.totalDays ==
-                                                                      '1'
-                                                                  ? 'Paternity - Full Day Application'
-                                                                  : leave.totalDays ==
-                                                                          '0.5'
-                                                                      ? 'Paternity - Half-Day Application'
-                                                                      : 'Paternity - ${leave.totalDays} Days Application'
-                                                              : leave.leaveType ==
-                                                                      'maternityLeave'
-                                                                  ? leave.totalDays ==
-                                                                          '1'
-                                                                      ? 'Maternity - Full Day Application'
-                                                                      : leave.totalDays ==
-                                                                              '0.5'
-                                                                          ? 'Maternity - Half-Day Application'
-                                                                          : 'Maternity - ${leave.totalDays} Days Application'
-                                                                  : leave.leaveType ==
-                                                                          'regularized'
-                                                                      ? 'Regularization'
-                                                                      : leave.leaveType ==
-                                                                              'shortLeave'
-                                                                          ? 'Short-Leave'
-                                                                          : leave
-                                                                              .leaveType,
-                                              style: TextStyle(
-                                                fontSize: height * 0.013,
-                                                fontWeight: FontWeight.w600,
-                                                color: AppColor.mainThemeColor,
-                                              ),
+                        shadowColor: Colors.black.withOpacity(0.2),
+                        child: Stack(
+                          alignment: AlignmentDirectional.topEnd,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            leave.leaveType == 'earnedLeave'
+                                                ? leave.totalDays == '1'
+                                                    ? 'Earned - Full Day Application'
+                                                    : leave.totalDays == '0.5'
+                                                        ? 'Earned - Half-Day Application'
+                                                        : 'Earned - ${leave.totalDays} Days Application'
+                                                : leave.leaveType ==
+                                                        'medicalLeave'
+                                                    ? leave.totalDays == '1'
+                                                        ? 'Medical - Full Day Application'
+                                                        : leave.totalDays ==
+                                                                '0.5'
+                                                            ? 'Medical - Half-Day Application'
+                                                            : 'Medical - ${leave.totalDays} Days Application'
+                                                    : leave.leaveType ==
+                                                            'casualLeave'
+                                                        ? leave.totalDays == '1'
+                                                            ? 'Casual - Full Day Application'
+                                                            : leave.totalDays ==
+                                                                    '0.5'
+                                                                ? 'Casual - Half-Day Application'
+                                                                : 'Casual - ${leave.totalDays} Days Application'
+                                                        : leave.leaveType ==
+                                                                'paternityLeave'
+                                                            ? leave.totalDays ==
+                                                                    '1'
+                                                                ? 'Paternity - Full Day Application'
+                                                                : leave.totalDays ==
+                                                                        '0.5'
+                                                                    ? 'Paternity - Half-Day Application'
+                                                                    : 'Paternity - ${leave.totalDays} Days Application'
+                                                            : leave.leaveType ==
+                                                                    'maternityLeave'
+                                                                ? leave.totalDays ==
+                                                                        '1'
+                                                                    ? 'Maternity - Full Day Application'
+                                                                    : leave.totalDays ==
+                                                                            '0.5'
+                                                                        ? 'Maternity - Half-Day Application'
+                                                                        : 'Maternity - ${leave.totalDays} Days Application'
+                                                                : leave.leaveType ==
+                                                                        'regularized'
+                                                                    ? 'Regularization'
+                                                                    : leave.leaveType ==
+                                                                            'shortLeave'
+                                                                        ? 'Short-Leave'
+                                                                        : leave
+                                                                            .leaveType,
+                                            style: TextStyle(
+                                              fontSize: height * 0.013,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColor.mainThemeColor,
                                             ),
-                                            Text(
-                                              leave.totalDays == '1' ||
-                                                      leave.totalDays == '0.5'
-                                                  ? DateFormat('EEE, dd MMM')
-                                                      .format(startDate)
-                                                  : '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
-                                              style: TextStyle(
-                                                fontSize: height * 0.015,
-                                                fontWeight: FontWeight.bold,
-                                                color: AppColor.mainTextColor,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: height * 0.015),
-                                    // Visibility(
-                                    //   visible: leave.location != null,
-                                    //   child: Padding(
-                                    //     padding: const EdgeInsets.only(top: 12),
-                                    //     child: Container(
-                                    //       width: width,
-                                    //       decoration: BoxDecoration(
-                                    //         border: Border.all(
-                                    //             color: AppColor.mainBGColor,
-                                    //             width: 2),
-                                    //         borderRadius:
-                                    //             BorderRadius.circular(12),
-                                    //         color: Colors.white,
-                                    //       ),
-                                    //       child: Padding(
-                                    //         padding: const EdgeInsets.all(8.0),
-                                    //         child: Row(
-                                    //           children: [
-                                    //             Icon(
-                                    //               Icons.file_copy_rounded,
-                                    //               color: Colors.blue,
-                                    //               size: height * 0.013,
-                                    //             ),
-                                    //             SizedBox(width: width * 0.03),
-                                    //             Text(
-                                    //               leave.location!,
-                                    //               style: TextStyle(
-                                    //                 color:
-                                    //                     AppColor.mainTextColor2,
-                                    //                 fontSize: height * 0.012,
-                                    //                 fontWeight: FontWeight.w500,
-                                    //               ),
-                                    //             ),
-                                    //           ],
-                                    //         ),
-                                    //       ),
-                                    //     ),
-                                    //   ),
-                                    // ),
-                                    Container(
-                                      width: width,
-                                      decoration: BoxDecoration(
-                                        color: AppColor.mainBGColor,
-                                        borderRadius: BorderRadius.circular(7),
-                                        // boxShadow: [
-                                        //   BoxShadow(
-                                        //     color: Colors.black12,
-                                        //     blurRadius: 4,
-                                        //     offset: Offset(0, 2),
-                                        //   ),
-                                        // ],
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8),
-                                        child: Text(
-                                          leave.reason,
-                                          style: TextStyle(
-                                            fontSize: height * 0.014,
-                                            color: Colors.black54,
-                                            fontWeight: FontWeight.w400,
                                           ),
+                                          Text(
+                                            leave.totalDays == '1' ||
+                                                    leave.totalDays == '0.5'
+                                                ? DateFormat('EEE, dd MMM')
+                                                    .format(startDate)
+                                                : '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
+                                            style: TextStyle(
+                                              fontSize: height * 0.015,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColor.mainTextColor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: height * 0.015),
+                                  // Visibility(
+                                  //   visible: leave.location != null,
+                                  //   child: Padding(
+                                  //     padding: const EdgeInsets.only(top: 12),
+                                  //     child: Container(
+                                  //       width: width,
+                                  //       decoration: BoxDecoration(
+                                  //         border: Border.all(
+                                  //             color: AppColor.mainBGColor,
+                                  //             width: 2),
+                                  //         borderRadius:
+                                  //             BorderRadius.circular(12),
+                                  //         color: Colors.white,
+                                  //       ),
+                                  //       child: Padding(
+                                  //         padding: const EdgeInsets.all(8.0),
+                                  //         child: Row(
+                                  //           children: [
+                                  //             Icon(
+                                  //               Icons.file_copy_rounded,
+                                  //               color: Colors.blue,
+                                  //               size: height * 0.013,
+                                  //             ),
+                                  //             SizedBox(width: width * 0.03),
+                                  //             Text(
+                                  //               leave.location!,
+                                  //               style: TextStyle(
+                                  //                 color:
+                                  //                     AppColor.mainTextColor2,
+                                  //                 fontSize: height * 0.012,
+                                  //                 fontWeight: FontWeight.w500,
+                                  //               ),
+                                  //             ),
+                                  //           ],
+                                  //         ),
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                  Container(
+                                    width: width,
+                                    decoration: BoxDecoration(
+                                      color: AppColor.mainBGColor,
+                                      borderRadius: BorderRadius.circular(7),
+                                      // boxShadow: [
+                                      //   BoxShadow(
+                                      //     color: Colors.black12,
+                                      //     blurRadius: 4,
+                                      //     offset: Offset(0, 2),
+                                      //   ),
+                                      // ],
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: Text(
+                                        leave.reason,
+                                        style: TextStyle(
+                                          fontSize: height * 0.014,
+                                          color: Colors.black54,
+                                          fontWeight: FontWeight.w400,
                                         ),
                                       ),
                                     ),
-                                    SizedBox(height: height * 0.005),
-                                  ],
-                                ),
+                                  ),
+                                  SizedBox(height: height * 0.005),
+                                ],
                               ),
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: leave.status == 'Pending'
-                                        ? Colors.amber
-                                        : leave.status == 'Approved'
-                                            ? Colors.green
-                                            : Colors.red,
-                                    borderRadius: BorderRadius.only(
-                                        topRight: Radius.circular(10),
-                                        bottomLeft: Radius.circular(20))),
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: leave.status == 'Pending'
+                                      ? Colors.amber
+                                      : leave.status == 'Approved'
+                                          ? Colors.green
+                                          : Colors.red,
+                                  borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(10),
+                                      bottomLeft: Radius.circular(20))),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 0, horizontal: 20),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 0, horizontal: 20),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(7.0),
-                                    child: Text(
-                                      leave.status,
-                                      style: TextStyle(
-                                          fontSize: height * 0.012,
-                                          fontWeight: FontWeight.w400,
-                                          color: leave.status == 'Pending'
-                                              ? Colors.black
-                                              : Colors.white),
-                                    ),
+                                  padding: const EdgeInsets.all(7.0),
+                                  child: Text(
+                                    leave.status,
+                                    style: TextStyle(
+                                        fontSize: height * 0.012,
+                                        fontWeight: FontWeight.w400,
+                                        color: leave.status == 'Pending'
+                                            ? Colors.black
+                                            : Colors.white),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                        );
-
-                   
-                      },
-                      separatorBuilder: (context, index) =>
-                          SizedBox(height: 10),
-                    );
-                  }
-                }),
-          ),
-        ],
-      ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    separatorBuilder: (context, index) => SizedBox(height: 10),
+                  );
+                }
+              }),
+        ),
+      ],
     );
   }
 
-
   teamSection(double height, double width) {
-    return Expanded(
-      child: Column(
-        children: [
-          Expanded(
-            child: FutureBuilder<List<LeaveRequests>>(
-                future: _leaveRequest,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: LoadingAnimationWidget.threeArchedCircle(
-                        color: AppColor.mainTextColor2,
-                        size: height * 0.03,
+    return Column(
+      children: [
+        SizedBox(
+          height: height / 3.2,
+          child: FutureBuilder<List<LeaveRequests>>(
+              future: _leaveRequest,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: LoadingAnimationWidget.threeArchedCircle(
+                      color: AppColor.mainTextColor2,
+                      size: height * 0.03,
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Card(
+                      color: AppColor.mainFGColor,
+                      elevation: 4,
+                      margin: EdgeInsets.all(0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('No Leave Request Found'),
+                      ),
+                      shadowColor: Colors.black.withOpacity(0.1),
+                    ),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No Leave Request Found'));
+                } else {
+                  List<LeaveRequests> items = snapshot.data!;
+
+                  return ListView.separated(
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final leave = items[index];
+                      final startDate = DateTime.parse(leave.leaveStartDate);
+                      final endDate = DateTime.parse(leave.leaveEndDate);
+
+                      return Card(
                         color: AppColor.mainFGColor,
-                        elevation: 4,
+                        elevation: 8,
                         margin: EdgeInsets.all(0),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text('No Data Found'),
-                        ),
-                        shadowColor: Colors.black.withOpacity(0.1),
-                      ),
-                    );
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text('No Data Found'));
-                  } else {
-                    List<LeaveRequests> items = snapshot.data!;
-
-                    return ListView.separated(
-                      itemCount: items.length,
-                      itemBuilder: (context, index) {
-                        final leave = items[index];
-                        final startDate = DateTime.parse(leave.leaveStartDate);
-                        final endDate = DateTime.parse(leave.leaveEndDate);
-
-                        return Card(
-                          color: AppColor.mainFGColor,
-                          elevation: 8,
-                          margin: EdgeInsets.all(0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          shadowColor: Colors.black.withOpacity(0.2),
-                          child: Stack(
-                            alignment: AlignmentDirectional.topEnd,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 8),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              leave.employeeName,
-                                              style: TextStyle(
-                                                fontSize: height * 0.016,
-                                                color: AppColor.mainTextColor,
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                        shadowColor: Colors.black.withOpacity(0.2),
+                        child: Stack(
+                          alignment: AlignmentDirectional.topEnd,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            leave.employeeName,
+                                            style: TextStyle(
+                                              fontSize: height * 0.016,
+                                              color: AppColor.mainTextColor,
+                                              fontWeight: FontWeight.bold,
                                             ),
-                                            Text(
-                                              leave.leaveType == 'earnedLeave'
-                                                  ? leave.totalDays == '1'
-                                                      ? 'Earned - Full Day Application'
-                                                      : leave.totalDays == '0.5'
-                                                          ? 'Earned - Half-Day Application'
-                                                          : 'Earned - ${leave.totalDays} Days Application'
-                                                  : leave.leaveType ==
-                                                          'medicalLeave'
-                                                      ? leave.totalDays == '1'
-                                                          ? 'Medical - Full Day Application'
-                                                          : leave.totalDays ==
-                                                                  '0.5'
-                                                              ? 'Medical - Half-Day Application'
-                                                              : 'Medical - ${leave.totalDays} Days Application'
-                                                      : leave.leaveType ==
-                                                              'casualLeave'
-                                                          ? leave.totalDays ==
-                                                                  '1'
-                                                              ? 'Casual - Full Day Application'
-                                                              : leave.totalDays ==
-                                                                      '0.5'
-                                                                  ? 'Casual - Half-Day Application'
-                                                                  : 'Casual - ${leave.totalDays} Days Application'
-                                                          : leave.leaveType ==
-                                                                  'paternityLeave'
-                                                              ? leave.totalDays ==
-                                                                      '1'
-                                                                  ? 'Paternity - Full Day Application'
-                                                                  : leave.totalDays ==
-                                                                          '0.5'
-                                                                      ? 'Paternity - Half-Day Application'
-                                                                      : 'Paternity - ${leave.totalDays} Days Application'
-                                                              : leave.leaveType ==
-                                                                      'maternityLeave'
-                                                                  ? leave.totalDays ==
-                                                                          '1'
-                                                                      ? 'Maternity - Full Day Application'
-                                                                      : leave.totalDays ==
-                                                                              '0.5'
-                                                                          ? 'Maternity - Half-Day Application'
-                                                                          : 'Maternity - ${leave.totalDays} Days Application'
-                                                                  : leave.leaveType ==
-                                                                          'regularized'
-                                                                      ? 'Regularization'
-                                                                      : leave.leaveType ==
-                                                                              'shortLeave'
-                                                                          ? 'Short-Leave'
-                                                                          : leave
-                                                                              .leaveType,
-                                              style: TextStyle(
-                                                fontSize: height * 0.012,
-                                                fontWeight: FontWeight.w600,
-                                                color: AppColor.mainThemeColor,
-                                              ),
-                                            ),
-                                            Text(
-                                              leave.totalDays == '1' ||
-                                                      leave.totalDays == '0.5'
-                                                  ? DateFormat('EEE, dd MMM')
-                                                      .format(startDate)
-                                                  : '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
-                                              style: TextStyle(
-                                                fontSize: height * 0.012,
-                                                fontWeight: FontWeight.bold,
-                                                color: AppColor.mainTextColor,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: height * 0.015),
-                                    Container(
-                                      width: width,
-                                      decoration: BoxDecoration(
-                                        color: AppColor.mainBGColor,
-                                        borderRadius: BorderRadius.circular(7),
-                                        // boxShadow: [
-                                        //   BoxShadow(
-                                        //     color: Colors.black12,
-                                        //     blurRadius: 4,
-                                        //     offset: Offset(0, 2),
-                                        //   ),
-                                        // ],
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8),
-                                        child: Text(
-                                          leave.reason,
-                                          style: TextStyle(
-                                            fontSize: height * 0.014,
-                                            color: Colors.black54,
-                                            fontWeight: FontWeight.w400,
                                           ),
+                                          Text(
+                                            leave.leaveType == 'earnedLeave'
+                                                ? leave.totalDays == '1'
+                                                    ? 'Earned - Full Day Application'
+                                                    : leave.totalDays == '0.5'
+                                                        ? 'Earned - Half-Day Application'
+                                                        : 'Earned - ${leave.totalDays} Days Application'
+                                                : leave.leaveType ==
+                                                        'medicalLeave'
+                                                    ? leave.totalDays == '1'
+                                                        ? 'Medical - Full Day Application'
+                                                        : leave.totalDays ==
+                                                                '0.5'
+                                                            ? 'Medical - Half-Day Application'
+                                                            : 'Medical - ${leave.totalDays} Days Application'
+                                                    : leave.leaveType ==
+                                                            'casualLeave'
+                                                        ? leave.totalDays == '1'
+                                                            ? 'Casual - Full Day Application'
+                                                            : leave.totalDays ==
+                                                                    '0.5'
+                                                                ? 'Casual - Half-Day Application'
+                                                                : 'Casual - ${leave.totalDays} Days Application'
+                                                        : leave.leaveType ==
+                                                                'paternityLeave'
+                                                            ? leave.totalDays ==
+                                                                    '1'
+                                                                ? 'Paternity - Full Day Application'
+                                                                : leave.totalDays ==
+                                                                        '0.5'
+                                                                    ? 'Paternity - Half-Day Application'
+                                                                    : 'Paternity - ${leave.totalDays} Days Application'
+                                                            : leave.leaveType ==
+                                                                    'maternityLeave'
+                                                                ? leave.totalDays ==
+                                                                        '1'
+                                                                    ? 'Maternity - Full Day Application'
+                                                                    : leave.totalDays ==
+                                                                            '0.5'
+                                                                        ? 'Maternity - Half-Day Application'
+                                                                        : 'Maternity - ${leave.totalDays} Days Application'
+                                                                : leave.leaveType ==
+                                                                        'regularized'
+                                                                    ? 'Regularization'
+                                                                    : leave.leaveType ==
+                                                                            'shortLeave'
+                                                                        ? 'Short-Leave'
+                                                                        : leave
+                                                                            .leaveType,
+                                            style: TextStyle(
+                                              fontSize: height * 0.012,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColor.mainThemeColor,
+                                            ),
+                                          ),
+                                          Text(
+                                            leave.totalDays == '1' ||
+                                                    leave.totalDays == '0.5'
+                                                ? DateFormat('EEE, dd MMM')
+                                                    .format(startDate)
+                                                : '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
+                                            style: TextStyle(
+                                              fontSize: height * 0.012,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColor.mainTextColor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: height * 0.015),
+                                  Container(
+                                    width: width,
+                                    decoration: BoxDecoration(
+                                      color: AppColor.mainBGColor,
+                                      borderRadius: BorderRadius.circular(7),
+                                      // boxShadow: [
+                                      //   BoxShadow(
+                                      //     color: Colors.black12,
+                                      //     blurRadius: 4,
+                                      //     offset: Offset(0, 2),
+                                      //   ),
+                                      // ],
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: Text(
+                                        leave.reason,
+                                        style: TextStyle(
+                                          fontSize: height * 0.014,
+                                          color: Colors.black54,
+                                          fontWeight: FontWeight.w400,
                                         ),
                                       ),
                                     ),
-                                    // Visibility(
-                                    //   visible: leave.location.isNotEmpty,
-                                    //   child: Padding(
-                                    //     padding: const EdgeInsets.only(top: 12),
-                                    //     child: Container(
-                                    //       width: width,
-                                    //       decoration: BoxDecoration(
-                                    //         border: Border.all(
-                                    //             color: AppColor.mainBGColor,
-                                    //             width: 2),
-                                    //         borderRadius:
-                                    //             BorderRadius.circular(12),
-                                    //         color: Colors.white,
-                                    //       ),
-                                    //       child: Padding(
-                                    //         padding: const EdgeInsets.all(8.0),
-                                    //         child: Row(
-                                    //           children: [
-                                    //             Icon(
-                                    //               Icons.file_copy_rounded,
-                                    //               color: Colors.blue,
-                                    //               size: height * 0.013,
-                                    //             ),
-                                    //             SizedBox(width: width * 0.03),
-                                    //             Text(
-                                    //               'IMG_45544871.JPG',
-                                    //               style: TextStyle(
-                                    //                 color:
-                                    //                     AppColor.mainTextColor2,
-                                    //                 fontSize: height * 0.012,
-                                    //                 fontWeight: FontWeight.w500,
-                                    //               ),
-                                    //             ),
-                                    //           ],
-                                    //         ),
-                                    //       ),
-                                    //     ),
-                                    //   ),
-                                    // ),
-                                    Visibility(
-                                      visible: leave.status == 'Pending',
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(top: 18),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            // Accept Button
-                                            GestureDetector(
-                                              onTap: () async {
-                                                await leaveAction(context,
-                                                    'Approved', leave.id);
-                                                setState(() {
-                                                  _leaveRequest =
-                                                      fetchLeaveRequest();
-                                                });
-                                              },
-                                              child: Container(
-                                                decoration: BoxDecoration(
+                                  ),
+                                  // Visibility(
+                                  //   visible: leave.location.isNotEmpty,
+                                  //   child: Padding(
+                                  //     padding: const EdgeInsets.only(top: 12),
+                                  //     child: Container(
+                                  //       width: width,
+                                  //       decoration: BoxDecoration(
+                                  //         border: Border.all(
+                                  //             color: AppColor.mainBGColor,
+                                  //             width: 2),
+                                  //         borderRadius:
+                                  //             BorderRadius.circular(12),
+                                  //         color: Colors.white,
+                                  //       ),
+                                  //       child: Padding(
+                                  //         padding: const EdgeInsets.all(8.0),
+                                  //         child: Row(
+                                  //           children: [
+                                  //             Icon(
+                                  //               Icons.file_copy_rounded,
+                                  //               color: Colors.blue,
+                                  //               size: height * 0.013,
+                                  //             ),
+                                  //             SizedBox(width: width * 0.03),
+                                  //             Text(
+                                  //               'IMG_45544871.JPG',
+                                  //               style: TextStyle(
+                                  //                 color:
+                                  //                     AppColor.mainTextColor2,
+                                  //                 fontSize: height * 0.012,
+                                  //                 fontWeight: FontWeight.w500,
+                                  //               ),
+                                  //             ),
+                                  //           ],
+                                  //         ),
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                  Visibility(
+                                    visible: leave.status == 'Pending',
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 18),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          // Accept Button
+                                          GestureDetector(
+                                            onTap: () async {
+                                              await leaveAction(context,
+                                                  'Approved', leave.id);
+                                              setState(() {
+                                                _leaveRequest =
+                                                    fetchLeaveRequest();
+                                              });
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                color: const Color.fromARGB(
+                                                    126, 20, 183, 25),
+                                              ),
+                                              child: Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: width / 9,
+                                                    vertical: 8),
+                                                child: Text(
+                                                  'Accept',
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppColor.mainTextColor,
+                                                    fontSize: height * 0.012,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+
+                                          GestureDetector(
+                                            onTap: () async {
+                                              await leaveAction(context,
+                                                  'Rejected', leave.id);
+                                              setState(() {
+                                                _leaveRequest =
+                                                    fetchLeaveRequest();
+                                              });
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
                                                   borderRadius:
                                                       BorderRadius.circular(8),
-                                                  color: const Color.fromARGB(
-                                                      126, 20, 183, 25),
-                                                ),
-                                                child: Padding(
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: width / 9,
-                                                      vertical: 8),
-                                                  child: Text(
-                                                    'Accept',
-                                                    style: TextStyle(
-                                                      color: AppColor
-                                                          .mainTextColor,
-                                                      fontSize: height * 0.012,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-
-                                            GestureDetector(
-                                              onTap: () async {
-                                                await leaveAction(context,
-                                                    'Rejected', leave.id);
-                                                setState(() {
-                                                  _leaveRequest =
-                                                      fetchLeaveRequest();
-                                                });
-                                              },
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
+                                                  color: AppColor.mainBGColor),
+                                              child: Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: width / 9,
+                                                    vertical: 8),
+                                                child: Text(
+                                                  'Decline',
+                                                  style: TextStyle(
                                                     color:
-                                                        AppColor.mainBGColor),
-                                                child: Padding(
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: width / 9,
-                                                      vertical: 8),
-                                                  child: Text(
-                                                    'Decline',
-                                                    style: TextStyle(
-                                                      color: AppColor
-                                                          .mainTextColor,
-                                                      fontSize: height * 0.012,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
+                                                        AppColor.mainTextColor,
+                                                    fontSize: height * 0.012,
+                                                    fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
                                               ),
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    SizedBox(height: height * 0.005),
-                                  ],
-                                ),
+                                  ),
+                                  SizedBox(height: height * 0.005),
+                                ],
                               ),
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: leave.status == 'Pending'
-                                        ? Colors.amber
-                                        : leave.status == 'Approved'
-                                            ? Colors.green
-                                            : Colors.red,
-                                    borderRadius: BorderRadius.only(
-                                        topRight: Radius.circular(10),
-                                        bottomLeft: Radius.circular(20))),
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: leave.status == 'Pending'
+                                      ? Colors.amber
+                                      : leave.status == 'Approved'
+                                          ? Colors.green
+                                          : Colors.red,
+                                  borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(10),
+                                      bottomLeft: Radius.circular(20))),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 0, horizontal: 20),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 0, horizontal: 20),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(7.0),
-                                    child: Text(
-                                      leave.status,
-                                      style: TextStyle(
-                                          fontSize: height * 0.012,
-                                          fontWeight: FontWeight.w400,
-                                          color: leave.status == 'Pending'
-                                              ? Colors.black
-                                              : Colors.white),
-                                    ),
+                                  padding: const EdgeInsets.all(7.0),
+                                  child: Text(
+                                    leave.status,
+                                    style: TextStyle(
+                                        fontSize: height * 0.012,
+                                        fontWeight: FontWeight.w400,
+                                        color: leave.status == 'Pending'
+                                            ? Colors.black
+                                            : Colors.white),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                        );
-                      },
-                      separatorBuilder: (context, index) =>
-                          SizedBox(height: 10),
-                    );
-                  }
-                }),
-          ),
-        ],
-      ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    separatorBuilder: (context, index) => SizedBox(height: 10),
+                  );
+                }
+              }),
+        ),
+        Text(
+          '----------------    Comp-Off Request    ----------------',
+          style: TextStyle(
+              fontSize: height * 0.012,
+              fontWeight: FontWeight.bold,
+              color: Colors.blueGrey),
+        ),
+        SizedBox(height: height * 0.02),
+        //compoff list
+        SizedBox(
+          height: height / 3,
+          child: FutureBuilder<List<CompOffRequest>>(
+              future: _compOffRequest,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: LoadingAnimationWidget.threeArchedCircle(
+                      color: AppColor.mainTextColor2,
+                      size: height * 0.03,
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Card(
+                      color: AppColor.mainFGColor,
+                      elevation: 4,
+                      margin: EdgeInsets.all(0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('No Comp-Off Request Found'),
+                      ),
+                      shadowColor: Colors.black.withOpacity(0.1),
+                    ),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No Comp-Off Request Found'));
+                } else {
+                  List<CompOffRequest> items = snapshot.data!;
+
+                  return ListView.separated(
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final leave = items[index];
+                      // final startDate = DateTime.parse(leave.appliedDate);
+
+                      return Card(
+                        color: AppColor.mainFGColor,
+                        elevation: 8,
+                        margin: EdgeInsets.all(0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        shadowColor: Colors.black.withOpacity(0.2),
+                        child: Stack(
+                          alignment: AlignmentDirectional.topEnd,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            leave.employeeName,
+                                            style: TextStyle(
+                                              fontSize: height * 0.016,
+                                              color: AppColor.mainTextColor,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Comp-Off ${leave.totalDays} Days',
+                                            style: TextStyle(
+                                              fontSize: height * 0.012,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColor.mainThemeColor,
+                                            ),
+                                          ),
+                                          Text(
+                                            leave.compOffDate,
+
+                                            // leave.totalDays == '1' ||
+                                            //         leave.totalDays == '0.5'
+                                            //     ? DateFormat('EEE, dd MMM')
+                                            //         .format(startDate)
+                                            //     : '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
+                                            style: TextStyle(
+                                              fontSize: height * 0.012,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColor.mainTextColor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: height * 0.015),
+                                  Container(
+                                    width: width,
+                                    decoration: BoxDecoration(
+                                      color: AppColor.mainBGColor,
+                                      borderRadius: BorderRadius.circular(7),
+                                      // boxShadow: [
+                                      //   BoxShadow(
+                                      //     color: Colors.black12,
+                                      //     blurRadius: 4,
+                                      //     offset: Offset(0, 2),
+                                      //   ),
+                                      // ],
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: Text(
+                                        leave.reason,
+                                        style: TextStyle(
+                                          fontSize: height * 0.014,
+                                          color: Colors.black54,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  // Visibility(
+                                  //   visible: leave.location.isNotEmpty,
+                                  //   child: Padding(
+                                  //     padding: const EdgeInsets.only(top: 12),
+                                  //     child: Container(
+                                  //       width: width,
+                                  //       decoration: BoxDecoration(
+                                  //         border: Border.all(
+                                  //             color: AppColor.mainBGColor,
+                                  //             width: 2),
+                                  //         borderRadius:
+                                  //             BorderRadius.circular(12),
+                                  //         color: Colors.white,
+                                  //       ),
+                                  //       child: Padding(
+                                  //         padding: const EdgeInsets.all(8.0),
+                                  //         child: Row(
+                                  //           children: [
+                                  //             Icon(
+                                  //               Icons.file_copy_rounded,
+                                  //               color: Colors.blue,
+                                  //               size: height * 0.013,
+                                  //             ),
+                                  //             SizedBox(width: width * 0.03),
+                                  //             Text(
+                                  //               'IMG_45544871.JPG',
+                                  //               style: TextStyle(
+                                  //                 color:
+                                  //                     AppColor.mainTextColor2,
+                                  //                 fontSize: height * 0.012,
+                                  //                 fontWeight: FontWeight.w500,
+                                  //               ),
+                                  //             ),
+                                  //           ],
+                                  //         ),
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                  Visibility(
+                                    visible: leave.status == 'Pending',
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 18),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          // Accept Button
+                                          GestureDetector(
+                                            onTap: () async {
+                                              await compOffActionPut(context,
+                                                  'Approved', leave.id);
+                                              setState(() {
+                                                _compOffRequest =
+                                                    fetchCompOffRequest();
+                                              });
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                color: const Color.fromARGB(
+                                                    126, 20, 183, 25),
+                                              ),
+                                              child: Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: width / 9,
+                                                    vertical: 8),
+                                                child: Text(
+                                                  'Approve',
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppColor.mainTextColor,
+                                                    fontSize: height * 0.012,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+
+                                          GestureDetector(
+                                            onTap: () async {
+                                              await compOffActionPut(context,
+                                                  'Rejected', leave.id);
+                                              setState(() {
+                                                _compOffRequest =
+                                                    fetchCompOffRequest();
+                                              });
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  color: AppColor.mainBGColor),
+                                              child: Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: width / 9,
+                                                    vertical: 8),
+                                                child: Text(
+                                                  'Reject',
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppColor.mainTextColor,
+                                                    fontSize: height * 0.012,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: height * 0.005),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: leave.status == 'Pending'
+                                      ? Colors.amber
+                                      : leave.status == 'Approved'
+                                          ? Colors.green
+                                          : Colors.red,
+                                  borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(10),
+                                      bottomLeft: Radius.circular(20))),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 0, horizontal: 20),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(7.0),
+                                  child: Text(
+                                    leave.status,
+                                    style: TextStyle(
+                                        fontSize: height * 0.012,
+                                        fontWeight: FontWeight.w400,
+                                        color: leave.status == 'Pending'
+                                            ? Colors.black
+                                            : Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    separatorBuilder: (context, index) => SizedBox(height: 10),
+                  );
+                }
+              }),
+        ),
+      ],
     );
   }
 
