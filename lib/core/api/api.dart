@@ -193,7 +193,7 @@ Future<void> applyLeave(
               ? _selectedText
               : ""
         });
-    if (response.statusCode == 201) {
+ if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Leave request submitted successfully'),
@@ -212,30 +212,6 @@ Future<void> applyLeave(
   }
 }
 
-Future<List<LeaveHistory>> fetchLeaveHistory(
-    String status, String empID) async {
-  String token = _authBox.get('token');
-
-  try {
-    final response = await dio.get('$getLeaveHistory/$empID',
-        options: Options(headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token"
-        }));
-
-    if (response.statusCode == 200) {
-      List<dynamic> data = response.data['data']
-          .where((leave) => leave['status'] == status)
-          .toList();
-
-      return data.map((leaveData) => LeaveHistory.fromJson(leaveData)).toList();
-    } else {
-      throw Exception('Failed to load leave history');
-    }
-  } catch (e) {
-    throw Exception('Error fetching data: $e');
-  }
-}
 
 Future<EmployeeProfile> fetchEmployeeDetails(String empID) async {
   Dio dio = Dio();
@@ -292,7 +268,7 @@ Future<void> applyRegularize(
           "leaveStartDate": startDate,
           "reason": reason,
         });
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Request submitted successfully'),
@@ -330,7 +306,7 @@ Future<void> applyShortLeave(
           "leaveStartDate": startDate,
           "reason": reason,
         });
-    if (response.statusCode == 201) {
+   if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Request submitted successfully'),
@@ -354,20 +330,20 @@ Future<void> applyCompoff(
   String startDate,
   String reason,
 ) async {
-  print('comp-off');
   String empID = _authBox.get('employeeId');
+  String token = _authBox.get('token');
 
   try {
     final response = await dio.post('$generateCompoff/$empID',
-        // options: Options(headers: {
-        //   "Content-Type": "application/json",
-        //   "Authorization": "Bearer $token"
-        // }),
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }),
         data: {
           "compOffDate": startDate,
           "reason": reason,
         });
-    if (response.statusCode == 201) {
+     if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Request submitted successfully'),
@@ -417,7 +393,7 @@ Future<void> leaveAction(
   try {
     final response =
         await dio.put('$leaveActionApi/$id', data: {"status": action});
-    if (response.statusCode == 201) {
+   if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Request Approved'),
@@ -668,7 +644,32 @@ Future<void> changeTaskStage(
   }
 }
 
-Future<List<CompOffRequest>> fetchCompOffRequest() async {
+Future<List<LeaveHistory>> fetchLeaveHistory(
+    String status, String empID) async {
+  String token = _authBox.get('token');
+
+  try {
+    final response = await dio.get('$getLeaveHistory/$empID',
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = response.data['data']
+          .where((leave) => leave['status'] == status)
+          .toList();
+
+      return data.map((leaveData) => LeaveHistory.fromJson(leaveData)).toList();
+    } else {
+      throw Exception('Failed to load leave history');
+    }
+  } catch (e) {
+    throw Exception('Error fetching data: $e');
+  }
+}
+
+Future<List<CompOffRequest>> fetchCompOffRequest( String status) async {
   String token = _authBox.get('token');
 
   // try {
@@ -679,9 +680,17 @@ Future<List<CompOffRequest>> fetchCompOffRequest() async {
       }));
 
   if (response.statusCode == 200) {
-    List<dynamic> data = response.data['data'];
+     if (status != '') {
+    List<dynamic> data = response.data['data']
+        .where((leave) => leave['status'] == status)
+        .toList();
 
     return data.map((leaveData) => CompOffRequest.fromJson(leaveData)).toList();
+  } else {
+     List<dynamic> data = response.data['data'];
+
+    return data.map((leaveData) => CompOffRequest.fromJson(leaveData)).toList();
+  }
   } else {
     return [];
   }
@@ -704,7 +713,7 @@ Future<void> compOffActionPut(
           "Authorization": "Bearer $token"
         }),
         data: {"status": action});
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Request Approved'),

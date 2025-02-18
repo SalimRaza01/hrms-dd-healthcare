@@ -36,7 +36,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
   void initState() {
     _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
     _leaveRequest = fetchLeaveRequest();
-    _compOffRequest = fetchCompOffRequest();
+    _compOffRequest = fetchCompOffRequest('');
     _tabController = TabController(vsync: this, length: 3);
     _tabController.addListener(_handleTabSelection);
     super.initState();
@@ -56,7 +56,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
         case 1:
           updateUser = 'Team';
           _leaveRequest = fetchLeaveRequest();
-          _compOffRequest = fetchCompOffRequest();
+          _compOffRequest = fetchCompOffRequest('');
           break;
       }
     });
@@ -989,7 +989,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                   'Approved', leave.id);
                                               setState(() {
                                                 _compOffRequest =
-                                                    fetchCompOffRequest();
+                                                    fetchCompOffRequest('');
                                               });
                                             },
                                             child: Container(
@@ -1022,7 +1022,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                   'Rejected', leave.id);
                                               setState(() {
                                                 _compOffRequest =
-                                                    fetchCompOffRequest();
+                                                    fetchCompOffRequest('');
                                               });
                                             },
                                             child: Container(

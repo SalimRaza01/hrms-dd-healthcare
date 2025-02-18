@@ -126,9 +126,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  SizedBox(
-                    height: height * 0.02,
-                  ),
+                 
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -147,11 +145,14 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                           SizedBox(
                             height: height * 0.01,
                           ),
-                          Text(
-                            'Don’t miss your clock in schedule',
-                            style: TextStyle(
-                              fontSize: height * 0.018,
-                              color: AppColor.mainFGColor,
+                          SizedBox(
+                            width: width / 2,
+                            child: Text(
+                              'Check Your PunchIn Record & Leave Types',
+                              style: TextStyle(
+                                fontSize: height * 0.015,
+                                color: AppColor.mainFGColor,
+                              ),
                             ),
                           )
                         ],
