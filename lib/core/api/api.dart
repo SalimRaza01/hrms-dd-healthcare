@@ -191,7 +191,8 @@ Future<void> applyLeave(
           "approvedBy": mgrId,
           "shift": leaveType == 'Casual Leave' || leaveType == 'Earned Leave'
               ? _selectedText
-              : ""
+              : "",
+              "location" : _authBox.get('file')
         });
  if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -200,6 +201,7 @@ Future<void> applyLeave(
           backgroundColor: Colors.green,
         ),
       );
+            Provider.of<LeaveApplied>(context, listen: false).leaveappiedStatus(true);
       Navigator.pop(context);
     }
   } on DioException catch (e) {
@@ -313,6 +315,7 @@ Future<void> applyShortLeave(
           backgroundColor: Colors.green,
         ),
       );
+               Provider.of<LeaveApplied>(context, listen: false).leaveappiedStatus(true);
       Navigator.pop(context);
     }
   } on DioException catch (e) {
@@ -594,6 +597,7 @@ Future<List<EmployeeOnLeave>> fetchEmployeeOnLeave() async {
 
     if (response.statusCode == 200) {
       List<dynamic> data = response.data['data'];
+      print(data);
 
       return data
           .map((leaveData) => EmployeeOnLeave.fromJson(leaveData))

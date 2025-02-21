@@ -32,6 +32,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
          ChangeNotifierProvider(create: (_) => TaskProvider()),
       ChangeNotifierProvider(create: (_) => ProjectProvider()),
+            ChangeNotifierProvider(create: (_) => LeaveApplied()),
       ],
       child: MyApp(),
     ),

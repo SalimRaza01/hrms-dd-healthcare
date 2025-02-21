@@ -1,14 +1,20 @@
 // ignore_for_file: sort_child_properties_last
+import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
+import 'package:hrms/core/provider/provider.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'apply_leave.dart';
+import 'package:open_file/open_file.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class LeaveScreenManager extends StatefulWidget {
   final String empID;
@@ -20,6 +26,8 @@ class LeaveScreenManager extends StatefulWidget {
 
 class _LeaveScreenState extends State<LeaveScreenManager>
     with SingleTickerProviderStateMixin {
+  late String documentType;
+  bool isDownloading = false;
   late String? empID;
   bool isLoading = true;
   int touchedIndex = -1;
@@ -62,98 +70,177 @@ class _LeaveScreenState extends State<LeaveScreenManager>
     });
   }
 
+  Future<void> _downloadDocument(String url) async {
+    // Request storage permissions
+    final status = await Permission.manageExternalStorage.request();
+    if (!status.isGranted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content:
+            Text('Storage permission is required to download the document'),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+
+    setState(() {
+      isDownloading = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Downloading Document'),
+        backgroundColor: Colors.blue,
+      ),
+    );
+
+    try {
+      final dio = Dio();
+      final response = await dio.get(
+        url,
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      final myDownloads = '/storage/emulated/0/Download';
+      final fileName = url.split('/').last;
+      final filePath = '$myDownloads/$fileName';
+
+      final file = File(filePath);
+      await file.writeAsBytes(response.data);
+
+      setState(() {
+        isDownloading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Downloaded to $filePath'),
+        backgroundColor: Colors.green,
+      ));
+
+      final result = await OpenFile.open(filePath);
+
+      if (result.type != ResultType.done) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Failed to open the file'),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } catch (e) {
+      print(e);
+      setState(() {
+        isDownloading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to download the document $e'),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
     return SafeArea(
-      child: Scaffold(
-          extendBodyBehindAppBar: true,
-          backgroundColor: AppColor.mainBGColor,
-          body: Stack(
-            children: [
-              Container(
-                height: height * 0.27,
-                width: width,
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColor.primaryThemeColor,
-                        AppColor.secondaryThemeColor2,
+      child: Consumer<LeaveApplied>(builder: (context, value, child) {
+        if (value.leaveappied == true) {
+          _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+          _leaveRequest = fetchLeaveRequest();
+          _compOffRequest = fetchCompOffRequest('');
+          Future.delayed(Duration(milliseconds: 1500), () {
+            Provider.of<LeaveApplied>(context, listen: false)
+                .leaveappiedStatus(false);
+          });
+        }
+        return Scaffold(
+            extendBodyBehindAppBar: true,
+            backgroundColor: AppColor.mainBGColor,
+            body: Stack(
+              children: [
+                Container(
+                  height: height * 0.27,
+                  width: width,
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColor.primaryThemeColor,
+                          AppColor.secondaryThemeColor2,
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                            spreadRadius: 2,
+                            blurRadius: 10,
+                            color: Colors.black.withOpacity(0.1),
+                            offset: Offset(0, 10))
                       ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                          spreadRadius: 2,
-                          blurRadius: 10,
-                          color: Colors.black.withOpacity(0.1),
-                          offset: Offset(0, 10))
-                    ],
-                    color: AppColor.mainThemeColor,
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(20),
-                        bottomRight: Radius.circular(20))),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(15),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TabBar(
-                        dividerColor: Colors.transparent,
-                        controller: _tabController,
-                        indicatorColor: AppColor.mainFGColor,
-                        labelColor: AppColor.mainFGColor,
-                        unselectedLabelColor:
-                            const Color.fromARGB(206, 255, 255, 255),
-                        tabs: [
-                          Tab(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [Icon(Icons.person), Text('Self')],
-                            ),
-                            // text: 'Self',
-                          ),
-                          Tab(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [Icon(Icons.person), Text('Team')],
-                            ),
-                            // text: 'Self',
-                          ),
-                        ]),
-                    SizedBox(
-                      height: height * 0.015,
-                    ),
-                    Expanded(
-                      child: TabBarView(controller: _tabController, children: [
-                        selfSection(height, width),
-                        teamSection(height, width),
-                      ]),
-                    )
-                  ],
+                      color: AppColor.mainThemeColor,
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20))),
                 ),
+                Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TabBar(
+                          dividerColor: Colors.transparent,
+                          controller: _tabController,
+                          indicatorColor: AppColor.mainFGColor,
+                          labelColor: AppColor.mainFGColor,
+                          unselectedLabelColor:
+                              const Color.fromARGB(206, 255, 255, 255),
+                          tabs: [
+                            Tab(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [Icon(Icons.person), Text('Self')],
+                              ),
+                              // text: 'Self',
+                            ),
+                            Tab(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [Icon(Icons.person), Text('Team')],
+                              ),
+                              // text: 'Self',
+                            ),
+                          ]),
+                      SizedBox(
+                        height: height * 0.015,
+                      ),
+                      Expanded(
+                        child:
+                            TabBarView(controller: _tabController, children: [
+                          selfSection(height, width),
+                          teamSection(height, width),
+                        ]),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton.extended(
+              backgroundColor: AppColor.mainThemeColor,
+              onPressed: () => showCupertinoModalBottomSheet(
+                expand: true,
+                context: context,
+                barrierColor: const Color.fromARGB(130, 0, 0, 0),
+                backgroundColor: Colors.transparent,
+                builder: (context) => ApplyLeave(),
               ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton.extended(
-            backgroundColor: AppColor.mainThemeColor,
-            onPressed: () => showCupertinoModalBottomSheet(
-              expand: true,
-              context: context,
-              barrierColor: const Color.fromARGB(130, 0, 0, 0),
-              backgroundColor: Colors.transparent,
-              builder: (context) => ApplyLeave(),
-            ),
-            label: Text(
-              'Apply Leave',
-              style: TextStyle(color: AppColor.mainFGColor),
-            ),
-          )),
+              label: Text(
+                'Apply Leave',
+                style: TextStyle(color: AppColor.mainFGColor),
+              ),
+            ));
+      }),
     );
   }
 
@@ -366,45 +453,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                     ],
                                   ),
                                   SizedBox(height: height * 0.015),
-                                  // Visibility(
-                                  //   visible: leave.location != null,
-                                  //   child: Padding(
-                                  //     padding: const EdgeInsets.only(top: 12),
-                                  //     child: Container(
-                                  //       width: width,
-                                  //       decoration: BoxDecoration(
-                                  //         border: Border.all(
-                                  //             color: AppColor.mainBGColor,
-                                  //             width: 2),
-                                  //         borderRadius:
-                                  //             BorderRadius.circular(12),
-                                  //         color: Colors.white,
-                                  //       ),
-                                  //       child: Padding(
-                                  //         padding: const EdgeInsets.all(8.0),
-                                  //         child: Row(
-                                  //           children: [
-                                  //             Icon(
-                                  //               Icons.file_copy_rounded,
-                                  //               color: Colors.blue,
-                                  //               size: height * 0.013,
-                                  //             ),
-                                  //             SizedBox(width: width * 0.03),
-                                  //             Text(
-                                  //               leave.location!,
-                                  //               style: TextStyle(
-                                  //                 color:
-                                  //                     AppColor.mainTextColor2,
-                                  //                 fontSize: height * 0.012,
-                                  //                 fontWeight: FontWeight.w500,
-                                  //               ),
-                                  //             ),
-                                  //           ],
-                                  //         ),
-                                  //       ),
-                                  //     ),
-                                  //   ),
-                                  // ),
+                                
                                   Container(
                                     width: width,
                                     decoration: BoxDecoration(
@@ -426,6 +475,50 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                           fontSize: height * 0.014,
                                           color: Colors.black54,
                                           fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                    Visibility(
+                                    visible: leave.location!.isNotEmpty,
+                                    child: Padding(
+                                 padding: const EdgeInsets.only(top: 12),
+                                      child: InkWell(
+                                        onTap: () {
+                                          _downloadDocument(leave.location!);
+                                        },
+                                        child: Container(
+                                          width: width,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: AppColor.mainBGColor,
+                                                width: 2),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            color: Colors.white,
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.file_copy_rounded,
+                                                  color: Colors.blue,
+                                                  size: height * 0.013,
+                                                ),
+                                                SizedBox(width: width * 0.03),
+                                                Text(
+                                                  'View Prescription',
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppColor.mainTextColor2,
+                                                    fontSize: height * 0.012,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -516,7 +609,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                       final leave = items[index];
                       final startDate = DateTime.parse(leave.leaveStartDate);
                       final endDate = DateTime.parse(leave.leaveEndDate);
-
+                      print(leave.location);
                       return Card(
                         color: AppColor.mainFGColor,
                         elevation: 8,
@@ -647,45 +740,50 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                       ),
                                     ),
                                   ),
-                                  // Visibility(
-                                  //   visible: leave.location.isNotEmpty,
-                                  //   child: Padding(
-                                  //     padding: const EdgeInsets.only(top: 12),
-                                  //     child: Container(
-                                  //       width: width,
-                                  //       decoration: BoxDecoration(
-                                  //         border: Border.all(
-                                  //             color: AppColor.mainBGColor,
-                                  //             width: 2),
-                                  //         borderRadius:
-                                  //             BorderRadius.circular(12),
-                                  //         color: Colors.white,
-                                  //       ),
-                                  //       child: Padding(
-                                  //         padding: const EdgeInsets.all(8.0),
-                                  //         child: Row(
-                                  //           children: [
-                                  //             Icon(
-                                  //               Icons.file_copy_rounded,
-                                  //               color: Colors.blue,
-                                  //               size: height * 0.013,
-                                  //             ),
-                                  //             SizedBox(width: width * 0.03),
-                                  //             Text(
-                                  //               'IMG_45544871.JPG',
-                                  //               style: TextStyle(
-                                  //                 color:
-                                  //                     AppColor.mainTextColor2,
-                                  //                 fontSize: height * 0.012,
-                                  //                 fontWeight: FontWeight.w500,
-                                  //               ),
-                                  //             ),
-                                  //           ],
-                                  //         ),
-                                  //       ),
-                                  //     ),
-                                  //   ),
-                                  // ),
+                                  Visibility(
+                                    visible: leave.location.isNotEmpty,
+                                   child: Padding(
+                                 padding: const EdgeInsets.only(top: 12),
+                                      child: InkWell(
+                                        onTap: () {
+                                          _downloadDocument(leave.location);
+                                        },
+                                        child: Container(
+                                          width: width,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: AppColor.mainBGColor,
+                                                width: 2),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            color: Colors.white,
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.file_copy_rounded,
+                                                  color: Colors.blue,
+                                                  size: height * 0.013,
+                                                ),
+                                                SizedBox(width: width * 0.03),
+                                                Text(
+                                                  'View Prescription',
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppColor.mainTextColor2,
+                                                    fontSize: height * 0.012,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                   Visibility(
                                     visible: leave.status == 'Pending',
                                     child: Padding(
@@ -801,6 +899,9 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                   );
                 }
               }),
+        ),
+        SizedBox(
+          height: height * 0.02,
         ),
         Text(
           '----------------    Comp-Off Request    ----------------',

@@ -9,6 +9,7 @@ class TaskProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+
 class ProjectProvider extends ChangeNotifier {
   bool projectUpdated = false;
   bool get updateStatus => projectUpdated;
@@ -28,4 +29,13 @@ class StageProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-              
+
+class LeaveApplied extends ChangeNotifier {
+  bool leaveappied = false;
+  bool get updateLeaveApplied => leaveappied;
+
+  void leaveappiedStatus(bool updateLeaveApplied) {
+    leaveappied = updateLeaveApplied;
+    notifyListeners();
+  }
+}

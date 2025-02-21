@@ -1,13 +1,19 @@
 // ignore_for_file: sort_child_properties_last
+import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
+import 'package:hrms/core/provider/provider.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'apply_leave.dart';
 
 class LeaveScreenEmployee extends StatefulWidget {
@@ -20,6 +26,8 @@ class LeaveScreenEmployee extends StatefulWidget {
 
 class _LeaveScreenState extends State<LeaveScreenEmployee>
     with SingleTickerProviderStateMixin {
+        late String documentType;
+    bool isDownloading = false;
   late String? empID;
   bool isLoading = true;
   int touchedIndex = -1;
@@ -61,92 +69,170 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
     });
   }
 
+
+
+
+Future<void> _downloadDocument(String url) async {
+  // Request storage permissions
+  final status = await Permission.manageExternalStorage.request();
+  if (!status.isGranted) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Storage permission is required to download the document'),
+      backgroundColor: Colors.red,
+    ));
+    return;
+  }
+
+  setState(() {
+    isDownloading = true;
+  });
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Downloading Document'),
+      backgroundColor: Colors.blue,
+    ),
+  );
+
+  try {
+    final dio = Dio();
+    final response = await dio.get(
+      url,
+      options: Options(responseType: ResponseType.bytes),
+    );
+
+    final myDownloads = '/storage/emulated/0/Download';
+        final fileName = url.split('/').last;
+    final filePath = '$myDownloads/$fileName';
+
+    final file = File(filePath);
+    await file.writeAsBytes(response.data);
+
+    setState(() {
+      isDownloading = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Downloaded to $filePath'),
+      backgroundColor: Colors.green,
+    ));
+
+    final result = await OpenFile.open(filePath);
+
+    if (result.type != ResultType.done) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to open the file'),
+        backgroundColor: Colors.red,
+      ));
+    }
+  } catch (e) {
+    print(e);
+    setState(() {
+      isDownloading = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      
+      content: Text('Failed to download the document $e'),
+      backgroundColor: Colors.red,
+    ));
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
     return SafeArea(
-      child: Scaffold(
-          extendBodyBehindAppBar: true,
-          backgroundColor: AppColor.mainBGColor,
-          body: Stack(
-            children: [
-              Container(
-                height: updateUser == 'Leave Request' ? height * 0.28 : height * 0.155,
-                width: width,
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColor.primaryThemeColor,
-                        AppColor.secondaryThemeColor2,
+      child: Consumer<LeaveApplied>(builder: (context, value, child){
+              if (value.leaveappied == true) {
+    _compOffRequest = fetchCompOffRequest(_selectedText);
+    _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+            Future.delayed(Duration(milliseconds: 1500), () {
+              Provider.of<LeaveApplied>(context, listen: false).leaveappiedStatus(false);
+            });
+            } return Scaffold(
+            extendBodyBehindAppBar: true,
+            backgroundColor: AppColor.mainBGColor,
+            body: Stack(
+              children: [
+                Container(
+                  height: updateUser == 'Leave Request' ? height * 0.28 : height * 0.155,
+                  width: width,
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColor.primaryThemeColor,
+                          AppColor.secondaryThemeColor2,
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                            spreadRadius: 2,
+                            blurRadius: 10,
+                            color: Colors.black.withOpacity(0.1),
+                            offset: Offset(0, 10))
                       ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                          spreadRadius: 2,
-                          blurRadius: 10,
-                          color: Colors.black.withOpacity(0.1),
-                          offset: Offset(0, 10))
-                    ],
-                    color: AppColor.mainThemeColor,
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(20),
-                        bottomRight: Radius.circular(20))),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(15),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TabBar(
-                        dividerColor: Colors.transparent,
-                        controller: _tabController,
-                        indicatorColor: AppColor.mainFGColor,
-                        labelColor: AppColor.mainFGColor,
-                        unselectedLabelColor:
-                            const Color.fromARGB(206, 255, 255, 255),
-                        tabs: [
-                          Tab(
-                            child: Text('Leave Request'),
-                            // text: 'Leave Request',
-                          ),
-                          Tab(
-                            child: Text('Comp-Off Request'),
-                            // text: 'Leave Request',
-                          ),
-                        ]),
-                    SizedBox(
-                      height: height * 0.015,
-                    ),
-                    Expanded(
-                      child: TabBarView(controller: _tabController, children: [
-                        leaveSection(height, width),
-                        compOffSection(height, width),
-                      ]),
-                    )
-                  ],
+                      color: AppColor.mainThemeColor,
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20))),
                 ),
+                Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TabBar(
+                          dividerColor: Colors.transparent,
+                          controller: _tabController,
+                          indicatorColor: AppColor.mainFGColor,
+                          labelColor: AppColor.mainFGColor,
+                          unselectedLabelColor:
+                              const Color.fromARGB(206, 255, 255, 255),
+                          tabs: [
+                            Tab(
+                              child: Text('Leave Request'),
+                              // text: 'Leave Request',
+                            ),
+                            Tab(
+                              child: Text('Comp-Off Request'),
+                              // text: 'Leave Request',
+                            ),
+                          ]),
+                      SizedBox(
+                        height: height * 0.015,
+                      ),
+                      Expanded(
+                        child: TabBarView(controller: _tabController, children: [
+                          leaveSection(height, width),
+                          compOffSection(height, width),
+                        ]),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton.extended(
+              backgroundColor: AppColor.mainThemeColor,
+              onPressed: () => showCupertinoModalBottomSheet(
+                expand: true,
+                context: context,
+                barrierColor: const Color.fromARGB(130, 0, 0, 0),
+                backgroundColor: Colors.transparent,
+                builder: (context) => ApplyLeave(),
               ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton.extended(
-            backgroundColor: AppColor.mainThemeColor,
-            onPressed: () => showCupertinoModalBottomSheet(
-              expand: true,
-              context: context,
-              barrierColor: const Color.fromARGB(130, 0, 0, 0),
-              backgroundColor: Colors.transparent,
-              builder: (context) => ApplyLeave(),
-            ),
-            label: Text(
-              'Apply Leave',
-              style: TextStyle(color: AppColor.mainFGColor),
-            ),
-          )),
+              label: Text(
+                'Apply Leave',
+                style: TextStyle(color: AppColor.mainFGColor),
+              ),
+            ));
+           }),
     );
   }
 
@@ -306,6 +392,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
+                                         
                                           Text(
                                             leave.leaveType == 'earnedLeave'
                                                 ? leave.totalDays == '1'
@@ -355,7 +442,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
                                                                         ? 'Short-Leave'
                                                                         : leave
                                                                             .leaveType,
-                                            style: TextStyle(
+                                           style: TextStyle(
                                               fontSize: height * 0.013,
                                               fontWeight: FontWeight.w600,
                                               color: AppColor.mainThemeColor,
@@ -367,7 +454,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
                                                 ? DateFormat('EEE, dd MMM')
                                                     .format(startDate)
                                                 : '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
-                                            style: TextStyle(
+                                           style: TextStyle(
                                               fontSize: height * 0.015,
                                               fontWeight: FontWeight.bold,
                                               color: AppColor.mainTextColor,
@@ -403,7 +490,51 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
                                       ),
                                     ),
                                   ),
-                                  SizedBox(height: height * 0.005),
+                                  Visibility(
+                                    visible: leave.location!.isNotEmpty,
+                                    child: Padding(
+                                 padding: const EdgeInsets.only(top: 12),
+                                      child: InkWell(
+                                        onTap: () {
+                                          _downloadDocument(leave.location!);
+                                        },
+                                        child: Container(
+                                          width: width,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: AppColor.mainBGColor,
+                                                width: 2),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            color: Colors.white,
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.file_copy_rounded,
+                                                  color: Colors.blue,
+                                                  size: height * 0.013,
+                                                ),
+                                                SizedBox(width: width * 0.03),
+                                                Text(
+                                                  'View Prescription',
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppColor.mainTextColor2,
+                                                    fontSize: height * 0.012,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                     
                                 ],
                               ),
                             ),

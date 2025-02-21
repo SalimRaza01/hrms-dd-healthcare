@@ -288,6 +288,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                   content: Text('Prescription Uploaded'),
                   backgroundColor: Colors.green),
             );
+            print(response);
+            _authBox.put('file',response.data['location'] );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -529,14 +531,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   _selectedLeaveType!.contains('Medical'),
                               child: Builder(
                                 builder: (BuildContext context) => _isLoading
-                                    ? Center(
-                                        child: LoadingAnimationWidget
-                                            .threeArchedCircle(
-                                          color: AppColor.mainTextColor2,
-                                          size: height * 0.03,
-                                        ),
-                                      )
-                                    : _paths == null
+                                    ? SizedBox()
+                                    :  _paths == null
                                         ? SizedBox()
                                         : ListView.builder(
                                             shrinkWrap: true,
@@ -616,7 +612,15 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   ),
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 50, vertical: 10),
-                                  child: Text(
+                                  child:_isLoading
+                                    ? Center(
+                                        child: LoadingAnimationWidget
+                                            .threeArchedCircle(
+                                          color: Colors.white,
+                                          size: height * 0.03,
+                                        ),
+                                      )
+                                    : Text(
                                     "Upload Prescription",
                                     style: TextStyle(
                                         color: AppColor.mainFGColor,
@@ -629,18 +633,28 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               height: height * 0.03,
                             ),
                             InkWell(
-                              onTap: () async {
+
+                              onTap: _selectedLeaveType != null &&
+                                  _selectedLeaveType!.contains('Medical') ? _isLoading ? null : () async {
+
                                 validation();
+
+                              } : () async {
+
+                                validation();
+
                               },
                               child: Container(
                                 width: width / 2,
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
+                                  gradient:  LinearGradient(
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
                                       colors: [
-                                        AppColor.primaryThemeColor,
-                                        AppColor.secondaryThemeColor2,
+                                  _selectedLeaveType != null &&
+                                  _selectedLeaveType!.contains('Medical') ? _isLoading ? Colors.grey :      AppColor.primaryThemeColor :  AppColor.primaryThemeColor,
+                                                                     _selectedLeaveType != null &&
+                                  _selectedLeaveType!.contains('Medical') ? _isLoading ? Colors.grey :      AppColor.secondaryThemeColor2 :  AppColor.secondaryThemeColor2, 
                                       ]),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
