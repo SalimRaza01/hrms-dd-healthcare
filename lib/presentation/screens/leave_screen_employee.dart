@@ -42,7 +42,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
 
   @override
   void initState() {
-    _compOffRequest = fetchCompOffRequest(_selectedText);
+    _compOffRequest = fetchOwnCompOffRequest(_selectedText);
     _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
     _tabController = TabController(vsync: this, length: 3);
     _tabController.addListener(_handleTabSelection);
@@ -62,7 +62,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
           break;
         case 1:
           updateUser = 'Comp-Off Request';
-          _compOffRequest = fetchCompOffRequest(_selectedCompoffText);
+          _compOffRequest = fetchOwnCompOffRequest(_selectedCompoffText);
 
           break;
       }
@@ -147,7 +147,7 @@ Future<void> _downloadDocument(String url) async {
     return SafeArea(
       child: Consumer<LeaveApplied>(builder: (context, value, child){
               if (value.leaveappied == true) {
-    _compOffRequest = fetchCompOffRequest(_selectedText);
+    _compOffRequest = fetchOwnCompOffRequest(_selectedText);
     _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
             Future.delayed(Duration(milliseconds: 1500), () {
               Provider.of<LeaveApplied>(context, listen: false).leaveappiedStatus(false);
@@ -663,150 +663,147 @@ Future<void> _downloadDocument(String url) async {
                       // final startDate = DateTime.parse(leave.appliedDate);
           
                       return Card(
-                        color: AppColor.mainFGColor,
-                        elevation: 8,
-                        margin: EdgeInsets.all(0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        shadowColor: Colors.black.withOpacity(0.2),
-                        child: Stack(
-                          alignment: AlignmentDirectional.topEnd,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                    color: AppColor.mainFGColor,
+                    elevation: 8,
+                    margin: EdgeInsets.all(0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    shadowColor: Colors.black.withOpacity(0.2),
+                    child: Stack(
+                      alignment: AlignmentDirectional.topEnd,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Comp-Off ${leave.totalDays} Days',
-                                            style: TextStyle(
-                                              fontSize: height * 0.013,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColor.mainThemeColor,
-                                            ),
-                                          ),
-                                          Text(
-                                            leave.compOffDate,
-                                            style: TextStyle(
-                                              fontSize: height * 0.015,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColor.mainTextColor,
-                                            ),
-                                          ),
-                                        ],
+                                      Text(
+                                        'Comp-Off Request (${leave.totalDays})',
+                                        style: TextStyle(
+                                          fontSize: height * 0.013,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColor.mainThemeColor,
+                                        ),
+                                      ),
+                                      Text(
+                                        leave.compOffDate,
+                                        style: TextStyle(
+                                          fontSize: height * 0.015,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColor.mainTextColor,
+                                        ),
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: height * 0.010),
-                                  Container(
-                                    width: width,
-                                    decoration: BoxDecoration(
-                                      color: AppColor.mainBGColor,
-                                      borderRadius: BorderRadius.circular(7),
-                                      // boxShadow: [
-                                      //   BoxShadow(
-                                      //     color: Colors.black12,
-                                      //     blurRadius: 4,
-                                      //     offset: Offset(0, 2),
-                                      //   ),
-                                      // ],
+                                ],
+                              ),
+                              SizedBox(height: height * 0.012),
+                              Container(
+                                width: width,
+                                decoration: BoxDecoration(
+                                  color: AppColor.mainBGColor,
+                                  borderRadius: BorderRadius.circular(7),
+                                  // boxShadow: [
+                                  //   BoxShadow(
+                                  //     color: Colors.black12,
+                                  //     blurRadius: 4,
+                                  //     offset: Offset(0, 2),
+                                  //   ),
+                                  // ],
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Text(
+                                    leave.reason,
+                                    style: TextStyle(
+                                      fontSize: height * 0.014,
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.w400,
                                     ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Text(
-                                        leave.reason,
-                                        style: TextStyle(
-                                          fontSize: height * 0.014,
-                                          color: Colors.black54,
-                                          fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ),
+                              Visibility(
+                                visible: leave.status == 'Pending',
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 15),
+                                  child: Center(
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        await ownCompOffActionDelete(
+                                            context, leave.id);
+                                        setState(() {
+                                          _compOffRequest =
+                                              fetchOwnCompOffRequest('');
+                                        });
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            color: Colors.redAccent),
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: width / 9,
+                                              vertical: 8),
+                                          child: Text(
+                                            'Delete Request',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: height * 0.012,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                  // Visibility(
-                                  //   visible: leave.location.isNotEmpty,
-                                  //   child: Padding(
-                                  //     padding: const EdgeInsets.only(top: 12),
-                                  //     child: Container(
-                                  //       width: width,
-                                  //       decoration: BoxDecoration(
-                                  //         border: Border.all(
-                                  //             color: AppColor.mainBGColor,
-                                  //             width: 2),
-                                  //         borderRadius:
-                                  //             BorderRadius.circular(12),
-                                  //         color: Colors.white,
-                                  //       ),
-                                  //       child: Padding(
-                                  //         padding: const EdgeInsets.all(8.0),
-                                  //         child: Row(
-                                  //           children: [
-                                  //             Icon(
-                                  //               Icons.file_copy_rounded,
-                                  //               color: Colors.blue,
-                                  //               size: height * 0.013,
-                                  //             ),
-                                  //             SizedBox(width: width * 0.03),
-                                  //             Text(
-                                  //               'IMG_45544871.JPG',
-                                  //               style: TextStyle(
-                                  //                 color:
-                                  //                     AppColor.mainTextColor2,
-                                  //                 fontSize: height * 0.012,
-                                  //                 fontWeight: FontWeight.w500,
-                                  //               ),
-                                  //             ),
-                                  //           ],
-                                  //         ),
-                                  //       ),
-                                  //     ),
-                                  //   ),
-                                  // ),
-          
-                                  SizedBox(height: height * 0.005),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: leave.status == 'Pending'
-                                      ? Colors.amber
-                                      : leave.status == 'Approved'
-                                          ? Colors.green
-                                          : Colors.red,
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(10),
-                                      bottomLeft: Radius.circular(20))),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 0, horizontal: 20),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(7.0),
-                                  child: Text(
-                                    leave.status,
-                                    style: TextStyle(
-                                        fontSize: height * 0.012,
-                                        fontWeight: FontWeight.w400,
-                                        color: leave.status == 'Pending'
-                                            ? Colors.black
-                                            : Colors.white),
-                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                              SizedBox(height: height * 0.005),
+                            ],
+                          ),
                         ),
-                      );
+                        Container(
+                          decoration: BoxDecoration(
+                              color: leave.status == 'Pending'
+                                  ? Colors.amber
+                                  : leave.status == 'Approved'
+                                      ? Colors.green
+                                      : Colors.red,
+                              borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(10),
+                                  bottomLeft: Radius.circular(20))),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 0, horizontal: 20),
+                            child: Padding(
+                              padding: const EdgeInsets.all(7.0),
+                              child: Text(
+                                leave.status,
+                                style: TextStyle(
+                                    fontSize: height * 0.012,
+                                    fontWeight: FontWeight.w400,
+                                    color: leave.status == 'Pending'
+                                        ? Colors.black
+                                        : Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                     },
                     separatorBuilder: (context, index) => SizedBox(height: 10),
                   );
@@ -907,7 +904,7 @@ Future<void> _downloadDocument(String url) async {
       onTap: () {
         setState(() {
           _selectedCompoffText = text;
-              _compOffRequest = fetchCompOffRequest(_selectedCompoffText);
+              _compOffRequest = fetchOwnCompOffRequest(_selectedCompoffText);
         });
       },
       child: Container(

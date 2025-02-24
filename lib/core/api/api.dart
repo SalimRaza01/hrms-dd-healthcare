@@ -192,16 +192,16 @@ Future<void> applyLeave(
           "shift": leaveType == 'Casual Leave' || leaveType == 'Earned Leave'
               ? _selectedText
               : "",
-              "location" : _authBox.get('file')
+          "location": _authBox.get('file')
         });
- if (response.statusCode == 201 || response.statusCode == 200) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Leave request submitted successfully'),
           backgroundColor: Colors.green,
         ),
       );
-            Provider.of<LeaveApplied>(context, listen: false).leaveappiedStatus(true);
+      Provider.of<LeaveApplied>(context, listen: false).leaveappiedStatus(true);
       Navigator.pop(context);
     }
   } on DioException catch (e) {
@@ -213,7 +213,6 @@ Future<void> applyLeave(
     );
   }
 }
-
 
 Future<EmployeeProfile> fetchEmployeeDetails(String empID) async {
   Dio dio = Dio();
@@ -308,14 +307,14 @@ Future<void> applyShortLeave(
           "leaveStartDate": startDate,
           "reason": reason,
         });
-   if (response.statusCode == 201 || response.statusCode == 200) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Request submitted successfully'),
           backgroundColor: Colors.green,
         ),
       );
-               Provider.of<LeaveApplied>(context, listen: false).leaveappiedStatus(true);
+      Provider.of<LeaveApplied>(context, listen: false).leaveappiedStatus(true);
       Navigator.pop(context);
     }
   } on DioException catch (e) {
@@ -346,7 +345,7 @@ Future<void> applyCompoff(
           "compOffDate": startDate,
           "reason": reason,
         });
-     if (response.statusCode == 201 || response.statusCode == 200) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Request submitted successfully'),
@@ -396,7 +395,7 @@ Future<void> leaveAction(
   try {
     final response =
         await dio.put('$leaveActionApi/$id', data: {"status": action});
-   if (response.statusCode == 201 || response.statusCode == 200) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Request Approved'),
@@ -673,7 +672,7 @@ Future<List<LeaveHistory>> fetchLeaveHistory(
   }
 }
 
-Future<List<CompOffRequest>> fetchCompOffRequest( String status) async {
+Future<List<CompOffRequest>> fetchCompOffRequest(String status) async {
   String token = _authBox.get('token');
 
   // try {
@@ -684,17 +683,55 @@ Future<List<CompOffRequest>> fetchCompOffRequest( String status) async {
       }));
 
   if (response.statusCode == 200) {
-     if (status != '') {
-    List<dynamic> data = response.data['data']
-        .where((leave) => leave['status'] == status)
-        .toList();
+    if (status != '') {
+      List<dynamic> data = response.data['data']
+          .where((leave) => leave['status'] == status)
+          .toList();
 
-    return data.map((leaveData) => CompOffRequest.fromJson(leaveData)).toList();
+      return data
+          .map((leaveData) => CompOffRequest.fromJson(leaveData))
+          .toList();
+    } else {
+      List<dynamic> data = response.data['data'];
+
+      return data
+          .map((leaveData) => CompOffRequest.fromJson(leaveData))
+          .toList();
+    }
   } else {
-     List<dynamic> data = response.data['data'];
-
-    return data.map((leaveData) => CompOffRequest.fromJson(leaveData)).toList();
+    return [];
   }
+  // } catch (e) {
+  //   throw Exception('Error fetching data: $e');
+  // }
+}
+
+Future<List<CompOffRequest>> fetchOwnCompOffRequest(String status) async {
+  String token = _authBox.get('token');
+
+  // try {
+  final response = await dio.get(ownCompOffList,
+      options: Options(headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      }));
+
+  if (response.statusCode == 200) {
+    if (status != '') {
+      List<dynamic> data = response.data['data']
+          .where((leave) => leave['status'] == status)
+          .toList();
+
+      return data
+          .map((leaveData) => CompOffRequest.fromJson(leaveData))
+          .toList();
+    } else {
+      List<dynamic> data = response.data['data'];
+
+      return data
+          .map((leaveData) => CompOffRequest.fromJson(leaveData))
+          .toList();
+    }
   } else {
     return [];
   }
@@ -728,6 +765,42 @@ Future<void> compOffActionPut(
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Request Declined'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } on DioException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.response!.data['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+Future<void> ownCompOffActionDelete(
+  BuildContext context,
+  String id,
+) async {
+
+  print(id);
+  try {
+    final response = await dio.delete(
+      '$ownCompOffActon/$id',
+    );
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.data['message']),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.data['message']),
           backgroundColor: Colors.red,
         ),
       );

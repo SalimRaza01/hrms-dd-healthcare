@@ -50,7 +50,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         minDateTime: _selectedLeaveType!.contains('Medical')
             ? DateTime.now().subtract(Duration(days: 6))
             : _selectedLeaveType.contains('Earned')
-                ? DateTime.now().add(Duration(days: 1))
+                // ? DateTime.now().add(Duration(days: 1))
+                ? DateTime.now()
                 : DateTime.now(),
         maxDateTime: _selectedLeaveType.contains('Medical')
             ? DateTime.now().subtract(Duration(days: 1))
@@ -83,7 +84,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       maxDateTime: _selectedLeaveType.contains('Medical')
           ? DateTime.now().subtract(Duration(days: 1))
           : _selectedLeaveType.contains('Earned')
-              ? DateTime.parse(startDateController.text).add(Duration(days: 6))
+              ? DateTime.parse(startDateController.text).add(Duration(days: 13))
               : null,
       onMonthChangeStartWithFirstDate: true,
       onConfirm: (dateTime2, List<int> index) {
@@ -132,6 +133,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         }
       } else if (_selectedLeaveType!.contains('Earned')) {
         if (_selectedText == 'Full Day') {
+          DateTime startDate = DateTime.parse(startDateController.text);
+          DateTime endDate = DateTime.parse(endDateController.text);
           if (startDateController.text.isEmpty) {
             showSnackBar('Please Select Start Date');
             return;
@@ -141,9 +144,11 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
           } else if (reasonController.text.isEmpty) {
             showSnackBar('Please Describe Reason');
             return;
+          } else if (startDate.day == DateTime.now().day &&
+              DateTime.now().hour >= 9) {
+            return showSnackBar(
+                'Earned leave must be applied before 9 AM for today.');
           }
-          DateTime startDate = DateTime.parse(startDateController.text);
-          DateTime endDate = DateTime.parse(endDateController.text);
 
           int leaveDuration = endDate.difference(startDate).inDays + 1;
 
@@ -218,6 +223,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
             reasonController.text)
         : applyLeave(
             context,
+    
             _selectedLeaveType!,
             startDateController.text,
             endDateController.text,
@@ -289,7 +295,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                   backgroundColor: Colors.green),
             );
             print(response);
-            _authBox.put('file',response.data['location'] );
+            _authBox.put('file', response.data['location']);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -532,7 +538,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               child: Builder(
                                 builder: (BuildContext context) => _isLoading
                                     ? SizedBox()
-                                    :  _paths == null
+                                    : _paths == null
                                         ? SizedBox()
                                         : ListView.builder(
                                             shrinkWrap: true,
@@ -612,20 +618,20 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   ),
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 50, vertical: 10),
-                                  child:_isLoading
-                                    ? Center(
-                                        child: LoadingAnimationWidget
-                                            .threeArchedCircle(
-                                          color: Colors.white,
-                                          size: height * 0.03,
+                                  child: _isLoading
+                                      ? Center(
+                                          child: LoadingAnimationWidget
+                                              .threeArchedCircle(
+                                            color: Colors.white,
+                                            size: height * 0.03,
+                                          ),
+                                        )
+                                      : Text(
+                                          "Upload Prescription",
+                                          style: TextStyle(
+                                              color: AppColor.mainFGColor,
+                                              fontSize: 15),
                                         ),
-                                      )
-                                    : Text(
-                                    "Upload Prescription",
-                                    style: TextStyle(
-                                        color: AppColor.mainFGColor,
-                                        fontSize: 15),
-                                  ),
                                 ),
                               ),
                             ),
@@ -633,28 +639,37 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               height: height * 0.03,
                             ),
                             InkWell(
-
                               onTap: _selectedLeaveType != null &&
-                                  _selectedLeaveType!.contains('Medical') ? _isLoading ? null : () async {
-
-                                validation();
-
-                              } : () async {
-
-                                validation();
-
-                              },
+                                      _selectedLeaveType!.contains('Medical')
+                                  ? _isLoading
+                                      ? null
+                                      : () async {
+                                          validation();
+                                        }
+                                  : () async {
+                                      validation();
+                                    },
                               child: Container(
                                 width: width / 2,
                                 decoration: BoxDecoration(
-                                  gradient:  LinearGradient(
+                                  gradient: LinearGradient(
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
                                       colors: [
-                                  _selectedLeaveType != null &&
-                                  _selectedLeaveType!.contains('Medical') ? _isLoading ? Colors.grey :      AppColor.primaryThemeColor :  AppColor.primaryThemeColor,
-                                                                     _selectedLeaveType != null &&
-                                  _selectedLeaveType!.contains('Medical') ? _isLoading ? Colors.grey :      AppColor.secondaryThemeColor2 :  AppColor.secondaryThemeColor2, 
+                                        _selectedLeaveType != null &&
+                                                _selectedLeaveType!
+                                                    .contains('Medical')
+                                            ? _isLoading
+                                                ? Colors.grey
+                                                : AppColor.primaryThemeColor
+                                            : AppColor.primaryThemeColor,
+                                        _selectedLeaveType != null &&
+                                                _selectedLeaveType!
+                                                    .contains('Medical')
+                                            ? _isLoading
+                                                ? Colors.grey
+                                                : AppColor.secondaryThemeColor2
+                                            : AppColor.secondaryThemeColor2,
                                       ]),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
