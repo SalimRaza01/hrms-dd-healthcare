@@ -34,21 +34,22 @@ class _LeaveScreenState extends State<LeaveScreenManager>
   bool switchMode = false;
   int touchedIndex = -1;
   String _selectedText = 'Pending';
+  String _selectedCompoffText = 'Pending';
   Color? activeColor;
   Color? activeText;
   String updateUser = 'Leaves';
   late TabController _tabController;
-  late Future<List<LeaveHistory>> _leaveHistory;
-  late Future<List<LeaveRequests>> _leaveRequest;
-  late Future<List<CompOffRequest>> _compOffRequest;
-  late Future<List<CompOffRequest>> _getOwncompOffRequest;
+  late Future<List<LeaveHistory>> _myLeaveHistory;
+  late Future<List<LeaveRequests>> _teamLeaveRequest;
+  late Future<List<CompOffRequest>> _teamCompOffRequest;
+  late Future<List<CompOffRequest>> _myCompOffRequest;
 
   @override
   void initState() {
-    _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
-                 _compOffRequest = fetchCompOffRequest('');
-                               _leaveRequest = fetchLeaveRequest();
-    _getOwncompOffRequest = fetchOwnCompOffRequest('');
+    _myLeaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+    _teamCompOffRequest = fetchCompOffRequest(_selectedCompoffText);
+    _teamLeaveRequest = fetchLeaveRequest(_selectedText);
+    _myCompOffRequest = fetchOwnCompOffRequest(_selectedCompoffText);
     _tabController = TabController(vsync: this, length: 2);
     _tabController.addListener(_handleTabSelection);
     super.initState();
@@ -63,19 +64,17 @@ class _LeaveScreenState extends State<LeaveScreenManager>
       switch (_tabController.index) {
         case 0:
           updateUser = switchMode ? 'Team Leave' : 'Leaves';
-              _leaveRequest = fetchLeaveRequest();
-          _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+          _teamLeaveRequest = fetchLeaveRequest(_selectedText);
+          _myLeaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
           break;
         case 1:
-          updateUser = switchMode ? 'Team Comp-off' :'Comp-off';
-              _compOffRequest = fetchCompOffRequest('');
-          _getOwncompOffRequest = fetchOwnCompOffRequest('');
+          updateUser = switchMode ? 'Team Comp-off' : 'Comp-off';
+          _teamCompOffRequest = fetchCompOffRequest(_selectedCompoffText);
+          _myCompOffRequest = fetchOwnCompOffRequest(_selectedCompoffText);
           break;
       }
     });
   }
-
-
 
   Future<void> _downloadDocument(String url) async {
     // Request storage permissions
@@ -156,8 +155,8 @@ class _LeaveScreenState extends State<LeaveScreenManager>
     return SafeArea(
       child: Consumer<LeaveApplied>(builder: (context, value, child) {
         if (value.leaveappied == true) {
-          _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
-          _compOffRequest = fetchOwnCompOffRequest('');
+          _myLeaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+          _myCompOffRequest = fetchOwnCompOffRequest(_selectedCompoffText);
           Future.delayed(Duration(milliseconds: 1500), () {
             Provider.of<LeaveApplied>(context, listen: false)
                 .leaveappiedStatus(false);
@@ -209,7 +208,10 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                             Tab(
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: [Icon(Icons.person), Text('Leaves')],
+                                children: [
+                                  Icon(Icons.person),
+                                  Text('My Leaves')
+                                ],
                               ),
                               // text: 'Self',
                             ),
@@ -218,7 +220,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.person),
-                                  Text('Comp-off')
+                                  Text('My Comp-off')
                                 ],
                               ),
                               // text: 'Self',
@@ -259,27 +261,20 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                               child: Text('No Data Found'));
                                         } else if (snapshot.hasData) {
                                           final leave = snapshot.data!;
-                                  
+
                                           return Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment
-                                                    .spaceBetween,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
-                                              leaveWidget(
-                                                  height,
-                                                  width,
-                                                  'Casual',
-                                                  leave.casualLeave),
+                                              leaveWidget(height, width,
+                                                  'Casual', leave.casualLeave),
                                               leaveWidget(
                                                   height,
                                                   width,
                                                   'Medical',
                                                   leave.medicalLeave),
-                                              leaveWidget(
-                                                  height,
-                                                  width,
-                                                  'Earned',
-                                                  leave.earnedLeave),
+                                              leaveWidget(height, width,
+                                                  'Earned', leave.earnedLeave),
                                             ],
                                           );
                                         } else {
@@ -319,7 +314,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                               ),
                               Expanded(
                                 child: FutureBuilder<List<LeaveHistory>>(
-                                    future: _leaveHistory,
+                                    future: _myLeaveHistory,
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState ==
                                           ConnectionState.waiting) {
@@ -648,9 +643,35 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                           ),
                           Column(
                             children: [
+                              Card(
+                                color: AppColor.mainFGColor,
+                                elevation: 4,
+                                margin: EdgeInsets.all(0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                shadowColor: Colors.black.withOpacity(0.1),
+                                child: Padding(
+                                  padding: EdgeInsets.all(4),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        _compoffSelectedButton(
+                                            'Pending', height, width),
+                                        _compoffSelectedButton(
+                                            'Approved', height, width),
+                                        _compoffSelectedButton(
+                                            'Rejected', height, width),
+                                      ]),
+                                ),
+                              ),
+                              SizedBox(
+                                height: height * 0.015,
+                              ),
                               Expanded(
                                 child: FutureBuilder<List<CompOffRequest>>(
-                                    future: _getOwncompOffRequest,
+                                    future: _myCompOffRequest,
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState ==
                                           ConnectionState.waiting) {
@@ -672,9 +693,13 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                   BorderRadius.circular(10),
                                             ),
                                             child: Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child:
-                                                  Text('No Comp-Off Request Found'),
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                'No Comp-Off Request Found',
+                                                style: TextStyle(
+                                                    fontSize: height * 0.014),
+                                              ),
                                             ),
                                             shadowColor:
                                                 Colors.black.withOpacity(0.1),
@@ -683,16 +708,37 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                       } else if (!snapshot.hasData ||
                                           snapshot.data!.isEmpty) {
                                         return Center(
-                                            child:
-                                                Text('No Comp-Off Request Found'));
+                                          child: Card(
+                                            color: AppColor.mainFGColor,
+                                            elevation: 4,
+                                            margin: EdgeInsets.all(0),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                'No Comp-Off Request Found',
+                                                style: TextStyle(
+                                                    fontSize: height * 0.014),
+                                              ),
+                                            ),
+                                            shadowColor:
+                                                Colors.black.withOpacity(0.1),
+                                          ),
+                                        );
                                       } else {
-                                        List<CompOffRequest> items = snapshot.data!;
-                              
+                                        List<CompOffRequest> items =
+                                            snapshot.data!;
+
                                         return ListView.separated(
                                           itemCount: items.length,
                                           itemBuilder: (context, index) {
                                             final leave = items[index];
-                              
+                                            // final startDate = DateTime.parse(leave.appliedDate);
+
                                             return Card(
                                               color: AppColor.mainFGColor,
                                               elevation: 8,
@@ -708,13 +754,14 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                     AlignmentDirectional.topEnd,
                                                 children: [
                                                   Padding(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                            horizontal: 14,
-                                                            vertical: 8),
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 14,
+                                                        vertical: 8),
                                                     child: Column(
                                                       crossAxisAlignment:
-                                                          CrossAxisAlignment.start,
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: [
                                                         Row(
                                                           mainAxisAlignment:
@@ -728,7 +775,8 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                               children: [
                                                                 Text(
                                                                   'Comp-Off Request (${leave.totalDays})',
-                                                                  style: TextStyle(
+                                                                  style:
+                                                                      TextStyle(
                                                                     fontSize:
                                                                         height *
                                                                             0.013,
@@ -740,8 +788,10 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                                   ),
                                                                 ),
                                                                 Text(
-                                                                  leave.compOffDate,
-                                                                  style: TextStyle(
+                                                                  leave
+                                                                      .compOffDate,
+                                                                  style:
+                                                                      TextStyle(
                                                                     fontSize:
                                                                         height *
                                                                             0.015,
@@ -757,15 +807,18 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                           ],
                                                         ),
                                                         SizedBox(
-                                                            height: height * 0.012),
+                                                            height:
+                                                                height * 0.012),
                                                         Container(
                                                           width: width,
-                                                          decoration: BoxDecoration(
+                                                          decoration:
+                                                              BoxDecoration(
                                                             color: AppColor
                                                                 .mainBGColor,
                                                             borderRadius:
                                                                 BorderRadius
-                                                                    .circular(7),
+                                                                    .circular(
+                                                                        7),
                                                             // boxShadow: [
                                                             //   BoxShadow(
                                                             //     color: Colors.black12,
@@ -782,51 +835,56 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                               leave.reason,
                                                               style: TextStyle(
                                                                 fontSize:
-                                                                    height * 0.014,
-                                                                color:
-                                                                    Colors.black54,
+                                                                    height *
+                                                                        0.014,
+                                                                color: Colors
+                                                                    .black54,
                                                                 fontWeight:
-                                                                    FontWeight.w400,
+                                                                    FontWeight
+                                                                        .w400,
                                                               ),
                                                             ),
                                                           ),
                                                         ),
                                                         Visibility(
-                                                          visible: leave.status ==
-                                                              'Pending',
+                                                          visible:
+                                                              leave.status ==
+                                                                  'Pending',
                                                           child: Padding(
                                                             padding:
                                                                 const EdgeInsets
-                                                                    .only(top: 15),
+                                                                    .only(
+                                                                    top: 15),
                                                             child: Center(
                                                               child:
                                                                   GestureDetector(
-                                                                onTap: () async {
+                                                                onTap:
+                                                                    () async {
                                                                   await ownCompOffActionDelete(
                                                                       context,
                                                                       leave.id);
                                                                   setState(() {
-                                                                    _getOwncompOffRequest =
+                                                                    _myCompOffRequest =
                                                                         fetchOwnCompOffRequest(
-                                                                            '');
+                                                                            _selectedCompoffText);
                                                                   });
                                                                 },
-                                                                child: Container(
+                                                                child:
+                                                                    Container(
                                                                   decoration: BoxDecoration(
                                                                       borderRadius:
-                                                                          BorderRadius
-                                                                              .circular(
-                                                                                  8),
+                                                                          BorderRadius.circular(
+                                                                              8),
                                                                       color: Colors
                                                                           .redAccent),
-                                                                  child: Padding(
-                                                                    padding: EdgeInsets
-                                                                        .symmetric(
-                                                                            horizontal:
-                                                                                width /
-                                                                                    9,
-                                                                            vertical:
-                                                                                8),
+                                                                  child:
+                                                                      Padding(
+                                                                    padding: EdgeInsets.symmetric(
+                                                                        horizontal:
+                                                                            width /
+                                                                                9,
+                                                                        vertical:
+                                                                            8),
                                                                     child: Text(
                                                                       'Delete Request',
                                                                       style:
@@ -837,8 +895,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                                             height *
                                                                                 0.012,
                                                                         fontWeight:
-                                                                            FontWeight
-                                                                                .w500,
+                                                                            FontWeight.w500,
                                                                       ),
                                                                     ),
                                                                   ),
@@ -848,7 +905,8 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                           ),
                                                         ),
                                                         SizedBox(
-                                                            height: height * 0.005),
+                                                            height:
+                                                                height * 0.005),
                                                       ],
                                                     ),
                                                   ),
@@ -864,9 +922,10 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                         borderRadius:
                                                             BorderRadius.only(
                                                                 topRight: Radius
-                                                                    .circular(10),
-                                                                bottomLeft:
-                                                                    Radius.circular(
+                                                                    .circular(
+                                                                        10),
+                                                                bottomLeft: Radius
+                                                                    .circular(
                                                                         20))),
                                                     child: Padding(
                                                       padding: const EdgeInsets
@@ -875,19 +934,21 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                           horizontal: 20),
                                                       child: Padding(
                                                         padding:
-                                                            const EdgeInsets.all(
-                                                                7.0),
+                                                            const EdgeInsets
+                                                                .all(7.0),
                                                         child: Text(
                                                           leave.status,
                                                           style: TextStyle(
-                                                              fontSize:
-                                                                  height * 0.012,
+                                                              fontSize: height *
+                                                                  0.012,
                                                               fontWeight:
-                                                                  FontWeight.w400,
+                                                                  FontWeight
+                                                                      .w400,
                                                               color: leave.status ==
                                                                       'Pending'
                                                                   ? Colors.black
-                                                                  : Colors.white),
+                                                                  : Colors
+                                                                      .white),
                                                         ),
                                                       ),
                                                     ),
@@ -916,14 +977,13 @@ class _LeaveScreenState extends State<LeaveScreenManager>
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 FloatingActionButton.extended(
-                            heroTag:'btn1',
+                    heroTag: 'btn1',
                     backgroundColor: AppColor.mainThemeColor,
                     onPressed: () {
                       setState(() {
                         switchMode = !switchMode;
-                        _leaveHistory =
-                            fetchLeaveHistory(_selectedText, widget.empID);
-                        _compOffRequest = fetchOwnCompOffRequest('');
+                        _teamLeaveRequest = fetchLeaveRequest(_selectedText);
+                   _teamCompOffRequest = fetchCompOffRequest(_selectedCompoffText);
                       });
                     },
                     label: Icon(
@@ -934,7 +994,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                   height: height * 0.015,
                 ),
                 FloatingActionButton.extended(
-                                    heroTag:'btn2',
+                  heroTag: 'btn2',
                   backgroundColor: AppColor.mainThemeColor,
                   onPressed: () => showCupertinoModalBottomSheet(
                     expand: true,
@@ -958,8 +1018,8 @@ class _LeaveScreenState extends State<LeaveScreenManager>
     return SafeArea(
       child: Consumer<LeaveApplied>(builder: (context, value, child) {
         if (value.leaveappied == true) {
-          _leaveRequest = fetchLeaveRequest();
-          _compOffRequest = fetchCompOffRequest('');
+          _teamLeaveRequest = fetchLeaveRequest(_selectedText);
+          _teamCompOffRequest = fetchCompOffRequest(_selectedCompoffText);
           Future.delayed(Duration(milliseconds: 1500), () {
             Provider.of<LeaveApplied>(context, listen: false)
                 .leaveappiedStatus(false);
@@ -1033,841 +1093,896 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                         height: height * 0.015,
                       ),
                       Expanded(
-                        child:
-                            TabBarView(controller: _tabController, children: [
-                          Column(
+                        child: TabBarView(
+                            controller: _tabController,
                             children: [
-                              Expanded(
-                                  child: FutureBuilder<List<LeaveRequests>>(
-                                      future: _leaveRequest,
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.waiting) {
-                                          return Center(
-                                            child: LoadingAnimationWidget
-                                                .threeArchedCircle(
-                                              color: AppColor.mainTextColor2,
-                                              size: height * 0.03,
-                                            ),
-                                          );
-                                        } else if (snapshot.hasError) {
-                                          return Center(
-                                            child: Card(
-                                              color: AppColor.mainFGColor,
-                                              elevation: 4,
-                                              margin: EdgeInsets.all(0),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(8.0),
-                                                child:
-                                                    Text('No Leave Request Found'),
-                                              ),
-                                              shadowColor:
-                                                  Colors.black.withOpacity(0.1),
-                                            ),
-                                          );
-                                        } else if (!snapshot.hasData ||
-                                            snapshot.data!.isEmpty) {
-                                          return Center(
-                                              child:
-                                                  Text('No Leave Request Found'));
-                                        } else {
-                                          List<LeaveRequests> items =
-                                              snapshot.data!;
-                              
-                                          return ListView.separated(
-                                            itemCount: items.length,
-                                            itemBuilder: (context, index) {
-                                              final leave = items[index];
-                                              final startDate = DateTime.parse(
-                                                  leave.leaveStartDate);
-                                              final endDate = DateTime.parse(
-                                                  leave.leaveEndDate);
-                                              print(leave.location);
-                                              return Card(
-                                                color: AppColor.mainFGColor,
-                                                elevation: 8,
-                                                margin: EdgeInsets.all(0),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
+                              Column(
+                                children: [
+                                   Card(
+                                color: AppColor.mainFGColor,
+                                elevation: 4,
+                                margin: EdgeInsets.all(0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                shadowColor: Colors.black.withOpacity(0.1),
+                                child: Padding(
+                                  padding: EdgeInsets.all(4),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        _leaveFilterBTNTeam('Pending', height, width),
+                                        _leaveFilterBTNTeam(
+                                            'Approved', height, width),
+                                        _leaveFilterBTNTeam(
+                                            'Rejected', height, width),
+                                      ]),
+                                ),
+                              ),
+                              SizedBox(
+                                height: height * 0.015,
+                              ),
+                                  Expanded(
+                                      child: FutureBuilder<List<LeaveRequests>>(
+                                          future: _teamLeaveRequest,
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return Center(
+                                                child: LoadingAnimationWidget
+                                                    .threeArchedCircle(
+                                                  color:
+                                                      AppColor.mainTextColor2,
+                                                  size: height * 0.03,
                                                 ),
-                                                shadowColor:
-                                                    Colors.black.withOpacity(0.2),
-                                                child: Stack(
-                                                  alignment:
-                                                      AlignmentDirectional.topEnd,
-                                                  children: [
-                                                    Padding(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 14,
-                                                          vertical: 8),
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceBetween,
+                                              );
+                                            } else if (snapshot.hasError) {
+                                              return Center(
+                                                child: Card(
+                                                  color: AppColor.mainFGColor,
+                                                  elevation: 4,
+                                                  margin: EdgeInsets.all(0),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Text(
+                                                        'No Leave Request Found'),
+                                                  ),
+                                                  shadowColor: Colors.black
+                                                      .withOpacity(0.1),
+                                                ),
+                                              );
+                                            } else if (!snapshot.hasData ||
+                                                snapshot.data!.isEmpty) {
+                                              return Center(
+                                                  child: Text(
+                                                      'No Leave Request Found'));
+                                            } else {
+                                              List<LeaveRequests> items =
+                                                  snapshot.data!;
+
+                                              return ListView.separated(
+                                                itemCount: items.length,
+                                                itemBuilder: (context, index) {
+                                                  final leave = items[index];
+                                                  final startDate =
+                                                      DateTime.parse(
+                                                          leave.leaveStartDate);
+                                                  final endDate =
+                                                      DateTime.parse(
+                                                          leave.leaveEndDate);
+                                                  print(leave.location);
+                                                  return Card(
+                                                    color: AppColor.mainFGColor,
+                                                    elevation: 8,
+                                                    margin: EdgeInsets.all(0),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                    ),
+                                                    shadowColor: Colors.black
+                                                        .withOpacity(0.2),
+                                                    child: Stack(
+                                                      alignment:
+                                                          AlignmentDirectional
+                                                              .topEnd,
+                                                      children: [
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                      14,
+                                                                  vertical: 8),
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
                                                             children: [
-                                                              Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Text(
-                                                                    leave
-                                                                        .employeeName,
-                                                                    style:
-                                                                        TextStyle(
-                                                                      fontSize:
-                                                                          height *
-                                                                              0.016,
-                                                                      color: AppColor
-                                                                          .mainTextColor,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                    ),
-                                                                  ),
-                                                                  Text(
-                                                                    leave.leaveType ==
-                                                                            'earnedLeave'
-                                                                        ? leave.totalDays ==
-                                                                                '1'
-                                                                            ? 'Earned - Full Day Application'
-                                                                            : leave.totalDays ==
-                                                                                    '0.5'
-                                                                                ? 'Earned - Half-Day Application'
-                                                                                : 'Earned - ${leave.totalDays} Days Application'
-                                                                        : leave.leaveType ==
-                                                                                'medicalLeave'
-                                                                            ? leave.totalDays ==
-                                                                                    '1'
-                                                                                ? 'Medical - Full Day Application'
-                                                                                : leave.totalDays == '0.5'
-                                                                                    ? 'Medical - Half-Day Application'
-                                                                                    : 'Medical - ${leave.totalDays} Days Application'
-                                                                            : leave.leaveType == 'casualLeave'
-                                                                                ? leave.totalDays == '1'
-                                                                                    ? 'Casual - Full Day Application'
-                                                                                    : leave.totalDays == '0.5'
-                                                                                        ? 'Casual - Half-Day Application'
-                                                                                        : 'Casual - ${leave.totalDays} Days Application'
-                                                                                : leave.leaveType == 'paternityLeave'
-                                                                                    ? leave.totalDays == '1'
-                                                                                        ? 'Paternity - Full Day Application'
-                                                                                        : leave.totalDays == '0.5'
-                                                                                            ? 'Paternity - Half-Day Application'
-                                                                                            : 'Paternity - ${leave.totalDays} Days Application'
-                                                                                    : leave.leaveType == 'maternityLeave'
-                                                                                        ? leave.totalDays == '1'
-                                                                                            ? 'Maternity - Full Day Application'
-                                                                                            : leave.totalDays == '0.5'
-                                                                                                ? 'Maternity - Half-Day Application'
-                                                                                                : 'Maternity - ${leave.totalDays} Days Application'
-                                                                                        : leave.leaveType == 'regularized'
-                                                                                            ? 'Regularization'
-                                                                                            : leave.leaveType == 'shortLeave'
-                                                                                                ? 'Short-Leave'
-                                                                                                : leave.leaveType,
-                                                                    style:
-                                                                        TextStyle(
-                                                                      fontSize:
-                                                                          height *
-                                                                              0.012,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w600,
-                                                                      color: AppColor
-                                                                          .mainThemeColor,
-                                                                    ),
-                                                                  ),
-                                                                  Text(
-                                                                    leave.totalDays ==
-                                                                                '1' ||
-                                                                            leave.totalDays ==
-                                                                                '0.5'
-                                                                        ? DateFormat(
-                                                                                'EEE, dd MMM')
-                                                                            .format(
-                                                                                startDate)
-                                                                        : '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
-                                                                    style:
-                                                                        TextStyle(
-                                                                      fontSize:
-                                                                          height *
-                                                                              0.012,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                      color: AppColor
-                                                                          .mainTextColor,
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          SizedBox(
-                                                              height:
-                                                                  height * 0.015),
-                                                          Container(
-                                                            width: width,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              color: AppColor
-                                                                  .mainBGColor,
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(7),
-                                                              // boxShadow: [
-                                                              //   BoxShadow(
-                                                              //     color: Colors.black12,
-                                                              //     blurRadius: 4,
-                                                              //     offset: Offset(0, 2),
-                                                              //   ),
-                                                              // ],
-                                                            ),
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(8),
-                                                              child: Text(
-                                                                leave.reason,
-                                                                style: TextStyle(
-                                                                  fontSize: height *
-                                                                      0.014,
-                                                                  color: Colors
-                                                                      .black54,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          Visibility(
-                                                            visible: leave.location
-                                                                .isNotEmpty,
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      top: 12),
-                                                              child: InkWell(
-                                                                onTap: () {
-                                                                  _downloadDocument(
-                                                                      leave
-                                                                          .location);
-                                                                },
-                                                                child: Container(
-                                                                  width: width,
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    border: Border.all(
-                                                                        color: AppColor
-                                                                            .mainBGColor,
-                                                                        width: 2),
-                                                                    borderRadius:
-                                                                        BorderRadius
-                                                                            .circular(
-                                                                                12),
-                                                                    color: Colors
-                                                                        .white,
-                                                                  ),
-                                                                  child: Padding(
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .all(
-                                                                            8.0),
-                                                                    child: Row(
-                                                                      children: [
-                                                                        Icon(
-                                                                          Icons
-                                                                              .file_copy_rounded,
-                                                                          color: Colors
-                                                                              .blue,
-                                                                          size: height *
-                                                                              0.013,
-                                                                        ),
-                                                                        SizedBox(
-                                                                            width: width *
-                                                                                0.03),
-                                                                        Text(
-                                                                          'View Prescription',
-                                                                          style:
-                                                                              TextStyle(
-                                                                            color: AppColor
-                                                                                .mainTextColor2,
-                                                                            fontSize:
-                                                                                height *
-                                                                                    0.012,
-                                                                            fontWeight:
-                                                                                FontWeight.w500,
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          Visibility(
-                                                            visible: leave.status ==
-                                                                'Pending',
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      top: 18),
-                                                              child: Row(
+                                                              Row(
                                                                 mainAxisAlignment:
                                                                     MainAxisAlignment
                                                                         .spaceBetween,
                                                                 children: [
-                                                                  // Accept Button
-                                                                  GestureDetector(
-                                                                    onTap:
-                                                                        () async {
-                                                                      await leaveAction(
-                                                                          context,
-                                                                          'Approved',
-                                                                          leave.id);
-                                                                      setState(() {
-                                                                        _leaveRequest =
-                                                                            fetchLeaveRequest();
-                                                                      });
-                                                                    },
-                                                                    child:
-                                                                        Container(
-                                                                      decoration:
-                                                                          BoxDecoration(
-                                                                        borderRadius:
-                                                                            BorderRadius
-                                                                                .circular(8),
-                                                                        color: const Color
-                                                                            .fromARGB(
-                                                                            126,
-                                                                            20,
-                                                                            183,
-                                                                            25),
-                                                                      ),
-                                                                      child:
-                                                                          Padding(
-                                                                        padding: EdgeInsets.symmetric(
-                                                                            horizontal:
-                                                                                width /
-                                                                                    9,
-                                                                            vertical:
-                                                                                8),
-                                                                        child: Text(
-                                                                          'Accept',
-                                                                          style:
-                                                                              TextStyle(
-                                                                            color: AppColor
-                                                                                .mainTextColor,
-                                                                            fontSize:
-                                                                                height *
-                                                                                    0.012,
-                                                                            fontWeight:
-                                                                                FontWeight.w500,
-                                                                          ),
+                                                                  Column(
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                      Text(
+                                                                        leave
+                                                                            .employeeName,
+                                                                        style:
+                                                                            TextStyle(
+                                                                          fontSize:
+                                                                              height * 0.016,
+                                                                          color:
+                                                                              AppColor.mainTextColor,
+                                                                          fontWeight:
+                                                                              FontWeight.bold,
                                                                         ),
                                                                       ),
-                                                                    ),
-                                                                  ),
-                              
-                                                                  GestureDetector(
-                                                                    onTap:
-                                                                        () async {
-                                                                      await leaveAction(
-                                                                          context,
-                                                                          'Rejected',
-                                                                          leave.id);
-                                                                      setState(() {
-                                                                        _leaveRequest =
-                                                                            fetchLeaveRequest();
-                                                                      });
-                                                                    },
-                                                                    child:
-                                                                        Container(
-                                                                      decoration: BoxDecoration(
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(
-                                                                                  8),
-                                                                          color: AppColor
-                                                                              .mainBGColor),
-                                                                      child:
-                                                                          Padding(
-                                                                        padding: EdgeInsets.symmetric(
-                                                                            horizontal:
-                                                                                width /
-                                                                                    9,
-                                                                            vertical:
-                                                                                8),
-                                                                        child: Text(
-                                                                          'Decline',
-                                                                          style:
-                                                                              TextStyle(
-                                                                            color: AppColor
-                                                                                .mainTextColor,
-                                                                            fontSize:
-                                                                                height *
-                                                                                    0.012,
-                                                                            fontWeight:
-                                                                                FontWeight.w500,
-                                                                          ),
+                                                                      Text(
+                                                                        leave.leaveType ==
+                                                                                'earnedLeave'
+                                                                            ? leave.totalDays == '1'
+                                                                                ? 'Earned - Full Day Application'
+                                                                                : leave.totalDays == '0.5'
+                                                                                    ? 'Earned - Half-Day Application'
+                                                                                    : 'Earned - ${leave.totalDays} Days Application'
+                                                                            : leave.leaveType == 'medicalLeave'
+                                                                                ? leave.totalDays == '1'
+                                                                                    ? 'Medical - Full Day Application'
+                                                                                    : leave.totalDays == '0.5'
+                                                                                        ? 'Medical - Half-Day Application'
+                                                                                        : 'Medical - ${leave.totalDays} Days Application'
+                                                                                : leave.leaveType == 'casualLeave'
+                                                                                    ? leave.totalDays == '1'
+                                                                                        ? 'Casual - Full Day Application'
+                                                                                        : leave.totalDays == '0.5'
+                                                                                            ? 'Casual - Half-Day Application'
+                                                                                            : 'Casual - ${leave.totalDays} Days Application'
+                                                                                    : leave.leaveType == 'paternityLeave'
+                                                                                        ? leave.totalDays == '1'
+                                                                                            ? 'Paternity - Full Day Application'
+                                                                                            : leave.totalDays == '0.5'
+                                                                                                ? 'Paternity - Half-Day Application'
+                                                                                                : 'Paternity - ${leave.totalDays} Days Application'
+                                                                                        : leave.leaveType == 'maternityLeave'
+                                                                                            ? leave.totalDays == '1'
+                                                                                                ? 'Maternity - Full Day Application'
+                                                                                                : leave.totalDays == '0.5'
+                                                                                                    ? 'Maternity - Half-Day Application'
+                                                                                                    : 'Maternity - ${leave.totalDays} Days Application'
+                                                                                            : leave.leaveType == 'regularized'
+                                                                                                ? 'Regularization'
+                                                                                                : leave.leaveType == 'shortLeave'
+                                                                                                    ? 'Short-Leave'
+                                                                                                    : leave.leaveType,
+                                                                        style:
+                                                                            TextStyle(
+                                                                          fontSize:
+                                                                              height * 0.012,
+                                                                          fontWeight:
+                                                                              FontWeight.w600,
+                                                                          color:
+                                                                              AppColor.mainThemeColor,
                                                                         ),
                                                                       ),
-                                                                    ),
+                                                                      Text(
+                                                                        leave.totalDays == '1' ||
+                                                                                leave.totalDays == '0.5'
+                                                                            ? DateFormat('EEE, dd MMM').format(startDate)
+                                                                            : '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
+                                                                        style:
+                                                                            TextStyle(
+                                                                          fontSize:
+                                                                              height * 0.012,
+                                                                          fontWeight:
+                                                                              FontWeight.bold,
+                                                                          color:
+                                                                              AppColor.mainTextColor,
+                                                                        ),
+                                                                      ),
+                                                                    ],
                                                                   ),
                                                                 ],
                                                               ),
-                                                            ),
+                                                              SizedBox(
+                                                                  height:
+                                                                      height *
+                                                                          0.015),
+                                                              Container(
+                                                                width: width,
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  color: AppColor
+                                                                      .mainBGColor,
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              7),
+                                                                  // boxShadow: [
+                                                                  //   BoxShadow(
+                                                                  //     color: Colors.black12,
+                                                                  //     blurRadius: 4,
+                                                                  //     offset: Offset(0, 2),
+                                                                  //   ),
+                                                                  // ],
+                                                                ),
+                                                                child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .all(
+                                                                          8),
+                                                                  child: Text(
+                                                                    leave
+                                                                        .reason,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          height *
+                                                                              0.014,
+                                                                      color: Colors
+                                                                          .black54,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w400,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              Visibility(
+                                                                visible: leave
+                                                                    .location
+                                                                    .isNotEmpty,
+                                                                child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .only(
+                                                                          top:
+                                                                              12),
+                                                                  child:
+                                                                      InkWell(
+                                                                    onTap: () {
+                                                                      _downloadDocument(
+                                                                          leave
+                                                                              .location);
+                                                                    },
+                                                                    child:
+                                                                        Container(
+                                                                      width:
+                                                                          width,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        border: Border.all(
+                                                                            color:
+                                                                                AppColor.mainBGColor,
+                                                                            width: 2),
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(12),
+                                                                        color: Colors
+                                                                            .white,
+                                                                      ),
+                                                                      child:
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .all(
+                                                                            8.0),
+                                                                        child:
+                                                                            Row(
+                                                                          children: [
+                                                                            Icon(
+                                                                              Icons.file_copy_rounded,
+                                                                              color: Colors.blue,
+                                                                              size: height * 0.013,
+                                                                            ),
+                                                                            SizedBox(width: width * 0.03),
+                                                                            Text(
+                                                                              'View Prescription',
+                                                                              style: TextStyle(
+                                                                                color: AppColor.mainTextColor2,
+                                                                                fontSize: height * 0.012,
+                                                                                fontWeight: FontWeight.w500,
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              Visibility(
+                                                                visible: leave
+                                                                        .status ==
+                                                                    'Pending',
+                                                                child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .only(
+                                                                          top:
+                                                                              18),
+                                                                  child: Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceBetween,
+                                                                    children: [
+                                                                      // Accept Button
+                                                                      GestureDetector(
+                                                                        onTap:
+                                                                            () async {
+                                                                          await leaveAction(
+                                                                              context,
+                                                                              'Approved',
+                                                                              leave.id);
+                                                                          setState(
+                                                                              () {
+                                                                            _teamLeaveRequest =
+                                                                                fetchLeaveRequest(_selectedText);
+                                                                          });
+                                                                        },
+                                                                        child:
+                                                                            Container(
+                                                                          decoration:
+                                                                              BoxDecoration(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(8),
+                                                                            color: const Color.fromARGB(
+                                                                                126,
+                                                                                20,
+                                                                                183,
+                                                                                25),
+                                                                          ),
+                                                                          child:
+                                                                              Padding(
+                                                                            padding:
+                                                                                EdgeInsets.symmetric(horizontal: width / 9, vertical: 8),
+                                                                            child:
+                                                                                Text(
+                                                                              'Accept',
+                                                                              style: TextStyle(
+                                                                                color: AppColor.mainTextColor,
+                                                                                fontSize: height * 0.012,
+                                                                                fontWeight: FontWeight.w500,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+
+                                                                      GestureDetector(
+                                                                        onTap:
+                                                                            () async {
+                                                                          await leaveAction(
+                                                                              context,
+                                                                              'Rejected',
+                                                                              leave.id);
+                                                                          setState(
+                                                                              () {
+                                                                            _teamLeaveRequest =
+                                                                                fetchLeaveRequest(_selectedText);
+                                                                          });
+                                                                        },
+                                                                        child:
+                                                                            Container(
+                                                                          decoration: BoxDecoration(
+                                                                              borderRadius: BorderRadius.circular(8),
+                                                                              color: AppColor.mainBGColor),
+                                                                          child:
+                                                                              Padding(
+                                                                            padding:
+                                                                                EdgeInsets.symmetric(horizontal: width / 9, vertical: 8),
+                                                                            child:
+                                                                                Text(
+                                                                              'Decline',
+                                                                              style: TextStyle(
+                                                                                color: AppColor.mainTextColor,
+                                                                                fontSize: height * 0.012,
+                                                                                fontWeight: FontWeight.w500,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                  height:
+                                                                      height *
+                                                                          0.005),
+                                                            ],
                                                           ),
-                                                          SizedBox(
-                                                              height:
-                                                                  height * 0.005),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      decoration: BoxDecoration(
-                                                          color: leave.status ==
-                                                                  'Pending'
-                                                              ? Colors.amber
-                                                              : leave.status ==
-                                                                      'Approved'
-                                                                  ? Colors.green
-                                                                  : Colors.red,
-                                                          borderRadius:
-                                                              BorderRadius.only(
-                                                                  topRight: Radius
-                                                                      .circular(10),
-                                                                  bottomLeft: Radius
-                                                                      .circular(
-                                                                          20))),
-                                                      child: Padding(
-                                                        padding: const EdgeInsets
-                                                            .symmetric(
-                                                            vertical: 0,
-                                                            horizontal: 20),
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets.all(
-                                                                  7.0),
-                                                          child: Text(
-                                                            leave.status,
-                                                            style: TextStyle(
-                                                                fontSize:
-                                                                    height * 0.012,
-                                                                fontWeight:
-                                                                    FontWeight.w400,
-                                                                color:
-                                                                    leave.status ==
+                                                        ),
+                                                        Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: leave.status ==
+                                                                          'Pending'
+                                                                      ? Colors
+                                                                          .amber
+                                                                      : leave.status ==
+                                                                              'Approved'
+                                                                          ? Colors
+                                                                              .green
+                                                                          : Colors
+                                                                              .red,
+                                                                  borderRadius: BorderRadius.only(
+                                                                      topRight:
+                                                                          Radius.circular(
+                                                                              10),
+                                                                      bottomLeft:
+                                                                          Radius.circular(
+                                                                              20))),
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    vertical: 0,
+                                                                    horizontal:
+                                                                        20),
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(7.0),
+                                                              child: Text(
+                                                                leave.status,
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        height *
+                                                                            0.012,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w400,
+                                                                    color: leave.status ==
                                                                             'Pending'
                                                                         ? Colors
                                                                             .black
                                                                         : Colors
                                                                             .white),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            },
-                                            separatorBuilder: (context, index) =>
-                                                SizedBox(height: 10),
-                                          );
-                                        }
-                                      })),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Expanded(
-                                child: FutureBuilder<List<CompOffRequest>>(
-                                    future: _compOffRequest,
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return Center(
-                                          child: LoadingAnimationWidget
-                                              .threeArchedCircle(
-                                            color: AppColor.mainTextColor2,
-                                            size: height * 0.03,
-                                          ),
-                                        );
-                                      } else if (snapshot.hasError) {
-                                        return Center(
-                                          child: Card(
-                                            color: AppColor.mainFGColor,
-                                            elevation: 4,
-                                            margin: EdgeInsets.all(0),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child:
-                                                  Text('No Comp-Off Request Found'),
-                                            ),
-                                            shadowColor:
-                                                Colors.black.withOpacity(0.1),
-                                          ),
-                                        );
-                                      } else if (!snapshot.hasData ||
-                                          snapshot.data!.isEmpty) {
-                                        return Center(
-                                            child:
-                                                Text('No Comp-Off Request Found'));
-                                      } else {
-                                        List<CompOffRequest> items = snapshot.data!;
-                              
-                                        return ListView.separated(
-                                          itemCount: items.length,
-                                          itemBuilder: (context, index) {
-                                            final leave = items[index];
-                                            // final startDate = DateTime.parse(leave.appliedDate);
-                              
-                                            return Card(
-                                              color: AppColor.mainFGColor,
-                                              elevation: 8,
-                                              margin: EdgeInsets.all(0),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              shadowColor:
-                                                  Colors.black.withOpacity(0.2),
-                                              child: Stack(
-                                                alignment:
-                                                    AlignmentDirectional.topEnd,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                            horizontal: 14,
-                                                            vertical: 8),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment.start,
-                                                      children: [
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Text(
-                                                                  leave
-                                                                      .employeeName,
-                                                                  style: TextStyle(
-                                                                    fontSize:
-                                                                        height *
-                                                                            0.016,
-                                                                    color: AppColor
-                                                                        .mainTextColor,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                  ),
-                                                                ),
-                                                                Text(
-                                                                  'Comp-Off ${leave.totalDays} Days',
-                                                                  style: TextStyle(
-                                                                    fontSize:
-                                                                        height *
-                                                                            0.012,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w600,
-                                                                    color: AppColor
-                                                                        .mainThemeColor,
-                                                                  ),
-                                                                ),
-                                                                Text(
-                                                                  leave.compOffDate,
-                              
-                                                                  // leave.totalDays == '1' ||
-                                                                  //         leave.totalDays == '0.5'
-                                                                  //     ? DateFormat('EEE, dd MMM')
-                                                                  //         .format(startDate)
-                                                                  //     : '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
-                                                                  style: TextStyle(
-                                                                    fontSize:
-                                                                        height *
-                                                                            0.012,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: AppColor
-                                                                        .mainTextColor,
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        SizedBox(
-                                                            height: height * 0.015),
-                                                        Container(
-                                                          width: width,
-                                                          decoration: BoxDecoration(
-                                                            color: AppColor
-                                                                .mainBGColor,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(7),
-                                                            // boxShadow: [
-                                                            //   BoxShadow(
-                                                            //     color: Colors.black12,
-                                                            //     blurRadius: 4,
-                                                            //     offset: Offset(0, 2),
-                                                            //   ),
-                                                            // ],
-                                                          ),
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .all(8),
-                                                            child: Text(
-                                                              leave.reason,
-                                                              style: TextStyle(
-                                                                fontSize:
-                                                                    height * 0.014,
-                                                                color:
-                                                                    Colors.black54,
-                                                                fontWeight:
-                                                                    FontWeight.w400,
                                                               ),
                                                             ),
                                                           ),
                                                         ),
-                                                        // Visibility(
-                                                        //   visible: leave.location.isNotEmpty,
-                                                        //   child: Padding(
-                                                        //     padding: const EdgeInsets.only(top: 12),
-                                                        //     child: Container(
-                                                        //       width: width,
-                                                        //       decoration: BoxDecoration(
-                                                        //         border: Border.all(
-                                                        //             color: AppColor.mainBGColor,
-                                                        //             width: 2),
-                                                        //         borderRadius:
-                                                        //             BorderRadius.circular(12),
-                                                        //         color: Colors.white,
-                                                        //       ),
-                                                        //       child: Padding(
-                                                        //         padding: const EdgeInsets.all(8.0),
-                                                        //         child: Row(
-                                                        //           children: [
-                                                        //             Icon(
-                                                        //               Icons.file_copy_rounded,
-                                                        //               color: Colors.blue,
-                                                        //               size: height * 0.013,
-                                                        //             ),
-                                                        //             SizedBox(width: width * 0.03),
-                                                        //             Text(
-                                                        //               'IMG_45544871.JPG',
-                                                        //               style: TextStyle(
-                                                        //                 color:
-                                                        //                     AppColor.mainTextColor2,
-                                                        //                 fontSize: height * 0.012,
-                                                        //                 fontWeight: FontWeight.w500,
-                                                        //               ),
-                                                        //             ),
-                                                        //           ],
-                                                        //         ),
-                                                        //       ),
-                                                        //     ),
-                                                        //   ),
-                                                        // ),
-                                                        Visibility(
-                                                          visible: leave.status ==
-                                                              'Pending',
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .only(top: 18),
-                                                            child: Row(
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
+                                                separatorBuilder:
+                                                    (context, index) =>
+                                                        SizedBox(height: 10),
+                                              );
+                                            }
+                                          })),
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                   Card(
+                                color: AppColor.mainFGColor,
+                                elevation: 4,
+                                margin: EdgeInsets.all(0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                shadowColor: Colors.black.withOpacity(0.1),
+                                child: Padding(
+                                  padding: EdgeInsets.all(4),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        _compoffFilterBTNTeam(
+                                            'Pending', height, width),
+                                        _compoffFilterBTNTeam(
+                                            'Approved', height, width),
+                                        _compoffFilterBTNTeam(
+                                            'Rejected', height, width),
+                                      ]),
+                                ),
+                              ),
+                              SizedBox(
+                                height: height * 0.015,
+                              ),
+                                  Expanded(
+                                    child: FutureBuilder<List<CompOffRequest>>(
+                                        future: _teamCompOffRequest,
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return Center(
+                                              child: LoadingAnimationWidget
+                                                  .threeArchedCircle(
+                                                color: AppColor.mainTextColor2,
+                                                size: height * 0.03,
+                                              ),
+                                            );
+                                          } else if (snapshot.hasError) {
+                                            return Center(
+                                              child: Card(
+                                                color: AppColor.mainFGColor,
+                                                elevation: 4,
+                                                margin: EdgeInsets.all(0),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Text(
+                                                      'No Comp-Off Request Found'),
+                                                ),
+                                                shadowColor: Colors.black
+                                                    .withOpacity(0.1),
+                                              ),
+                                            );
+                                          } else if (!snapshot.hasData ||
+                                              snapshot.data!.isEmpty) {
+                                            return Center(
+                                                child: Text(
+                                                    'No Comp-Off Request Found'));
+                                          } else {
+                                            List<CompOffRequest> items =
+                                                snapshot.data!;
+
+                                            return ListView.separated(
+                                              itemCount: items.length,
+                                              itemBuilder: (context, index) {
+                                                final leave = items[index];
+                                                // final startDate = DateTime.parse(leave.appliedDate);
+
+                                                return Card(
+                                                  color: AppColor.mainFGColor,
+                                                  elevation: 8,
+                                                  margin: EdgeInsets.all(0),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
+                                                  shadowColor: Colors.black
+                                                      .withOpacity(0.2),
+                                                  child: Stack(
+                                                    alignment:
+                                                        AlignmentDirectional
+                                                            .topEnd,
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 14,
+                                                                vertical: 8),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Row(
                                                               mainAxisAlignment:
                                                                   MainAxisAlignment
                                                                       .spaceBetween,
                                                               children: [
-                                                                // Accept Button
-                                                                GestureDetector(
-                                                                  onTap: () async {
-                                                                    await compOffActionPut(
-                                                                        context,
-                                                                        'Approved',
-                                                                        leave.id);
-                                                                    setState(() {
-                                                                      _compOffRequest =
-                                                                          fetchCompOffRequest(
-                                                                              '');
-                                                                    });
-                                                                  },
-                                                                  child: Container(
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      borderRadius:
-                                                                          BorderRadius
-                                                                              .circular(
-                                                                                  8),
-                                                                      color: const Color
-                                                                          .fromARGB(
-                                                                          126,
-                                                                          20,
-                                                                          183,
-                                                                          25),
-                                                                    ),
-                                                                    child: Padding(
-                                                                      padding: EdgeInsets.symmetric(
-                                                                          horizontal:
-                                                                              width /
-                                                                                  9,
-                                                                          vertical:
-                                                                              8),
-                                                                      child: Text(
-                                                                        'Approve',
-                                                                        style:
-                                                                            TextStyle(
-                                                                          color: AppColor
-                                                                              .mainTextColor,
-                                                                          fontSize:
-                                                                              height *
-                                                                                  0.012,
-                                                                          fontWeight:
-                                                                              FontWeight
-                                                                                  .w500,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                              
-                                                                GestureDetector(
-                                                                  onTap: () async {
-                                                                    await compOffActionPut(
-                                                                        context,
-                                                                        'Rejected',
-                                                                        leave.id);
-                                                                    setState(() {
-                                                                      _compOffRequest =
-                                                                          fetchCompOffRequest(
-                                                                              '');
-                                                                    });
-                                                                  },
-                                                                  child: Container(
-                                                                    decoration: BoxDecoration(
-                                                                        borderRadius:
-                                                                            BorderRadius
-                                                                                .circular(
-                                                                                    8),
+                                                                Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Text(
+                                                                      leave
+                                                                          .employeeName,
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            height *
+                                                                                0.016,
                                                                         color: AppColor
-                                                                            .mainBGColor),
-                                                                    child: Padding(
-                                                                      padding: EdgeInsets.symmetric(
-                                                                          horizontal:
-                                                                              width /
-                                                                                  9,
-                                                                          vertical:
-                                                                              8),
-                                                                      child: Text(
-                                                                        'Reject',
-                                                                        style:
-                                                                            TextStyle(
-                                                                          color: AppColor
-                                                                              .mainTextColor,
-                                                                          fontSize:
-                                                                              height *
-                                                                                  0.012,
-                                                                          fontWeight:
-                                                                              FontWeight
-                                                                                  .w500,
-                                                                        ),
+                                                                            .mainTextColor,
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
                                                                       ),
                                                                     ),
-                                                                  ),
+                                                                    Text(
+                                                                      'Comp-Off Request (${leave.totalDays})',
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            height *
+                                                                                0.012,
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                        color: AppColor
+                                                                            .mainThemeColor,
+                                                                      ),
+                                                                    ),
+                                                                    Text(
+                                                                      leave
+                                                                          .compOffDate,
+
+                                                                      // leave.totalDays == '1' ||
+                                                                      //         leave.totalDays == '0.5'
+                                                                      //     ? DateFormat('EEE, dd MMM')
+                                                                      //         .format(startDate)
+                                                                      //     : '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            height *
+                                                                                0.012,
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                        color: AppColor
+                                                                            .mainTextColor,
+                                                                      ),
+                                                                    ),
+                                                                  ],
                                                                 ),
                                                               ],
                                                             ),
-                                                          ),
-                                                        ),
-                                                        SizedBox(
-                                                            height: height * 0.005),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Container(
-                                                    decoration: BoxDecoration(
-                                                        color: leave.status ==
-                                                                'Pending'
-                                                            ? Colors.amber
-                                                            : leave.status ==
-                                                                    'Approved'
-                                                                ? Colors.green
-                                                                : Colors.red,
-                                                        borderRadius:
-                                                            BorderRadius.only(
-                                                                topRight: Radius
-                                                                    .circular(10),
-                                                                bottomLeft:
-                                                                    Radius.circular(
-                                                                        20))),
-                                                    child: Padding(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          vertical: 0,
-                                                          horizontal: 20),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets.all(
-                                                                7.0),
-                                                        child: Text(
-                                                          leave.status,
-                                                          style: TextStyle(
-                                                              fontSize:
-                                                                  height * 0.012,
-                                                              fontWeight:
-                                                                  FontWeight.w400,
-                                                              color: leave.status ==
-                                                                      'Pending'
-                                                                  ? Colors.black
-                                                                  : Colors.white),
+                                                            SizedBox(
+                                                                height: height *
+                                                                    0.015),
+                                                            Container(
+                                                              width: width,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: AppColor
+                                                                    .mainBGColor,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            7),
+                                                                // boxShadow: [
+                                                                //   BoxShadow(
+                                                                //     color: Colors.black12,
+                                                                //     blurRadius: 4,
+                                                                //     offset: Offset(0, 2),
+                                                                //   ),
+                                                                // ],
+                                                              ),
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                child: Text(
+                                                                  leave.reason,
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        height *
+                                                                            0.014,
+                                                                    color: Colors
+                                                                        .black54,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w400,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            // Visibility(
+                                                            //   visible: leave.location.isNotEmpty,
+                                                            //   child: Padding(
+                                                            //     padding: const EdgeInsets.only(top: 12),
+                                                            //     child: Container(
+                                                            //       width: width,
+                                                            //       decoration: BoxDecoration(
+                                                            //         border: Border.all(
+                                                            //             color: AppColor.mainBGColor,
+                                                            //             width: 2),
+                                                            //         borderRadius:
+                                                            //             BorderRadius.circular(12),
+                                                            //         color: Colors.white,
+                                                            //       ),
+                                                            //       child: Padding(
+                                                            //         padding: const EdgeInsets.all(8.0),
+                                                            //         child: Row(
+                                                            //           children: [
+                                                            //             Icon(
+                                                            //               Icons.file_copy_rounded,
+                                                            //               color: Colors.blue,
+                                                            //               size: height * 0.013,
+                                                            //             ),
+                                                            //             SizedBox(width: width * 0.03),
+                                                            //             Text(
+                                                            //               'IMG_45544871.JPG',
+                                                            //               style: TextStyle(
+                                                            //                 color:
+                                                            //                     AppColor.mainTextColor2,
+                                                            //                 fontSize: height * 0.012,
+                                                            //                 fontWeight: FontWeight.w500,
+                                                            //               ),
+                                                            //             ),
+                                                            //           ],
+                                                            //         ),
+                                                            //       ),
+                                                            //     ),
+                                                            //   ),
+                                                            // ),
+                                                            Visibility(
+                                                              visible: leave
+                                                                      .status ==
+                                                                  'Pending',
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .only(
+                                                                        top:
+                                                                            18),
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .spaceBetween,
+                                                                  children: [
+                                                                    // Accept Button
+                                                                    GestureDetector(
+                                                                      onTap:
+                                                                          () async {
+                                                                        await compOffActionPut(
+                                                                            context,
+                                                                            'Approved',
+                                                                            leave.id);
+                                                                        setState(
+                                                                            () {
+                                                                          _teamCompOffRequest =
+                                                                              fetchCompOffRequest(_selectedCompoffText);
+                                                                        });
+                                                                      },
+                                                                      child:
+                                                                          Container(
+                                                                        decoration:
+                                                                            BoxDecoration(
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(8),
+                                                                          color: const Color
+                                                                              .fromARGB(
+                                                                              126,
+                                                                              20,
+                                                                              183,
+                                                                              25),
+                                                                        ),
+                                                                        child:
+                                                                            Padding(
+                                                                          padding: EdgeInsets.symmetric(
+                                                                              horizontal: width / 9,
+                                                                              vertical: 8),
+                                                                          child:
+                                                                              Text(
+                                                                            'Approve',
+                                                                            style:
+                                                                                TextStyle(
+                                                                              color: AppColor.mainTextColor,
+                                                                              fontSize: height * 0.012,
+                                                                              fontWeight: FontWeight.w500,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+
+                                                                    GestureDetector(
+                                                                      onTap:
+                                                                          () async {
+                                                                        await compOffActionPut(
+                                                                            context,
+                                                                            'Rejected',
+                                                                            leave.id);
+                                                                        setState(
+                                                                            () {
+                                                                          _teamCompOffRequest =
+                                                                              fetchCompOffRequest(_selectedCompoffText);
+                                                                        });
+                                                                      },
+                                                                      child:
+                                                                          Container(
+                                                                        decoration: BoxDecoration(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(8),
+                                                                            color: AppColor.mainBGColor),
+                                                                        child:
+                                                                            Padding(
+                                                                          padding: EdgeInsets.symmetric(
+                                                                              horizontal: width / 9,
+                                                                              vertical: 8),
+                                                                          child:
+                                                                              Text(
+                                                                            'Reject',
+                                                                            style:
+                                                                                TextStyle(
+                                                                              color: AppColor.mainTextColor,
+                                                                              fontSize: height * 0.012,
+                                                                              fontWeight: FontWeight.w500,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                                height: height *
+                                                                    0.005),
+                                                          ],
                                                         ),
                                                       ),
-                                                    ),
+                                                      Container(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                                color: leave.status ==
+                                                                        'Pending'
+                                                                    ? Colors
+                                                                        .amber
+                                                                    : leave.status ==
+                                                                            'Approved'
+                                                                        ? Colors
+                                                                            .green
+                                                                        : Colors
+                                                                            .red,
+                                                                borderRadius: BorderRadius.only(
+                                                                    topRight: Radius
+                                                                        .circular(
+                                                                            10),
+                                                                    bottomLeft:
+                                                                        Radius.circular(
+                                                                            20))),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  vertical: 0,
+                                                                  horizontal:
+                                                                      20),
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(7.0),
+                                                            child: Text(
+                                                              leave.status,
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                      height *
+                                                                          0.012,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400,
+                                                                  color: leave.status ==
+                                                                          'Pending'
+                                                                      ? Colors
+                                                                          .black
+                                                                      : Colors
+                                                                          .white),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
-                                              ),
+                                                );
+                                              },
+                                              separatorBuilder:
+                                                  (context, index) =>
+                                                      SizedBox(height: 10),
                                             );
-                                          },
-                                          separatorBuilder: (context, index) =>
-                                              SizedBox(height: 10),
-                                        );
-                                      }
-                                    }),
+                                          }
+                                        }),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ]),
+                            ]),
                       )
                     ],
                   ),
@@ -1879,13 +1994,16 @@ class _LeaveScreenState extends State<LeaveScreenManager>
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 FloatingActionButton.extended(
-                  heroTag:'btn1',
+                    heroTag: 'btn1',
                     backgroundColor: AppColor.mainThemeColor,
                     onPressed: () {
                       setState(() {
                         switchMode = !switchMode;
-                        _leaveRequest = fetchLeaveRequest();
-                        _compOffRequest = fetchCompOffRequest('');
+
+                        _myLeaveHistory =
+                            fetchLeaveHistory(_selectedText, widget.empID);
+                        _myCompOffRequest =
+                            fetchOwnCompOffRequest(_selectedCompoffText);
                       });
                     },
                     label: Icon(
@@ -1896,7 +2014,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                   height: height * 0.015,
                 ),
                 FloatingActionButton.extended(
-                            heroTag:'btn2',
+                  heroTag: 'btn2',
                   backgroundColor: AppColor.mainThemeColor,
                   onPressed: () => showCupertinoModalBottomSheet(
                     expand: true,
@@ -1916,6 +2034,81 @@ class _LeaveScreenState extends State<LeaveScreenManager>
     );
   }
 
+  Widget _compoffSelectedButton(String text, double height, double width) {
+    Color activeColor;
+    Color activeText;
+
+    if (_selectedCompoffText == text) {
+      activeColor = AppColor.mainThemeColor;
+      activeText = AppColor.mainFGColor;
+    } else {
+      activeColor = Colors.transparent;
+      activeText = const Color.fromARGB(141, 0, 0, 0);
+    }
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedCompoffText = text;
+          _myCompOffRequest = fetchOwnCompOffRequest(_selectedCompoffText);
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color: activeColor,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 12),
+          child: Text(
+            text,
+            style: TextStyle(
+              color: activeText,
+              fontSize: height * 0.015,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _selectButton(String text, double height, double width) {
+    Color activeColor;
+    Color activeText;
+
+    if (_selectedText == text) {
+      activeColor = AppColor.mainThemeColor;
+      activeText = AppColor.mainFGColor;
+    } else {
+      activeColor = Colors.transparent;
+      activeText = const Color.fromARGB(141, 0, 0, 0);
+    }
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedText = text;
+          _myLeaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color: activeColor,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 12),
+          child: Text(
+            text,
+            style: TextStyle(
+              color: activeText,
+              fontSize: height * 0.015,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
   SizedBox leaveWidget(
       double height, double width, String leave, String leaveCount) {
     return SizedBox(
@@ -1952,7 +2145,46 @@ class _LeaveScreenState extends State<LeaveScreenManager>
     );
   }
 
-  Widget _selectButton(String text, double height, double width) {
+
+  Widget _compoffFilterBTNTeam(String text, double height, double width) {
+    Color activeColor;
+    Color activeText;
+
+    if (_selectedCompoffText == text) {
+      activeColor = AppColor.mainThemeColor;
+      activeText = AppColor.mainFGColor;
+    } else {
+      activeColor = Colors.transparent;
+      activeText = const Color.fromARGB(141, 0, 0, 0);
+    }
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedCompoffText = text;
+            _teamCompOffRequest = fetchCompOffRequest(_selectedCompoffText);
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color: activeColor,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 12),
+          child: Text(
+            text,
+            style: TextStyle(
+              color: activeText,
+              fontSize: height * 0.015,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _leaveFilterBTNTeam(String text, double height, double width) {
     Color activeColor;
     Color activeText;
 
@@ -1968,7 +2200,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
       onTap: () {
         setState(() {
           _selectedText = text;
-          _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+           _teamLeaveRequest = fetchLeaveRequest(_selectedText);
         });
       },
       child: Container(

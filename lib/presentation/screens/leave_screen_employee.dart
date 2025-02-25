@@ -44,7 +44,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
   void initState() {
     _compOffRequest = fetchOwnCompOffRequest(_selectedText);
     _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
-    _tabController = TabController(vsync: this, length: 3);
+    _tabController = TabController(vsync: this, length: 2);
     _tabController.addListener(_handleTabSelection);
     super.initState();
     SystemChrome.setPreferredOrientations([

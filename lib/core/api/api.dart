@@ -192,7 +192,7 @@ Future<void> applyLeave(
           "shift": leaveType == 'Casual Leave' || leaveType == 'Earned Leave'
               ? _selectedText
               : "",
-          "location": _authBox.get('file')
+          "location": leaveType == 'Medical Leave' ? _authBox.get('file') : ''
         });
     if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -364,7 +364,7 @@ Future<void> applyCompoff(
   }
 }
 
-Future<List<LeaveRequests>> fetchLeaveRequest() async {
+Future<List<LeaveRequests>> fetchLeaveRequest(String status) async {
   String token = _authBox.get('token');
   print(token);
 
@@ -373,10 +373,15 @@ Future<List<LeaveRequests>> fetchLeaveRequest() async {
       options: Options(headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token"
-      }));
+      }),
+      queryParameters: {
+        "limit": 20,
+      });
 
   if (response.statusCode == 200) {
-    List<dynamic> data = response.data['data'];
+    List<dynamic> data = response.data['data']
+        .where((leave) => leave['status'] == status)
+        .toList();
 
     return data.map((leaveData) => LeaveRequests.fromJson(leaveData)).toList();
   } else {
@@ -398,15 +403,15 @@ Future<void> leaveAction(
     if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Request Approved'),
-          backgroundColor: Colors.green,
+          content: Text(response.data['message']),
+          backgroundColor: action == "Approved" ? Colors.green : Colors.red,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Request Declined'),
-          backgroundColor: Colors.red,
+          content: Text(response.data['message']),
+          backgroundColor: action == "Approved" ? Colors.green : Colors.red,
         ),
       );
     }
@@ -683,21 +688,13 @@ Future<List<CompOffRequest>> fetchCompOffRequest(String status) async {
       }));
 
   if (response.statusCode == 200) {
-    if (status != '') {
-      List<dynamic> data = response.data['data']
+        List<dynamic> data = response.data['data']
           .where((leave) => leave['status'] == status)
           .toList();
 
       return data
           .map((leaveData) => CompOffRequest.fromJson(leaveData))
           .toList();
-    } else {
-      List<dynamic> data = response.data['data'];
-
-      return data
-          .map((leaveData) => CompOffRequest.fromJson(leaveData))
-          .toList();
-    }
   } else {
     return [];
   }
@@ -717,21 +714,11 @@ Future<List<CompOffRequest>> fetchOwnCompOffRequest(String status) async {
       }));
 
   if (response.statusCode == 200) {
-    if (status != '') {
-      List<dynamic> data = response.data['data']
-          .where((leave) => leave['status'] == status)
-          .toList();
+    List<dynamic> data = response.data['data']
+        .where((leave) => leave['status'] == status)
+        .toList();
 
-      return data
-          .map((leaveData) => CompOffRequest.fromJson(leaveData))
-          .toList();
-    } else {
-      List<dynamic> data = response.data['data'];
-
-      return data
-          .map((leaveData) => CompOffRequest.fromJson(leaveData))
-          .toList();
-    }
+    return data.map((leaveData) => CompOffRequest.fromJson(leaveData)).toList();
   } else {
     return [];
   }
@@ -757,15 +744,15 @@ Future<void> compOffActionPut(
     if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Request Approved'),
-          backgroundColor: Colors.green,
+          content: Text(response.data['message']),
+          backgroundColor: action == "Approved" ? Colors.green : Colors.red,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Request Declined'),
-          backgroundColor: Colors.red,
+          content: Text(response.data['message']),
+          backgroundColor: action == "Approved" ? Colors.green : Colors.red,
         ),
       );
     }
@@ -783,7 +770,6 @@ Future<void> ownCompOffActionDelete(
   BuildContext context,
   String id,
 ) async {
-
   print(id);
   try {
     final response = await dio.delete(
@@ -794,7 +780,7 @@ Future<void> ownCompOffActionDelete(
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(response.data['message']),
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.red,
         ),
       );
     } else {
