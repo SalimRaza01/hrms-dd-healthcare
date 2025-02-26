@@ -1,6 +1,7 @@
 // ignore_for_file: sort_child_properties_last
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,7 @@ import 'package:provider/provider.dart';
 import 'apply_leave.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
 
 class LeaveScreenManager extends StatefulWidget {
   final String empID;
@@ -77,8 +79,11 @@ class _LeaveScreenState extends State<LeaveScreenManager>
   }
 
   Future<void> _downloadDocument(String url) async {
-    // Request storage permissions
-    final status = await Permission.manageExternalStorage.request();
+    final plugin = DeviceInfoPlugin();
+    final android = await plugin.androidInfo;
+    final status = android.version.sdkInt < 33
+        ? await Permission.manageExternalStorage.request()
+        : PermissionStatus.granted;
     if (!status.isGranted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content:
@@ -105,10 +110,10 @@ class _LeaveScreenState extends State<LeaveScreenManager>
         url,
         options: Options(responseType: ResponseType.bytes),
       );
-
-      final myDownloads = '/storage/emulated/0/Download';
+final directory = await getExternalStorageDirectory();
       final fileName = url.split('/').last;
-      final filePath = '$myDownloads/$fileName';
+final filePath = '${directory!.path}/$fileName.pdf';
+
 
       final file = File(filePath);
       await file.writeAsBytes(response.data);

@@ -1,3 +1,4 @@
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:hrms/core/api/api.dart';
@@ -6,8 +7,8 @@ import 'package:dio/dio.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
-import 'package:open_file/open_file.dart'; 
-// import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../core/model/models.dart';
 
 class ViewDocument extends StatefulWidget {
@@ -20,10 +21,8 @@ class ViewDocument extends StatefulWidget {
 
 class _ViewDocumentState extends State<ViewDocument> {
   late String documentType;
-    bool isDownloading = false;
+  bool isDownloading = false;
   late Future<List<DocumentListModel>> documentList;
-
-
 
   @override
   void initState() {
@@ -31,126 +30,76 @@ class _ViewDocumentState extends State<ViewDocument> {
     documentList = fetchDocumentList(widget.documentType);
   }
 
-
-Future<void> _downloadDocument(String url, String filename) async {
-  // Request storage permissions
-  final status = await Permission.manageExternalStorage.request();
-  if (!status.isGranted) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Storage permission is required to download the document'),
-      backgroundColor: Colors.red,
-    ));
-    return;
-  }
-
-  setState(() {
-    isDownloading = true;
-  });
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('Downloading Document'),
-      backgroundColor: Colors.blue,
-    ),
-  );
-
-  try {
-    final dio = Dio();
-    final response = await dio.get(
-      url,
-      options: Options(responseType: ResponseType.bytes),
-    );
-
-    final myDownloads = '/storage/emulated/0/Download';
-    final filePath = '$myDownloads/$filename.pdf';
-
-    final file = File(filePath);
-    await file.writeAsBytes(response.data);
+  Future<void> _downloadDocument(String url, String filename) async {
+    final plugin = DeviceInfoPlugin();
+    final android = await plugin.androidInfo;
+    final status = android.version.sdkInt < 33
+        ? await Permission.manageExternalStorage.request()
+        : PermissionStatus.granted;
+    if (!status.isGranted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content:
+            Text('Storage permission is required to download the document'),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
 
     setState(() {
-      isDownloading = false;
+      isDownloading = true;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Downloaded to $filePath'),
-      backgroundColor: Colors.green,
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Downloading Document'),
+        backgroundColor: Colors.blue,
+      ),
+    );
 
-    final result = await OpenFile.open(filePath);
+    try {
+      final dio = Dio();
+      final response = await dio.get(
+        url,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      final directory = await getExternalStorageDirectory();
+      final filePath = '${directory!.path}/$filename.pdf';
 
-    if (result.type != ResultType.done) {
+      // final myDownloads = '/storage/emulated/0/Download';
+      // final filePath = '$myDownloads/$filename.pdf';
+
+      final file = File(filePath);
+      await file.writeAsBytes(response.data);
+
+      setState(() {
+        isDownloading = false;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to open the file'),
+        content: Text('Downloaded to $filePath'),
+        backgroundColor: Colors.green,
+      ));
+
+      final result = await OpenFile.open(filePath);
+
+      if (result.type != ResultType.done) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Failed to open the file'),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } catch (e) {
+      print(e);
+      setState(() {
+        isDownloading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to download the document $e'),
         backgroundColor: Colors.red,
       ));
     }
-  } catch (e) {
-    print(e);
-    setState(() {
-      isDownloading = false;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      
-      content: Text('Failed to download the document $e'),
-      backgroundColor: Colors.red,
-    ));
   }
-}
-  // Future<void> _downloadDocument(String url, String filename) async {
-  //   // Request storage permissions
-  //   final status = await Permission.manageExternalStorage.request();
-  //   if (!status.isGranted) {
-  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-  //       content: Text('Storage permission is required to download the document'),
-  //       backgroundColor: Colors.red,
-  //     ));
-  //     return;
-  //   }
-
-  //   setState(() {
-  //     isDownloading = true;
-  //   });
-
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text('Downloading Document'),
-  //       backgroundColor: Colors.blue,
-  //     ),
-  //   );
-
-  //   try {
-  //     final dio = Dio();
-  //     final response = await dio.get(
-  //       url,
-  //       options: Options(responseType: ResponseType.bytes),
-  //     );
-
-  //     final myDownloads = '/storage/emulated/0/Download';
-  //     final filePath = '$myDownloads/$filename.pdf';
-  //     final file = File(filePath);
-  //     await file.writeAsBytes(response.data);
-
-  //     setState(() {
-  //       isDownloading = false;
-  //     });
-
-  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-  //       content: Text('Downloaded to $filePath'),
-  //       backgroundColor: Colors.green,
-  //     ));
-  //   } catch (e) {
-  //     setState(() {
-  //       isDownloading = false;
-  //     });
-
-  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-  //       content: Text('Failed to download the document'),
-  //       backgroundColor: Colors.red,
-  //     ));
-  //   }
-  // }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -189,12 +138,11 @@ Future<void> _downloadDocument(String url, String filename) async {
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(
-                                        child: LoadingAnimationWidget
-                                            .threeArchedCircle(
-                                          color: AppColor.mainTextColor2,
-                                          size: height * 0.03,
-                                        ),
-                                      );
+                        child: LoadingAnimationWidget.threeArchedCircle(
+                          color: AppColor.mainTextColor2,
+                          size: height * 0.03,
+                        ),
+                      );
                     } else if (snapshot.hasError) {
                       return Center(
                           child: Text('No document records available.'));

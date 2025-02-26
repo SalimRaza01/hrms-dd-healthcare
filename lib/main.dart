@@ -1,11 +1,12 @@
-import 'package:hrms/core/provider/provider.dart';
-import 'package:hrms/presentation/odoo/odoo_dashboard.dart';
-import 'package:hrms/presentation/odoo/view_projects.dart';
-import 'package:hrms/presentation/screens/splash_screen.dart';
-import 'core/api/api.dart';
+
 import 'package:flutter/material.dart';
+import 'package:hrms/core/api/api.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'core/provider/provider.dart';
+import 'presentation/odoo/odoo_dashboard.dart';
+import 'presentation/odoo/view_projects.dart';
+import 'presentation/screens/splash_screen.dart';
 import 'presentation/authentication/otp_screen.dart';
 import 'presentation/authentication/login_screen.dart';
 import 'presentation/authentication/create_new_pass.dart';
@@ -25,14 +26,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await Hive.openBox('authBox');
-     
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-         ChangeNotifierProvider(create: (_) => TaskProvider()),
-      ChangeNotifierProvider(create: (_) => ProjectProvider()),
-            ChangeNotifierProvider(create: (_) => LeaveApplied()),
+        ChangeNotifierProvider(create: (_) => TaskProvider()),
+        ChangeNotifierProvider(create: (_) => ProjectProvider()),
+        ChangeNotifierProvider(create: (_) => LeaveApplied()),
       ],
       child: MyApp(),
     ),
@@ -43,9 +44,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return MaterialApp(
       themeMode: ThemeMode.light,
       theme: ThemeData(primarySwatch: Colors.blue),
@@ -67,10 +66,17 @@ class MyApp extends StatelessWidget {
         "/holidayList": (context) => HolidayList(),
         "/notificationScreen": (context) => NotificationScreen(),
         "/odooDashbaord": (context) => OdooDashboard(),
-        "/createTask": (context) => CreateTask(projectID: 0,),
-        "/taskDetails": (context) => TaskDetails(taskID: 0,),
-                "/viewProject": (context) => ViewProjects(projectName: '', projectID: 0, createDate: '', alreadyAssignedEmails: [],),
+        "/createTask": (context) => CreateTask(projectID: 0),
+        "/taskDetails": (context) => TaskDetails(taskID: 0),
+        "/viewProject": (context) => ViewProjects(
+              projectName: '',
+              projectID: 0,
+              createDate: '',
+              alreadyAssignedEmails: [],
+            ),
       },
     );
   }
 }
+
+

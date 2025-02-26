@@ -67,48 +67,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     box.put('role', null);
   }
 
-  // Future<void> _pickImage(ImageSource source) async {
-
-  //   PermissionStatus permissionStatus;
-
-  //   permissionStatus = await Permission.camera.request();
-
-  //   if (permissionStatus.isGranted) {
-  //               isLoading = true;
-  //     final picker = ImagePicker();
-  //     final pickedFile = await picker.pickImage(source: source);
-  //     if (pickedFile != null) {
-  //       setState(() {
-  //         _image = File(pickedFile.path);
-  //         filepath = pickedFile.path;
-  //       });
-
-  //       final fileSize = await _image!.length();
-
-  //       uploadAvatar([
-  //         PlatformFile(
-  //           path: filepath,
-  //           name: pickedFile.name,
-  //           size: fileSize,
-  //         ),
-  //       ]);
-  //     }
-  //   } else {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Permission not granted')),
-  //     );
-  //   }
-  // }
-
   Future<void> _filepicker(ImageSource source) async {
     final plugin = DeviceInfoPlugin();
     final android = await plugin.androidInfo;
     final permissionStatus = android.version.sdkInt < 33
         ? await Permission.manageExternalStorage.request()
         : PermissionStatus.granted;
-
-    // PermissionStatus permissionStatus =
-    //     await Permission.manageExternalStorage.request();
 
     if (permissionStatus.isGranted) {
       isLoading = true;
