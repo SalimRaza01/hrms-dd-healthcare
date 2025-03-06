@@ -104,8 +104,10 @@ Future<ShiftTimeModel> fetchShiftTime(String empID) async {
 }
 
 class AuthProvider with ChangeNotifier {
+   
   Future<void> login(String emailController, String passController,
       BuildContext context) async {
+            
     try {
       final response = await dio.post(employeeLogin, data: {
         "email": emailController.toLowerCase(),
@@ -143,6 +145,7 @@ class AuthProvider with ChangeNotifier {
             MaterialPageRoute(builder: (context) => BottomNavigation()));
       } else {}
     } on DioException catch (e) {
+           print('here2 $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.response!.data['message']),
