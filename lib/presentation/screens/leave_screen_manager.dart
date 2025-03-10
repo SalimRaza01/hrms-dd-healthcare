@@ -110,10 +110,9 @@ class _LeaveScreenState extends State<LeaveScreenManager>
         url,
         options: Options(responseType: ResponseType.bytes),
       );
-final directory = await getExternalStorageDirectory();
+      final directory = await getExternalStorageDirectory();
       final fileName = url.split('/').last;
-final filePath = '${directory!.path}/$fileName.pdf';
-
+      final filePath = '${directory!.path}/$fileName.pdf';
 
       final file = File(filePath);
       await file.writeAsBytes(response.data);
@@ -588,6 +587,68 @@ final filePath = '${directory!.path}/$fileName.pdf';
                                                         SizedBox(
                                                             height:
                                                                 height * 0.005),
+                                                        Visibility(
+                                                          visible:
+                                                              leave.status ==
+                                                                  'Pending',
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .only(
+                                                                    top: 15),
+                                                            child: Center(
+                                                              child:
+                                                                  GestureDetector(
+                                                                onTap:
+                                                                    () async {
+                                                                  await ownLeaveActionDelete(
+                                                                      context,
+                                                                      leave.id);
+                                                                  setState(() {
+                                                                    _myLeaveHistory = fetchLeaveHistory(
+                                                                        _selectedText,
+                                                                        widget
+                                                                            .empID);
+                                                                  });
+                                                                },
+                                                                child:
+                                                                    Container(
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              8),
+                                                                      color: Colors
+                                                                          .redAccent),
+                                                                  child:
+                                                                      Padding(
+                                                                    padding: EdgeInsets.symmetric(
+                                                                        horizontal:
+                                                                            width /
+                                                                                9,
+                                                                        vertical:
+                                                                            8),
+                                                                    child: Text(
+                                                                      'Delete Request',
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize:
+                                                                            height *
+                                                                                0.012,
+                                                                        fontWeight:
+                                                                            FontWeight.w500,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                            height:
+                                                                height * 0.005),
                                                       ],
                                                     ),
                                                   ),
@@ -982,19 +1043,24 @@ final filePath = '${directory!.path}/$fileName.pdf';
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 FloatingActionButton.extended(
+                       icon:  Icon(
+                      CupertinoIcons.group_solid,
+                      color: Colors.white,
+                    ),
                     heroTag: 'btn1',
                     backgroundColor: AppColor.mainThemeColor,
                     onPressed: () {
                       setState(() {
                         switchMode = !switchMode;
                         _teamLeaveRequest = fetchLeaveRequest(_selectedText);
-                   _teamCompOffRequest = fetchCompOffRequest(_selectedCompoffText);
+                        _teamCompOffRequest =
+                            fetchCompOffRequest(_selectedCompoffText);
                       });
                     },
-                    label: Icon(
-                      CupertinoIcons.person_2_fill,
-                      color: Colors.white,
-                    )),
+                    label:Text(
+                    'Team',
+                    style: TextStyle(color: AppColor.mainFGColor),
+                  ),),
                 SizedBox(
                   height: height * 0.015,
                 ),
@@ -1103,31 +1169,32 @@ final filePath = '${directory!.path}/$fileName.pdf';
                             children: [
                               Column(
                                 children: [
-                                   Card(
-                                color: AppColor.mainFGColor,
-                                elevation: 4,
-                                margin: EdgeInsets.all(0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                shadowColor: Colors.black.withOpacity(0.1),
-                                child: Padding(
-                                  padding: EdgeInsets.all(4),
-                                  child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        _leaveFilterBTNTeam('Pending', height, width),
-                                        _leaveFilterBTNTeam(
-                                            'Approved', height, width),
-                                        _leaveFilterBTNTeam(
-                                            'Rejected', height, width),
-                                      ]),
-                                ),
-                              ),
-                              SizedBox(
-                                height: height * 0.015,
-                              ),
+                                  Card(
+                                    color: AppColor.mainFGColor,
+                                    elevation: 4,
+                                    margin: EdgeInsets.all(0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    shadowColor: Colors.black.withOpacity(0.1),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(4),
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            _leaveFilterBTNTeam(
+                                                'Pending', height, width),
+                                            _leaveFilterBTNTeam(
+                                                'Approved', height, width),
+                                            _leaveFilterBTNTeam(
+                                                'Rejected', height, width),
+                                          ]),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: height * 0.015,
+                                  ),
                                   Expanded(
                                       child: FutureBuilder<List<LeaveRequests>>(
                                           future: _teamLeaveRequest,
@@ -1574,32 +1641,32 @@ final filePath = '${directory!.path}/$fileName.pdf';
                               ),
                               Column(
                                 children: [
-                                   Card(
-                                color: AppColor.mainFGColor,
-                                elevation: 4,
-                                margin: EdgeInsets.all(0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                shadowColor: Colors.black.withOpacity(0.1),
-                                child: Padding(
-                                  padding: EdgeInsets.all(4),
-                                  child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        _compoffFilterBTNTeam(
-                                            'Pending', height, width),
-                                        _compoffFilterBTNTeam(
-                                            'Approved', height, width),
-                                        _compoffFilterBTNTeam(
-                                            'Rejected', height, width),
-                                      ]),
-                                ),
-                              ),
-                              SizedBox(
-                                height: height * 0.015,
-                              ),
+                                  Card(
+                                    color: AppColor.mainFGColor,
+                                    elevation: 4,
+                                    margin: EdgeInsets.all(0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    shadowColor: Colors.black.withOpacity(0.1),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(4),
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            _compoffFilterBTNTeam(
+                                                'Pending', height, width),
+                                            _compoffFilterBTNTeam(
+                                                'Approved', height, width),
+                                            _compoffFilterBTNTeam(
+                                                'Rejected', height, width),
+                                          ]),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: height * 0.015,
+                                  ),
                                   Expanded(
                                     child: FutureBuilder<List<CompOffRequest>>(
                                         future: _teamCompOffRequest,
@@ -1999,6 +2066,10 @@ final filePath = '${directory!.path}/$fileName.pdf';
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 FloatingActionButton.extended(
+                  icon:  Icon(
+                      CupertinoIcons.person_fill,
+                      color: Colors.white,
+                    ),
                     heroTag: 'btn1',
                     backgroundColor: AppColor.mainThemeColor,
                     onPressed: () {
@@ -2011,10 +2082,10 @@ final filePath = '${directory!.path}/$fileName.pdf';
                             fetchOwnCompOffRequest(_selectedCompoffText);
                       });
                     },
-                    label: Icon(
-                      CupertinoIcons.person_fill,
-                      color: Colors.white,
-                    )),
+                    label: Text(
+                    'Self',
+                    style: TextStyle(color: AppColor.mainFGColor),
+                  ),),
                 SizedBox(
                   height: height * 0.015,
                 ),
@@ -2114,6 +2185,7 @@ final filePath = '${directory!.path}/$fileName.pdf';
       ),
     );
   }
+
   SizedBox leaveWidget(
       double height, double width, String leave, String leaveCount) {
     return SizedBox(
@@ -2150,7 +2222,6 @@ final filePath = '${directory!.path}/$fileName.pdf';
     );
   }
 
-
   Widget _compoffFilterBTNTeam(String text, double height, double width) {
     Color activeColor;
     Color activeText;
@@ -2167,7 +2238,7 @@ final filePath = '${directory!.path}/$fileName.pdf';
       onTap: () {
         setState(() {
           _selectedCompoffText = text;
-            _teamCompOffRequest = fetchCompOffRequest(_selectedCompoffText);
+          _teamCompOffRequest = fetchCompOffRequest(_selectedCompoffText);
         });
       },
       child: Container(
@@ -2205,7 +2276,7 @@ final filePath = '${directory!.path}/$fileName.pdf';
       onTap: () {
         setState(() {
           _selectedText = text;
-           _teamLeaveRequest = fetchLeaveRequest(_selectedText);
+          _teamLeaveRequest = fetchLeaveRequest(_selectedText);
         });
       },
       child: Container(

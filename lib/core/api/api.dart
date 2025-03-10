@@ -803,3 +803,38 @@ Future<void> ownCompOffActionDelete(
     );
   }
 }
+
+Future<void> ownLeaveActionDelete(
+  BuildContext context,
+  String id,
+) async {
+  print(id);
+  try {
+    final response = await dio.delete(
+      '$ownLeaveAction/$id',
+    );
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.data['message']),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.data['message']),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } on DioException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.response!.data['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}

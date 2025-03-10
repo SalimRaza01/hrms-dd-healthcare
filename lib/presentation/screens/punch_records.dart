@@ -10,7 +10,8 @@ class PunchRecordScreen extends StatefulWidget {
   final String? regularizationDate;
   final int lateMinutes;
 
-  PunchRecordScreen({
+  const PunchRecordScreen({
+    super.key,
     required this.punchRecords,
     required this.regularizationDate,
     required this.lateMinutes,
@@ -26,8 +27,6 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
   String? maxRegularization;
   DateTime? date;
   String _selectedText = 'Regularization';
-  Color? activeColor;
-  Color? activeText;
 
   @override
   void initState() {
@@ -60,7 +59,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-
+    
     List<String> punches =
         (widget.punchRecords?.split(',') ?? []).toSet().toList();
     // ..sort();
@@ -85,9 +84,14 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Visibility(
-              visible: date!
-                      .isAfter(DateTime.now().subtract(Duration(days: 8))) &&
-                  date!.isBefore(DateTime.now().subtract(Duration(days: 1))),
+              // visible: date!
+              //         .isAfter(DateTime.now().subtract(Duration(days: 8))) &&
+              //     date!.isBefore(DateTime.now().subtract(Duration(days: 1))),
+
+              visible: date != null &&
+                  date!.month == DateTime.now().month &&
+                  date!.year == DateTime.now().year,
+
               child: Column(
                 children: [
                   Card(

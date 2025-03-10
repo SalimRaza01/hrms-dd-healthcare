@@ -538,7 +538,44 @@ final filePath = '${directory!.path}/$fileName.pdf';
                                       ),
                                     ),
                                   ),
-                     
+                                    Visibility(
+                                visible: leave.status == 'Pending',
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 15),
+                                  child: Center(
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        await ownLeaveActionDelete(
+                                            context, leave.id);
+                                        setState(() {
+                                          _leaveHistory =
+                                              fetchLeaveHistory(_selectedText, widget.empID);
+                                        });
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            color: Colors.redAccent),
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: width / 9,
+                                              vertical: 8),
+                                          child: Text(
+                                            'Delete Request',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: height * 0.012,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: height * 0.005),
                                 ],
                               ),
                             ),

@@ -41,6 +41,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   String? medicalLeave;
   String? shortLeave;
   String? reasonError;
+   num? totalDays;
 
   startDate(
       BuildContext context, String? _selectedLeaveType, String _selectedText) {
@@ -99,7 +100,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   }
 
   void validation() {
-    num? totalDays;
+ 
 
     Leave selectedLeave = leaveList.firstWhere(
       (leave) => leave.name == _selectedLeaveType,
@@ -181,9 +182,9 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         DateTime startDate = DateTime.parse(startDateController.text);
         DateTime endDate = DateTime.parse(endDateController.text);
 
-        if (startDate.isBefore(DateTime.now().subtract(Duration(days: 6)))) {
+        if (startDate.isBefore(DateTime.now().subtract(Duration(days: 7)))) {
           showSnackBar(
-              'Medical leave can only be applied within the last 6 days');
+              'Medical leave can only be applied within the last 7 days');
           return;
         }
 
@@ -328,7 +329,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
           ' ' +
           '0${_authBox.get('earlyby').toString().trim()}',
     );
-
     String shortLeaveDate = DateFormat('yyyy-MM-dd').format(shiftendTime);
 
     return SafeArea(
