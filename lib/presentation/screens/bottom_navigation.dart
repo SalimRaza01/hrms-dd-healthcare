@@ -200,6 +200,12 @@
 //   }
 // }
 
+
+
+
+
+
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -240,15 +246,15 @@ class _BottomNavigationState extends State<BottomNavigation> {
     setState(() {
       role = box.get('role');
       empID = box.get('employeeId');
+      print(role);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColor.mainBGColor,
-      body: role == 'Manager'
+      body: role == 'Manager' || role == 'Super-Admin'
           ? <Widget>[
               DashboardScreen(empID!),
               LeaveScreenManager(empID!),
@@ -268,92 +274,94 @@ class _BottomNavigationState extends State<BottomNavigation> {
             topRight: Radius.circular(30),
           ),
           child: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            selectedFontSize:12.0,
             currentIndex: _selectedIndex,
             onTap: (value) {
               setState(() {
                 _selectedIndex = value;
               });
             },
-            items:     role == 'Manager' ? <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                backgroundColor: Colors.white,
-                icon: Icon(
-                  CupertinoIcons.house_fill,
-                  size: 25,
-                ),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                backgroundColor: Colors.white,
-                icon: Icon(
-                  CupertinoIcons.timelapse,
-                  size: 25,
-                ),
-                label: 'Leave',
-              ),
-              BottomNavigationBarItem(
-                backgroundColor: Colors.white,
-                icon: Icon(
-                  CupertinoIcons.timer_fill,
-                  size: 25,
-                ),
-                label: 'Attendence',
-              ),
-          BottomNavigationBarItem(
-                backgroundColor: Colors.white,
-                icon: Icon(
-                  CupertinoIcons.person_2_fill,
-                  size: 25,
-                ),
-                label: 'Team',
-              ),
-              BottomNavigationBarItem(
-                backgroundColor: Colors.white,
-                icon: Icon(
-                  CupertinoIcons.person_crop_circle_fill,
-                  size: 25,
-                ),
-                label: 'Profile',
-              ),
-            ] : 
-            <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                backgroundColor: Colors.white,
-                icon: Icon(
-                  CupertinoIcons.house_fill,
-                  size: 25,
-                ),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                backgroundColor: Colors.white,
-                icon: Icon(
-                  CupertinoIcons.timelapse,
-                  size: 25,
-                ),
-                label: 'Leave',
-              ),
-              BottomNavigationBarItem(
-                backgroundColor: Colors.white,
-                icon: Icon(
-                  CupertinoIcons.timer_fill,
-                  size: 25,
-                ),
-                label: 'Attendence',
-              ),
-          
-              BottomNavigationBarItem(
-                backgroundColor: Colors.white,
-                icon: Icon(
-                  CupertinoIcons.person_crop_circle_fill,
-                  size: 25,
-                ),
-                label: 'Profile',
-              ),
-            ],
+            items: role == 'Manager' || role == 'Super-Admin'
+                ? <BottomNavigationBarItem>[
+                    BottomNavigationBarItem(
+                      backgroundColor: Colors.white,
+                      icon: Icon(
+                        CupertinoIcons.house_fill,
+                        size: 25,
+                      ),
+                      label: 'Home',
+                    ),
+                    BottomNavigationBarItem(
+                      backgroundColor: Colors.white,
+                      icon: Icon(
+                        CupertinoIcons.timelapse,
+                        size: 25,
+                      ),
+                      label: 'Leave',
+                    ),
+                    BottomNavigationBarItem(
+                      backgroundColor: Colors.white,
+                      icon: Icon(
+                        CupertinoIcons.timer_fill,
+                        size: 25,
+                      ),
+                      label: 'Attendence',
+                    ),
+                    BottomNavigationBarItem(
+                      backgroundColor: Colors.white,
+                      icon: Icon(
+                        CupertinoIcons.person_2_fill,
+                        size: 25,
+                      ),
+                      label: 'Team',
+                    ),
+                    BottomNavigationBarItem(
+                      backgroundColor: Colors.white,
+                      icon: Icon(
+                        CupertinoIcons.person_crop_circle_fill,
+                        size: 25,
+                      ),
+                      label: 'Profile',
+                    ),
+                  ]
+                : <BottomNavigationBarItem>[
+                    BottomNavigationBarItem(
+                      backgroundColor: Colors.white,
+                      icon: Icon(
+                        CupertinoIcons.house_fill,
+                        size: 25,
+                      ),
+                      label: 'Home',
+                    ),
+                    BottomNavigationBarItem(
+                      backgroundColor: Colors.white,
+                      icon: Icon(
+                        CupertinoIcons.timelapse,
+                        size: 25,
+                      ),
+                      label: 'Leave',
+                    ),
+                    BottomNavigationBarItem(
+                      backgroundColor: Colors.white,
+                      icon: Icon(
+                        CupertinoIcons.timer_fill,
+                        size: 25,
+                      ),
+                      label: 'Attendence',
+                    ),
+                    BottomNavigationBarItem(
+                      backgroundColor: Colors.white,
+                      icon: Icon(
+                        CupertinoIcons.person_crop_circle_fill,
+                        size: 25,
+                      ),
+                      label: 'Profile',
+                    ),
+                  ],
             backgroundColor: AppColor.mainFGColor,
-            selectedItemColor: AppColor.mainTextColor2,
-            unselectedItemColor: Colors.grey,
+            selectedItemColor: AppColor.mainThemeColor,
+            unselectedItemColor: const Color.fromARGB(255, 179, 179, 179),
           )),
     );
   }

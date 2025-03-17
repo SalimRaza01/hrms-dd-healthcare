@@ -104,10 +104,8 @@ Future<ShiftTimeModel> fetchShiftTime(String empID) async {
 }
 
 class AuthProvider with ChangeNotifier {
-   
   Future<void> login(String emailController, String passController,
       BuildContext context) async {
-            
     try {
       final response = await dio.post(employeeLogin, data: {
         "email": emailController.toLowerCase(),
@@ -145,7 +143,7 @@ class AuthProvider with ChangeNotifier {
             MaterialPageRoute(builder: (context) => BottomNavigation()));
       } else {}
     } on DioException catch (e) {
-           print('here2 $e');
+      print('here2 $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.response!.data['message']),
@@ -400,9 +398,16 @@ Future<void> leaveAction(
   String action,
   String id,
 ) async {
+  String token = _authBox.get('token');
+  print(token);
   try {
-    final response =
-        await dio.put('$leaveActionApi/$id', data: {"status": action});
+    final response = await dio.put('$leaveActionApi/$id',
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }),
+        data: {"status": action});
+
     if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -691,13 +696,11 @@ Future<List<CompOffRequest>> fetchCompOffRequest(String status) async {
       }));
 
   if (response.statusCode == 200) {
-        List<dynamic> data = response.data['data']
-          .where((leave) => leave['status'] == status)
-          .toList();
+    List<dynamic> data = response.data['data']
+        .where((leave) => leave['status'] == status)
+        .toList();
 
-      return data
-          .map((leaveData) => CompOffRequest.fromJson(leaveData))
-          .toList();
+    return data.map((leaveData) => CompOffRequest.fromJson(leaveData)).toList();
   } else {
     return [];
   }

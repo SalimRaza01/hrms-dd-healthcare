@@ -41,67 +41,133 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   String? medicalLeave;
   String? shortLeave;
   String? reasonError;
-   num? totalDays;
+  num? totalDays;
+
+  DateTime getQuarterEndDate(DateTime date) {
+    if (date.month <= 3) {
+      // Q1
+      return DateTime(date.year, 3, 31);
+    } else if (date.month <= 6) {
+      // Q2
+      return DateTime(date.year, 6, 30);
+    } else if (date.month <= 9) {
+      // Q3
+      return DateTime(date.year, 9, 30);
+    } else {
+      // Q4
+      return DateTime(date.year, 12, 31);
+    }
+  }
 
   startDate(
       BuildContext context, String? _selectedLeaveType, String _selectedText) {
-    return DatePicker.showDatePicker(context,
-        dateFormat: 'dd MMMM yyyy',
-        initialDateTime: DateTime.now(),
-        minDateTime: _selectedLeaveType!.contains('Medical')
-            ? DateTime.now().subtract(Duration(days: 6))
-            : _selectedLeaveType.contains('Earned')
-                // ? DateTime.now().add(Duration(days: 1))
-                ? DateTime.now()
-                : DateTime.now(),
-        maxDateTime: _selectedLeaveType.contains('Medical')
-            ? DateTime.now().subtract(Duration(days: 1))
-            : DateTime(3000),
-        onMonthChangeStartWithFirstDate: true,
-        onConfirm: (dateTime, List<int> index) {
-      setState(() {
-        DateTime selectdate = dateTime;
-        startDateController.clear();
-        endDateController.clear();
-        startDateController.text = DateFormat('yyyy-MM-dd').format(selectdate);
-        print(startDateController.text);
-        print(endDateController.text);
-      });
-    });
+    DateTime now = DateTime.now();
+    DateTime startOfMonth = DateTime(now.year, now.month, 1);
+
+    DateTime minDate;
+    DateTime maxDate;
+
+    if (_selectedLeaveType != null && _selectedLeaveType.contains('Medical')) {
+      minDate = now.subtract(Duration(days: 6));
+      maxDate = now.subtract(Duration(days: 1));
+    } else if (_selectedLeaveType != null &&
+        _selectedLeaveType.contains('Casual')) {
+      DateTime quarterEndDate = getQuarterEndDate(now);
+      DateTime next7Days = now.add(Duration(days: 7));
+      maxDate = next7Days.isBefore(quarterEndDate) ? next7Days : quarterEndDate;
+
+      minDate = startOfMonth;
+
+      print("Quarter Ends: $quarterEndDate");
+      print("Max Leave Date for Casual Leave: $maxDate");
+    } else if (_selectedLeaveType != null &&
+        _selectedLeaveType.contains('Earned')) {
+      minDate = startOfMonth;
+      maxDate = now.add(Duration(days: 14));
+    } else {
+      minDate = now;
+      maxDate = DateTime(3000);
+    }
+
+    return DatePicker.showDatePicker(
+      context,
+      dateFormat: 'dd MMMM yyyy',
+      initialDateTime: now,
+      minDateTime: minDate,
+      maxDateTime: maxDate,
+      onMonthChangeStartWithFirstDate: true,
+      onConfirm: (dateTime, List<int> index) {
+        setState(() {
+          DateTime selectedDate = dateTime;
+          startDateController.clear();
+          endDateController.clear();
+
+          startDateController.text =
+              DateFormat('yyyy-MM-dd').format(selectedDate);
+
+          print('Selected Start Date: ${startDateController.text}');
+        });
+      },
+    );
   }
 
   endDate(
       BuildContext context, String? _selectedLeaveType, String _selectedText) {
+    DateTime now = DateTime.now();
+    DateTime startOfMonth = DateTime(now.year, now.month, 1);
+
+    DateTime? minDate;
+    DateTime? maxDate;
+
+    if (_selectedLeaveType != null && _selectedLeaveType.contains('Medical')) {
+      minDate = now.subtract(Duration(days: 6));
+      maxDate = now.subtract(Duration(days: 1));
+    } else if (_selectedLeaveType != null &&
+        _selectedLeaveType.contains('Casual')) {
+      DateTime quarterEndDate = getQuarterEndDate(now);
+      DateTime next7Days = now.add(Duration(days: 7));
+      maxDate = next7Days.isBefore(quarterEndDate) ? next7Days : quarterEndDate;
+
+      minDate = startOfMonth;
+
+      print("Quarter Ends: $quarterEndDate");
+      print("Max Leave Date for Casual Leave (End Date): $maxDate");
+    } else if (_selectedLeaveType != null &&
+        _selectedLeaveType.contains('Earned')) {
+      if (startDateController.text.isNotEmpty) {
+        DateTime selectedStartDate = DateTime.parse(startDateController.text);
+        minDate = selectedStartDate;
+        maxDate = selectedStartDate.add(Duration(days: 13));
+      } else {
+        minDate = startOfMonth;
+        maxDate = now.add(Duration(days: 14));
+      }
+    } else {
+      minDate = now;
+      maxDate = DateTime(3000);
+    }
+
     return DatePicker.showDatePicker(
       context,
       dateFormat: 'dd MMMM yyyy',
-      initialDateTime: DateTime.now(),
-      minDateTime: _selectedLeaveType!.contains('Medical')
-          ? DateTime.now().subtract(Duration(days: 6))
-          : _selectedLeaveType.contains('Earned') ||
-                  _selectedLeaveType.contains('Casual')
-              ? DateTime.parse(startDateController.text)
-              : null,
-      maxDateTime: _selectedLeaveType.contains('Medical')
-          ? DateTime.now().subtract(Duration(days: 1))
-          : _selectedLeaveType.contains('Earned')
-              ? DateTime.parse(startDateController.text).add(Duration(days: 13))
-              : null,
+      initialDateTime: now,
+      minDateTime: minDate,
+      maxDateTime: maxDate,
       onMonthChangeStartWithFirstDate: true,
       onConfirm: (dateTime2, List<int> index) {
         setState(() {
-          DateTime selectdate2 = dateTime2;
-          endDateController.text = DateFormat('yyyy-MM-dd').format(selectdate2);
-          print(startDateController.text);
-          print(endDateController.text);
+          DateTime selectedDate2 = dateTime2;
+
+          endDateController.text =
+              DateFormat('yyyy-MM-dd').format(selectedDate2);
+
+          print('Selected End Date: ${endDateController.text}');
         });
       },
     );
   }
 
   void validation() {
- 
-
     Leave selectedLeave = leaveList.firstWhere(
       (leave) => leave.name == _selectedLeaveType,
       orElse: () => Leave('Unknown', '0'),
@@ -224,7 +290,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
             reasonController.text)
         : applyLeave(
             context,
-    
             _selectedLeaveType!,
             startDateController.text,
             endDateController.text,
@@ -593,8 +658,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   _selectedLeaveType!.contains('Medical'),
                               child: InkWell(
                                 onTap: () async {
-
-                                  
                                   FilePickerResult? result =
                                       await FilePicker.platform.pickFiles();
 
@@ -702,72 +765,73 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                     color: AppColor.mainThemeColor,
                                   ),
                                 ),
+                                SizedBox(height: height * 0.02),
                                 SizedBox(
-                                  height: height * 0.02,
+                                  height: height * 0.2,
+                                  child: _selectedLeaveType != null &&
+                                          _selectedLeaveType!.contains('Casual')
+                                      ? ListView(
+                                          children: [
+                                            _buildBulletPoint(
+                                                'Casual leaves can be applied starting from the 1st of the current month.'),
+                                            _buildBulletPoint(
+                                                'You can only apply for Casual leaves up to 7 days from today.'),
+                                            _buildBulletPoint(
+                                                'Casual leaves can be applied for a minimum of 1 day, including half-days.'),
+                              
+                                            _buildBulletPoint(
+                                                'Uninformed absences will automatically be deducted as Casual Leaves.'),
+                                            _buildBulletPoint(
+                                                'Any unused Casual Leaves will lapse at the end of each quarter.'),
+                                          ],
+                                        )
+                                      : _selectedLeaveType != null &&
+                                              _selectedLeaveType!
+                                                  .contains('Medical')
+                                          ? ListView(
+                                              children: [
+                                                _buildBulletPoint(
+                                                    'Medical leaves can be applied only for past days.'),
+                                                _buildBulletPoint(
+                                                    'Medical leaves can be applied for a minimum of 1 day and a maximum of 6 days at a time.'),
+                                                _buildBulletPoint(
+                                                    'A valid medical certificate or prescription is mandatory for availing Medical Leaves.'),
+                                                _buildBulletPoint(
+                                                    'These leaves lapse after 6 months if unused.'),
+                                              ],
+                                            )
+                                          : _selectedLeaveType != null &&
+                                                  _selectedLeaveType!
+                                                      .contains('Short')
+                                              ? ListView(
+                                                  children: [
+                                                    _buildBulletPoint(
+                                                        'Short leave can only be applied for today, before leaving the office.'),
+                                                    _buildBulletPoint(
+                                                        'The leave timing will be auto-selected for 1 hour before your shift end time.'),
+                                                    _buildBulletPoint(
+                                                        'Make sure to apply for short leave before your shift concludes.'),
+                                                  ],
+                                                )
+                                              : _selectedLeaveType != null &&
+                                                      _selectedLeaveType!
+                                                          .contains('Earned')
+                                                  ? ListView(
+                                                      children: [
+                                                        _buildBulletPoint(
+                                                            'Earned leave can be applied starting from the 1st of the current month.'),
+                                                        _buildBulletPoint(
+                                                            'Earned leave can also be taken as half-days if required.'),
+                                                        _buildBulletPoint(
+                                                            'Make sure you apply before 9 AM if you are taking Earned leave for today.'),
+                                                        _buildBulletPoint(
+                                                            'Ensure you have enough leave balance before applying for Earned leave.'),
+                                                      ],
+                                                    )
+                                                  : SizedBox(),
                                 ),
-                                SizedBox(
-                                    height: height * 0.2,
-                                    child: _selectedLeaveType != null &&
-                                            _selectedLeaveType!
-                                                .contains('Casual')
-                                        ? ListView(
-                                            children: [
-                                              _buildBulletPoint(
-                                                  'Casual leaves can be applied for a minimum of 1 day at a time, including half-days'),
-                                              _buildBulletPoint(
-                                                  'Applying for past day is not allowed'),
-                                              _buildBulletPoint(
-                                                  'Uninformed leaves will automatically be deducted as Casual Leaves.'),
-                                              _buildBulletPoint(
-                                                  'Any unused Casual Leaves will lapse at the end of each quarter.'),
-                                            ],
-                                          )
-                                        : _selectedLeaveType != null &&
-                                                _selectedLeaveType!
-                                                    .contains('Medical')
-                                            ? ListView(
-                                                children: [
-                                                  _buildBulletPoint(
-                                                      'Medical leaves can be applied only for past days'),
-                                                  _buildBulletPoint(
-                                                      'Medical leaves can be applied for a minimum of 1 day and a maximum of 6 days at a time.'),
-                                                  _buildBulletPoint(
-                                                      'A valid medical certificate or prescription is mandatory for availing Medical Leaves.'),
-                                                  _buildBulletPoint(
-                                                      'These leaves lapse after 6 months if unused.'),
-                                                ],
-                                              )
-                                            : _selectedLeaveType != null &&
-                                                    _selectedLeaveType!
-                                                        .contains('Short')
-                                                ? ListView(
-                                                    children: [
-                                                      _buildBulletPoint(
-                                                          'Short leave can only be applied for today, before leaving the office.'),
-                                                      _buildBulletPoint(
-                                                          'The leave timing will be auto-selected for 1 hour before your shift end time.'),
-                                                      _buildBulletPoint(
-                                                          'Make sure to apply for short leave before your shift concludes.'),
-                                                    ],
-                                                  )
-                                                : _selectedLeaveType != null &&
-                                                        _selectedLeaveType!
-                                                            .contains('Earned')
-                                                    ? ListView(
-                                                        children: [
-                                                          _buildBulletPoint(
-                                                              'Earned leave can be applied for future days only'),
-                                                          _buildBulletPoint(
-                                                              'Earned leave can be applied for a minimum of 1 day and a maximum of 7 days, depending on available leave balance.'),
-                                                          _buildBulletPoint(
-                                                              'Earned leave can also be taken as half days if required.'),
-                                                          _buildBulletPoint(
-                                                              'Make sure you have enough leave balance before applying for earned leave.'),
-                                                        ],
-                                                      )
-                                                    : SizedBox())
                               ],
-                            ),
+                            )
                           ],
                         ),
                       ),

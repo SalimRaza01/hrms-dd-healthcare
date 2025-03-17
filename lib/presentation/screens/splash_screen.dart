@@ -7,6 +7,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/presentation/authentication/login_screen.dart';
 import 'onboarding_screen.dart';
 import 'bottom_navigation.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,7 +21,6 @@ class _SplashScreenState extends State<SplashScreen>
   final Box _authBox = Hive.box('authBox');
   late Animation<double> _fadeAnim;
   late AnimationController _controller;
-
   late AnimationController _animationController;
 
   @override
@@ -31,35 +31,69 @@ class _SplashScreenState extends State<SplashScreen>
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+
     _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200));
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
 
     _fadeAnim = Tween<double>(begin: 1.0, end: 0.0).animate(_controller);
-
     _animationController = AnimationController(vsync: this);
 
     Future.delayed(Duration(seconds: 2), () {
       _controller.forward().then((_) {
-        if (_authBox.get('FreshInstall') == false) {
-          if (_authBox.get('token') != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => BottomNavigation()),
-            );
-          } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => LoginScreen()),
-            );
-          }
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => OnboardingScreen()),
-          );
-        }
+        checkNavigation();
       });
     });
+  }
+
+  bool isTokenExpired(String token) {
+    try {
+      return JwtDecoder.isExpired(token);
+    } catch (e) {
+      print('Invalid token or error decoding: $e');
+      return true;
+    }
+  }
+
+  void checkNavigation() {
+    bool isFirstInstall = _authBox.get('FreshInstall') ?? true;
+    String? token = _authBox.get('token');
+
+    if (!isFirstInstall) {
+      if (token != null) {
+        if (isTokenExpired(token)) {
+          navigateToLogin();
+        } else {
+          navigateToHome();
+        }
+      } else {
+        navigateToLogin();
+      }
+    } else {
+      navigateToOnboarding();
+    }
+  }
+
+  void navigateToHome() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => BottomNavigation()),
+    );
+  }
+
+  void navigateToLogin() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+    );
+  }
+
+  void navigateToOnboarding() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => OnboardingScreen()),
+    );
   }
 
   @override

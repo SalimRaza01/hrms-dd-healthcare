@@ -4,6 +4,7 @@
 *.pyc
 *.swp
 *.zip
+*.jks
 /lib/core/api/api_config.dart
 .DS_Store
 .atom/
