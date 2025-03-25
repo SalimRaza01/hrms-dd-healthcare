@@ -20,7 +20,10 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
     ]);
 
   }
-
+@override
+void dispose() {
+  super.dispose();
+}
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;

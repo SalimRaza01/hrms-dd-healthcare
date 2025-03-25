@@ -28,7 +28,10 @@ class _TeamScreenState extends State<TeamScreen> {
     ]);
     employeeProfiles = fetchTeamList();
   }
-
+@override
+void dispose() {
+  super.dispose();
+}
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;

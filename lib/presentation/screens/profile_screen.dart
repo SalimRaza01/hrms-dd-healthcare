@@ -203,7 +203,10 @@ void _showPicker(BuildContext context) {
     );
   }
 }
-
+@override
+void dispose() {
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -528,7 +531,7 @@ void _showPicker(BuildContext context) {
       title: Text(
         'Confirm Logout',
         style: TextStyle(
-          fontSize: 20,
+        fontSize: height * 0.015,
           fontWeight: FontWeight.bold,
           color: Colors.black87,
         ),
@@ -536,7 +539,7 @@ void _showPicker(BuildContext context) {
       content: Text(
         'Are you sure you want to logout?',
         style: TextStyle(
-          fontSize: 16,
+        fontSize: height * 0.013,
           color: Colors.black54,
         ),
       ),

@@ -28,16 +28,16 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   late Future<List<HolidayModel>> holidayList;
-  late Future<List<EmployeeOnLeave>> employeeOnLeaveList;
+  late Future<List<LeaveRequests>> _teamLeaveRequest;
   final Box _authBox = Hive.box('authBox');
   List<Map<String, dynamic>> tasks = [];
-  late String? empID;
   DateTime today = DateTime.now();
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
+        _teamLeaveRequest = fetchLeaveRequest('Pending');
     _fetchTasks();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -84,7 +84,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-
+@override
+void dispose() {
+  super.dispose();
+}
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
@@ -102,6 +105,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           _authBox.get('gender') == 'Male'
                               ? 'assets/image/MaleAvatar.png'
                               : 'assets/image/FemaleAvatar.png',
+                              
                         )
                       : NetworkImage(_authBox.get('photo')!),
             ),
@@ -131,18 +135,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
           actions: [
-            IconButton(
-              onPressed: () {
+            InkWell(
+              onTap: () {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => NotificationScreen()));
               },
-              icon: Icon(
-                Icons.notifications_rounded,
-                color: AppColor.mainThemeColor,
-                size: height * 0.035,
-              ),
+              child: FutureBuilder<List<LeaveRequests>>(
+                      future: _teamLeaveRequest,
+                      builder: (context, snapshot) {
+           bool hasPendingRequests = snapshot.hasData && snapshot.data!.isNotEmpty;
+
+            return Padding(
+             padding: const EdgeInsets.only(right: 15),
+          child: Image.asset(
+          hasPendingRequests    ? 'assets/image/unread.png'
+                                : 'assets/image/read.png',
+        
+            height: height * 0.033,
+      ),
+    );
+  },
+)
+
             ),
           ],
         ),

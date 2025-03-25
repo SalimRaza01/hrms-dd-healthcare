@@ -48,7 +48,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       DeviceOrientation.portraitDown,
     ]);
   }
-
+@override
+void dispose() {
+  super.dispose();
+}
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;

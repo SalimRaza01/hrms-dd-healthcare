@@ -54,6 +54,12 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
       maxRegularization = box.get('maxRegularization');
     });
   }
+  
+  @override
+void dispose() {
+  reasonController.dispose();
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {

@@ -384,6 +384,14 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     });
   }
 
+@override
+void dispose() {
+  reasonController.dispose();
+  startDateController.dispose();
+  endDateController.dispose();
+  super.dispose();
+}
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;

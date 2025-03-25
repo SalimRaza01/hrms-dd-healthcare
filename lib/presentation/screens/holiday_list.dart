@@ -26,7 +26,10 @@ class _HolidayListState extends State<HolidayList> {
     ]);
     holidayList = fetchHolidayList('MainScreen');
   }
-
+@override
+void dispose() {
+  super.dispose();
+}
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;

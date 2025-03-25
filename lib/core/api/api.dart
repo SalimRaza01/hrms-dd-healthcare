@@ -86,11 +86,9 @@ Future<ShiftTimeModel> fetchShiftTime(String empID) async {
       await _authBox.put(
           'medical', response.data['data']['leaveBalance']['medicalLeave']);
       await _authBox.put(
-          'maternity', response.data['data']['leaveBalance']['maternityLeave']);
-      await _authBox.put(
           'earned', response.data['data']['leaveBalance']['earnedLeave']);
       await _authBox.put(
-          'paternity', response.data['data']['leaveBalance']['paternityLeave']);
+          'optional', response.data['data']['leaveBalance']['optionalLeave']);
 
       await _authBox.put('photo', response.data['data']['employeePhoto']);
 
@@ -149,11 +147,10 @@ class AuthProvider with ChangeNotifier {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.push(context,
+        Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => BottomNavigation()));
       } else {}
     } on DioException catch (e) {
-      print('here2 $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.response!.data['message']),

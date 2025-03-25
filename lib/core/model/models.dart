@@ -130,6 +130,7 @@ class LeaveHistory {
   final String status;
   final String approvedBy;
   final String dateTime;
+  final String remarks;
   final String? location;
 
   LeaveHistory(
@@ -142,6 +143,7 @@ class LeaveHistory {
       required this.status,
       required this.approvedBy,
       required this.dateTime,
+      required this.remarks,
       this.location});
 
   factory LeaveHistory.fromJson(Map<String, dynamic> json) {
@@ -155,6 +157,7 @@ class LeaveHistory {
       status: json['status'] ?? '',
       approvedBy: json['approvedBy'] ?? '',
       dateTime: json['dateTime'] ?? '',
+         remarks: json['remarks'] ?? '',
       location: json['location'] ?? '',
     );
   }
@@ -170,6 +173,7 @@ class LeaveHistory {
       'status': status,
       'approvedBy': approvedBy,
       'dateTime': dateTime,
+       'remarks': remarks,
       'location': location
     };
   }
@@ -545,6 +549,7 @@ class CompOffRequest {
   final String totalDays;
   final String reason;
   final String status;
+  final String comments;
   final String employeeName;
 
   CompOffRequest({
@@ -554,6 +559,7 @@ class CompOffRequest {
     required this.totalDays,
     required this.reason,
     required this.status,
+    required this.comments,
     required this.employeeName,
   });
 
@@ -565,6 +571,7 @@ class CompOffRequest {
       totalDays: json['totalDays'] ?? '',
       reason: json['reason'] ?? '',
       status: json['status'] ?? '',
+      comments: json['comments'] ?? '',
       employeeName: json['employeeInfo']['employeeName'] ?? '',
     );
   }
@@ -577,6 +584,7 @@ class CompOffRequest {
       'totalDays': totalDays,
       'reason': reason,
       'status': status,
+      'comments': comments,
       'employeeName': employeeName,
     };
   }

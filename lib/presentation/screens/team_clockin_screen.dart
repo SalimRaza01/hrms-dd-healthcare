@@ -33,7 +33,10 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
 
     
   }
-
+@override
+void dispose() {
+  super.dispose();
+}
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;

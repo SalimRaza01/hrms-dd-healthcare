@@ -26,7 +26,10 @@ class _TeamProfileState extends State<TeamProfile> {
     ]);
     employeeProfile = fetchEmployeeDetails(widget.empID);
   }
-
+@override
+void dispose() {
+  super.dispose();
+}
   @override
   Widget build(BuildContext context) {
         final height = MediaQuery.of(context).size.height;
