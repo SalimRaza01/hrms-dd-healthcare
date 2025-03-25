@@ -2,13 +2,13 @@
 
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:hrms/presentation/animations/profile_shimmer.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
@@ -150,56 +150,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _showPicker(BuildContext context) {
+void _showPicker(BuildContext context) {
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text('Choose Option'),
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+            onPressed: () {
+              _filepicker(ImageSource.gallery);
+              Navigator.of(context).pop();
+            },
+            child: Text('Photo Library'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDestructiveAction: true,
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text('Cancel'),
+        ),
+      ),
+    );
+  } else {
     showModalBottomSheet(
-      backgroundColor: Colors.transparent,
       context: context,
       builder: (BuildContext context) {
-        return CupertinoActionSheet(
-          actions: <Widget>[
-            ListTile(
-              leading:
-                  Icon(Icons.photo_library, color: AppColor.mainTextColor2),
-              title: Text(
-                'Photo Library',
-                style: TextStyle(color: AppColor.mainTextColor2),
-              ),
-              onTap: () {
-                _filepicker(ImageSource.gallery);
-                Navigator.of(context).pop();
-              },
-            ),
-            // ListTile(
-            //   leading: Icon(Icons.photo_camera, color: AppColor.mainTextColor2),
-            //   title: Text(
-            //     'Camera',
-            //     style: TextStyle(color: AppColor.mainTextColor2),
-            //   ),
-            //   onTap: () {
-            //     _pickImage(ImageSource.camera);
-            //     Navigator.of(context).pop();
-            //   },
-            // ),
-            ListTile(
-              leading: Icon(
-                Icons.cancel,
-                color: Colors.red,
-              ),
-              title: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: Colors.red,
+        return Container(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: Wrap(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.photo_library),
+                  title: Text('Photo Library'),
+                  onTap: () {
+                    _filepicker(ImageSource.gallery);
+                    Navigator.of(context).pop();
+                  },
                 ),
-              ),
-              onTap: () {
-                Navigator.of(context).pop();
-              },
+                ListTile(
+                  leading: Icon(Icons.cancel, color: Colors.red),
+                  title: Text('Cancel', style: TextStyle(color: Colors.red)),
+                  onTap: () => Navigator.of(context).pop(),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -510,44 +514,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 height: height * 0.02,
               ),
               InkWell(
-                onTap: () async {
-                  showDialog<void>(
-                    barrierColor: Colors.black38,
-                    context: context,
-                    barrierDismissible: true,
-                    builder: (BuildContext context) {
-                      return CupertinoAlertDialog(
-                        title: Text(
-                          'Confirm Logout',
-                        ),
-                        actions: [
-                          CupertinoDialogAction(
-                            onPressed: () async {
-                              await logout();
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => SplashScreen()));
-                            },
-                            child: Text(
-                              "Yes",
-                            ),
-                          ),
-                          CupertinoDialogAction(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text(
-                              "No",
-                            ),
-                          ),
-                        ],
-                        content: Text(
-                          'Are you sure want to logout?',
-                        ),
-                      );
-                    },
-                  );
+                onTap: () {
+                showDialog<void>(
+  barrierColor: Colors.black.withOpacity(0.5), // Darker background
+  context: context,
+  barrierDismissible: true,
+  builder: (BuildContext context) {
+    return AlertDialog(
+      backgroundColor: Colors.white, // Dialog background color
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20), // Rounded corners
+      ),
+      title: Text(
+        'Confirm Logout',
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+      ),
+      content: Text(
+        'Are you sure you want to logout?',
+        style: TextStyle(
+          fontSize: 16,
+          color: Colors.black54,
+        ),
+      ),
+      actionsPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Add spacing
+      actionsAlignment: MainAxisAlignment.spaceBetween, // Spread the buttons
+      actions: [
+        ElevatedButton(
+          onPressed: () async {
+            Navigator.pop(context);
+            await logout();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => SplashScreen()),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.redAccent, // Button background color
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 0,
+          ),
+          child: Text(
+            "Yes",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+        OutlinedButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: Colors.grey.shade400),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+          child: Text(
+            "No",
+            style: TextStyle(
+              color: Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+  },
+);
+
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),

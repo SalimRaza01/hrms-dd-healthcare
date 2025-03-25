@@ -51,8 +51,13 @@ Future<List<Attendance>> fetchAttendence(
 }
 
 Future<LeaveBalance> fetchLeaves(String empID) async {
+  String token = _authBox.get('token');
   try {
-    final response = await dio.get('$getEmployeeData/$empID');
+    final response = await dio.get('$getEmployeeData/$empID',
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }));
 
     if (response.statusCode == 200) {
       String maxRegularization = response.data['data']['maxRegularization'];
@@ -67,8 +72,13 @@ Future<LeaveBalance> fetchLeaves(String empID) async {
 }
 
 Future<ShiftTimeModel> fetchShiftTime(String empID) async {
+  String token = _authBox.get('token');
   try {
-    final response = await dio.get('$getEmployeeData/$empID');
+    final response = await dio.get('$getEmployeeData/$empID',
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }));
 
     if (response.statusCode == 200) {
       await _authBox.put(
@@ -216,9 +226,14 @@ Future<void> applyLeave(
 }
 
 Future<EmployeeProfile> fetchEmployeeDetails(String empID) async {
+  String token = _authBox.get('token');
   Dio dio = Dio();
   try {
-    final response = await dio.get('$getEmployeeData/$empID');
+    final response = await dio.get('$getEmployeeData/$empID',
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }));
 
     return EmployeeProfile.fromJson(response.data['data']);
   } catch (e) {
@@ -557,11 +572,15 @@ Future<void> createNewPass(
 }
 
 Future<List<DocumentListModel>> fetchDocumentList(String documentType) async {
+      String token = _authBox.get('token');
   String empID = _authBox.get('employeeId');
 
   final response = await dio.get(
     documentType == 'Public' ? documentList : '$documentList/$empID',
-  );
+     options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }));
 
   if (response.statusCode == 200) {
     final List<dynamic> data = response.data['data'];
@@ -603,24 +622,24 @@ Future<List<OdooProjectList>> fetchOdooProjects() async {
   }
 }
 
-Future<List<EmployeeOnLeave>> fetchEmployeeOnLeave() async {
-  try {
-    final response = await dio.get(getEmployeeOnLeave);
+// Future<List<EmployeeOnLeave>> fetchEmployeeOnLeave() async {
+//   try {
+//     final response = await dio.get(getEmployeeOnLeave);
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = response.data['data'];
-      print(data);
+//     if (response.statusCode == 200) {
+//       List<dynamic> data = response.data['data'];
+//       print(data);
 
-      return data
-          .map((leaveData) => EmployeeOnLeave.fromJson(leaveData))
-          .toList();
-    } else {
-      throw Exception('Failed to load employee onleave');
-    }
-  } catch (e) {
-    throw Exception('Error fetching data: $e');
-  }
-}
+//       return data
+//           .map((leaveData) => EmployeeOnLeave.fromJson(leaveData))
+//           .toList();
+//     } else {
+//       throw Exception('Failed to load employee onleave');
+//     }
+//   } catch (e) {
+//     throw Exception('Error fetching data: $e');
+//   }
+// }
 
 Future<void> changeTaskStage(
   BuildContext context,
@@ -778,9 +797,13 @@ Future<void> ownCompOffActionDelete(
 ) async {
   print(id);
   try {
+        String token = _authBox.get('token');
     final response = await dio.delete(
       '$ownCompOffActon/$id',
-    );
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }));
 
     if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -813,9 +836,12 @@ Future<void> ownLeaveActionDelete(
 ) async {
   print(id);
   try {
-    final response = await dio.delete(
-      '$ownLeaveAction/$id',
-    );
+    String token = _authBox.get('token');
+    final response = await dio.delete('$ownLeaveAction/$id',
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }));
 
     if (response.statusCode == 201 || response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(

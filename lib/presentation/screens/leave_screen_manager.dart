@@ -112,7 +112,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
       );
       final directory = await getExternalStorageDirectory();
       final fileName = url.split('/').last;
-      final filePath = '${directory!.path}/$fileName.pdf';
+      final filePath = '${directory!.path}/$fileName';
 
       final file = File(filePath);
       await file.writeAsBytes(response.data);
