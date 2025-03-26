@@ -28,6 +28,15 @@ class _TeamScreenState extends State<TeamScreen> {
     ]);
     employeeProfiles = fetchTeamList();
   }
+
+    @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  
 @override
 void dispose() {
   super.dispose();

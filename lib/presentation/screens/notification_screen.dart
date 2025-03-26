@@ -24,6 +24,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
       DeviceOrientation.portraitDown,
     ]);
   }
+
+    @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  
 @override
 void dispose() {
   super.dispose();

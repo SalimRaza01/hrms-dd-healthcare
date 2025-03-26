@@ -55,6 +55,15 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
     });
   }
   
+
+    @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  
   @override
 void dispose() {
   reasonController.dispose();

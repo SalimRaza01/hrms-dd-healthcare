@@ -33,6 +33,15 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
 
     
   }
+
+    @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  
 @override
 void dispose() {
   super.dispose();

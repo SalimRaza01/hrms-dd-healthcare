@@ -232,7 +232,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   @override
   void initState() {
-    // TODO: implement initState
+   
     super.initState();
     checkEmployeeId();
     SystemChrome.setPreferredOrientations([

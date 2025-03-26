@@ -203,6 +203,15 @@ void _showPicker(BuildContext context) {
     );
   }
 }
+
+    @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  
 @override
 void dispose() {
   super.dispose();

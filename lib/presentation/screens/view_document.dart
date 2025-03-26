@@ -101,6 +101,15 @@ class _ViewDocumentState extends State<ViewDocument> {
     }
   }
 
+
+    @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  
   @override
   void dispose() {
     super.dispose();

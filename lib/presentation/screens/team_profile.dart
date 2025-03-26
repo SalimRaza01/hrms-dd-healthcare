@@ -26,6 +26,15 @@ class _TeamProfileState extends State<TeamProfile> {
     ]);
     employeeProfile = fetchEmployeeDetails(widget.empID);
   }
+
+    @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  
 @override
 void dispose() {
   super.dispose();

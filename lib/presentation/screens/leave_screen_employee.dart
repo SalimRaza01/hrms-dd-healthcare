@@ -138,6 +138,16 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
       ));
     }
   }
+
+
+    @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  
 @override
 void dispose() {
   super.dispose();

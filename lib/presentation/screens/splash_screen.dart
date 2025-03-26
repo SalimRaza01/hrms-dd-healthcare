@@ -95,6 +95,15 @@ class _SplashScreenState extends State<SplashScreen>
       MaterialPageRoute(builder: (context) => OnboardingScreen()),
     );
   }
+
+    @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  
 @override
 void dispose() {
   super.dispose();

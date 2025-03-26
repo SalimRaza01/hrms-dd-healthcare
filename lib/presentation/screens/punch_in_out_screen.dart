@@ -213,12 +213,12 @@
 //     return Scaffold(
 //       backgroundColor: Colors.transparent,
 //       body: _isLoading
-          // ? Center(
-          //     child: LoadingAnimationWidget.inkDrop(
-          //       color: AppColor.mainFGColor,
-          //       size: height * 0.04,
-          //     ),
-          //   )
+//      ? Center(
+//          child: LoadingAnimationWidget.inkDrop(
+//            color: AppColor.mainFGColor,
+//            size: height * 0.04,
+//               ),
+//            )
 //           : Stack(
 //               children: [
 //                 FlutterMap(
@@ -441,16 +441,16 @@
 //                           top: -height * 0.12,
 //                           child: GestureDetector(
 //                             onTap: () {
-//                               // if (_selfie != null) {
-//                               //   Navigator.push(
-//                               //     context,
-//                               //     MaterialPageRoute(
-//                               //       builder: (context) => ImageViewerScreen(
-//                               //         imageFile: _selfie!,
-//                               //       ),
-//                               //     ),
-//                               //   );
-//                               // }
+//                               if (_selfie != null) {
+//                                Navigator.push(
+//                                  context,
+//                                MaterialPageRoute(
+//                                  builder: (context) => ImageViewerScreen(
+//                                     imageFile: _selfie!,
+//                                    ),
+//                                  ),
+//                                );
+//                               }
 //                             },
 //                             child: Container(
 //                               decoration: BoxDecoration(

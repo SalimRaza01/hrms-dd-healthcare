@@ -1,16 +1,16 @@
 // ignore_for_file: sort_child_properties_last, prefer_final_fields
 
-import 'package:dio/dio.dart';
+// import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_stack/flutter_image_stack.dart';
 import 'package:hrms/core/api/api.dart';
-import 'package:hrms/core/api/api_config.dart';
+// import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hrms/presentation/odoo/odoo_dashboard.dart';
+// import 'package:hrms/presentation/odoo/odoo_dashboard.dart';
 import 'package:hrms/presentation/odoo/task_details.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -35,10 +35,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool isLoading = false;
 
   @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
         _teamLeaveRequest = fetchLeaveRequest('Pending');
-    _fetchTasks();
+    // _fetchTasks();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -55,34 +62,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  Future<void> _fetchTasks() async {
-    try {
-      final response = await Dio().get(getOdootasks);
+  // Future<void> _fetchTasks() async {
+  //   try {
+  //     final response = await Dio().get(getOdootasks);
 
-      if (response.data['status'] == 'success') {
-        final myTasks = List<Map<String, dynamic>>.from(response.data['tasks']);
+  //     if (response.data['status'] == 'success') {
+  //       final myTasks = List<Map<String, dynamic>>.from(response.data['tasks']);
 
-        setState(() {
-          tasks = myTasks.where((project) {
-            bool isAssigneeMatch =
-                project['assignees_emails'].contains(_authBox.get('email')!);
+  //       setState(() {
+  //         tasks = myTasks.where((project) {
+  //           bool isAssigneeMatch =
+  //               project['assignees_emails'].contains(_authBox.get('email')!);
 
-            bool isInProgress = project['stage_name'] == 'In Progress' ||
-                project['stage_name'] == 'Created';
+  //           bool isInProgress = project['stage_name'] == 'In Progress' ||
+  //               project['stage_name'] == 'Created';
 
-            return isAssigneeMatch && isInProgress;
-          }).toList();
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
+  //           return isAssigneeMatch && isInProgress;
+  //         }).toList();
+  //         isLoading = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
 
-      print('Error fetching tasks: $e');
-    }
-  }
+  //     print('Error fetching tasks: $e');
+  //   }
+  // }
 
 @override
 void dispose() {
@@ -257,64 +264,64 @@ void dispose() {
                     SizedBox(
                       height: height * 0.015,
                     ),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => OdooDashboard()));
-                      },
-                      child: Container(
-                          width: width,
-                          decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.centerRight,
-                                colors: [
-                                  AppColor.primaryThemeColor,
-                                  AppColor.mainThemeColor,
-                                ],
-                              ),
-                              border: Border.all(
-                                  color: const Color.fromARGB(14, 0, 0, 0)),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 12),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.check_circle_outline_outlined,
-                                      color: AppColor.mainFGColor,
-                                      size: height * 0.022,
-                                    ),
-                                    SizedBox(
-                                      width: width * 0.02,
-                                    ),
-                                    Text(
-                                      'View Task Dashbaord',
-                                      style: TextStyle(
-                                          fontSize: height * 0.015,
-                                          color: AppColor.mainFGColor,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ],
-                                ),
-                                Icon(
-                                  Icons.arrow_forward_ios_outlined,
-                                  color: AppColor.mainFGColor,
-                                  size: height * 0.018,
-                                ),
-                              ],
-                            ),
-                          )),
-                    ),
-                    SizedBox(
-                      height: height * 0.015,
-                    ),
+                    // InkWell(
+                    //   onTap: () {
+                    //     Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //             builder: (context) => OdooDashboard()));
+                    //   },
+                    //   child: Container(
+                    //       width: width,
+                    //       decoration: BoxDecoration(
+                    //           gradient: LinearGradient(
+                    //             begin: Alignment.topLeft,
+                    //             end: Alignment.centerRight,
+                    //             colors: [
+                    //               AppColor.primaryThemeColor,
+                    //               AppColor.mainThemeColor,
+                    //             ],
+                    //           ),
+                    //           border: Border.all(
+                    //               color: const Color.fromARGB(14, 0, 0, 0)),
+                    //           borderRadius: BorderRadius.circular(10)),
+                    //       child: Padding(
+                    //         padding: const EdgeInsets.symmetric(
+                    //             horizontal: 10, vertical: 12),
+                    //         child: Row(
+                    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //           children: [
+                    //             Row(
+                    //               children: [
+                    //                 Icon(
+                    //                   Icons.check_circle_outline_outlined,
+                    //                   color: AppColor.mainFGColor,
+                    //                   size: height * 0.022,
+                    //                 ),
+                    //                 SizedBox(
+                    //                   width: width * 0.02,
+                    //                 ),
+                    //                 Text(
+                    //                   'View Task Dashbaord',
+                    //                   style: TextStyle(
+                    //                       fontSize: height * 0.015,
+                    //                       color: AppColor.mainFGColor,
+                    //                       fontWeight: FontWeight.w400),
+                    //                 ),
+                    //               ],
+                    //             ),
+                    //             Icon(
+                    //               Icons.arrow_forward_ios_outlined,
+                    //               color: AppColor.mainFGColor,
+                    //               size: height * 0.018,
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       )),
+                    // ),
+                 //   SizedBox(
+                   //   height: height * 0.015,
+                   // ),
                     Card(
                       color: AppColor.mainFGColor,
                       elevation: 4,

@@ -48,6 +48,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       DeviceOrientation.portraitDown,
     ]);
   }
+
+    @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  
 @override
 void dispose() {
   super.dispose();

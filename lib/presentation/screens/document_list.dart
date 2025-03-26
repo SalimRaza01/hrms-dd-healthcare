@@ -12,6 +12,13 @@ class DocumentListScreen extends StatefulWidget {
 class _DocumentListScreenState extends State<DocumentListScreen> {
 
   @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     SystemChrome.setPreferredOrientations([

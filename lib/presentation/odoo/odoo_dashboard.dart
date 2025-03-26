@@ -1,12 +1,12 @@
 // ignore_for_file: sort_child_properties_last
 
-import 'package:dio/dio.dart';
+// import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_stack/flutter_image_stack.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hrms/core/api/api_config.dart';
+// import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/provider/provider.dart';
 import 'package:hrms/presentation/odoo/edit_project.dart';
@@ -37,34 +37,34 @@ class _OdooDashboardState extends State<OdooDashboard> {
   @override
   void initState() {
     super.initState();
-    _fetchTasks();
-    _projectsFuture = fetchOdooProjects();
+    // _fetchTasks();
+    // _projectsFuture = fetchOdooProjects();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
   }
 
-  Future<void> _fetchTasks() async {
-    try {
-      final response = await Dio().get(getOdootasks);
+  // Future<void> _fetchTasks() async {
+  //   try {
+  //     final response = await Dio().get(getOdootasks);
 
-      if (response.statusCode == 200) {
-        final myTasks = List<Map<String, dynamic>>.from(response.data['tasks']);
-        setState(() {
-          tasks = myTasks
-              .where((project) =>
-                  project['assignees_emails'].contains(_authBox.get('email')))
-              .toList();
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+  //     if (response.statusCode == 200) {
+  //       final myTasks = List<Map<String, dynamic>>.from(response.data['tasks']);
+  //       setState(() {
+  //         tasks = myTasks
+  //             .where((project) =>
+  //                 project['assignees_emails'].contains(_authBox.get('email')))
+  //             .toList();
+  //         isLoading = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
 
   String _formatDate(String dateString) {
     try {

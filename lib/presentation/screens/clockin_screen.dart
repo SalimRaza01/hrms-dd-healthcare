@@ -31,6 +31,13 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
   DateTime currentDate = DateTime.now();
 
   @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     empID = widget.empID;

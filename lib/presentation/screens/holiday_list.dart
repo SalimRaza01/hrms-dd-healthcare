@@ -26,6 +26,14 @@ class _HolidayListState extends State<HolidayList> {
     ]);
     holidayList = fetchHolidayList('MainScreen');
   }
+
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
 @override
 void dispose() {
   super.dispose();

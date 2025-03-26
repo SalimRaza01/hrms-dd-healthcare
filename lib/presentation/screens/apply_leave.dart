@@ -68,7 +68,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     DateTime maxDate;
 
     if (_selectedLeaveType != null && _selectedLeaveType.contains('Medical')) {
-      minDate = now.subtract(Duration(days: 6));
+      minDate = now.subtract(Duration(days: 7));
       maxDate = now.subtract(Duration(days: 1));
     } else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Casual')) {
@@ -113,7 +113,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
 
   endDate(
       BuildContext context, String? _selectedLeaveType, String _selectedText) {
-    DateTime now = DateTime.now();
+    DateTime now = DateTime.parse(startDateController.text);
     DateTime startOfMonth = DateTime(now.year, now.month, 1);
 
     DateTime? minDate;
@@ -129,9 +129,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       maxDate = next7Days.isBefore(quarterEndDate) ? next7Days : quarterEndDate;
 
       minDate = startOfMonth;
-
-      print("Quarter Ends: $quarterEndDate");
-      print("Max Leave Date for Casual Leave (End Date): $maxDate");
     } else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Earned')) {
       if (startDateController.text.isNotEmpty) {
@@ -211,11 +208,12 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
           } else if (reasonController.text.isEmpty) {
             showSnackBar('Please Describe Reason');
             return;
-          } else if (startDate.day == DateTime.now().day &&
-              DateTime.now().hour >= 9) {
-            return showSnackBar(
-                'Earned leave must be applied before 9 AM for today.');
-          }
+          } else {}
+          //else if (startDate.day == DateTime.now().day &&
+          //     DateTime.now().hour >= 9) {
+          //   return showSnackBar(
+          //       'Earned leave must be applied before 9 AM for today.');
+          // }
 
           int leaveDuration = endDate.difference(startDate).inDays + 1;
 
@@ -337,6 +335,13 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     ]);
   }
 
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   String? get uploadURL => '$documentUpload/$empID';
   Future<void> uploadPrescription(List<PlatformFile> files) async {
     final dio = Dio();
@@ -384,13 +389,13 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     });
   }
 
-@override
-void dispose() {
-  reasonController.dispose();
-  startDateController.dispose();
-  endDateController.dispose();
-  super.dispose();
-}
+  @override
+  void dispose() {
+    reasonController.dispose();
+    startDateController.dispose();
+    endDateController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -786,7 +791,6 @@ void dispose() {
                                                 'You can only apply for Casual leaves up to 7 days from today.'),
                                             _buildBulletPoint(
                                                 'Casual leaves can be applied for a minimum of 1 day, including half-days.'),
-                              
                                             _buildBulletPoint(
                                                 'Uninformed absences will automatically be deducted as Casual Leaves.'),
                                             _buildBulletPoint(
