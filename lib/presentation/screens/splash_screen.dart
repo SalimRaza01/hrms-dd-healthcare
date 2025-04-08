@@ -16,8 +16,7 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with TickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
   final Box _authBox = Hive.box('authBox');
   late Animation<double> _fadeAnim;
   late AnimationController _controller;

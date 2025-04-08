@@ -6,6 +6,7 @@ import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:hrms/presentation/screens/punch_in_out_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -689,20 +690,20 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
             )
           ],
         ),
-        // floatingActionButton:  FloatingActionButton.extended(
-        //   backgroundColor: AppColor.mainThemeColor,
-        //   onPressed: () => showCupertinoModalBottomSheet(
-        //     expand: true,
-        //     context: context,
-        //     barrierColor: const Color.fromARGB(130, 0, 0, 0),
-        //     backgroundColor: Colors.transparent,
-        //     builder: (context) => PunchInOutScreen(),
-        //   ),
-        //   label: Text(
-        //     'Clock-In',
-        //     style: TextStyle(color: AppColor.mainFGColor),
-        //   ),
-        // )
+        floatingActionButton:  FloatingActionButton.extended(
+          backgroundColor: AppColor.mainThemeColor,
+          onPressed: () => showCupertinoModalBottomSheet(
+            expand: true,
+            context: context,
+            barrierColor: const Color.fromARGB(130, 0, 0, 0),
+            backgroundColor: Colors.transparent,
+            builder: (context) => PunchInOutScreen(),
+          ),
+          label: Text(
+            'Clock-In',
+            style: TextStyle(color: AppColor.mainFGColor),
+          ),
+        )
       ),
     );
   }
