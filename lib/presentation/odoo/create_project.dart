@@ -10,7 +10,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 class CreateProject extends StatefulWidget {
-  CreateProject();
+  const CreateProject({super.key});
 
   @override
   State<CreateProject> createState() => _CreateProjectState();
