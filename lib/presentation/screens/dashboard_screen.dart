@@ -131,8 +131,8 @@ void dispose() {
                     fontWeight: FontWeight.w500),
               ),
               Text(
-                _authBox.get('employeeDesign') != null
-                    ? _authBox.get('employeeDesign')!
+                _authBox.get('employeeDesign') != null ? _authBox.get('employeeId') == '413' ? 'Flutter & UI/UX Developer' :
+                     _authBox.get('employeeDesign')! 
                     : '',
                 style: TextStyle(
                   fontSize: height * 0.013,

@@ -155,7 +155,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                             SizedBox(
                               width: width / 2,
                               child: Text(
-                                'Check Your PunchIn Record & Leave Types',
+                                'Check Your Punch Record & Leave Types',
                                 style: TextStyle(
                                   fontSize: height * 0.015,
                                   color: AppColor.mainFGColor,

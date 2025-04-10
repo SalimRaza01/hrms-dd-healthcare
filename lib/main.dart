@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:wiredash/wiredash.dart';
 import 'core/provider/provider.dart';
 import 'presentation/odoo/odoo_dashboard.dart';
 import 'presentation/odoo/view_projects.dart';
@@ -45,36 +46,41 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      themeMode: ThemeMode.light,
-      theme: ThemeData(primarySwatch: Colors.blue),
-      darkTheme: ThemeData(brightness: Brightness.dark),
-      debugShowCheckedModeBanner: false,
-      initialRoute: "/SplashScreen",
-      routes: {
-        "/SplashScreen": (context) => SplashScreen(),
-        "/OnBoarding": (context) => OnboardingScreen(),
-        "/Login": (context) => const LoginScreen(),
-        "/CreateNewPassword": (context) => CreateNewPassword(''),
-        "/OTP": (context) => OTPScren(""),
-        "/BottomNavigation": (context) => BottomNavigation(),
-        "/home": (context) => DashboardScreen(''),
-        "/applyLeave": (context) => ApplyLeave(),
-        "/profileScreen": (context) => ProfileScreen(''),
-        "/clockSecondScreen": (context) => ClockInScreenSecond(''),
-        "/leaveSecondScreen": (context) => LeaveScreenManager(''),
-        "/holidayList": (context) => HolidayList(),
-        "/notificationScreen": (context) => NotificationScreen(),
-        "/odooDashbaord": (context) => OdooDashboard(),
-        "/createTask": (context) => CreateTask(projectID: 0),
-        "/taskDetails": (context) => TaskDetails(taskID: 0),
-        "/viewProject": (context) => ViewProjects(
-              projectName: '',
-              projectID: 0,
-              createDate: '',
-              alreadyAssignedEmails: [],
-            ),
-      },
+    return Wiredash(
+      projectId: 'hrms-obpnfi3',
+      secret: 'QImrYzABXucoW8hFSIpoH52KRg2dLywl',
+
+      child: MaterialApp(
+        themeMode: ThemeMode.light,
+        theme: ThemeData(primarySwatch: Colors.blue),
+        darkTheme: ThemeData(brightness: Brightness.dark),
+        debugShowCheckedModeBanner: false,
+        initialRoute: "/SplashScreen",
+        routes: {
+          "/SplashScreen": (context) => SplashScreen(),
+          "/OnBoarding": (context) => OnboardingScreen(),
+          "/Login": (context) => const LoginScreen(),
+          "/CreateNewPassword": (context) => CreateNewPassword(''),
+          "/OTP": (context) => OTPScren(""),
+          "/BottomNavigation": (context) => BottomNavigation(),
+          "/home": (context) => DashboardScreen(''),
+          "/applyLeave": (context) => ApplyLeave(),
+          "/profileScreen": (context) => ProfileScreen(''),
+          "/clockSecondScreen": (context) => ClockInScreenSecond(''),
+          "/leaveSecondScreen": (context) => LeaveScreenManager(''),
+          "/holidayList": (context) => HolidayList(),
+          "/notificationScreen": (context) => NotificationScreen(),
+          "/odooDashbaord": (context) => OdooDashboard(),
+          "/createTask": (context) => CreateTask(projectID: 0),
+          "/taskDetails": (context) => TaskDetails(taskID: 0),
+          "/viewProject": (context) => ViewProjects(
+                projectName: '',
+                projectID: 0,
+                createDate: '',
+                alreadyAssignedEmails: [],
+              ),
+        },
+      ),
     );
   }
 }

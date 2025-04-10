@@ -1,4 +1,3 @@
-
 // ignore_for_file: use_key_in_widget_constructors, depend_on_referenced_packages
 
 import 'dart:io';
@@ -118,7 +117,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
     });
   }
 
-  Future<void> _savePunchOutStatus( DateTime? punchOutTime) async {
+  Future<void> _savePunchOutStatus(DateTime? punchOutTime) async {
     var box = await Hive.openBox('authBox');
     box.put('punchOutTime', punchOutTime);
     Future.delayed(Duration(seconds: 1), () {
@@ -255,6 +254,16 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                               const Color.fromARGB(120, 64, 195, 255)),
                     ),
                   ],
+                ),
+                Container(
+                  color: const Color.fromARGB(235, 207, 0, 0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      "You're using a test version of the clock-in feature. Selfie, time, and location data are not saved and won't affect official attendance. Use this to help us improve.",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ),
                 Align(
                   alignment: Alignment.bottomCenter,
@@ -420,8 +429,8 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                           begin: Alignment.topCenter,
                                           end: Alignment.bottomCenter,
                                           colors: [
-                                        AppColor.primaryThemeColor,
-                                          AppColor.secondaryThemeColor2,
+                                            AppColor.primaryThemeColor,
+                                            AppColor.secondaryThemeColor2,
                                           ]),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
@@ -440,8 +449,8 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                   ),
                                 ),
                                 InkWell(
-                            // onTap: _punchOutTime != null ? null : _punchOut,
-                                   onTap: _punchOut,
+                                  // onTap: _punchOutTime != null ? null : _punchOut,
+                                  onTap: _punchOut,
                                   child: Container(
                                     width: width / 3,
                                     decoration: BoxDecoration(
@@ -449,8 +458,8 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                           begin: Alignment.topCenter,
                                           end: Alignment.bottomCenter,
                                           colors: [
-                                          AppColor.primaryThemeColor,
-                                       AppColor.secondaryThemeColor2,
+                                            AppColor.primaryThemeColor,
+                                            AppColor.secondaryThemeColor2,
                                           ]),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
