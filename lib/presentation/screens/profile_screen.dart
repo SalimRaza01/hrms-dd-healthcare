@@ -1,5 +1,3 @@
-// ignore_for_file: unused_element
-
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
@@ -25,7 +23,7 @@ class ProfileScreen extends StatefulWidget {
   final String empID;
   ProfileScreen(this.empID);
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
@@ -221,39 +219,461 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-    return Scaffold(
-        backgroundColor: AppColor.mainBGColor,
-        body: FutureBuilder<EmployeeProfile>(
-          future: employeeProfile,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return ProfileShimmerAnimation();
-            } else if (snapshot.hasError) {
-              return Center(child: Text('No Data Found'));
-            } else if (!snapshot.hasData) {
-              return Center(child: Text('No data found'));
-            } else {
-              final employee = snapshot.data!;
-              return ListView(children: [
-                Container(
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColor.primaryThemeColor,
-                          AppColor.secondaryThemeColor2,
+
+    return SafeArea(
+      child: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          backgroundColor: AppColor.mainFGColor,
+          body: FutureBuilder<EmployeeProfile>(
+              future: employeeProfile,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return ProfileShimmerAnimation();
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('No Data Found'));
+                } else if (!snapshot.hasData) {
+                  return Center(child: Text('No data found'));
+                } else {
+                  final employee = snapshot.data!;
+                  return Stack(
+                    children: [
+                      Column(
+                        children: [
+                          // Cover Image
+
+                          Image.asset(
+                            'assets/image/cover3.png',
+                            height: height * 0.21,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+
+                          Column(
+                            children: [
+                              SizedBox(height: height * 0.08),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    employee.employeeName,
+                                    style: TextStyle(
+                                      fontSize: height * 0.021,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColor.mainTextColor2,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Icon(
+                                    Icons.circle,
+                                    color: employee.employeeStatus == 'Working'
+                                        ? Colors.green
+                                        : Colors.red,
+                                    size: height * .015,
+                                  )
+                                ],
+                              ),
+                              Text(
+                                employee.designation,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.grey[700]),
+                              ),
+
+                              SizedBox(height: height * 0.015),
+
+                              // Tab Bar
+                              TabBar(
+                                unselectedLabelColor: Colors.grey,
+                                indicatorColor: AppColor.mainThemeColor,
+                                labelColor: AppColor.mainThemeColor,
+                                tabs: [
+                                  Tab(text: 'Personal'),
+                                  Tab(text: 'Contact'),
+                                  Tab(text: 'Work Info'),
+                                ],
+                              ),
+                              SizedBox(height: height * 0.015),
+                              SizedBox(
+                                height: height * 0.19,
+                                child: TabBarView(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16),
+                                      child: Card(
+                                        color: AppColor.mainBGColor,
+                                        elevation: 0,
+                                        margin: EdgeInsets.all(0),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        shadowColor:
+                                            Colors.black.withOpacity(0.1),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _buildProfileInfo(
+                                                  'Gender :',
+                                                  employee.gender,
+                                                  Icons.person,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Date of Birth :',
+                                                  employee.dob,
+                                                  Icons.calendar_today,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Marital Status :',
+                                                  employee.maritalStatus,
+                                                  Icons.favorite,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Address :',
+                                                  employee.permanentAddress,
+                                                  Icons.flag,
+                                                  height),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16),
+                                      child: Card(
+                                        color: AppColor.mainBGColor,
+                                        elevation: 0,
+                                        margin: EdgeInsets.all(0),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        shadowColor:
+                                            Colors.black.withOpacity(0.1),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _buildProfileInfo(
+                                                  'Contact No :',
+                                                  employee.contactNo,
+                                                  Icons.phone,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Email :',
+                                                  employee.email,
+                                                  Icons.email,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Emergency Contact :',
+                                                  employee.emergencyContact,
+                                                  Icons.local_hospital,
+                                                  height),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16),
+                                      child: Card(
+                                        color: AppColor.mainBGColor,
+                                        elevation: 0,
+                                        margin: EdgeInsets.all(0),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        shadowColor:
+                                            Colors.black.withOpacity(0.1),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _buildProfileInfo(
+                                                  'EmployeeID :',
+                                                  employee.employeeId,
+                                                  Icons.badge,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Date of Joining :',
+                                                  employee.doj,
+                                                  Icons.work,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Workplace :',
+                                                  employee.workPlace,
+                                                  Icons.business,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Designation :',
+                                                  employee.employeeId == '413'
+                                                      ? 'Flutter & UI/UX Developer'
+                                                      : employee.designation,
+                                                  Icons.assignment,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Employee Type :',
+                                                  employee.employmentType,
+                                                  Icons.assignment,
+                                                  height),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                height: height * 0.01,
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              DocumentListScreen()));
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  child: Card(
+                                    color: AppColor.mainBGColor,
+                                    elevation: 0,
+                                    margin: EdgeInsets.all(0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    shadowColor: Colors.black.withOpacity(0.1),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 13),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.file_copy_rounded,
+                                            color: AppColor.mainThemeColor,
+                                            size: height * 0.02,
+                                          ),
+                                          SizedBox(
+                                            width: width * 0.02,
+                                          ),
+                                          Text(
+                                            'Documents',
+                                            style: TextStyle(
+                                              fontSize: height * 0.015,
+                                              color: AppColor.mainTextColor,
+                                            ),
+                                            textAlign: TextAlign.end,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(
+                                height: height * 0.01,
+                              ),
+                              InkWell(
+                                onTap: () => Wiredash.of(context)
+                                    .show(inheritMaterialTheme: true),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  child: Card(
+                                    color: AppColor.mainBGColor,
+                                    elevation: 0,
+                                    margin: EdgeInsets.all(0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    shadowColor: Colors.black.withOpacity(0.1),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 13),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.support_agent,
+                                            color: AppColor.mainThemeColor,
+                                            size: height * 0.02,
+                                          ),
+                                          SizedBox(
+                                            width: width * 0.02,
+                                          ),
+                                          Text(
+                                            'Support & Feedback',
+                                            style: TextStyle(
+                                              fontSize: height * 0.015,
+                                              color: AppColor.mainTextColor,
+                                            ),
+                                            textAlign: TextAlign.end,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: height * 0.01,
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  showDialog<void>(
+                                    barrierColor: Colors.black
+                                        .withOpacity(0.5), // Darker background
+                                    context: context,
+                                    barrierDismissible: true,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        backgroundColor: Colors
+                                            .white, // Dialog background color
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              20), // Rounded corners
+                                        ),
+                                        title: Text(
+                                          'Confirm Logout',
+                                          style: TextStyle(
+                                            fontSize: height * 0.015,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        content: Text(
+                                          'Are you sure you want to logout?',
+                                          style: TextStyle(
+                                            fontSize: height * 0.013,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                        actionsPadding: EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8), // Add spacing
+                                        actionsAlignment: MainAxisAlignment
+                                            .spaceBetween, // Spread the buttons
+                                        actions: [
+                                          ElevatedButton(
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+                                              await logout();
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        SplashScreen()),
+                                              );
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors
+                                                  .redAccent, // Button background color
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 24, vertical: 12),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              elevation: 0,
+                                            ),
+                                            child: Text(
+                                              "Yes",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                          ),
+                                          OutlinedButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              side: BorderSide(
+                                                  color: Colors.grey.shade400),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 24, vertical: 12),
+                                            ),
+                                            child: Text(
+                                              "No",
+                                              style: TextStyle(
+                                                color: Colors.black87,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  child: Card(
+                                    color: AppColor.mainBGColor,
+                                    elevation: 0,
+                                    margin: EdgeInsets.all(0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    shadowColor: Colors.black.withOpacity(0.1),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 13),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.logout_rounded,
+                                            color: AppColor.mainThemeColor,
+                                            size: height * 0.02,
+                                          ),
+                                          SizedBox(
+                                            width: width * 0.02,
+                                          ),
+                                          Text(
+                                            'Log-Out',
+                                            style: TextStyle(
+                                              fontSize: height * 0.015,
+                                              color: AppColor.mainTextColor,
+                                            ),
+                                            textAlign: TextAlign.end,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
-                      borderRadius: BorderRadius.only(
-                          bottomRight: Radius.circular(30),
-                          bottomLeft: Radius.circular(30))),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 20),
-                    child: Column(
-                      children: [
-                        InkWell(
+                      Positioned(
+                        top: height * 0.135,
+                        left: MediaQuery.of(context).size.width / 2 - 75,
+                        child: InkWell(
                           onTap: () {
                             _showPicker(context);
                           },
@@ -267,7 +687,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         )));
                           },
                           child: Container(
-                            width: 120,
+                            width: 150,
                             height: height * 0.14,
                             decoration: BoxDecoration(
                               border: Border.all(
@@ -289,7 +709,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     child: LoadingAnimationWidget
                                         .threeArchedCircle(
                                       color: AppColor.mainBGColor,
-                                      size: height * 0.06,
+                                      size: height * 0.05,
                                     ),
                                   )
                                 : CircleAvatar(
@@ -301,387 +721,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 : 'assets/image/FemaleAvatar.png',
                                           )
                                         : NetworkImage(employee.employeePhoto),
-                                    radius: 50,
+                                    radius: 40,
                                   ),
                           ),
                         ),
-                        SizedBox(height: height * 0.01),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              employee.employeeName,
-                              style: TextStyle(
-                                fontSize: height * 0.02,
-                                fontWeight: FontWeight.bold,
-                                color: AppColor.mainFGColor,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Icon(
-                              Icons.circle,
-                              color: employee.employeeStatus == 'Working'
-                                  ? Colors.green
-                                  : Colors.red,
-                              size: height * .015,
-                            )
-                          ],
-                        ),
-                        Text(
-                          employee.email,
-                          style: TextStyle(
-                              fontSize: height * 0.016,
-                              color: const Color.fromARGB(255, 224, 224, 224)),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: height * 0.01,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Card(
-                    color: AppColor.mainFGColor,
-                    elevation: 4,
-                    margin: EdgeInsets.all(0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    shadowColor: Colors.black.withOpacity(0.1),
-                    child: Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Column(children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: AppColor.mainBGColor, width: 2),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Personal Information',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: height * 0.018,
-                                    color: AppColor.mainTextColor2,
-                                  ),
-                                ),
-                                SizedBox(height: height * 0.005),
-                                _buildProfileInfo('Gender :', employee.gender,
-                                    Icons.person, height),
-                                _buildProfileInfo('Date of Birth :',
-                                    employee.dob, Icons.calendar_today, height),
-                                _buildProfileInfo(
-                                    'Marital Status :',
-                                    employee.maritalStatus,
-                                    Icons.favorite,
-                                    height),
-                                _buildProfileInfo(
-                                    'Address :',
-                                    employee.permanentAddress,
-                                    Icons.flag,
-                                    height),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: height * 0.015,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: AppColor.mainBGColor, width: 2),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Contact Information',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: height * 0.018,
-                                    color: AppColor.mainTextColor2,
-                                  ),
-                                ),
-                                SizedBox(height: height * 0.005),
-                                _buildProfileInfo('Contact No :',
-                                    employee.contactNo, Icons.phone, height),
-                                _buildProfileInfo('Email :', employee.email,
-                                    Icons.email, height),
-                                _buildProfileInfo(
-                                    'Emergency Contact :',
-                                    employee.emergencyContact,
-                                    Icons.local_hospital,
-                                    height),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: height * 0.015,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: AppColor.mainBGColor, width: 2),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Work Information',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: height * 0.018,
-                                    color: AppColor.mainTextColor2,
-                                  ),
-                                ),
-                                SizedBox(height: height * 0.005),
-                                _buildProfileInfo('EmployeeID :',
-                                    employee.employeeId, Icons.badge, height),
-                                _buildProfileInfo('Date of Joining :',
-                                    employee.doj, Icons.work, height),
-                                _buildProfileInfo('Workplace :',
-                                    employee.workPlace, Icons.business, height),
-                                _buildProfileInfo(
-                                    'Designation :',
-                                    employee.employeeId == '413'
-                                        ? 'Flutter & UI/UX Developer'
-                                        : employee.designation,
-                                    Icons.assignment,
-                                    height),
-                                _buildProfileInfo(
-                                    'Employee Type :',
-                                    employee.employmentType,
-                                    Icons.assignment,
-                                    height),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ]),
-                    ),
-                  ),
-                ),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => DocumentListScreen()));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Card(
-                      color: AppColor.mainFGColor,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
                       ),
-                      shadowColor: Colors.black.withOpacity(0.1),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 13),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.file_copy_rounded,
-                              color: AppColor.mainThemeColor,
-                            ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              'Documents',
-                              style: TextStyle(
-                                fontSize: height * 0.016,
-                                fontWeight: FontWeight.w500,
-                                color: AppColor.mainTextColor,
-                              ),
-                              textAlign: TextAlign.end,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: height * 0.02,
-                ),
-                InkWell(
-                  onTap: () {
-                    showDialog<void>(
-                      barrierColor:
-                          Colors.black.withOpacity(0.5), // Darker background
-                      context: context,
-                      barrierDismissible: true,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          backgroundColor:
-                              Colors.white, // Dialog background color
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(20), // Rounded corners
-                          ),
-                          title: Text(
-                            'Confirm Logout',
-                            style: TextStyle(
-                              fontSize: height * 0.015,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          content: Text(
-                            'Are you sure you want to logout?',
-                            style: TextStyle(
-                              fontSize: height * 0.013,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          actionsPadding: EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8), // Add spacing
-                          actionsAlignment: MainAxisAlignment
-                              .spaceBetween, // Spread the buttons
-                          actions: [
-                            ElevatedButton(
-                              onPressed: () async {
-                                Navigator.pop(context);
-                                await logout();
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => SplashScreen()),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Colors.redAccent, // Button background color
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 24, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: Text(
-                                "Yes",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                            OutlinedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(color: Colors.grey.shade400),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 24, vertical: 12),
-                              ),
-                              child: Text(
-                                "No",
-                                style: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Card(
-                      color: AppColor.mainFGColor,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadowColor: Colors.black.withOpacity(0.1),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 13),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.logout_rounded,
-                              color: AppColor.mainThemeColor,
-                            ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              'Log-Out',
-                              style: TextStyle(
-                                fontSize: height * 0.016,
-                                fontWeight: FontWeight.w500,
-                                color: AppColor.mainTextColor,
-                              ),
-                              textAlign: TextAlign.end,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: height * 0.02,
-                ),
-              ]);
-            }
-          },
+                    ],
+                  );
+                }
+              }),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          backgroundColor: AppColor.mainThemeColor,
-          // onPressed: () => showCupertinoModalBottomSheet(
-          //   expand: true,
-          //   context: context,
-          //   barrierColor: const Color.fromARGB(130, 0, 0, 0),
-          //   backgroundColor: Colors.transparent,
-          //   builder: (context) => PunchInOutScreen(),
-          // ),
-          onPressed: () {
-            Wiredash.of(context).show(inheritMaterialTheme: true);
-          },
-label: Text(
-                              'Support & Feedback',
-                              style: TextStyle(
-                                fontSize: height * 0.013,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                              ),)
-        //  label: Icon(CupertinoIcons.exclamationmark_bubble_fill, color: Colors.white,)
-          
-        ));
+      ),
+    );
   }
 
   Widget _buildProfileInfo(

@@ -142,30 +142,33 @@ void dispose() {
             ],
           ),
           actions: [
-            InkWell(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => NotificationScreen()));
-              },
-              child: FutureBuilder<List<LeaveRequests>>(
-                      future: _teamLeaveRequest,
-                      builder: (context, snapshot) {
-           bool hasPendingRequests = snapshot.hasData && snapshot.data!.isNotEmpty;
-
-            return Padding(
-             padding: const EdgeInsets.only(right: 15),
-          child: Image.asset(
-          hasPendingRequests    ? 'assets/image/unread.png'
-                                : 'assets/image/read.png',
-        
-            height: height * 0.033,
-      ),
-    );
-  },
-)
-
+            Visibility(
+              visible: _authBox.get('role') == 'Manager' || _authBox.get('role') == 'Super-Admin',
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => NotificationScreen()));
+                },
+                child: FutureBuilder<List<LeaveRequests>>(
+                        future: _teamLeaveRequest,
+                        builder: (context, snapshot) {
+                         bool hasPendingRequests = snapshot.hasData && snapshot.data!.isNotEmpty;
+              
+              return Padding(
+               padding: const EdgeInsets.only(right: 15),
+                        child: Image.asset(
+                        hasPendingRequests    ? 'assets/image/unread.png'
+                                  : 'assets/image/read.png',
+                      
+              height: height * 0.033,
+                    ),
+                  );
+                },
+              )
+              
+              ),
             ),
           ],
         ),

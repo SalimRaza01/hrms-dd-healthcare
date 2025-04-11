@@ -204,6 +204,7 @@ void dispose() {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      
                       TabBar(
                           dividerColor: Colors.transparent,
                           controller: _tabController,
