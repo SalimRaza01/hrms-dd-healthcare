@@ -51,8 +51,9 @@ class MyApp extends StatelessWidget {
       secret: 'QImrYzABXucoW8hFSIpoH52KRg2dLywl',
 
       child: MaterialApp(
+        
         themeMode: ThemeMode.light,
-        theme: ThemeData(primarySwatch: Colors.blue),
+        theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Poppins',),
         darkTheme: ThemeData(brightness: Brightness.dark),
         debugShowCheckedModeBanner: false,
         initialRoute: "/SplashScreen",

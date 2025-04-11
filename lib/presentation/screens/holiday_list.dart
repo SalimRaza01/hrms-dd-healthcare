@@ -19,8 +19,7 @@ class _HolidayListState extends State<HolidayList> {
   void initState() {
     super.initState();
 
-
- SystemChrome.setPreferredOrientations([
+    SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
@@ -34,10 +33,11 @@ class _HolidayListState extends State<HolidayList> {
     }
   }
 
-@override
-void dispose() {
-  super.dispose();
-}
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
@@ -49,7 +49,7 @@ void dispose() {
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
         child: Column(
           children: [
-             SizedBox(
+            SizedBox(
               height: height * 0.01,
             ),
             Text(
@@ -68,12 +68,11 @@ void dispose() {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(
-                                        child: LoadingAnimationWidget
-                                            .threeArchedCircle(
-                                          color: AppColor.mainTextColor2,
-                                          size: height * 0.03,
-                                        ),
-                                      );
+                      child: LoadingAnimationWidget.threeArchedCircle(
+                        color: AppColor.mainTextColor2,
+                        size: height * 0.03,
+                      ),
+                    );
                   } else if (snapshot.hasError) {
                     return Center(
                         child: Text('No HolidayModel records available.'));
@@ -82,15 +81,14 @@ void dispose() {
                         child: Text('No HolidayModel records available.'));
                   } else {
                     List<HolidayModel> items = snapshot.data!;
-                      
+
                     return ListView.separated(
                       itemCount: items.length,
                       itemBuilder: (context, index) {
                         HolidayModel item = items[index];
-                      
-    final newDate = DateTime.parse(item.holidayDate);
 
-                      
+                        final newDate = DateTime.parse(item.holidayDate);
+
                         return Card(
                           color: AppColor.mainFGColor,
                           elevation: 4,
@@ -103,38 +101,38 @@ void dispose() {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Container(
+                                width: width * 0.14,
+                                height: height * 0.069,
                                 decoration: BoxDecoration(
                                     color: AppColor.mainThemeColor,
                                     borderRadius: BorderRadius.only(
                                         topLeft: Radius.circular(15),
                                         bottomLeft: Radius.circular(15))),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 8,
-                                  ),
+                                  padding: const EdgeInsets.all(8.0),
                                   child: Column(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: [
-                                     Text(
-                                                   DateFormat('dd').format(newDate).toString(),
-                                                      style: TextStyle(
-                                                        fontSize: height * 0.02,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: AppColor.mainFGColor,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                            DateFormat('EEE').format(newDate).toString(),
-                                                      style: TextStyle(
-                                                          fontSize:
-                                                              height * 0.014,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: AppColor.mainFGColor),
-                                                    ),
+                                      Text(
+                                        DateFormat('dd')
+                                            .format(newDate)
+                                            .toString(),
+                                        style: TextStyle(
+                                          fontSize: height * 0.02,
+                                          fontWeight: FontWeight.normal,
+                                          color: AppColor.mainFGColor,
+                                        ),
+                                      ),
+                                      Text(
+                                        DateFormat('EEE')
+                                            .format(newDate)
+                                            .toString(),
+                                        style: TextStyle(
+                                            fontSize: height * 0.014,
+                                            fontWeight: FontWeight.normal,
+                                            color: AppColor.mainFGColor),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -150,10 +148,9 @@ void dispose() {
                                     SizedBox(
                                       width: width / 1.6,
                                       child: Text(
-                                                                    overflow: TextOverflow.ellipsis,
+                                        overflow: TextOverflow.ellipsis,
                                         item.holidayName,
                                         style: TextStyle(
-                                          
                                             fontSize: height * 0.018,
                                             fontWeight: FontWeight.bold,
                                             color: AppColor.mainTextColor),
@@ -163,7 +160,9 @@ void dispose() {
                                       height: height * 0.005,
                                     ),
                                     Text(
-                                       DateFormat('MMMM').format(newDate).toString(),
+                                      DateFormat('MMMM')
+                                          .format(newDate)
+                                          .toString(),
                                       style: TextStyle(
                                           fontSize: height * 0.014,
                                           fontWeight: FontWeight.w500,

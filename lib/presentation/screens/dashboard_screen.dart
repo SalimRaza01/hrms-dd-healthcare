@@ -146,6 +146,7 @@ String getGreeting() {
                   fontWeight: FontWeight.w500,
                 ),
               ),
+              SizedBox(height: height * 0.004,),
               Text(
                 _authBox.get('employeeDesign') != null
                     ? _authBox.get('employeeId') == '413'

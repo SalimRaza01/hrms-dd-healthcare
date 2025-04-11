@@ -64,7 +64,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
     super.dispose();
   }
 
-  String getMonthName(int month) {
+   String getMonthName(int month) {
     switch (month) {
       case 1:
         return 'January';
@@ -204,7 +204,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                     width: 2,
                                   ))),
                                   child: Text(
-                                    months[index],
+                                    months[index].toUpperCase(),
                                     style: TextStyle(
                                       fontSize: width * 0.035,
                                       color: isSelected
@@ -359,69 +359,66 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.center,
                                                 children: [
-                                                  Card(
-                                                    color: item.weekOff == 1 ||
-                                                            item.isHoliday == 1
-                                                        ? AppColor.mainBGColor
-                                                        : AppColor
-                                                            .mainThemeColor,
-                                                    elevation: 4,
-                                                    margin: EdgeInsets.all(0),
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10),
-                                                    ),
-                                                    shadowColor: Colors.black
-                                                        .withOpacity(0.1),
-                                                    child: Padding(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 15,
-                                                          vertical: 8),
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceAround,
-                                                        children: [
-                                                          Text(
-                                                            '$attendDate',
-                                                            style: TextStyle(
-                                                              fontSize:
-                                                                  height * 0.03,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color: item.weekOff ==
-                                                                          1 ||
-                                                                      item.isHoliday ==
-                                                                          1
-                                                                  ? Colors
-                                                                      .black87
-                                                                  : Colors
-                                                                      .white,
+                                                  SizedBox(
+                                                    width: width * 0.16,
+                                                    height: height * 0.08,
+                                                    child: Card(
+                                                      color: item.weekOff ==
+                                                                  1 ||
+                                                              item.isHoliday ==
+                                                                  1
+                                                          ? AppColor.mainBGColor
+                                                          : AppColor
+                                                              .mainThemeColor,
+                                                      elevation: 4,
+                                                      margin: EdgeInsets.all(0),
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                      ),
+                                                      shadowColor: Colors.black
+                                                          .withOpacity(0.1),
+                                                      child: Padding(
+                                                        padding: const EdgeInsets.symmetric(vertical: 5.0),
+                                                        child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceEvenly,
+                                                          children: [
+                                                            Text(
+                                                              '$attendDate',
+                                                              style: TextStyle(
+                                                                fontSize:
+                                                                    height * 0.03,
+                                                                color: item.weekOff ==
+                                                                            1 ||
+                                                                        item.isHoliday ==
+                                                                            1
+                                                                    ? Colors
+                                                                        .black87
+                                                                    : Colors
+                                                                        .white,
+                                                              ),
                                                             ),
-                                                          ),
-                                                          Text(
-                                                            '$attendDay',
-                                                            style: TextStyle(
-                                                              fontSize: height *
-                                                                  0.014,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color: item.weekOff ==
-                                                                          1 ||
-                                                                      item.isHoliday ==
-                                                                          1
-                                                                  ? Colors
-                                                                      .black87
-                                                                  : Colors
-                                                                      .white,
+                                                            Text(
+                                                              '$attendDay',
+                                                              style: TextStyle(
+                                                                fontSize: height *
+                                                                    0.014,
+                                                                color: item.weekOff ==
+                                                                            1 ||
+                                                                        item.isHoliday ==
+                                                                            1
+                                                                    ? Colors
+                                                                        .black87
+                                                                    : Colors
+                                                                        .white,
+                                                              ),
                                                             ),
-                                                          ),
-                                                        ],
+                                                          ],
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
@@ -441,7 +438,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                             fontSize:
                                                                 height * 0.02,
                                                             fontWeight:
-                                                                FontWeight.bold,
+                                                                FontWeight.w600,
                                                             color: AppColor
                                                                 .mainTextColor),
                                                       ),
@@ -454,7 +451,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                             fontSize:
                                                                 height * 0.014,
                                                             fontWeight:
-                                                                FontWeight.w500,
+                                                                FontWeight.normal,
                                                             color: AppColor
                                                                 .mainTextColor),
                                                       ),
@@ -483,7 +480,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                             fontSize:
                                                                 height * 0.02,
                                                             fontWeight:
-                                                                FontWeight.bold,
+                                                                FontWeight.w600,
                                                             color: AppColor
                                                                 .mainTextColor),
                                                       ),
@@ -496,7 +493,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                             fontSize:
                                                                 height * 0.014,
                                                             fontWeight:
-                                                                FontWeight.w500,
+                                                                FontWeight.normal,
                                                             color: AppColor
                                                                 .mainTextColor),
                                                       ),
@@ -524,8 +521,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                         style: TextStyle(
                                                           fontSize:
                                                               height * 0.02,
-                                                          fontWeight:
-                                                              FontWeight.bold,
+                                                               fontWeight:
+                                                                FontWeight.w600,
                                                           color: AppColor
                                                               .mainTextColor,
                                                         ),
@@ -539,7 +536,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                             fontSize:
                                                                 height * 0.014,
                                                             fontWeight:
-                                                                FontWeight.w500,
+                                                                FontWeight.normal,
                                                             color: AppColor
                                                                 .mainTextColor),
                                                       ),
@@ -587,7 +584,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                           fontSize:
                                                               height * 0.013,
                                                           fontWeight:
-                                                              FontWeight.w400,
+                                                              FontWeight.normal,
                                                           color: AppColor
                                                               .mainFGColor),
                                                     ),
@@ -621,8 +618,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                       style: TextStyle(
                                                           fontSize:
                                                               height * 0.013,
-                                                          fontWeight:
-                                                              FontWeight.w400,
+                                                      fontWeight:
+                                                              FontWeight.normal,
                                                           color: AppColor
                                                               .mainFGColor),
                                                     ),
@@ -653,8 +650,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                       style: TextStyle(
                                                           fontSize:
                                                               height * 0.013,
-                                                          fontWeight:
-                                                              FontWeight.w400,
+                                                   fontWeight:
+                                                              FontWeight.normal,
                                                           color: AppColor
                                                               .mainFGColor),
                                                     ),
@@ -688,8 +685,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                       style: TextStyle(
                                                           fontSize:
                                                               height * 0.013,
-                                                          fontWeight:
-                                                              FontWeight.w400,
+                                                       fontWeight:
+                                                              FontWeight.normal,
                                                           color: AppColor
                                                               .mainFGColor),
                                                     ),
