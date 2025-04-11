@@ -44,7 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-        _teamLeaveRequest = fetchLeaveRequest('Pending');
+    _teamLeaveRequest = fetchLeaveRequest('Pending');
     // _fetchTasks();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -91,10 +91,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
   //   }
   // }
 
-@override
-void dispose() {
-  super.dispose();
+String getGreeting() {
+  final hour = DateTime.now().hour;
+
+  if (hour < 12) {
+    return "🌞 Good Morning";
+  } else if (hour < 17) {
+    return "🌤️ Good Afternoon";
+  } else if (hour < 20) {
+    return "🌇 Good Evening";
+  } else {
+    return "🌙 Good Night";
+  }
 }
+
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
@@ -112,7 +128,6 @@ void dispose() {
                           _authBox.get('gender') == 'Male'
                               ? 'assets/image/MaleAvatar.png'
                               : 'assets/image/FemaleAvatar.png',
-                              
                         )
                       : NetworkImage(_authBox.get('photo')!),
             ),
@@ -123,16 +138,19 @@ void dispose() {
             children: [
               Text(
                 _authBox.get('employeeName') != null
-                    ? _authBox.get('employeeName')!
+                    ? "${getGreeting()}, ${_authBox.get('employeeName').split(' ').first}"
                     : '',
                 style: TextStyle(
-                    fontSize: height * 0.017,
-                    color: AppColor.mainTextColor,
-                    fontWeight: FontWeight.w500),
+                  fontSize: height * 0.017,
+                  color: AppColor.mainTextColor,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               Text(
-                _authBox.get('employeeDesign') != null ? _authBox.get('employeeId') == '413' ? 'Flutter & UI/UX Developer' :
-                     _authBox.get('employeeDesign')! 
+                _authBox.get('employeeDesign') != null
+                    ? _authBox.get('employeeId') == '413'
+                        ? 'Flutter & UI/UX Developer'
+                        : _authBox.get('employeeDesign')!
                     : '',
                 style: TextStyle(
                   fontSize: height * 0.013,
@@ -143,32 +161,32 @@ void dispose() {
           ),
           actions: [
             Visibility(
-              visible: _authBox.get('role') == 'Manager' || _authBox.get('role') == 'Super-Admin',
+              visible: _authBox.get('role') == 'Manager' ||
+                  _authBox.get('role') == 'Super-Admin',
               child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => NotificationScreen()));
-                },
-                child: FutureBuilder<List<LeaveRequests>>(
-                        future: _teamLeaveRequest,
-                        builder: (context, snapshot) {
-                         bool hasPendingRequests = snapshot.hasData && snapshot.data!.isNotEmpty;
-              
-              return Padding(
-               padding: const EdgeInsets.only(right: 15),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => NotificationScreen()));
+                  },
+                  child: FutureBuilder<List<LeaveRequests>>(
+                    future: _teamLeaveRequest,
+                    builder: (context, snapshot) {
+                      bool hasPendingRequests =
+                          snapshot.hasData && snapshot.data!.isNotEmpty;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 15),
                         child: Image.asset(
-                        hasPendingRequests    ? 'assets/image/unread.png'
-                                  : 'assets/image/read.png',
-                      
-              height: height * 0.033,
-                    ),
-                  );
-                },
-              )
-              
-              ),
+                          hasPendingRequests
+                              ? 'assets/image/unread.png'
+                              : 'assets/image/read.png',
+                          height: height * 0.033,
+                        ),
+                      );
+                    },
+                  )),
             ),
           ],
         ),
@@ -322,9 +340,9 @@ void dispose() {
                     //         ),
                     //       )),
                     // ),
-                 //   SizedBox(
-                   //   height: height * 0.015,
-                   // ),
+                    //   SizedBox(
+                    //   height: height * 0.015,
+                    // ),
                     Card(
                       color: AppColor.mainFGColor,
                       elevation: 4,
@@ -357,7 +375,7 @@ void dispose() {
                     SizedBox(
                       height: height * 0.015,
                     ),
-                   
+
                     SizedBox(
                       width: width,
                       child: Card(
@@ -644,8 +662,7 @@ void dispose() {
                                             Container(
                                               width: width,
                                               decoration: BoxDecoration(
-                                                  color:
-                                                      Colors.green,
+                                                  color: Colors.green,
                                                   borderRadius:
                                                       BorderRadius.only(
                                                           topLeft:
@@ -656,7 +673,9 @@ void dispose() {
                                                                   10))),
                                               child: Padding(
                                                 padding:
-                                                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10.0,
+                                                        vertical: 5.0),
                                                 child: Text(
                                                   'Current Task ',
                                                   style: TextStyle(
@@ -685,7 +704,9 @@ void dispose() {
                                                           overflow: TextOverflow
                                                               .ellipsis,
                                                           maxLines: 2,
-                                                          task['name'].toString().toUpperCase(),
+                                                          task['name']
+                                                              .toString()
+                                                              .toUpperCase(),
                                                           style: TextStyle(
                                                             color: AppColor
                                                                 .mainTextColor,
@@ -697,98 +718,99 @@ void dispose() {
                                                         ),
                                                       ),
                                                       Container(
-                                                      decoration: BoxDecoration(
-                                                          color: task['priority'] !=
-                                                                      null &&
-                                                                  task['priority']
-                                                                      .isNotEmpty
-                                                              ? task['priority'][0] ==
-                                                                          'High' ||
-                                                                      task['priority'][0] ==
-                                                                          'high'
-                                                                  ? const Color.fromARGB(
-                                                                      255,
-                                                                      249,
-                                                                      177,
-                                                                      177)
-                                                                  : task['priority'][0] ==
-                                                                          'Low'
-                                                                      ? const Color.fromARGB(
-                                                                          255,
-                                                                          226,
-                                                                          255,
-                                                                          193)
-                                                                      : const Color.fromARGB(
-                                                                          116,
-                                                                          255,
-                                                                          198,
-                                                                          124)
-                                                              : Colors
-                                                                  .transparent,
-                                                          borderRadius:
-                                                              BorderRadius.circular(5)),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                horizontal: 8,
-                                                                vertical: 5),
-                                                        child: Text(
-                                                          task['priority'] !=
-                                                                      null &&
-                                                                  task['priority']
-                                                                      .isNotEmpty
-                                                              ? task['priority']
-                                                                      [0]
-                                                                  .toString()
-                                                                  .toUpperCase()
-                                                              : 'Not Set',
-                                                          style: TextStyle(
-                                                            fontSize:
-                                                                height * 0.014,
-                                                            color: task['priority'] !=
+                                                        decoration:
+                                                            BoxDecoration(
+                                                                color: task['priority'] !=
+                                                                            null &&
+                                                                        task['priority']
+                                                                            .isNotEmpty
+                                                                    ? task['priority'][0] == 'High' ||
+                                                                            task['priority'][0] ==
+                                                                                'high'
+                                                                        ? const Color.fromARGB(
+                                                                            255,
+                                                                            249,
+                                                                            177,
+                                                                            177)
+                                                                        : task['priority'][0] ==
+                                                                                'Low'
+                                                                            ? const Color.fromARGB(
+                                                                                255, 226, 255, 193)
+                                                                            : const Color.fromARGB(
+                                                                                116, 255, 198, 124)
+                                                                    : Colors
+                                                                        .transparent,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            5)),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal: 8,
+                                                                  vertical: 5),
+                                                          child: Text(
+                                                            task['priority'] !=
                                                                         null &&
                                                                     task['priority']
                                                                         .isNotEmpty
-                                                                ? task['priority'][0] ==
-                                                                            'High' ||
-                                                                        task['priority'][0] ==
-                                                                            'high'
-                                                                    ? const Color
-                                                                        .fromARGB(
-                                                                        255,
-                                                                        229,
-                                                                        45,
-                                                                        45)
-                                                                    : task['priority'][0] ==
-                                                                            'Low'
-                                                                        ? const Color.fromARGB(
-                                                                            255,
-                                                                            113,
-                                                                            163,
-                                                                            56)
-                                                                        : const Color.fromARGB(
-                                                                            255,
-                                                                            227,
-                                                                            129,
-                                                                            0)
-                                                                : Colors.grey,
-                                                            fontWeight:
-                                                                FontWeight.w500,
+                                                                ? task['priority']
+                                                                        [0]
+                                                                    .toString()
+                                                                    .toUpperCase()
+                                                                : 'Not Set',
+                                                            style: TextStyle(
+                                                              fontSize: height *
+                                                                  0.014,
+                                                              color: task['priority'] !=
+                                                                          null &&
+                                                                      task['priority']
+                                                                          .isNotEmpty
+                                                                  ? task['priority'][0] ==
+                                                                              'High' ||
+                                                                          task['priority'][0] ==
+                                                                              'high'
+                                                                      ? const Color
+                                                                          .fromARGB(
+                                                                          255,
+                                                                          229,
+                                                                          45,
+                                                                          45)
+                                                                      : task['priority'][0] ==
+                                                                              'Low'
+                                                                          ? const Color.fromARGB(
+                                                                              255,
+                                                                              113,
+                                                                              163,
+                                                                              56)
+                                                                          : const Color.fromARGB(
+                                                                              255,
+                                                                              227,
+                                                                              129,
+                                                                              0)
+                                                                  : Colors.grey,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Text(
-                                                 task['deadline_date'] == 'False' ? 'Deadline: Not Provided' : 'Deadline: ${_formatDate(task['deadline_date'])}',
-                                                  style: TextStyle(
-                                                    color: Colors.grey,
-                                                    fontSize: height * 0.014,
-                                                    fontWeight: FontWeight.w400,
+                                                    ],
                                                   ),
-                                                ),
+                                                  Text(
+                                                    task['deadline_date'] ==
+                                                            'False'
+                                                        ? 'Deadline: Not Provided'
+                                                        : 'Deadline: ${_formatDate(task['deadline_date'])}',
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                      fontSize: height * 0.014,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
                                                   SizedBox(
                                                     height: height * 0.02,
                                                   ),

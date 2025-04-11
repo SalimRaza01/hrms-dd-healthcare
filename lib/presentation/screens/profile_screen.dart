@@ -277,7 +277,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ],
                               ),
                               Text(
-                                employee.designation,
+                                employee.employeeId == '413' ? 'Flutter & UI/UX Developer' : employee.designation,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(color: Colors.grey[700]),
                               ),
