@@ -78,7 +78,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
             )
           ],
         ),
-        padding: const EdgeInsets.symmetric(vertical: 25),
+        padding: const EdgeInsets.only(bottom: 30, top: 20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(
