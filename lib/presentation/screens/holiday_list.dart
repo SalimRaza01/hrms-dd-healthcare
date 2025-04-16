@@ -102,7 +102,7 @@ class _HolidayListState extends State<HolidayList> {
                             children: [
                               Container(
                                 width: width * 0.14,
-                                height: height * 0.069,
+                                height: height * 0.072,
                                 decoration: BoxDecoration(
                                     color: AppColor.mainThemeColor,
                                     borderRadius: BorderRadius.only(

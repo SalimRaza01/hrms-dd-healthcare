@@ -103,7 +103,7 @@ void dispose() {
                               height: height * 0.01,
                             ),
                             Text(
-                              'Know Everything About Your Team',
+                              'Everything About Your Team',
                               style: TextStyle(
                                 fontSize: height * 0.018,
                                 color: AppColor.mainFGColor,

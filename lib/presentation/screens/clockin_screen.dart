@@ -206,7 +206,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                   child: Text(
                                     months[index].toUpperCase(),
                                     style: TextStyle(
-                                      fontSize: width * 0.035,
+                                      fontSize: height * 0.016,
                                       color: isSelected
                                           ? Colors.white
                                           : Colors.grey,
