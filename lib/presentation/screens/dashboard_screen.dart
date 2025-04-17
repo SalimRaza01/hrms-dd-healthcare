@@ -1,22 +1,17 @@
 // ignore_for_file: sort_child_properties_last, prefer_final_fields
-
-// import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_stack/flutter_image_stack.dart';
 import 'package:hrms/core/api/api.dart';
-// import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-// import 'package:hrms/presentation/odoo/odoo_dashboard.dart';
 import 'package:hrms/presentation/odoo/task_details.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'holiday_list.dart';
-import 'notification_screen.dart';
 import 'package:calendar_timeline/calendar_timeline.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -28,7 +23,6 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   late Future<List<HolidayModel>> holidayList;
-  late Future<List<LeaveRequests>> _teamLeaveRequest;
   final Box _authBox = Hive.box('authBox');
   List<Map<String, dynamic>> tasks = [];
   DateTime today = DateTime.now();
@@ -44,7 +38,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _teamLeaveRequest = fetchLeaveRequest('Pending');
     // _fetchTasks();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -161,34 +154,12 @@ String getGreeting() {
             ],
           ),
           actions: [
-            Visibility(
-              visible: _authBox.get('role') == 'Manager' ||
-                  _authBox.get('role') == 'Super-Admin',
-              child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => NotificationScreen()));
-                  },
-                  child: FutureBuilder<List<LeaveRequests>>(
-                    future: _teamLeaveRequest,
-                    builder: (context, snapshot) {
-                      bool hasPendingRequests =
-                          snapshot.hasData && snapshot.data!.isNotEmpty;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: Image.asset(
-                          hasPendingRequests
-                              ? 'assets/image/unread.png'
-                              : 'assets/image/read.png',
-                          height: height * 0.033,
-                        ),
-                      );
-                    },
-                  )),
-            ),
+            Padding(
+                      padding: const EdgeInsets.only(right: 15),
+                      child: Image.asset( 'assets/image/read.png',
+                        height: height * 0.033,
+                      ),
+                    ),
           ],
         ),
         backgroundColor: AppColor.mainBGColor,
