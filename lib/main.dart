@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -49,11 +48,12 @@ class MyApp extends StatelessWidget {
     return Wiredash(
       projectId: 'hrms-obpnfi3',
       secret: 'QImrYzABXucoW8hFSIpoH52KRg2dLywl',
-
       child: MaterialApp(
-        
         themeMode: ThemeMode.light,
-        theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Poppins',),
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          fontFamily: 'Poppins',
+        ),
         darkTheme: ThemeData(brightness: Brightness.dark),
         debugShowCheckedModeBanner: false,
         initialRoute: "/SplashScreen",
@@ -85,6 +85,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
-
