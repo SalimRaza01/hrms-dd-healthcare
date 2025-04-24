@@ -90,8 +90,8 @@ class _OTPScrenState extends State<OTPScren> {
             Padding(
               padding: const EdgeInsets.only(top: 160),
               child: Image.asset(
-                'assets/image/DDLOGO.png',
-                height: height * 0.07,
+                'assets/image/DDHRMS.png',
+                height: height * 0.11,
               ),
             ),
             Align(

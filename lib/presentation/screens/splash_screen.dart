@@ -16,7 +16,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
   final Box _authBox = Hive.box('authBox');
   late Animation<double> _fadeAnim;
   late AnimationController _controller;
@@ -95,20 +96,22 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     );
   }
 
-    @override
+  @override
   void setState(VoidCallback fn) {
     if (mounted) {
       super.setState(fn);
     }
   }
 
-  
-@override
-void dispose() {
-  super.dispose();
-}
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: FadeTransition(
         opacity: _fadeAnim,
@@ -124,9 +127,35 @@ void dispose() {
             ),
           ),
           child: Center(
-            child: Image.asset(
-              'assets/image/DDLOGO.png',
-              height: 60,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                    SizedBox(height: height * 0.2,),
+                Image.asset(
+                  'assets/image/DDHRMS.png',
+                  height: 100,
+                ),
+                SizedBox(height: height * 0.1,),
+                Column(
+                  children: [
+                    Text(
+                      "POWERED BY",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: height * 0.012,
+                      ),
+                    ),
+                    Text(
+                      "D&D Healthcare",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: height * 0.02,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

@@ -57,10 +57,11 @@ class _LoginScreenState extends State<LoginScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 160),
                 child: Image.asset(
-                  'assets/image/DDLOGO.png',
-                  height: height * 0.07,
+                  'assets/image/DDHRMS.png',
+                  height: height * 0.12,
                 ),
               ),
+              
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(
@@ -118,13 +119,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                       if (value.isEmpty) {
                                         _emailErrorText =
                                             'Employee Code is required';
-                                      } 
-                                      else if (!employeeCode
+                                      } else if (!employeeCode
                                           .hasMatch(value)) {
                                         _emailErrorText =
                                             'Invalid Employee Code';
-                                      } 
-                                      else {
+                                      } else {
                                         _emailErrorText = null;
                                       }
                                     } else {
@@ -261,12 +260,13 @@ class _LoginScreenState extends State<LoginScreen> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 0, vertical: 12),
                               child: isloading
-                                  ?           Center(
-              child: LoadingAnimationWidget.threeArchedCircle(
-                color: AppColor.mainFGColor,
-                size: height * 0.03,
-              ),
-            )
+                                  ? Center(
+                                      child: LoadingAnimationWidget
+                                          .threeArchedCircle(
+                                        color: AppColor.mainFGColor,
+                                        size: height * 0.03,
+                                      ),
+                                    )
                                   : Center(
                                       child: Text(
                                         'Sign In',

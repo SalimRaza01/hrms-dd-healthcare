@@ -68,8 +68,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
             Padding(
               padding: const EdgeInsets.only(top: 200),
               child: Image.asset(
-                'assets/image/DDLOGO.png',
-                height: height * 0.07,
+                'assets/image/DDHRMS.png',
+                height: height * 0.11,
               ),
             ),
             Align(
