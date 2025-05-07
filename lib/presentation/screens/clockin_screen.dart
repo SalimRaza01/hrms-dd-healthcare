@@ -6,7 +6,6 @@ import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:hrms/presentation/screens/punch_in_out_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -306,7 +305,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                     dateTime.difference(scheduledTime);
 
                                 int lateMinutes =
-                                    (lateByDuration.inMinutes) - 20;
+                                    (lateByDuration.inMinutes) - 15;
 
                                 return InkWell(
                                     onTap: () {
@@ -560,8 +559,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                 visible: (item.weekOff != 1 &&
                                                         item.isLeaveTaken ==
                                                             false) &&
-                                                    (item.duration > 200 &&
-                                                        item.duration < 450),
+                                                    (item.duration > 270 &&
+                                                        item.duration < 510),
                                                 child: Container(
                                                   decoration: BoxDecoration(
                                                       color: Colors.redAccent,
@@ -596,7 +595,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                         item.isLeaveTaken ==
                                                             false) &&
                                                     (lateMinutes >= 1 &&
-                                                        lateMinutes <= 20),
+                                                        lateMinutes <= 15),
                                                 child: Container(
                                                   decoration: BoxDecoration(
                                                       color: Colors.redAccent,
@@ -715,20 +714,21 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
               )
             ],
           ),
-          floatingActionButton: FloatingActionButton.extended(
-            backgroundColor: AppColor.mainThemeColor,
-            onPressed: () => showCupertinoModalBottomSheet(
-              expand: true,
-              context: context,
-              barrierColor: const Color.fromARGB(130, 0, 0, 0),
-              backgroundColor: Colors.transparent,
-              builder: (context) => PunchInOutScreen(),
-            ),
-            label: Text(
-              'Clock-In',
-              style: TextStyle(color: AppColor.mainFGColor),
-            ),
-          )),
+          // floatingActionButton: FloatingActionButton.extended(
+          //   backgroundColor: AppColor.mainThemeColor,
+          //   onPressed: () => showCupertinoModalBottomSheet(
+          //     expand: true,
+          //     context: context,
+          //     barrierColor: const Color.fromARGB(130, 0, 0, 0),
+          //     backgroundColor: Colors.transparent,
+          //     builder: (context) => PunchInOutScreen(),
+          //   ),
+          //   label: Text(
+          //     'Clock-In',
+          //     style: TextStyle(color: AppColor.mainFGColor),
+          //   ),
+          // )
+          ),
     );
   }
 }
