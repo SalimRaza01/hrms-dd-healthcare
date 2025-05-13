@@ -54,27 +54,25 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
       maxRegularization = box.get('maxRegularization');
     });
   }
-  
 
-    @override
+  @override
   void setState(VoidCallback fn) {
     if (mounted) {
       super.setState(fn);
     }
   }
 
-  
   @override
-void dispose() {
-  reasonController.dispose();
-  super.dispose();
-}
+  void dispose() {
+    reasonController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-    
+
     List<String> punches =
         (widget.punchRecords?.split(',') ?? []).toSet().toList();
     // ..sort();
@@ -186,8 +184,7 @@ void dispose() {
                       if (reasonController.text.isEmpty) {
                         showSnackBar('Please describe the reason');
                       } else if (_selectedText == 'Regularization') {
-                        if (widget.lateMinutes > 1 &&
-                            widget.lateMinutes <= 10) {
+                        if (widget.lateMinutes > 0 && widget.lateMinutes <= 5) {
                           await applyRegularize(
                             context,
                             widget.regularizationDate!,
@@ -197,7 +194,7 @@ void dispose() {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                  'Regularization can only be applied if late before ${_authBox.get('lateby') == '9:00' ? '09:30 AM' : _authBox.get('lateby') == '10:00' ? '10:30 AM' : _authBox.get('lateby') == '8:30' ? '09:00 AM' : ''}'),
+                                  'Regularization can only be applied if late before ${_authBox.get('lateby') == '9:00' ? '09:20 AM' : _authBox.get('lateby') == '10:00' ? '10:20 AM' : _authBox.get('lateby') == '8:30' ? '08:50 AM' : ''}'),
                               backgroundColor: Colors.red,
                             ),
                           );
