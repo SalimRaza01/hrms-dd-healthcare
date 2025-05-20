@@ -1,0 +1,1 @@
+/Users/ddtech/Desktop/database_app/build/app/intermediates/cxx/RelWithDebInfo/3c17415u/obj/x86_64
