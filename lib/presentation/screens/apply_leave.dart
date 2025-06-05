@@ -68,7 +68,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     DateTime maxDate;
 
     if (_selectedLeaveType != null && _selectedLeaveType.contains('Medical')) {
-      minDate = now.subtract(Duration(days: 7));
+      minDate = now.subtract(Duration(days: 30));
       maxDate = now.subtract(Duration(days: 1));
     } else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Casual')) {
@@ -120,7 +120,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     DateTime? maxDate;
 
     if (_selectedLeaveType != null && _selectedLeaveType.contains('Medical')) {
-      minDate = now.subtract(Duration(days: 6));
+      minDate = now.subtract(Duration(days: 30));
       maxDate = now.subtract(Duration(days: 1));
     } else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Casual')) {
@@ -546,7 +546,13 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                               startDateController
                                                       .text.isNotEmpty
                                                   ? startDateController.text
-                                                  : 'Select Start Date',
+                                                  : _selectedLeaveType !=
+                                                              null &&
+                                                          _selectedLeaveType!
+                                                              .contains(
+                                                                  'Medical')
+                                                      ? 'Select End Date'
+                                                      : 'Select Start Date',
                                               height,
                                               width),
                                           if (_selectedText == 'Full Day' &&
@@ -556,7 +562,13 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 endDateController
                                                         .text.isNotEmpty
                                                     ? endDateController.text
-                                                    : 'Select End Date',
+                                                    : _selectedLeaveType !=
+                                                                null &&
+                                                            _selectedLeaveType!
+                                                                .contains(
+                                                                    'Medical')
+                                                        ? 'Select Start Date'
+                                                        : 'Select End Date',
                                                 height,
                                                 width),
                                         ],
