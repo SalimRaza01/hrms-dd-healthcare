@@ -68,7 +68,7 @@ void dispose() {
                   BoxShadow(
                     spreadRadius: 2,
                     blurRadius: 10,
-                    color: Colors.black.withOpacity(0.1),
+                    color: AppColor.shadowColor,
                     offset: Offset(0, 10),
                   )
                 ],
@@ -127,8 +127,8 @@ void dispose() {
                     decoration: ShapeDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Color.fromARGB(255, 212, 212, 212),
-                          Color.fromARGB(255, 244, 244, 244)
+                          AppColor.shimmerBaseColor,
+                          AppColor.shimmerHightlightColor
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -141,7 +141,7 @@ void dispose() {
                     ),
                     child: TextField(
                       expands: false,
-                      style: TextStyle(fontSize: 20.0, color: Colors.black54),
+                      style: TextStyle(fontSize: 20.0, color: AppColor.mainTextColor2),
                       onChanged: (value) {
                         setState(() {
                           searchQuery = value;
@@ -151,11 +151,11 @@ void dispose() {
                         contentPadding: EdgeInsets.all(12),
                         prefixIcon: Icon(
                           Icons.search,
-                          color: Colors.black54,
+                          color: AppColor.mainTextColor2,
                         ),
                         hintText: 'Search Employee',
                         hintStyle: TextStyle(
-                            color: Colors.black54, fontSize: height * 0.02),
+                            color: AppColor.mainTextColor2, fontSize: height * 0.02),
                         focusedBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: AppColor.mainFGColor),
                           borderRadius: BorderRadius.circular(32.0),
@@ -215,7 +215,7 @@ void dispose() {
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(15),
                                       ),
-                                      shadowColor: Colors.black.withOpacity(0.1),
+                                      shadowColor: AppColor.shadowColor,
                                       child: Padding(
                                         padding: const EdgeInsets.all(5),
                                         child: Column(
@@ -225,8 +225,7 @@ void dispose() {
                                             ListTile(
                                               leading: CircleAvatar(
                                                 backgroundColor:
-                                                    const Color.fromARGB(
-                                                        255, 235, 244, 254),
+                                                   AppColor.mainFGColor,
                                                 child: Text(
                                                   employee.employeeName[0],
                                                   style: TextStyle(
@@ -239,7 +238,7 @@ void dispose() {
                                                 employee.employeeName,
                                                 style: TextStyle(
                                                   fontSize: height * 0.019,
-                                                  color: AppColor.mainTextColor2,
+                                                  color: AppColor.mainTextColor,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -247,7 +246,7 @@ void dispose() {
                                                 employee.designation,
                                                 style: TextStyle(
                                                     fontSize: height * 0.013,
-                                                    color: Colors.grey.shade600),
+                                                    color: AppColor.mainTextColor2),
                                               ),
                                             ),
                                             AnimatedContainer(
@@ -321,9 +320,7 @@ void dispose() {
                                                           expand: true,
                                                           context: context,
                                                           barrierColor:
-                                                              const Color
-                                                                  .fromARGB(
-                                                                  130, 0, 0, 0),
+                                                        AppColor.mainTextColor2,
                                                           backgroundColor:
                                                               Colors.transparent,
                                                           builder: (context) =>
@@ -341,9 +338,7 @@ void dispose() {
                                                                   topRight: Radius
                                                                       .circular(
                                                                           0)),
-                                                          color: const Color
-                                                              .fromARGB(
-                                                              255, 235, 244, 254),
+                                                          color: AppColor.mainFGColor,
                                                         ),
                                                         width: width,
                                                         height: height * 0.04,
@@ -369,9 +364,7 @@ void dispose() {
                                                           expand: true,
                                                           context: context,
                                                           barrierColor:
-                                                              const Color
-                                                                  .fromARGB(
-                                                                  130, 0, 0, 0),
+                                                        AppColor.mainTextColor2,
                                                           backgroundColor:
                                                               Colors.transparent,
                                                           builder: (context) =>
@@ -393,9 +386,7 @@ void dispose() {
                                                                       Radius
                                                                           .circular(
                                                                               15)),
-                                                          color: const Color
-                                                              .fromARGB(
-                                                              255, 235, 244, 254),
+                                                          color: AppColor.mainFGColor,
                                                         ),
                                                         child: Padding(
                                                           padding:

@@ -176,7 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         context: context,
         builder: (BuildContext context) {
           return Container(
-            color: Colors.white,
+            color: AppColor.mainFGColor,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 12.0),
               child: Wrap(
@@ -282,14 +282,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ? 'Flutter & UI/UX Developer'
                                       : employee.designation,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(color: Colors.grey[700]),
+                                  style: TextStyle(color: AppColor.mainTextColor2),
                                 ),
                             
                                 SizedBox(height: height * 0.015),
                             
                                 // Tab Bar
                                 TabBar(
-                                  unselectedLabelColor: Colors.grey,
+                                  unselectedLabelColor: AppColor.unselectedColor,
                                   indicatorColor: AppColor.mainThemeColor,
                                   labelColor: AppColor.mainThemeColor,
                                   tabs: [
@@ -315,7 +315,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 BorderRadius.circular(10),
                                           ),
                                           shadowColor:
-                                              Colors.black.withOpacity(0.1),
+                                            AppColor.shadowColor,
                                           child: Padding(
                                             padding: const EdgeInsets.all(12),
                                             child: Column(
@@ -359,7 +359,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 BorderRadius.circular(10),
                                           ),
                                           shadowColor:
-                                              Colors.black.withOpacity(0.1),
+                                            AppColor.shadowColor,
                                           child: Padding(
                                             padding: const EdgeInsets.all(12),
                                             child: Column(
@@ -398,7 +398,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 BorderRadius.circular(10),
                                           ),
                                           shadowColor:
-                                              Colors.black.withOpacity(0.1),
+                                            AppColor.shadowColor,
                                           child: Padding(
                                             padding: const EdgeInsets.all(12),
                                             child: Column(
@@ -463,7 +463,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             BorderRadius.circular(10),
                                       ),
                                       shadowColor:
-                                          Colors.black.withOpacity(0.1),
+                                        AppColor.shadowColor,
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 16, vertical: 13),
@@ -511,7 +511,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             BorderRadius.circular(10),
                                       ),
                                       shadowColor:
-                                          Colors.black.withOpacity(0.1),
+                                        AppColor.shadowColor,
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 16, vertical: 13),
@@ -547,15 +547,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 InkWell(
                                   onTap: () {
                                     showDialog<void>(
-                                      barrierColor: Colors.black
-                                          .withOpacity(
-                                              0.5), // Darker background
+                                      barrierColor: AppColor.barrierColor, // Darker background
                                       context: context,
                                       barrierDismissible: true,
                                       builder: (BuildContext context) {
                                         return AlertDialog(
-                                          backgroundColor: Colors
-                                              .white, // Dialog background color
+                                          backgroundColor: AppColor.mainFGColor, // Dialog background color
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(
@@ -566,14 +563,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             style: TextStyle(
                                               fontSize: height * 0.015,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.black87,
+                                              color: AppColor.mainTextColor,
                                             ),
                                           ),
                                           content: Text(
                                             'Are you sure you want to logout?',
                                             style: TextStyle(
                                               fontSize: height * 0.013,
-                                              color: Colors.black54,
+                                              color: AppColor.mainTextColor2,
                                             ),
                                           ),
                                           actionsPadding:
@@ -614,7 +611,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               child: Text(
                                                 "Yes",
                                                 style: TextStyle(
-                                                  color: Colors.white,
+                                                  color: AppColor.mainFGColor,
                                                   fontWeight:
                                                       FontWeight.bold,
                                                   letterSpacing: 0.5,
@@ -628,8 +625,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               style:
                                                   OutlinedButton.styleFrom(
                                                 side: BorderSide(
-                                                    color: Colors
-                                                        .grey.shade400),
+                                                    color: AppColor.borderColor),
                                                 shape:
                                                     RoundedRectangleBorder(
                                                   borderRadius:
@@ -644,7 +640,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               child: Text(
                                                 "No",
                                                 style: TextStyle(
-                                                  color: Colors.black87,
+                                                  color: AppColor.mainTextColor,
                                                   fontWeight:
                                                       FontWeight.w500,
                                                 ),
@@ -667,7 +663,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             BorderRadius.circular(10),
                                       ),
                                       shadowColor:
-                                          Colors.black.withOpacity(0.1),
+                                        AppColor.shadowColor,
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 16, vertical: 13),
@@ -733,7 +729,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 BoxShadow(
                                   spreadRadius: 2,
                                   blurRadius: 10,
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: AppColor.shadowColor,
                                   offset: Offset(0, 10),
                                 ),
                               ],
@@ -783,7 +779,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: TextStyle(
               fontWeight: FontWeight.w500,
               fontSize: height * 0.014,
-              color: const Color.fromARGB(139, 0, 0, 0),
+              color: AppColor.mainTextColor2,
             ),
           ),
           SizedBox(width: 8),
@@ -792,7 +788,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               value,
               style: TextStyle(
                 fontSize: height * 0.014,
-                color: const Color.fromARGB(139, 0, 0, 0),
+                color: AppColor.mainTextColor2,
               ),
               textAlign: TextAlign.end,
             ),

@@ -73,7 +73,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
+              color: AppColor.shadowColor,
               blurRadius: 10,
             )
           ],
@@ -117,7 +117,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.white : Colors.transparent,
+                    color: isSelected ? AppColor.mainFGColor : Colors.transparent,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: AnimatedSwitcher(
@@ -151,7 +151,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
     : Icon(
         icons[index],
         key: ValueKey('icon_$index'),
-        color: const Color.fromARGB(255, 179, 179, 179),
+        color: AppColor.unselectedColor,
         size: 25,
       ),
 

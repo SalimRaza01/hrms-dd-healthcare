@@ -96,7 +96,7 @@ class _HolidayListState extends State<HolidayList> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
-                          shadowColor: Colors.black.withOpacity(0.1),
+                          shadowColor: AppColor.shadowColor,
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [

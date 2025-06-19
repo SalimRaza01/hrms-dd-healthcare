@@ -1,3 +1,5 @@
+// ignore_for_file: use_key_in_widget_constructors
+
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -12,25 +14,25 @@ class ProfileShimmerAnimation extends StatelessWidget {
       body: SingleChildScrollView(
         child:  Shimmer.fromColors(
  
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
+          baseColor: AppColor.shimmerBaseColor,
+          highlightColor: AppColor.shimmerHightlightColor,
           enabled: true,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 100),
             child: Column(children: [
               Container(
-                        width: 120,
+                        width: width * 0.2,
                         height: height * 0.14,
                         decoration: BoxDecoration(
                           border: Border.all(
                             width: width * 0.01,
-                            color: Theme.of(context).scaffoldBackgroundColor,
+                            color: AppColor.borderColor,
                           ),
                           boxShadow: [
                             BoxShadow(
                               spreadRadius: 2,
                               blurRadius: 10,
-                              color: Colors.black.withOpacity(0.1),
+                              color: AppColor.shadowColor,
                               offset: Offset(0, 10),
                             ),
                           ],
@@ -91,13 +93,13 @@ class ProfileShimmerAnimation extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: Card(
-                  color: Colors.white,
+                  color: AppColor.mainFGColor,
                   elevation: 4,
                   margin: EdgeInsets.all(0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  shadowColor: Colors.black.withOpacity(0.1),
+                  shadowColor: AppColor.shadowColor,
                   child: Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 13),

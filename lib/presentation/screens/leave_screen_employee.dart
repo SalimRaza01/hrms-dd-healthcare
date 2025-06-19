@@ -190,7 +190,7 @@ void dispose() {
                         BoxShadow(
                             spreadRadius: 2,
                             blurRadius: 10,
-                            color: Colors.black.withOpacity(0.1),
+                            color: AppColor.shadowColor,
                             offset: Offset(0, 10))
                       ],
                       color: AppColor.mainThemeColor,
@@ -211,7 +211,7 @@ void dispose() {
                           indicatorColor: AppColor.mainFGColor,
                           labelColor: AppColor.mainFGColor,
                           unselectedLabelColor:
-                              const Color.fromARGB(206, 255, 255, 255),
+                             AppColor.unselectedColor,
                           tabs: [
                             Tab(
                               child: Text('Leave Request'),
@@ -242,7 +242,7 @@ void dispose() {
               onPressed: () => showCupertinoModalBottomSheet(
                 expand: true,
                 context: context,
-                barrierColor: const Color.fromARGB(130, 0, 0, 0),
+                barrierColor: AppColor.barrierColor,
                 backgroundColor: Colors.transparent,
                 builder: (context) => ApplyLeave(),
               ),
@@ -265,7 +265,7 @@ void dispose() {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          shadowColor: Colors.black.withOpacity(0.1),
+          shadowColor: AppColor.shadowColor,
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: SizedBox(
@@ -313,7 +313,7 @@ void dispose() {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          shadowColor: Colors.black.withOpacity(0.1),
+          shadowColor: AppColor.shadowColor,
           child: Padding(
             padding: EdgeInsets.all(4),
             child: Row(
@@ -355,7 +355,7 @@ void dispose() {
                           style: TextStyle(fontSize: height * 0.014),
                         ),
                       ),
-                      shadowColor: Colors.black.withOpacity(0.1),
+                      shadowColor: AppColor.shadowColor,
                     ),
                   );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -374,7 +374,7 @@ void dispose() {
                           style: TextStyle(fontSize: height * 0.014),
                         ),
                       ),
-                      shadowColor: Colors.black.withOpacity(0.1),
+                      shadowColor: AppColor.shadowColor,
                     ),
                   );
                 } else {
@@ -393,7 +393,7 @@ void dispose() {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        shadowColor: Colors.black.withOpacity(0.2),
+                        shadowColor: AppColor.shadowColor,
                         child: Stack(
                           alignment: AlignmentDirectional.topEnd,
                           children: [
@@ -502,7 +502,7 @@ void dispose() {
                                         leave.reason,
                                         style: TextStyle(
                                           fontSize: height * 0.014,
-                                          color: Colors.black54,
+                                          color: AppColor.mainTextColor2,
                                           fontWeight: FontWeight.w400,
                                         ),
                                       ),
@@ -524,7 +524,7 @@ void dispose() {
                                                 width: 2),
                                             borderRadius:
                                                 BorderRadius.circular(12),
-                                            color: Colors.white,
+                                            color: AppColor.mainFGColor,
                                           ),
                                           child: Padding(
                                             padding: const EdgeInsets.all(8.0),
@@ -574,15 +574,12 @@ void dispose() {
                                       child: Center(
                                         child: GestureDetector(
                                           onTap: () => showDialog<void>(
-                                            barrierColor: Colors.black
-                                                .withOpacity(
-                                                    0.5), // Darker background
+                                          barrierColor: AppColor.barrierColor, // Darker background
                                             context: context,
                                             barrierDismissible: true,
                                             builder: (BuildContext context) {
                                               return AlertDialog(
-                                                backgroundColor: Colors
-                                                    .white, // Dialog background color
+                                                backgroundColor: AppColor.mainFGColor, // Dialog background color
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(
@@ -593,14 +590,14 @@ void dispose() {
                                                   style: TextStyle(
                                                     fontSize: height * 0.015,
                                                     fontWeight: FontWeight.bold,
-                                                    color: Colors.black87,
+                                                    color: AppColor.mainTextColor,
                                                   ),
                                                 ),
                                                 content: Text(
                                                   'Are you sure you want to delete leave request',
                                                   style: TextStyle(
                                                     fontSize: height * 0.013,
-                                                    color: Colors.black54,
+                                                    color: AppColor.mainTextColor2,
                                                   ),
                                                 ),
                                                 actionsPadding:
@@ -642,7 +639,7 @@ void dispose() {
                                                     child: Text(
                                                       "Yes",
                                                       style: TextStyle(
-                                                        color: Colors.white,
+                                                        color: AppColor.mainFGColor,
                                                         fontWeight:
                                                             FontWeight.bold,
                                                         letterSpacing: 0.5,
@@ -656,8 +653,7 @@ void dispose() {
                                                     style: OutlinedButton
                                                         .styleFrom(
                                                       side: BorderSide(
-                                                          color: Colors
-                                                              .grey.shade400),
+                                                          color:AppColor.borderColor),
                                                       shape:
                                                           RoundedRectangleBorder(
                                                         borderRadius:
@@ -672,7 +668,7 @@ void dispose() {
                                                     child: Text(
                                                       "No",
                                                       style: TextStyle(
-                                                        color: Colors.black87,
+                                                        color: AppColor.mainTextColor,
                                                         fontWeight:
                                                             FontWeight.w500,
                                                       ),
@@ -694,7 +690,7 @@ void dispose() {
                                               child: Text(
                                                 'Delete Request',
                                                 style: TextStyle(
-                                                  color: Colors.white,
+                                                  color: AppColor.mainFGColor,
                                                   fontSize: height * 0.012,
                                                   fontWeight: FontWeight.w500,
                                                 ),
@@ -731,7 +727,7 @@ void dispose() {
                                         fontWeight: FontWeight.w400,
                                         color: leave.status == 'Pending'
                                             ? Colors.black
-                                            : Colors.white),
+                                            : AppColor.mainFGColor),
                                   ),
                                 ),
                               ),
@@ -759,7 +755,7 @@ void dispose() {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          shadowColor: Colors.black.withOpacity(0.1),
+          shadowColor: AppColor.shadowColor,
           child: Padding(
             padding: EdgeInsets.all(4),
             child: Row(
@@ -801,7 +797,7 @@ void dispose() {
                           style: TextStyle(fontSize: height * 0.014),
                         ),
                       ),
-                      shadowColor: Colors.black.withOpacity(0.1),
+                      shadowColor: AppColor.shadowColor,
                     ),
                   );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -820,7 +816,7 @@ void dispose() {
                           style: TextStyle(fontSize: height * 0.014),
                         ),
                       ),
-                      shadowColor: Colors.black.withOpacity(0.1),
+                      shadowColor: AppColor.shadowColor,
                     ),
                   );
                 } else {
@@ -839,7 +835,7 @@ void dispose() {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        shadowColor: Colors.black.withOpacity(0.2),
+                        shadowColor: AppColor.shadowColor,
                         child: Stack(
                           alignment: AlignmentDirectional.topEnd,
                           children: [
@@ -897,7 +893,7 @@ void dispose() {
                                         leave.reason,
                                         style: TextStyle(
                                           fontSize: height * 0.014,
-                                          color: Colors.black54,
+                                          color: AppColor.mainTextColor2,
                                           fontWeight: FontWeight.w400,
                                         ),
                                       ),
@@ -944,7 +940,7 @@ void dispose() {
                                               child: Text(
                                                 'Delete Request',
                                                 style: TextStyle(
-                                                  color: Colors.white,
+                                                  color: AppColor.mainFGColor,
                                                   fontSize: height * 0.012,
                                                   fontWeight: FontWeight.w500,
                                                 ),
@@ -981,7 +977,7 @@ void dispose() {
                                         fontWeight: FontWeight.w400,
                                         color: leave.status == 'Pending'
                                             ? Colors.black
-                                            : Colors.white),
+                                            : AppColor.mainFGColor),
                                   ),
                                 ),
                               ),
@@ -1010,7 +1006,7 @@ void dispose() {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: AppColor.shadowColor,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
           child: Column(
@@ -1025,7 +1021,7 @@ void dispose() {
               Text(
                 leaveCount,
                 style: TextStyle(
-                    color: Color.fromARGB(141, 0, 0, 0),
+                    color: AppColor.mainTextColor2,
                     fontSize: height * 0.022),
               ),
             ],
@@ -1044,7 +1040,7 @@ void dispose() {
       activeText = AppColor.mainFGColor;
     } else {
       activeColor = Colors.transparent;
-      activeText = const Color.fromARGB(141, 0, 0, 0);
+      activeText =  AppColor.mainTextColor2;
     }
 
     return GestureDetector(
@@ -1082,7 +1078,7 @@ void dispose() {
       activeText = AppColor.mainFGColor;
     } else {
       activeColor = Colors.transparent;
-      activeText = const Color.fromARGB(141, 0, 0, 0);
+      activeText =  AppColor.mainTextColor2;
     }
 
     return GestureDetector(

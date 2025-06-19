@@ -178,7 +178,7 @@ class _ViewDocumentState extends State<ViewDocument> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            shadowColor: Colors.black.withOpacity(0.1),
+                            shadowColor: AppColor.shadowColor,
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Row(

@@ -90,7 +90,7 @@ void dispose() {
                             padding: const EdgeInsets.all(8.0),
                             child: Text('No Leave Request Found'),
                           ),
-                          shadowColor: Colors.black.withOpacity(0.1),
+                          shadowColor: AppColor.shadowColor,
                         ),
                       );
                     } else if (!snapshot.hasData ||
@@ -115,7 +115,7 @@ void dispose() {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            shadowColor: Colors.black.withOpacity(0.2),
+                            shadowColor: AppColor.shadowColor,
                             child: Stack(
                               alignment: AlignmentDirectional.topEnd,
                               children: [
@@ -173,7 +173,7 @@ void dispose() {
                                             leave.reason,
                                             style: TextStyle(
                                               fontSize: height * 0.014,
-                                              color: Colors.black54,
+                                              color: AppColor.mainTextColor2,
                                               fontWeight: FontWeight.w400,
                                             ),
                                           ),
@@ -289,7 +289,7 @@ void dispose() {
                                         style: TextStyle(
                                             fontSize: height * 0.012,
                                             fontWeight: FontWeight.w400,
-                                            color: Colors.white),
+                                            color: AppColor.mainFGColor),
                                       ),
                                     ),
                                   ),

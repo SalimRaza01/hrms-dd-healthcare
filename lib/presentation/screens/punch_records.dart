@@ -31,6 +31,8 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
   @override
   void initState() {
     super.initState();
+    print(widget.lateMinutes);
+
     date = DateTime.parse(widget.regularizationDate!);
     checkEmployeeId();
     SystemChrome.setPreferredOrientations([
@@ -114,7 +116,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
                     ),
-                    shadowColor: Colors.black.withOpacity(0.1),
+                    shadowColor: AppColor.shadowColor,
                     child: Padding(
                       padding: EdgeInsets.all(3),
                       child: Row(
@@ -133,7 +135,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    shadowColor: Colors.black.withOpacity(0.1),
+                    shadowColor: AppColor.shadowColor,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       child: SizedBox(
@@ -147,7 +149,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                             controller: reasonController,
                             style: TextStyle(
                               overflow: TextOverflow.ellipsis,
-                              color: const Color.fromARGB(255, 0, 0, 0),
+                              color: AppColor.mainTextColor,
                             ),
                             decoration: InputDecoration(
                               filled: false,
@@ -184,7 +186,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                       if (reasonController.text.isEmpty) {
                         showSnackBar('Please describe the reason');
                       } else if (_selectedText == 'Regularization') {
-                        if (widget.lateMinutes > 0 && widget.lateMinutes <= 5) {
+                        if (widget.lateMinutes > 0 && widget.lateMinutes <= 15) {
                           await applyRegularize(
                             context,
                             widget.regularizationDate!,
@@ -194,7 +196,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                  'Regularization can only be applied if late before ${_authBox.get('lateby') == '9:00' ? '09:20 AM' : _authBox.get('lateby') == '10:00' ? '10:20 AM' : _authBox.get('lateby') == '8:30' ? '08:50 AM' : ''}'),
+                                  'Regularization can only be applied if late before ${_authBox.get('lateby') == '9:00' ? '09:30 AM' : _authBox.get('lateby') == '10:00' ? '10:30 AM' : _authBox.get('lateby') == '8:30' ? '09:00 AM' : ''}'),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -261,7 +263,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    shadowColor: Colors.black.withOpacity(0.1),
+                    shadowColor: AppColor.shadowColor,
                     child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: IntrinsicHeight(
@@ -345,7 +347,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
       activeText = AppColor.mainFGColor;
     } else {
       activeColor = Colors.transparent;
-      activeText = Colors.black87;
+      activeText = AppColor.mainTextColor;
     }
 
     return GestureDetector(

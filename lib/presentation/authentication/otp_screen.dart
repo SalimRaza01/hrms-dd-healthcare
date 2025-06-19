@@ -72,7 +72,7 @@ class _OTPScrenState extends State<OTPScren> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
-      backgroundColor: AppColor.bgColor,
+      backgroundColor: AppColor.secondaryThemeColor2,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

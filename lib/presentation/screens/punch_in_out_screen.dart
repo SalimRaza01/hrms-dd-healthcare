@@ -284,7 +284,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black12,
+                              color: AppColor.shadowColor,
                               blurRadius: 10,
                               spreadRadius: 2,
                             ),
@@ -355,7 +355,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                         ],
                                       ),
                                       VerticalDivider(
-                                        color: Colors.black,
+                                        color: AppColor.mainTextColor,
                                         thickness: 0.3,
                                       ),
                                       Column(
@@ -382,7 +382,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                         ],
                                       ),
                                       VerticalDivider(
-                                        color: Colors.black,
+                                        color: AppColor.mainTextColor,
                                         thickness: 0.3,
                                       ),
                                       Column(
@@ -504,8 +504,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                 boxShadow: [
                                   BoxShadow(
                                       blurRadius: 50,
-                                      color: const Color.fromARGB(
-                                          255, 162, 162, 162),
+                                      color: AppColor.shadowColor,
                                       spreadRadius: 5)
                                 ],
                               ),

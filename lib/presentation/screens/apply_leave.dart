@@ -119,10 +119,23 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     DateTime? minDate;
     DateTime? maxDate;
 
+    // if (_selectedLeaveType != null && _selectedLeaveType.contains('Medical')) {
+    //   minDate = now.subtract(Duration(days: 30));
+    //   maxDate = now.subtract(Duration(days: 1));
+    // }
     if (_selectedLeaveType != null && _selectedLeaveType.contains('Medical')) {
-      minDate = now.subtract(Duration(days: 30));
-      maxDate = now.subtract(Duration(days: 1));
-    } else if (_selectedLeaveType != null &&
+  DateTime selectedStart = DateTime.parse(startDateController.text);
+
+  minDate = selectedStart;
+  DateTime today = DateTime.now();
+  maxDate = today.subtract(Duration(days: 1)); // Only till yesterday
+
+  if (selectedStart.isAfter(maxDate)) {
+    maxDate = selectedStart; // Only one day allowed
+  }
+}
+
+     else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Casual')) {
       DateTime quarterEndDate = getQuarterEndDate(now);
       DateTime next7Days = now.add(Duration(days: 7));
@@ -246,11 +259,11 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         DateTime startDate = DateTime.parse(startDateController.text);
         DateTime endDate = DateTime.parse(endDateController.text);
 
-        if (startDate.isBefore(DateTime.now().subtract(Duration(days: 7)))) {
-          showSnackBar(
-              'Medical leave can only be applied within the last 7 days');
-          return;
-        }
+        // if (startDate.isBefore(DateTime.now().subtract(Duration(days: 7)))) {
+        //   showSnackBar(
+        //       'Medical leave can only be applied within the last 7 days');
+        //   return;
+        // }
 
         totalDays = endDate.difference(startDate).inDays + 1;
       }
@@ -468,7 +481,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(5),
                                   ),
-                                  shadowColor: Colors.black.withOpacity(0.1),
+                                  shadowColor:AppColor.shadowColor,
                                   child: Padding(
                                     padding: EdgeInsets.all(3),
                                     child: Row(
@@ -503,7 +516,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       shadowColor:
-                                          Colors.black.withOpacity(0.1),
+                                         AppColor.shadowColor,
                                       child: SizedBox(
                                           width: width / 2.5,
                                           height: height * 0.05,
@@ -519,7 +532,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       shadowColor:
-                                          Colors.black.withOpacity(0.1),
+                                         AppColor.shadowColor,
                                       child: SizedBox(
                                           width: width / 2.5,
                                           height: height * 0.05,
@@ -545,14 +558,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                           _buildDateSelection(
                                               startDateController
                                                       .text.isNotEmpty
-                                                  ? startDateController.text
-                                                  : _selectedLeaveType !=
-                                                              null &&
-                                                          _selectedLeaveType!
-                                                              .contains(
-                                                                  'Medical')
-                                                      ? 'Select End Date'
-                                                      : 'Select Start Date',
+                                                  ? startDateController.text :
+                                                'Select Start Date',
                                               height,
                                               width),
                                           if (_selectedText == 'Full Day' &&
@@ -562,12 +569,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 endDateController
                                                         .text.isNotEmpty
                                                     ? endDateController.text
-                                                    : _selectedLeaveType !=
-                                                                null &&
-                                                            _selectedLeaveType!
-                                                                .contains(
-                                                                    'Medical')
-                                                        ? 'Select Start Date'
+                                                    
                                                         : 'Select End Date',
                                                 height,
                                                 width),
@@ -583,7 +585,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              shadowColor: Colors.black.withOpacity(0.1),
+                              shadowColor:AppColor.shadowColor,
                               child: Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 15),
@@ -599,7 +601,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                       style: TextStyle(
                                         overflow: TextOverflow.ellipsis,
                                         color:
-                                            const Color.fromARGB(255, 0, 0, 0),
+                                          AppColor.mainTextColor2
                                       ),
                                       decoration: InputDecoration(
                                         errorText: reasonController.text.isEmpty
@@ -644,8 +646,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                   borderRadius:
                                                       BorderRadius.circular(15),
                                                 ),
-                                                shadowColor: Colors.black
-                                                    .withOpacity(0.1),
+                                                shadowColor:AppColor.shadowColor,
                                                 child: ListTile(
                                                   leading: Icon(
                                                     Icons.file_copy_rounded,
@@ -712,7 +713,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                       ? Center(
                                           child: LoadingAnimationWidget
                                               .threeArchedCircle(
-                                            color: Colors.white,
+                                        color: AppColor.mainFGColor,
                                             size: height * 0.03,
                                           ),
                                         )
@@ -750,14 +751,14 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                                 _selectedLeaveType!
                                                     .contains('Medical')
                                             ? _isLoading
-                                                ? Colors.grey
+                                                ? AppColor.shimmerBaseColor
                                                 : AppColor.primaryThemeColor
                                             : AppColor.primaryThemeColor,
                                         _selectedLeaveType != null &&
                                                 _selectedLeaveType!
                                                     .contains('Medical')
                                             ? _isLoading
-                                                ? Colors.grey
+                                                ? AppColor.shimmerBaseColor
                                                 : AppColor.secondaryThemeColor2
                                             : AppColor.secondaryThemeColor2,
                                       ]),
@@ -906,7 +907,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor:AppColor.shadowColor,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
           child: SizedBox(
@@ -914,7 +915,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
             child: Center(
               child: Text(text,
                   style: TextStyle(
-                      color: const Color.fromARGB(255, 128, 128, 128),
+                      color:AppColor.mainTextColor2,
                       fontSize: 16)),
             ),
           ),
@@ -947,7 +948,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor:AppColor.shadowColor,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
           child: SizedBox(

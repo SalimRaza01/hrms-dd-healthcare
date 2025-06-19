@@ -193,10 +193,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              shadowColor: Colors.black.withOpacity(0.1),
+                              shadowColor: AppColor.shadowColor,
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Center(child: Text('No Data Found')),
+                                child: Center(child: Text('No Data Found', style: TextStyle(color: AppColor.mainTextColor2),)),
                               ),
                             );
                           } else if (snapshot.hasData) {
@@ -209,7 +209,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                shadowColor: Colors.black.withOpacity(0.1),
+                                shadowColor: AppColor.shadowColor,
                                 child: Padding(
                                   padding: const EdgeInsets.all(10),
                                   child: Row(
@@ -229,24 +229,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             '${shift.startTime} AM ',
                                             style: TextStyle(
                                               fontSize: height * 0.015,
-                                              color: Color.fromARGB(
-                                                  141, 0, 0, 0),
+                                             color: AppColor.mainTextColor
                                             ),
                                           ),
                                           Text(
                                             '- ',
                                             style: TextStyle(
                                               fontSize: height * 0.015,
-                                              color: Color.fromARGB(
-                                                  141, 0, 0, 0),
+                                             color: AppColor.mainTextColor
                                             ),
                                           ),
                                           Text(
                                             '${shift.endTime} PM',
                                             style: TextStyle(
                                               fontSize: height * 0.015,
-                                              color: Color.fromARGB(
-                                                  141, 0, 0, 0),
+                                             color: AppColor.mainTextColor
                                             ),
                                           ),
                                         ],
@@ -326,7 +323,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      shadowColor: Colors.black.withOpacity(0.1),
+                      shadowColor: AppColor.shadowColor,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 10),
@@ -362,7 +359,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        shadowColor: Colors.black.withOpacity(0.1),
+                        shadowColor: AppColor.shadowColor,
                         child: Padding(
                           padding: const EdgeInsets.all(10),
                           child: Column(
@@ -430,7 +427,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      shadowColor: Colors.black.withOpacity(0.1),
+                      shadowColor: AppColor.shadowColor,
                       child: Padding(
                         padding: const EdgeInsets.all(10),
                         child: Column(
@@ -477,8 +474,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         showCupertinoModalBottomSheet(
                                       expand: true,
                                       context: context,
-                                      barrierColor: const Color.fromARGB(
-                                          130, 0, 0, 0),
+                                      barrierColor: AppColor.barrierColor,
                                       backgroundColor: Colors.transparent,
                                       builder: (context) => HolidayList(),
                                     ),
@@ -640,7 +636,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               BorderRadius.circular(10),
                                         ),
                                         shadowColor:
-                                            Colors.black.withOpacity(0.1),
+                                            AppColor.shadowColor,
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -949,7 +945,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      shadowColor: Colors.black.withOpacity(0.1),
+                      shadowColor: AppColor.shadowColor,
                       child: Padding(
                         padding: const EdgeInsets.all(10),
                         child: Column(
@@ -976,7 +972,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               'No announcements have been published yet. Keep an eye out for future updates.',
                               style: TextStyle(
                                 fontSize: height * 0.012,
-                                color: Color.fromARGB(141, 0, 0, 0),
+                                color: AppColor.mainTextColor2,
                               ),
                             ),
                           ],
@@ -999,7 +995,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       width: width * 0.27,
       child: Container(
         decoration: BoxDecoration(
-            border: Border.all(color: const Color.fromARGB(14, 0, 0, 0)),
+            border: Border.all(color: AppColor.borderColor),
             color: AppColor.mainBGColor,
             borderRadius: BorderRadius.circular(10)),
         child: Padding(
@@ -1016,7 +1012,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                 leaveCount,
                 style: TextStyle(
-                    color: Color.fromARGB(141, 0, 0, 0),
+                       color: AppColor.mainTextColor2,
                     fontSize: height * 0.022),
               ),
             ],
@@ -1046,7 +1042,7 @@ class NoTaskWidget extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: AppColor.shadowColor,
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Column(

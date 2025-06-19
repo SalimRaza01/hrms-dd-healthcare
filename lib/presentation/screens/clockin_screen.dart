@@ -120,7 +120,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                     BoxShadow(
                         spreadRadius: 2,
                         blurRadius: 10,
-                        color: Colors.black.withOpacity(0.1),
+                        color: AppColor.shadowColor,
                         offset: Offset(0, 10))
                   ],
                   color: AppColor.mainThemeColor,
@@ -197,7 +197,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                     border: Border(
                                         bottom: BorderSide(
                                   color: isSelected
-                                      ? Colors.white
+                                      ? AppColor.mainFGColor
                                       : Colors.transparent,
                                   width: 2,
                                 ))),
@@ -206,7 +206,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                   style: TextStyle(
                                     fontSize: height * 0.016,
                                     color:
-                                        isSelected ? Colors.white : Colors.grey,
+                                        isSelected ? AppColor.mainFGColor : AppColor.mainBGColor,
                                     fontWeight: isSelected
                                         ? FontWeight.bold
                                         : FontWeight.normal,
@@ -297,6 +297,9 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                               int reguTimeLimit = (lateMinutes -
                                   ((lateMinutes / 60).toInt()) * 60);
 
+                                  print('late min $lateMinutes and regutime $reguTimeLimit');
+                                  
+
                               return InkWell(
                                   onTap: () {
                                     if (item.punchRecords.isNotEmpty) {
@@ -305,9 +308,9 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                         expand: true,
                                         context: context,
                                         barrierColor:
-                                            const Color.fromARGB(130, 0, 0, 0),
+                                            AppColor.barrierColor,
                                         backgroundColor:
-                                            const Color.fromARGB(0, 0, 0, 0),
+                                            Colors.transparent,
                                         builder: (context) => PunchRecordScreen(
                                           punchRecords: item.punchRecords,
                                           regularizationDate:
@@ -331,7 +334,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15),
                                     ),
-                                    shadowColor: Colors.black.withOpacity(0.1),
+                                    shadowColor: AppColor.shadowColor,
                                     child: Stack(
                                       alignment: AlignmentDirectional.bottomEnd,
                                       children: [
@@ -382,10 +385,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                                           1 ||
                                                                       item.isHoliday ==
                                                                           1
-                                                                  ? Colors
-                                                                      .black87
-                                                                  : Colors
-                                                                      .white,
+                                                                  ? AppColor.mainTextColor2
+                                                                  : AppColor.mainFGColor,
                                                             ),
                                                           ),
                                                           Text(
@@ -397,10 +398,8 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                                           1 ||
                                                                       item.isHoliday ==
                                                                           1
-                                                                  ? Colors
-                                                                      .black87
-                                                                  : Colors
-                                                                      .white,
+                                                                  ? AppColor.mainTextColor2
+                                                                  : AppColor.mainFGColor,
                                                             ),
                                                           ),
                                                         ],
@@ -445,7 +444,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                   ],
                                                 ),
                                                 VerticalDivider(
-                                                  color: Colors.black,
+                                                  color: AppColor.mainTextColor,
                                                   thickness: 0.3,
                                                 ),
                                                 Column(
@@ -485,7 +484,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                   ],
                                                 ),
                                                 VerticalDivider(
-                                                  color: Colors.black,
+                                                  color: AppColor.mainTextColor,
                                                   thickness: 0.3,
                                                 ),
                                                 Column(

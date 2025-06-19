@@ -114,7 +114,7 @@ void dispose() {
                             style: TextStyle(
                                 fontSize: 16,
                                 color:
-                                    const Color.fromARGB(255, 224, 224, 224)),
+                                    AppColor.mainFGColor),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -132,7 +132,7 @@ void dispose() {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  shadowColor: Colors.black.withOpacity(0.1),
+                  shadowColor: AppColor.shadowColor,
                   child: Padding(
                     padding: const EdgeInsets.all(15),
                     child: Column(children: [
@@ -266,7 +266,7 @@ void dispose() {
             style: TextStyle(
               fontWeight: FontWeight.w500,
               fontSize: 14,
-              color: const Color.fromARGB(139, 0, 0, 0),
+              color: AppColor.mainTextColor2,
             ),
           ),
           SizedBox(width: 8),
@@ -275,7 +275,7 @@ void dispose() {
               value,
               style: TextStyle(
                 fontSize: 14,
-                color: const Color.fromARGB(139, 0, 0, 0),
+                color: AppColor.mainTextColor2,
               ),
               textAlign: TextAlign.end,
             ),

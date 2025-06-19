@@ -126,8 +126,8 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                             showCupertinoModalBottomSheet(
                               expand: true,
                               context: context,
-                              barrierColor: const Color.fromARGB(130, 0, 0, 0),
-                              backgroundColor: const Color.fromARGB(0, 0, 0, 0),
+                              barrierColor: AppColor.barrierColor,
+                              backgroundColor: Colors.transparent,
                               builder: (context) => TeamPunchrecords(
                                 punchRecords: item.punchRecords,
                               ),
@@ -147,7 +147,7 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
-                          shadowColor: Colors.black.withOpacity(0.1),
+                          shadowColor: AppColor.shadowColor,
                           child: Stack(
                             alignment: AlignmentDirectional.bottomEnd,
                             children: [
@@ -172,7 +172,7 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                               BorderRadius.circular(10),
                                         ),
                                         shadowColor:
-                                            Colors.black.withOpacity(0.1),
+                                         AppColor.shadowColor,
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 15, vertical: 8),
@@ -187,8 +187,8 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                                   fontWeight: FontWeight.bold,
                                                   color: item.weekOff == 1 ||
                                                           item.isHoliday == 1
-                                                      ? Colors.black87
-                                                      : Colors.white,
+                                                      ? AppColor.mainTextColor2
+                                                      : AppColor.mainFGColor,
                                                 ),
                                               ),
                                               Text(
@@ -198,8 +198,8 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                                   fontWeight: FontWeight.bold,
                                                   color: item.weekOff == 1 ||
                                                           item.isHoliday == 1
-                                                      ? Colors.black87
-                                                      : Colors.white,
+                                                      ? AppColor.mainTextColor2
+                                                      : AppColor.mainFGColor,
                                                 ),
                                               ),
                                             ],
@@ -237,7 +237,7 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                         ],
                                       ),
                                       VerticalDivider(
-                                        color: Colors.black,
+                                        color: AppColor.mainTextColor,
                                         thickness: 0.3,
                                       ),
                                       Column(
@@ -271,7 +271,7 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                                         ],
                                       ),
                                       VerticalDivider(
-                                        color: Colors.black,
+                                        color: AppColor.mainTextColor,
                                         thickness: 0.3,
                                       ),
                                       Column(
