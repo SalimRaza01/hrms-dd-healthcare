@@ -34,6 +34,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TaskProvider()),
         ChangeNotifierProvider(create: (_) => ProjectProvider()),
         ChangeNotifierProvider(create: (_) => LeaveApplied()),
+        ChangeNotifierProvider(create: (_) => PunchedIN()),
+
       ],
       child: MyApp(),
     ),

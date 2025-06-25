@@ -568,15 +568,15 @@ Future<void> createNewPass(
 }
 
 Future<List<DocumentListModel>> fetchDocumentList(String documentType) async {
-      String token = _authBox.get('token');
+  String token = _authBox.get('token');
   String empID = _authBox.get('employeeId');
 
   final response = await dio.get(
-    documentType == 'Public' ? documentList : '$documentList/$empID',
-     options: Options(headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token"
-        }));
+      documentType == 'Public' ? documentList : '$documentList/$empID',
+      options: Options(headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      }));
 
   if (response.statusCode == 200) {
     final List<dynamic> data = response.data['data'];
@@ -793,9 +793,8 @@ Future<void> ownCompOffActionDelete(
 ) async {
   print(id);
   try {
-        String token = _authBox.get('token');
-    final response = await dio.delete(
-      '$ownCompOffActon/$id',
+    String token = _authBox.get('token');
+    final response = await dio.delete('$ownCompOffActon/$id',
         options: Options(headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token"
@@ -850,6 +849,116 @@ Future<void> ownLeaveActionDelete(
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(response.data['message']),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } on DioException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.response!.data['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+Future<void> manualPunchIn(
+  BuildContext context,
+  String location,
+  String imageUrl64,
+) async {
+  String empID = _authBox.get('employeeId');
+  String token = _authBox.get('token');
+
+  try {
+    final response = await dio.post(punchinAction,
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }),
+        data: {
+          "employeeId": empID,
+          "location": location,
+          "imageUrl": imageUrl64
+        });
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      print(response.data);
+      await _authBox.put('Punch-In-id', response.data['data']['_id']);
+      await _authBox.put('Punch-InTime', response.data['data']['InTime']);
+ Provider.of<PunchedIN>(context, listen: false).updatePunchInTime(true);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Punch-In Success'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  } on DioException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.response!.data['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+Future<void> manualPunchOut(
+  BuildContext context,
+  String id,
+) async {
+  String token = _authBox.get('token');
+
+  try {
+    final response = await dio.post(
+      '$punchOutAction/$id',
+      options: Options(headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      }),
+      // data: {
+      //   "location": location,
+      // }
+    );
+    if (response.statusCode == 201 || response.statusCode == 200) {
+           await _authBox.put('Punch-OutTime', DateTime.now());
+            Provider.of<PunchedIN>(context, listen: false).updatePunchInTime(true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Punch-Out Success'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  } on DioException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.response!.data['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+Future<void> updateLocation(
+    BuildContext context, String id, String location) async {
+  try {
+    final response = await dio.put('$updatePunchLocation/$id', data: {
+      "location": location,
+    });
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Location Updated Successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Something Went Wrong'),
           backgroundColor: Colors.red,
         ),
       );

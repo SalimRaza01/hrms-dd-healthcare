@@ -689,20 +689,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
             )
           ],
         ),
-        // floatingActionButton: FloatingActionButton.extended(
-        //   backgroundColor: AppColor.mainThemeColor,
-        //   onPressed: () => showCupertinoModalBottomSheet(
-        //     expand: true,
-        //     context: context,
-        //     barrierColor: const Color.fromARGB(130, 0, 0, 0),
-        //     backgroundColor: Colors.transparent,
-        //     builder: (context) => PunchInOutScreen(),
-        //   ),
-        //   label: Text(
-        //     'Clock-In',
-        //     style: TextStyle(color: AppColor.mainFGColor),
-        //   ),
-        // )
+
       ),
     );
   }

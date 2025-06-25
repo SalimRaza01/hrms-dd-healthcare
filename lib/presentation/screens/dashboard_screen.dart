@@ -8,6 +8,8 @@ import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/presentation/odoo/task_details.dart';
+import 'package:hrms/presentation/screens/punch_in_out_screen.dart';
+import 'package:hrms/widgets/manual_punch.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -28,7 +30,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   DateTime today = DateTime.now();
   bool isLoading = false;
 
-
   @override
   void setState(VoidCallback fn) {
     if (mounted) {
@@ -40,6 +41,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     // _fetchTasks();
+    
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -179,8 +181,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
                             return Center(
-                              child:
-                                  LoadingAnimationWidget.threeArchedCircle(
+                              child: LoadingAnimationWidget.threeArchedCircle(
                                 color: AppColor.mainTextColor2,
                                 size: height * 0.03,
                               ),
@@ -196,12 +197,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               shadowColor: AppColor.shadowColor,
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Center(child: Text('No Data Found', style: TextStyle(color: AppColor.mainTextColor2),)),
+                                child: Center(
+                                    child: Text(
+                                  'No Data Found',
+                                  style:
+                                      TextStyle(color: AppColor.mainTextColor2),
+                                )),
                               ),
                             );
                           } else if (snapshot.hasData) {
                             final shift = snapshot.data!;
-          
+
                             return Card(
                                 color: AppColor.mainFGColor,
                                 elevation: 4,
@@ -228,23 +234,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           Text(
                                             '${shift.startTime} AM ',
                                             style: TextStyle(
-                                              fontSize: height * 0.015,
-                                             color: AppColor.mainTextColor
-                                            ),
+                                                fontSize: height * 0.015,
+                                                color: AppColor.mainTextColor),
                                           ),
                                           Text(
                                             '- ',
                                             style: TextStyle(
-                                              fontSize: height * 0.015,
-                                             color: AppColor.mainTextColor
-                                            ),
+                                                fontSize: height * 0.015,
+                                                color: AppColor.mainTextColor),
                                           ),
                                           Text(
                                             '${shift.endTime} PM',
                                             style: TextStyle(
-                                              fontSize: height * 0.015,
-                                             color: AppColor.mainTextColor
-                                            ),
+                                                fontSize: height * 0.015,
+                                                color: AppColor.mainTextColor),
                                           ),
                                         ],
                                       )
@@ -255,6 +258,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             return Text('No data Found');
                           }
                         }),
+                    SizedBox(
+                      height: height * 0.015,
+                    ),
+                    InkWell(
+                        onTap: 
+                          () => showCupertinoModalBottomSheet(
+                                expand: true,
+                                context: context,
+                                barrierColor:
+                                    const Color.fromARGB(130, 0, 0, 0),
+                                backgroundColor: Colors.transparent,
+                                builder: (context) => PunchInOutScreen(),
+                              ),
+                        
+                        child: PunchCardWidget()),
+
                     SizedBox(
                       height: height * 0.015,
                     ),
@@ -340,8 +359,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           monthColor: Colors.blueGrey,
                           dayColor: Colors.blueGrey,
                           activeDayColor: Colors.amberAccent,
-                          activeBackgroundDayColor:
-                              AppColor.mainThemeColor,
+                          activeBackgroundDayColor: AppColor.mainThemeColor,
                           locale: 'en_ISO',
                         ),
                       ),
@@ -349,7 +367,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     SizedBox(
                       height: height * 0.015,
                     ),
-          
+
                     SizedBox(
                       width: width,
                       child: Card(
@@ -392,20 +410,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           child: Text('No Data Found'));
                                     } else if (snapshot.hasData) {
                                       final leave = snapshot.data!;
-          
+
                                       return Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          leaveWidget(height, width,
-                                              'Casual', leave.casualLeave),
-                                          leaveWidget(
-                                              height,
-                                              width,
-                                              'Medical',
+                                          leaveWidget(height, width, 'Casual',
+                                              leave.casualLeave),
+                                          leaveWidget(height, width, 'Medical',
                                               leave.medicalLeave),
-                                          leaveWidget(height, width,
-                                              'Earned', leave.earnedLeave),
+                                          leaveWidget(height, width, 'Earned',
+                                              leave.earnedLeave),
                                         ],
                                       );
                                     } else {
@@ -463,15 +478,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       child: Text('No Holiday available.'));
                                 } else {
                                   List<HolidayModel> items = snapshot.data!;
-          
+
                                   HolidayModel item = items[0];
-          
+
                                   final newDate =
                                       DateTime.parse(item.holidayDate);
-          
+
                                   return InkWell(
-                                    onTap: () =>
-                                        showCupertinoModalBottomSheet(
+                                    onTap: () => showCupertinoModalBottomSheet(
                                       expand: true,
                                       context: context,
                                       barrierColor: AppColor.barrierColor,
@@ -488,15 +502,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           children: [
                                             Container(
                                               decoration: BoxDecoration(
-                                                  color: AppColor
-                                                      .mainThemeColor,
+                                                  color:
+                                                      AppColor.mainThemeColor,
                                                   borderRadius:
                                                       BorderRadius.all(
                                                     Radius.circular(10),
                                                   )),
                                               child: Padding(
-                                                padding: const EdgeInsets
-                                                    .symmetric(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
                                                   horizontal: 15,
                                                   vertical: 4,
                                                 ),
@@ -510,8 +524,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                           .format(newDate)
                                                           .toString(),
                                                       style: TextStyle(
-                                                        fontSize:
-                                                            height * 0.02,
+                                                        fontSize: height * 0.02,
                                                         fontWeight:
                                                             FontWeight.bold,
                                                         color: AppColor
@@ -523,11 +536,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                           .format(newDate)
                                                           .toString(),
                                                       style: TextStyle(
-                                                          fontSize: height *
-                                                              0.014,
+                                                          fontSize:
+                                                              height * 0.014,
                                                           fontWeight:
-                                                              FontWeight
-                                                                  .bold,
+                                                              FontWeight.bold,
                                                           color: AppColor
                                                               .mainFGColor),
                                                     ),
@@ -536,30 +548,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               ),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsets
-                                                  .symmetric(
-                                                  vertical: 4,
-                                                  horizontal: 20),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 4,
+                                                      horizontal: 20),
                                               child: Column(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                 crossAxisAlignment:
-                                                    CrossAxisAlignment
-                                                        .start,
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   SizedBox(
                                                     width: width / 2,
                                                     child: Text(
-                                                      overflow: TextOverflow
-                                                          .ellipsis,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                       item.holidayName,
                                                       style: TextStyle(
-                                                          fontSize: height *
-                                                              0.015,
+                                                          fontSize:
+                                                              height * 0.015,
                                                           fontWeight:
-                                                              FontWeight
-                                                                  .bold,
+                                                              FontWeight.bold,
                                                           color: AppColor
                                                               .mainTextColor),
                                                     ),
@@ -616,7 +626,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   itemCount: 1,
                                   itemBuilder: (context, index) {
                                     final task = tasks[tasks.length - 1];
-          
+
                                     return InkWell(
                                       onTap: () {
                                         Navigator.push(
@@ -624,8 +634,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             MaterialPageRoute(
                                                 builder: (context) =>
                                                     TaskDetails(
-                                                        taskID:
-                                                            task['id'])));
+                                                        taskID: task['id'])));
                                       },
                                       child: Card(
                                         color: AppColor.mainFGColor,
@@ -635,8 +644,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           borderRadius:
                                               BorderRadius.circular(10),
                                         ),
-                                        shadowColor:
-                                            AppColor.shadowColor,
+                                        shadowColor: AppColor.shadowColor,
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -647,21 +655,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                   color: Colors.green,
                                                   borderRadius:
                                                       BorderRadius.only(
-                                                          topLeft: Radius
-                                                              .circular(10),
-                                                          topRight: Radius
-                                                              .circular(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  10),
+                                                          topRight:
+                                                              Radius.circular(
                                                                   10))),
                                               child: Padding(
-                                                padding: const EdgeInsets
-                                                    .symmetric(
-                                                    horizontal: 10.0,
-                                                    vertical: 5.0),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10.0,
+                                                        vertical: 5.0),
                                                 child: Text(
                                                   'Current Task ',
                                                   style: TextStyle(
-                                                      fontSize:
-                                                          height * 0.015,
+                                                      fontSize: height * 0.015,
                                                       color: Colors.white,
                                                       fontWeight:
                                                           FontWeight.w400),
@@ -673,8 +681,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                   const EdgeInsets.all(8.0),
                                               child: Column(
                                                 crossAxisAlignment:
-                                                    CrossAxisAlignment
-                                                        .start,
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Row(
                                                     mainAxisAlignment:
@@ -684,9 +691,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                       SizedBox(
                                                         width: width / 1.5,
                                                         child: Text(
-                                                          overflow:
-                                                              TextOverflow
-                                                                  .ellipsis,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                           maxLines: 2,
                                                           task['name']
                                                               .toString()
@@ -695,32 +701,45 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                             color: AppColor
                                                                 .mainTextColor,
                                                             fontSize:
-                                                                height *
-                                                                    0.016,
+                                                                height * 0.016,
                                                             fontWeight:
-                                                                FontWeight
-                                                                    .bold,
+                                                                FontWeight.bold,
                                                           ),
                                                         ),
                                                       ),
                                                       Container(
-                                                        decoration: BoxDecoration(
-                                                            color: task['priority'] != null && task['priority'].isNotEmpty
-                                                                ? task['priority'][0] == 'High' || task['priority'][0] == 'high'
-                                                                    ? const Color.fromARGB(255, 249, 177, 177)
-                                                                    : task['priority'][0] == 'Low'
-                                                                        ? const Color.fromARGB(255, 226, 255, 193)
-                                                                        : const Color.fromARGB(116, 255, 198, 124)
-                                                                : Colors.transparent,
-                                                            borderRadius: BorderRadius.circular(5)),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                                color: task['priority'] !=
+                                                                            null &&
+                                                                        task['priority']
+                                                                            .isNotEmpty
+                                                                    ? task['priority'][0] == 'High' ||
+                                                                            task['priority'][0] ==
+                                                                                'high'
+                                                                        ? const Color.fromARGB(
+                                                                            255,
+                                                                            249,
+                                                                            177,
+                                                                            177)
+                                                                        : task['priority'][0] ==
+                                                                                'Low'
+                                                                            ? const Color.fromARGB(
+                                                                                255, 226, 255, 193)
+                                                                            : const Color.fromARGB(
+                                                                                116, 255, 198, 124)
+                                                                    : Colors
+                                                                        .transparent,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            5)),
                                                         child: Padding(
                                                           padding:
                                                               const EdgeInsets
                                                                   .symmetric(
-                                                                  horizontal:
-                                                                      8,
-                                                                  vertical:
-                                                                      5),
+                                                                  horizontal: 8,
+                                                                  vertical: 5),
                                                           child: Text(
                                                             task['priority'] !=
                                                                         null &&
@@ -731,16 +750,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                                     .toString()
                                                                     .toUpperCase()
                                                                 : 'Not Set',
-                                                            style:
-                                                                TextStyle(
-                                                              fontSize:
-                                                                  height *
-                                                                      0.014,
+                                                            style: TextStyle(
+                                                              fontSize: height *
+                                                                  0.014,
                                                               color: task['priority'] !=
                                                                           null &&
                                                                       task['priority']
                                                                           .isNotEmpty
-                                                                  ? task['priority'][0] == 'High' ||
+                                                                  ? task['priority'][0] ==
+                                                                              'High' ||
                                                                           task['priority'][0] ==
                                                                               'high'
                                                                       ? const Color
@@ -751,12 +769,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                                           45)
                                                                       : task['priority'][0] ==
                                                                               'Low'
-                                                                          ? const Color.fromARGB(255, 113, 163,
+                                                                          ? const Color.fromARGB(
+                                                                              255,
+                                                                              113,
+                                                                              163,
                                                                               56)
-                                                                          : const Color.fromARGB(255, 227, 129,
+                                                                          : const Color.fromARGB(
+                                                                              255,
+                                                                              227,
+                                                                              129,
                                                                               0)
-                                                                  : Colors
-                                                                      .grey,
+                                                                  : Colors.grey,
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w500,
@@ -773,8 +796,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                         : 'Deadline: ${_formatDate(task['deadline_date'])}',
                                                     style: TextStyle(
                                                       color: Colors.grey,
-                                                      fontSize:
-                                                          height * 0.014,
+                                                      fontSize: height * 0.014,
                                                       fontWeight:
                                                           FontWeight.w400,
                                                     ),
@@ -784,11 +806,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                   ),
                                                   LinearProgressIndicator(
                                                     backgroundColor:
-                                                        AppColor
-                                                            .mainBGColor,
+                                                        AppColor.mainBGColor,
                                                     borderRadius:
-                                                        BorderRadius
-                                                            .circular(20),
+                                                        BorderRadius.circular(
+                                                            20),
                                                     minHeight: 6.0,
                                                     color: task['stage_name'] ==
                                                             'Created'
@@ -796,17 +817,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                             167, 76, 175, 79)
                                                         : task['stage_name'] ==
                                                                 'In Progress'
-                                                            ? const Color
-                                                                .fromARGB(
+                                                            ? const Color.fromARGB(
                                                                 167, 76, 175, 79)
                                                             : task['stage_name'] ==
                                                                     'Hold'
                                                                 ? const Color
                                                                     .fromARGB(
-                                                                    167,
-                                                                    255,
-                                                                    193,
-                                                                    7)
+                                                                    167, 255, 193, 7)
                                                                 : task['stage_name'] ==
                                                                         'Review'
                                                                     ? const Color.fromARGB(
@@ -814,8 +831,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                                         33,
                                                                         149,
                                                                         243)
-                                                                    : task['stage_name'] == 'Completed'
-                                                                        ? const Color.fromARGB(167, 76, 175, 79)
+                                                                    : task['stage_name'] ==
+                                                                            'Completed'
+                                                                        ? const Color.fromARGB(
+                                                                            167,
+                                                                            76,
+                                                                            175,
+                                                                            79)
                                                                         : task['stage_name'] == 'Running Late'
                                                                             ? const Color.fromARGB(167, 244, 67, 54)
                                                                             : const Color.fromARGB(167, 76, 175, 79),
@@ -834,7 +856,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                                     : task['stage_name'] ==
                                                                             'Completed'
                                                                         ? 1.0
-                                                                        : task['stage_name'] == 'Running Late'
+                                                                        : task['stage_name'] ==
+                                                                                'Running Late'
                                                                             ? 0.1
                                                                             : 0.0,
                                                   ),
@@ -846,8 +869,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                         MainAxisAlignment
                                                             .spaceBetween,
                                                     children: [
-                                                      FlutterImageStack
-                                                          .widgets(
+                                                      FlutterImageStack.widgets(
                                                         children: [
                                                           for (var n = 0;
                                                               n <
@@ -864,8 +886,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                                       254),
                                                               child: Text(
                                                                 task['assignees_emails']
-                                                                        [
-                                                                        n][0]
+                                                                        [n][0]
                                                                     .toString()
                                                                     .toUpperCase(),
                                                                 style:
@@ -880,8 +901,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                               ),
                                                             )
                                                         ],
-                                                        showTotalCount:
-                                                            true,
+                                                        showTotalCount: true,
                                                         itemBorderColor:
                                                             Colors.white,
                                                         totalCount: task[
@@ -896,29 +916,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                                 .center,
                                                         children: [
                                                           Icon(
-                                                            CupertinoIcons
-                                                                .dial,
+                                                            CupertinoIcons.dial,
                                                             color: const Color
-                                                                .fromARGB(
-                                                                177,
-                                                                158,
-                                                                158,
-                                                                158),
+                                                                .fromARGB(177,
+                                                                158, 158, 158),
                                                           ),
                                                           SizedBox(
-                                                            width: width *
-                                                                0.02,
+                                                            width: width * 0.02,
                                                           ),
                                                           Text(
-                                                            task[
-                                                                'stage_name'],
-                                                            style:
-                                                                TextStyle(
-                                                              color: Colors
-                                                                  .grey,
-                                                              fontSize:
-                                                                  height *
-                                                                      0.017,
+                                                            task['stage_name'],
+                                                            style: TextStyle(
+                                                              color:
+                                                                  Colors.grey,
+                                                              fontSize: height *
+                                                                  0.017,
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w400,
@@ -1012,8 +1024,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                 leaveCount,
                 style: TextStyle(
-                       color: AppColor.mainTextColor2,
-                    fontSize: height * 0.022),
+                    color: AppColor.mainTextColor2, fontSize: height * 0.022),
               ),
             ],
           ),

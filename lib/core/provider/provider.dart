@@ -39,3 +39,13 @@ class LeaveApplied extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+class PunchedIN extends ChangeNotifier {
+  bool punchin = false;
+  bool get updatedpunchIn => punchin;
+
+  void updatePunchInTime(bool updatedpunchIn) {
+    punchin = updatedpunchIn;
+    notifyListeners();
+  }
+}

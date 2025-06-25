@@ -1,7 +1,9 @@
 // ignore_for_file: use_key_in_widget_constructors, depend_on_referenced_packages
 
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -21,25 +23,39 @@ class PunchInOutScreen extends StatefulWidget {
 }
 
 class _PunchInOutScreenState extends State<PunchInOutScreen> {
+  final Box _authBox = Hive.box('authBox');
   late CameraController _cameraController;
-  String? empName;
   File? _selfie;
   LatLng? _currentLocation;
   bool _isLoading = false;
-  DateTime? _punchInTime;
-  DateTime? _punchOutTime;
   List<Placemark>? placemarks;
   Placemark? place;
 
   @override
   void initState() {
     super.initState();
-    _checkEmployeeId();
     _getCurrentLocation();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+  }
+
+  String displayInTime() {
+    DateTime inTime = DateTime.parse(_authBox.get('Punch-InTime'));
+
+    return "${inTime.hour.toString().padLeft(2, '0')}:${inTime.minute.toString().padLeft(2, '0')}";
+  }
+
+  String displayOutTime() {
+
+
+    return "${_authBox.get('Punch-OutTime').hour.toString().padLeft(2, '0')}:${_authBox.get('Punch-OutTime').minute.toString().padLeft(2, '0')}";
+  }
+
+  Future<String> convertImageToBase64(File imageFile) async {
+    final bytes = await imageFile.readAsBytes();
+    return base64Encode(bytes);
   }
 
   Future<void> _initializeCamera() async {
@@ -109,53 +125,24 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
     }
   }
 
-  Future<void> _savePunchInStatus(DateTime? punchInTime) async {
-    var box = await Hive.openBox('authBox');
-    box.put('punchInTime', punchInTime);
-    Future.delayed(Duration(seconds: 1), () {
-      _checkEmployeeId();
-    });
-  }
-
-  Future<void> _savePunchOutStatus(DateTime? punchOutTime) async {
-    var box = await Hive.openBox('authBox');
-    box.put('punchOutTime', punchOutTime);
-    Future.delayed(Duration(seconds: 1), () {
-      _checkEmployeeId();
-    });
-  }
-
-  Future<void> _checkEmployeeId() async {
-    var box = await Hive.openBox('authBox');
-    setState(() {
-      empName = box.get('employeeName');
-      _punchInTime = box.get('punchInTime', defaultValue: null);
-      _punchOutTime = box.get('punchOutTime', defaultValue: null);
-    });
-    print('Stored Employee ID: $empName');
-  }
-
   Future<void> _punchIn() async {
     await _getCurrentLocation();
+
     if (_selfie == null) {
       await _takeSelfie();
     }
 
     if (_selfie != null && _currentLocation != null) {
-      setState(() {
-        _isLoading = true;
-      });
+      setState(() => _isLoading = true);
 
-      setState(() {
-        _isLoading = false;
-      });
+      String base64Image = await convertImageToBase64(_selfie!);
+      String location = place!.subLocality!.isNotEmpty
+          ? '${place!.subLocality}, ${place!.locality}'
+          : '${place!.locality}';
+      _authBox.put('punchLocation', location);
+      await manualPunchIn(context, location, base64Image);
 
-      await _savePunchInStatus(DateTime.now());
-
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.green,
-        content: Text('Punched In Successfully!'),
-      ));
+      setState(() => _isLoading = false);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.red,
@@ -165,31 +152,48 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
   }
 
   Future<void> _punchOut() async {
+    // await _getCurrentLocation();
+
+    // if (_currentLocation != null) {
+    //   String location = place!.subLocality!.isNotEmpty
+    //       ? '${place!.subLocality}, ${place!.locality}'
+    //       : '${place!.locality}';
+
+    String punchId = _authBox.get('Punch-In-id');
+
+    await manualPunchOut(
+      context,
+      punchId,
+    );
+    displayOutTime();
+    // } else {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text('Location not available for Punch-Out'),
+    //       backgroundColor: Colors.red,
+    //     ),
+    //   );
+    // }
+  }
+
+  Future<void> _updatePunchLocation() async {
     await _getCurrentLocation();
-    if (_selfie == null) {
-      await _takeSelfie();
-    }
 
-    if (_selfie != null && _currentLocation != null) {
-      setState(() {
-        _isLoading = true;
-      });
+    if (_currentLocation != null) {
+      String location = place!.subLocality!.isNotEmpty
+          ? '${place!.subLocality}, ${place!.locality}'
+          : '${place!.locality}';
+      _authBox.put('punchLocation', location);
+      String punchId = _authBox.get('Punch-In-id');
 
-      setState(() {
-        _isLoading = false;
-      });
-
-      await _savePunchOutStatus(DateTime.now());
-
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.green,
-        content: Text('Punched Out Successfully!'),
-      ));
+      await updateLocation(context, punchId, location);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.red,
-        content: Text('Failed to punch out'),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Location not available for Punch-Out'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -204,25 +208,16 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
-    Duration duration = _punchInTime != null
-        ? DateTime.now().difference(_punchInTime!)
+    Duration duration = _authBox.get('Punch-InTime') != null
+        ? DateTime.now()
+            .difference(DateTime.parse(_authBox.get('Punch-InTime')!))
         : Duration(hours: 0, minutes: 0);
 
     int hours = duration.inHours;
     int minutes = duration.inMinutes % 60;
     String formattedDuration = hours == 0 && minutes == 0
         ? '--/--'
-        : (hours < 10 ? '0$hours' : '$hours') +
-            ':' +
-            (minutes < 10 ? '0$minutes' : '$minutes');
-
-    String punchIn = _punchInTime != null
-        ? "${_punchInTime!.hour.toString().padLeft(2, '0')}:${_punchInTime!.minute.toString().padLeft(2, '0')}"
-        : '--/--';
-
-    String punchOut = _punchOutTime != null
-        ? "${_punchOutTime!.hour.toString().padLeft(2, '0')}:${_punchOutTime!.minute.toString().padLeft(2, '0')}"
-        : '--/--';
+        : '${hours < 10 ? '0$hours' : '$hours'}:${minutes < 10 ? '0$minutes' : '$minutes'}';
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -251,19 +246,9 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                       style: LocationMarkerStyle(
                           markerSize: Size.fromRadius(10),
                           accuracyCircleColor:
-                              const Color.fromARGB(120, 64, 195, 255)),
+                              const Color.fromARGB(120, 153, 207, 232)),
                     ),
                   ],
-                ),
-                Container(
-                  color: const Color.fromARGB(235, 207, 0, 0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(
-                      "You're using a test version of the clock-in feature. Selfie, time, and location data are not saved and won't affect official attendance. Use this to help us improve.",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
                 ),
                 Align(
                   alignment: Alignment.bottomCenter,
@@ -275,7 +260,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                         height: height / 3,
                         width: width,
                         padding:
-                            EdgeInsets.symmetric(vertical: 20, horizontal: 50),
+                            EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                         decoration: BoxDecoration(
                           color: AppColor.mainFGColor,
                           borderRadius: BorderRadius.only(
@@ -291,32 +276,28 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                           ],
                         ),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             SizedBox(
-                              height: height * 0.06,
+                              height: height * 0.04,
                             ),
                             Text(
-                              empName != null ? 'Name : ${empName!}' : '',
+                              _authBox.get('employeeName'),
                               style: TextStyle(
                                   fontSize: height * 0.02,
                                   color: AppColor.mainTextColor,
                                   fontWeight: FontWeight.w500),
                             ),
-                            SizedBox(
-                              height: 5,
-                            ),
                             Text(
                               place != null
-                                  ? 'Location : ${place!.subLocality}, ${place!.locality}'
+                                  ? place!.subLocality!.isNotEmpty
+                                      ? 'Location : ${place!.subLocality}, ${place!.locality}'
+                                      : 'Location : ${place!.locality}'
                                   : 'Unable to track location',
                               style: TextStyle(
                                   fontSize: height * 0.016,
                                   color: Colors.green,
                                   fontWeight: FontWeight.w400),
-                            ),
-                            SizedBox(
-                              height: 5,
                             ),
                             Container(
                               decoration: BoxDecoration(
@@ -324,7 +305,8 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                 borderRadius: BorderRadius.circular(15),
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(5),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 7),
                                 child: IntrinsicHeight(
                                   child: Row(
                                     mainAxisAlignment:
@@ -339,7 +321,9 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                             CrossAxisAlignment.center,
                                         children: [
                                           Text(
-                                            punchIn,
+                                            _authBox.get('Punch-InTime') != null
+                                                ? displayInTime()
+                                                : '--/--',
                                             style: TextStyle(
                                                 fontSize: height * 0.02,
                                                 fontWeight: FontWeight.bold,
@@ -365,7 +349,10 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                             CrossAxisAlignment.center,
                                         children: [
                                           Text(
-                                            punchOut,
+                                            _authBox.get('Punch-OutTime') !=
+                                                    null
+                                                ? displayOutTime()
+                                                : '--/--',
                                             style: TextStyle(
                                               fontSize: height * 0.02,
                                               fontWeight: FontWeight.bold,
@@ -413,33 +400,33 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                 ),
                               ),
                             ),
-                            SizedBox(
-                              height: 8,
-                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 InkWell(
-                                  // onTap: _punchInTime != null ? null : _punchIn,
-                                  onTap: _punchIn,
+                                  onTap: _authBox.get('Punch-InTime') == null
+                                      ? _punchIn
+                                      : _updatePunchLocation,
                                   child: Container(
-                                    width: width / 3,
+                                    width: width / 2.5,
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                           begin: Alignment.topCenter,
                                           end: Alignment.bottomCenter,
                                           colors: [
-                                            AppColor.primaryThemeColor,
-                                            AppColor.secondaryThemeColor2,
+                                            Colors.lightGreen,
+                                            Colors.green,
                                           ]),
-                                      borderRadius: BorderRadius.circular(20),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 20, vertical: 12),
                                       child: Center(
                                         child: Text(
-                                          'Punch In',
+                                          _authBox.get('Punch-InTime') == null
+                                              ? 'Punch In'
+                                              : 'Update Location',
                                           style: TextStyle(
                                               fontSize: height * 0.015,
                                               color: AppColor.mainFGColor),
@@ -449,19 +436,18 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                                   ),
                                 ),
                                 InkWell(
-                                  // onTap: _punchOutTime != null ? null : _punchOut,
-                                  onTap: _punchOut,
+                                  onTap: () => _punchOut(),
                                   child: Container(
-                                    width: width / 3,
+                                    width: width / 2.5,
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                           begin: Alignment.topCenter,
                                           end: Alignment.bottomCenter,
                                           colors: [
-                                            AppColor.primaryThemeColor,
-                                            AppColor.secondaryThemeColor2,
+                                            Colors.black45,
+                                            Colors.black,
                                           ]),
-                                      borderRadius: BorderRadius.circular(20),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
@@ -545,7 +531,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
 class ImageViewerScreen extends StatelessWidget {
   final File imageFile;
 
-  ImageViewerScreen({required this.imageFile});
+  const ImageViewerScreen({required this.imageFile});
 
   @override
   Widget build(BuildContext context) {
