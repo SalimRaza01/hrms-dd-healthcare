@@ -1,37 +1,10 @@
-import 'package:dio/dio.dart';
+
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hrms/core/api/api_config.dart';
+import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 
-class PunchRecordModel {
-  final String inTime;
-  final String outTime;
-  final String location;
 
-  PunchRecordModel({
-    required this.inTime,
-    required this.outTime,
-    required this.location,
-  });
-
-  factory PunchRecordModel.fromJson(Map<String, dynamic> json) {
-    return PunchRecordModel(
-      inTime: json['InTime'] ?? '',
-      outTime: json['OutTime'] ?? '',
-      location: json['location'] ?? 'Not Available',
-    );
-  }
-
-  String formatTime(String timeStr) {
-    try {
-      final time = DateTime.parse(timeStr);
-      return "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
-    } catch (_) {
-      return '--/--';
-    }
-  }
-}
 
 class PunchCardWidget extends StatefulWidget {
   const PunchCardWidget({super.key});
@@ -41,28 +14,7 @@ class PunchCardWidget extends StatefulWidget {
 }
 
 class _PunchCardWidgetState extends State<PunchCardWidget> {
-  final Dio dio = Dio();
-  final Box _authBox = Hive.box('authBox');
 
-  Future<PunchRecordModel> fetchPunchRecord() async {
-    final String token = _authBox.get('token');
-
-    final response = await dio.get(
-      '$getPunchAttendence/${_authBox.get('employeeId')}',
-      options: Options(headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      }),
-    );
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      print(response.data);
-      final Map<String, dynamic> data = response.data['data'][0];
-      return PunchRecordModel.fromJson(data);
-    } else {
-      throw Exception("Failed to fetch punch data");
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

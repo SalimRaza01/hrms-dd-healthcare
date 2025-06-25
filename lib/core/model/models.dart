@@ -589,3 +589,33 @@ class CompOffRequest {
     };
   }
 }
+
+
+class PunchRecordModel {
+  final String inTime;
+  final String outTime;
+  final String location;
+
+  PunchRecordModel({
+    required this.inTime,
+    required this.outTime,
+    required this.location,
+  });
+
+  factory PunchRecordModel.fromJson(Map<String, dynamic> json) {
+    return PunchRecordModel(
+      inTime: json['InTime'] ?? '',
+      outTime: json['OutTime'] ?? '',
+      location: json['location'] ?? 'Not Available',
+    );
+  }
+
+  String formatTime(String timeStr) {
+    try {
+      final time = DateTime.parse(timeStr);
+      return "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
+    } catch (_) {
+      return '--/--';
+    }
+  }
+}

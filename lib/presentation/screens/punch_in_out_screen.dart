@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -41,18 +42,6 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
     ]);
   }
 
-  String displayInTime() {
-    DateTime inTime = DateTime.parse(_authBox.get('Punch-InTime'));
-
-    return "${inTime.hour.toString().padLeft(2, '0')}:${inTime.minute.toString().padLeft(2, '0')}";
-  }
-
-  String displayOutTime() {
-
-
-    return "${_authBox.get('Punch-OutTime').hour.toString().padLeft(2, '0')}:${_authBox.get('Punch-OutTime').minute.toString().padLeft(2, '0')}";
-  }
-
   Future<String> convertImageToBase64(File imageFile) async {
     final bytes = await imageFile.readAsBytes();
     return base64Encode(bytes);
@@ -72,11 +61,11 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
 
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-  Future.delayed(Duration(seconds: 3),(){
+      Future.delayed(Duration(seconds: 3), () {
         setState(() {
-        _isLoading = false;
+          _isLoading = false;
+        });
       });
-  });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Location services are disabled.'),
       ));
@@ -153,31 +142,6 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
     }
   }
 
-  Future<void> _punchOut() async {
-    // await _getCurrentLocation();
-
-    // if (_currentLocation != null) {
-    //   String location = place!.subLocality!.isNotEmpty
-    //       ? '${place!.subLocality}, ${place!.locality}'
-    //       : '${place!.locality}';
-
-    String punchId = _authBox.get('Punch-In-id');
-
-    await manualPunchOut(
-      context,
-      punchId,
-    );
-     displayOutTime();
-    // } else {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(
-    //       content: Text('Location not available for Punch-Out'),
-    //       backgroundColor: Colors.red,
-    //     ),
-    //   );
-    // }
-  }
-
   Future<void> _updatePunchLocation() async {
     await _getCurrentLocation();
 
@@ -210,16 +174,16 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
-    Duration duration = _authBox.get('Punch-InTime') != null
-        ? DateTime.now()
-            .difference(DateTime.parse(_authBox.get('Punch-InTime')!))
-        : Duration(hours: 0, minutes: 0);
+    // Duration duration = _authBox.get('Punch-InTime') != null
+    //     ? DateTime.now()
+    //         .difference(DateTime.parse(_authBox.get('Punch-InTime')!))
+    //     : Duration(hours: 0, minutes: 0);
 
-    int hours = duration.inHours;
-    int minutes = duration.inMinutes % 60;
-    String formattedDuration = hours == 0 && minutes == 0
-        ? '--/--'
-        : '${hours < 10 ? '0$hours' : '$hours'}:${minutes < 10 ? '0$minutes' : '$minutes'}';
+    // int hours = duration.inHours;
+    // int minutes = duration.inMinutes % 60;
+    // String formattedDuration = hours == 0 && minutes == 0
+    //     ? '--/--'
+    //     : '${hours < 10 ? '0$hours' : '$hours'}:${minutes < 10 ? '0$minutes' : '$minutes'}';
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -258,217 +222,252 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                     clipBehavior: Clip.none,
                     alignment: Alignment.topCenter,
                     children: [
-                      Container(
-                        height: height / 3,
-                        width: width,
-                        padding:
-                            EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                        decoration: BoxDecoration(
-                          color: AppColor.mainFGColor,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(30),
-                            topRight: Radius.circular(30),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColor.shadowColor,
-                              blurRadius: 10,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            SizedBox(
-                              height: height * 0.04,
-                            ),
-                            Text(
-                              _authBox.get('employeeName'),
-                              style: TextStyle(
-                                  fontSize: height * 0.02,
-                                  color: AppColor.mainTextColor,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                            Text(
-                              place != null
-                                  ? place!.subLocality!.isNotEmpty
-                                      ? 'Location : ${place!.subLocality}, ${place!.locality}'
-                                      : 'Location : ${place!.locality}'
-                                  : 'Unable to track location',
-                              style: TextStyle(
-                                  fontSize: height * 0.016,
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.w400),
-                            ),
-                            Container(
+                      FutureBuilder<PunchRecordModel>(
+                        future: fetchPunchRecord(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasData) {
+                            final record = snapshot.data!;
+                            return Container(
+                              height: height / 3,
+                              width: width,
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 20, horizontal: 20),
                               decoration: BoxDecoration(
-                                color: AppColor.mainBGColor,
-                                borderRadius: BorderRadius.circular(15),
+                                color: AppColor.mainFGColor,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(30),
+                                  topRight: Radius.circular(30),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColor.shadowColor,
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 7),
-                                child: IntrinsicHeight(
-                                  child: Row(
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  SizedBox(
+                                    height: height * 0.04,
+                                  ),
+                                  Text(
+                                    _authBox.get('employeeName'),
+                                    style: TextStyle(
+                                        fontSize: height * 0.02,
+                                        color: AppColor.mainTextColor,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  Text(
+                                    place != null
+                                        ? place!.subLocality!.isNotEmpty
+                                            ? 'Location : ${place!.subLocality}, ${place!.locality}'
+                                            : 'Location : ${place!.locality}'
+                                        : 'Unable to track location',
+                                    style: TextStyle(
+                                        fontSize: height * 0.016,
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColor.mainBGColor,
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10, horizontal: 7),
+                                      child: IntrinsicHeight(
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  record.formatTime(
+                                                      record.inTime),
+                                                  style: TextStyle(
+                                                      fontSize: height * 0.02,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: AppColor
+                                                          .mainTextColor),
+                                                ),
+                                                Text(
+                                                  'Punch-in',
+                                                  style: TextStyle(
+                                                      fontSize: height * 0.014,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: AppColor
+                                                          .mainTextColor),
+                                                ),
+                                              ],
+                                            ),
+                                            VerticalDivider(
+                                              color: AppColor.mainTextColor,
+                                              thickness: 0.3,
+                                            ),
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  record.formatTime(
+                                                      record.outTime),
+                                                  style: TextStyle(
+                                                    fontSize: height * 0.02,
+                                                    fontWeight: FontWeight.bold,
+                                                    color:
+                                                        AppColor.mainTextColor,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  'Punch-Out',
+                                                  style: TextStyle(
+                                                      fontSize: height * 0.014,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: AppColor
+                                                          .mainTextColor),
+                                                ),
+                                              ],
+                                            ),
+                                            VerticalDivider(
+                                              color: AppColor.mainTextColor,
+                                              thickness: 0.3,
+                                            ),
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  '--/--',
+                                                  style: TextStyle(
+                                                    fontSize: height * 0.02,
+                                                    fontWeight: FontWeight.bold,
+                                                    color:
+                                                        AppColor.mainTextColor,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  'Total Hrs',
+                                                  style: TextStyle(
+                                                      fontSize: height * 0.014,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: AppColor
+                                                          .mainTextColor),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            _authBox.get('Punch-InTime') != null
-                                                ? displayInTime()
-                                                : '--/--',
-                                            style: TextStyle(
-                                                fontSize: height * 0.02,
-                                                fontWeight: FontWeight.bold,
-                                                color: AppColor.mainTextColor),
-                                          ),
-                                          Text(
-                                            'Punch-in',
-                                            style: TextStyle(
-                                                fontSize: height * 0.014,
-                                                fontWeight: FontWeight.w500,
-                                                color: AppColor.mainTextColor),
-                                          ),
-                                        ],
-                                      ),
-                                      VerticalDivider(
-                                        color: AppColor.mainTextColor,
-                                        thickness: 0.3,
-                                      ),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            _authBox.get('Punch-OutTime') !=
+                                      InkWell(
+                                        onTap:
+                                            // ignore: unnecessary_null_comparison
+                                            record.formatTime(record.inTime) ==
                                                     null
-                                                ? displayOutTime()
-                                                : '--/--',
-                                            style: TextStyle(
-                                              fontSize: height * 0.02,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColor.mainTextColor,
+                                                ? _punchIn
+                                                : _updatePunchLocation,
+                                        child: Container(
+                                          width: width / 2.5,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [
+                                                  Colors.lightGreen,
+                                                  Colors.green,
+                                                ]),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 20, vertical: 12),
+                                            child: Center(
+                                              child: Text(
+                                                record.formatTime(
+                                                            // ignore: unnecessary_null_comparison
+                                                            record.inTime) ==
+                                                        null
+                                                    ? 'Punch In'
+                                                    : 'Update Location',
+                                                style: TextStyle(
+                                                    fontSize: height * 0.015,
+                                                    color:
+                                                        AppColor.mainFGColor),
+                                              ),
                                             ),
                                           ),
-                                          Text(
-                                            'Punch-Out',
-                                            style: TextStyle(
-                                                fontSize: height * 0.014,
-                                                fontWeight: FontWeight.w500,
-                                                color: AppColor.mainTextColor),
+                                        ),
+                                      ),
+                                      InkWell(
+                                        onTap: () => manualPunchOut(
+                                          context,
+                                        ),
+                                        child: Container(
+                                          width: width / 2.5,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [
+                                                  Colors.black45,
+                                                  Colors.black,
+                                                ]),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
                                           ),
-                                        ],
-                                      ),
-                                      VerticalDivider(
-                                        color: AppColor.mainTextColor,
-                                        thickness: 0.3,
-                                      ),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            formattedDuration,
-                                            style: TextStyle(
-                                              fontSize: height * 0.02,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColor.mainTextColor,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 20, vertical: 12),
+                                            child: Center(
+                                              child: Text(
+                                                'Punch Out',
+                                                style: TextStyle(
+                                                    fontSize: height * 0.015,
+                                                    color:
+                                                        AppColor.mainFGColor),
+                                              ),
                                             ),
                                           ),
-                                          Text(
-                                            'Total Hrs',
-                                            style: TextStyle(
-                                                fontSize: height * 0.014,
-                                                fontWeight: FontWeight.w500,
-                                                color: AppColor.mainTextColor),
-                                          ),
-                                        ],
+                                        ),
                                       ),
                                     ],
-                                  ),
-                                ),
+                                  )
+                                ],
                               ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                InkWell(
-                                  onTap: _authBox.get('Punch-InTime') == null
-                                      ? _punchIn
-                                      : _updatePunchLocation,
-                                  child: Container(
-                                    width: width / 2.5,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Colors.lightGreen,
-                                            Colors.green,
-                                          ]),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 20, vertical: 12),
-                                      child: Center(
-                                        child: Text(
-                                          _authBox.get('Punch-InTime') == null
-                                              ? 'Punch In'
-                                              : 'Update Location',
-                                          style: TextStyle(
-                                              fontSize: height * 0.015,
-                                              color: AppColor.mainFGColor),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () => _punchOut(),
-                                  child: Container(
-                                    width: width / 2.5,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Colors.black45,
-                                            Colors.black,
-                                          ]),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 20, vertical: 12),
-                                      child: Center(
-                                        child: Text(
-                                          'Punch Out',
-                                          style: TextStyle(
-                                              fontSize: height * 0.015,
-                                              color: AppColor.mainFGColor),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
+                            );
+                          } else {
+                            return newMethod( height,  width, context);
+                          }
+                        },
                       ),
                       Positioned(
                           top: -height * 0.12,
@@ -526,6 +525,207 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
                 ),
               ],
             ),
+    );
+  }
+
+  Container newMethod(double height, double width,
+      BuildContext context) {
+    return Container(
+      height: height / 3,
+      width: width,
+      padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+      decoration: BoxDecoration(
+        color: AppColor.mainFGColor,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColor.shadowColor,
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          SizedBox(
+            height: height * 0.04,
+          ),
+          Text(
+            _authBox.get('employeeName'),
+            style: TextStyle(
+                fontSize: height * 0.02,
+                color: AppColor.mainTextColor,
+                fontWeight: FontWeight.w500),
+          ),
+          Text(
+            place != null
+                ? place!.subLocality!.isNotEmpty
+                    ? 'Location : ${place!.subLocality}, ${place!.locality}'
+                    : 'Location : ${place!.locality}'
+                : 'Unable to track location',
+            style: TextStyle(
+                fontSize: height * 0.016,
+                color: Colors.green,
+                fontWeight: FontWeight.w400),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: AppColor.mainBGColor,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 7),
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          '--/--',
+                          style: TextStyle(
+                              fontSize: height * 0.02,
+                              fontWeight: FontWeight.bold,
+                              color: AppColor.mainTextColor),
+                        ),
+                        Text(
+                          'Punch-in',
+                          style: TextStyle(
+                              fontSize: height * 0.014,
+                              fontWeight: FontWeight.w500,
+                              color: AppColor.mainTextColor),
+                        ),
+                      ],
+                    ),
+                    VerticalDivider(
+                      color: AppColor.mainTextColor,
+                      thickness: 0.3,
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          '--/--',
+                          style: TextStyle(
+                            fontSize: height * 0.02,
+                            fontWeight: FontWeight.bold,
+                            color: AppColor.mainTextColor,
+                          ),
+                        ),
+                        Text(
+                          'Punch-Out',
+                          style: TextStyle(
+                              fontSize: height * 0.014,
+                              fontWeight: FontWeight.w500,
+                              color: AppColor.mainTextColor),
+                        ),
+                      ],
+                    ),
+                    VerticalDivider(
+                      color: AppColor.mainTextColor,
+                      thickness: 0.3,
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          '--/--',
+                          style: TextStyle(
+                            fontSize: height * 0.02,
+                            fontWeight: FontWeight.bold,
+                            color: AppColor.mainTextColor,
+                          ),
+                        ),
+                        Text(
+                          'Total Hrs',
+                          style: TextStyle(
+                              fontSize: height * 0.014,
+                              fontWeight: FontWeight.w500,
+                              color: AppColor.mainTextColor),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
+                onTap: _punchIn,
+                child: Container(
+                  width: width / 2.5,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.lightGreen,
+                          Colors.green,
+                        ]),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    child: Center(
+                      child: Text(
+                 
+                            'Punch In',
+        
+                        style: TextStyle(
+                            fontSize: height * 0.015,
+                            color: AppColor.mainFGColor),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () => manualPunchOut(
+                  context,
+                ),
+                child: Container(
+                  width: width / 2.5,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black45,
+                          Colors.black,
+                        ]),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    child: Center(
+                      child: Text(
+                        'Punch Out',
+                        style: TextStyle(
+                            fontSize: height * 0.015,
+                            color: AppColor.mainFGColor),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
     );
   }
 }

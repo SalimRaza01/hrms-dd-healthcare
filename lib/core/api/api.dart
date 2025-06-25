@@ -885,7 +885,6 @@ Future<void> manualPunchIn(
     if (response.statusCode == 201 || response.statusCode == 200) {
       print(response.data);
       await _authBox.put('Punch-In-id', response.data['data']['_id']);
-      await _authBox.put('Punch-InTime', response.data['data']['InTime']);
  Provider.of<PunchedIN>(context, listen: false).updatePunchInTime(true);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -907,13 +906,12 @@ Future<void> manualPunchIn(
 
 Future<void> manualPunchOut(
   BuildContext context,
-  String id,
 ) async {
   String token = _authBox.get('token');
 
   try {
     final response = await dio.post(
-      '$punchOutAction/$id',
+      '$punchOutAction/${_authBox.get('Punch-In-id')}',
       options: Options(headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token"
@@ -923,7 +921,7 @@ Future<void> manualPunchOut(
       // }
     );
     if (response.statusCode == 201 || response.statusCode == 200) {
-           await _authBox.put('Punch-OutTime', DateTime.now());
+
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -969,3 +967,23 @@ Future<void> updateLocation(
  print(e);
   }
 }
+
+  Future<PunchRecordModel> fetchPunchRecord() async {
+    final String token = _authBox.get('token');
+
+    final response = await dio.get(
+      '$getPunchAttendence/${_authBox.get('employeeId')}',
+      options: Options(headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      }),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print(response.data);
+      final Map<String, dynamic> data = response.data['data'][0];
+      return PunchRecordModel.fromJson(data);
+    } else {
+      throw Exception("Failed to fetch punch data");
+    }
+  }
