@@ -924,13 +924,14 @@ Future<void> manualPunchOut(
     );
     if (response.statusCode == 201 || response.statusCode == 200) {
            await _authBox.put('Punch-OutTime', DateTime.now());
-            Provider.of<PunchedIN>(context, listen: false).updatePunchInTime(true);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Punch-Out Success'),
           backgroundColor: Colors.green,
         ),
       );
+                  Provider.of<PunchedIN>(context, listen: false).updatePunchInTime(true);
     }
   } on DioException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -941,6 +942,7 @@ Future<void> manualPunchOut(
     );
   }
 }
+
 
 Future<void> updateLocation(
     BuildContext context, String id, String location) async {
@@ -964,11 +966,6 @@ Future<void> updateLocation(
       );
     }
   } on DioException catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(e.response!.data['message']),
-        backgroundColor: Colors.red,
-      ),
-    );
+ print(e);
   }
 }

@@ -72,9 +72,11 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
 
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      setState(() {
+  Future.delayed(Duration(seconds: 3),(){
+        setState(() {
         _isLoading = false;
       });
+  });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Location services are disabled.'),
       ));
@@ -165,7 +167,7 @@ class _PunchInOutScreenState extends State<PunchInOutScreen> {
       context,
       punchId,
     );
-    displayOutTime();
+     displayOutTime();
     // } else {
     //   ScaffoldMessenger.of(context).showSnackBar(
     //     SnackBar(

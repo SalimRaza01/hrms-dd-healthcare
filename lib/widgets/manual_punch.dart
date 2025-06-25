@@ -1,8 +1,37 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hrms/core/provider/provider.dart';
+import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/theme/app_colors.dart';
-import 'package:provider/provider.dart';
+
+class PunchRecordModel {
+  final String inTime;
+  final String outTime;
+  final String location;
+
+  PunchRecordModel({
+    required this.inTime,
+    required this.outTime,
+    required this.location,
+  });
+
+  factory PunchRecordModel.fromJson(Map<String, dynamic> json) {
+    return PunchRecordModel(
+      inTime: json['InTime'] ?? '',
+      outTime: json['OutTime'] ?? '',
+      location: json['location'] ?? 'Not Available',
+    );
+  }
+
+  String formatTime(String timeStr) {
+    try {
+      final time = DateTime.parse(timeStr);
+      return "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
+    } catch (_) {
+      return '--/--';
+    }
+  }
+}
 
 class PunchCardWidget extends StatefulWidget {
   const PunchCardWidget({super.key});
@@ -12,20 +41,27 @@ class PunchCardWidget extends StatefulWidget {
 }
 
 class _PunchCardWidgetState extends State<PunchCardWidget> {
+  final Dio dio = Dio();
   final Box _authBox = Hive.box('authBox');
 
+  Future<PunchRecordModel> fetchPunchRecord() async {
+    final String token = _authBox.get('token');
 
-  String displayInTime() {
-    DateTime inTime = DateTime.parse(_authBox.get('Punch-InTime'));
+    final response = await dio.get(
+      '$getPunchAttendence/${_authBox.get('employeeId')}',
+      options: Options(headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      }),
+    );
 
-    return  "${inTime.hour.toString().padLeft(2, '0')}:${inTime.minute.toString().padLeft(2, '0')}";
-  }
-
-  String displayOutTime() {
- 
-
-    return "${_authBox.get('Punch-OutTime').hour.toString().padLeft(2, '0')}:${_authBox.get('Punch-OutTime').minute.toString().padLeft(2, '0')}";
-       
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print(response.data);
+      final Map<String, dynamic> data = response.data['data'][0];
+      return PunchRecordModel.fromJson(data);
+    } else {
+      throw Exception("Failed to fetch punch data");
+    }
   }
 
   @override
@@ -33,88 +69,199 @@ class _PunchCardWidgetState extends State<PunchCardWidget> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
-    return Consumer<PunchedIN>(
-  builder: (context, punchAction, child) {
-    print('updated time ');
-    
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            gradient: LinearGradient(
-              colors: [AppColor.mainThemeColor, AppColor.primaryThemeColor],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColor.shadowColor,
-                blurRadius: 10,
-                offset: Offset(2, 2),
-              )
-            ],
-          ),
-          child: Column(
-            spacing: 20,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // LEFT SIDE
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Punch in',
-                        style: TextStyle(
-                            fontSize: height * 0.015, color: AppColor.mainFGColor),
-                      ),
-                      Text(
-                 _authBox.get('Punch-InTime') != null ?  displayInTime() : '--/--',
-                        style: TextStyle(
-                            fontSize: height * 0.020,
-                            fontWeight: FontWeight.bold,
-                            color: AppColor.mainFGColor),
-                      ),
-                    ],
-                  ),
-        
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Punch out',
-                        style: TextStyle(
-                            fontSize: height * 0.015, color: AppColor.mainFGColor),
-                      ),
-                      Text(
-                  _authBox.get('Punch-OutTime') != null ?  displayOutTime() : '--/--',
-                        style: TextStyle(
-                            fontSize: height * 0.020,
-                            fontWeight: FontWeight.bold,
-                            color: AppColor.mainFGColor),
-                      ),
-                    ],
-                  ),
-                ],
+    return FutureBuilder<PunchRecordModel>(
+      future: fetchPunchRecord(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return EmptyWidget(height: height, width: width);
+        } else if (snapshot.hasData) {
+          final record = snapshot.data!;
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              gradient: LinearGradient(
+                colors: [AppColor.mainThemeColor, AppColor.primaryThemeColor],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              Row(
+              boxShadow: [
+                BoxShadow(
+                  color: AppColor.shadowColor,
+                  blurRadius: 10,
+                  offset: const Offset(2, 2),
+                )
+              ],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Punch In
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Punch in',
+                          style: TextStyle(
+                              fontSize: height * 0.015,
+                              color: AppColor.mainFGColor),
+                        ),
+                        Text(
+                          record.formatTime(record.inTime),
+                          style: TextStyle(
+                            fontSize: height * 0.020,
+                            fontWeight: FontWeight.bold,
+                            color: AppColor.mainFGColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Punch Out
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Punch out',
+                          style: TextStyle(
+                              fontSize: height * 0.015,
+                              color: AppColor.mainFGColor),
+                        ),
+                        Text(
+                          record.formatTime(record.outTime),
+                          style: TextStyle(
+                            fontSize: height * 0.020,
+                            fontWeight: FontWeight.bold,
+                            color: AppColor.mainFGColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: height * 0.02),
+                Row(
+                  children: [
+                    Icon(Icons.location_on,
+                        size: height * 0.015, color: AppColor.mainFGColor),
+                    SizedBox(width: width * 0.02),
+                    Expanded(
+                      child: Text(
+                        record.location,
+                        style: TextStyle(
+                            fontSize: height * 0.015,
+                            color: AppColor.mainFGColor),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        } else {
+          return EmptyWidget(height: height, width: width);
+        }
+      },
+    );
+  }
+}
+
+class EmptyWidget extends StatelessWidget {
+  const EmptyWidget({
+    super.key,
+    required this.height,
+    required this.width,
+  });
+
+  final double height;
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        gradient: LinearGradient(
+          colors: [AppColor.mainThemeColor, AppColor.primaryThemeColor],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColor.shadowColor,
+            blurRadius: 10,
+            offset: const Offset(2, 2),
+          )
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Punch In
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.location_on,
-                      size: height * 0.015, color: AppColor.mainFGColor),
-                  SizedBox(width: width * 0.02),
                   Text(
-                    _authBox.get('punchLocation') ?? 'Not Fetched',
+                    'Punch in',
                     style: TextStyle(
                         fontSize: height * 0.015, color: AppColor.mainFGColor),
                   ),
+                  Text(
+                    '--/--',
+                    style: TextStyle(
+                      fontSize: height * 0.020,
+                      fontWeight: FontWeight.bold,
+                      color: AppColor.mainFGColor,
+                    ),
+                  ),
+                ],
+              ),
+              // Punch Out
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Punch out',
+                    style: TextStyle(
+                        fontSize: height * 0.015, color: AppColor.mainFGColor),
+                  ),
+                  Text(
+                    '--/--',
+                    style: TextStyle(
+                      fontSize: height * 0.020,
+                      fontWeight: FontWeight.bold,
+                      color: AppColor.mainFGColor,
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
-        );
-      }
+          SizedBox(height: height * 0.02),
+          Row(
+            children: [
+              Icon(Icons.location_on,
+                  size: height * 0.015, color: AppColor.mainFGColor),
+              SizedBox(width: width * 0.02),
+              Expanded(
+                child: Text(
+                  'Not Fetched',
+                  style: TextStyle(
+                      fontSize: height * 0.015, color: AppColor.mainFGColor),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
