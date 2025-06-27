@@ -730,42 +730,55 @@ class PunchHistoryModel {
   }
 
   static List<PunchEntry> parsePunchRecords(String punchData, String locationData) {
-    final punches = punchData.split(',').where((e) => e.trim().isNotEmpty).toList();
-    final locations = locationData.split('||').map((e) => e.trim()).toList();
+    final punches = punchData
+        .split(',')
+        .where((e) => e.trim().isNotEmpty)
+        .toList();
 
-    String? inLocation;
-    String? outLocation;
-    List<String> upLocations = [];
+    final inLocations = <String>[];
+    final outLocations = <String>[];
 
-    for (var loc in locations) {
+    for (var loc in locationData.split('||')) {
+      loc = loc.trim();
       if (loc.startsWith('(IN)')) {
-        inLocation = loc.replaceFirst('(IN)', '').trim();
-      } else if (loc.startsWith('(OUT)')) {
-        outLocation = loc.replaceFirst('(OUT)', '').trim();
+        inLocations.add(loc.replaceFirst('(IN)', '').trim());
       } else if (loc.startsWith('(UP)')) {
-        upLocations.add(loc.replaceFirst('(UP)', '').trim());
+        if (inLocations.isNotEmpty) {
+          final last = inLocations.removeLast();
+          inLocations.add('$last → ${loc.replaceFirst('(UP)', '').trim()}');
+        } else {
+          inLocations.add(loc.replaceFirst('(UP)', '').trim());
+        }
+      } else if (loc.startsWith('(OUT)')) {
+        outLocations.add(loc.replaceFirst('(OUT)', '').trim());
       }
     }
 
-    final inLocationFull = [
-      if (inLocation != null && inLocation.isNotEmpty) inLocation,
-      ...upLocations.where((e) => e.isNotEmpty)
-    ].join(' → ');
+    List<PunchEntry> entries = [];
 
-    return List.generate(punches.length, (index) {
-      final parts = punches[index].split(':');
+    int inIndex = 0;
+    int outIndex = 0;
+
+    for (var i = 0; i < punches.length; i++) {
+      final parts = punches[i].split(':');
       if (parts.length >= 3) {
         final time = '${parts[0]}:${parts[1]}';
-        final type = parts[2].toLowerCase().contains("in") ? "IN" : "OUT";
-        final location = type == 'IN'
-            ? (inLocationFull.isNotEmpty ? inLocationFull : 'Unknown')
-            : (outLocation ?? 'Unknown');
+        final isIn = parts[2].toLowerCase().contains('in');
+        final type = isIn ? 'IN' : 'OUT';
+        String location = 'Unknown';
 
-        return PunchEntry(time: time, type: type, location: location);
+        if (isIn && inIndex < inLocations.length) {
+          location = inLocations[inIndex];
+          inIndex++;
+        } else if (!isIn && outIndex < outLocations.length) {
+          location = outLocations[outIndex];
+          outIndex++;
+        }
+
+        entries.add(PunchEntry(time: time, type: type, location: location));
       }
-      return PunchEntry(time: '--:--', type: 'UNKNOWN', location: 'Unknown');
-    });
+    }
+
+    return entries;
   }
 }
-
-

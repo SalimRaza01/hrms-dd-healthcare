@@ -109,11 +109,32 @@ class _PunchCardWidgetState extends State<PunchCardWidget> {
                   Icon(Icons.location_on,
                       size: height * 0.015, color: AppColor.mainFGColor),
                   SizedBox(width: width * 0.02),
-                  Expanded(
-                    child: Text(lastLocation.replaceFirst('(OUT)', '').trim(),
-                        style: TextStyle(
-                            fontSize: height * 0.015,
-                            color: AppColor.mainFGColor)),
+                  Visibility(
+                    visible: lastLocation.contains('OUT'),
+                    child: Expanded(
+                      child: Text(lastLocation.replaceFirst('(OUT)', '').trim(),
+                          style: TextStyle(
+                              fontSize: height * 0.015,
+                              color: AppColor.mainFGColor)),
+                    ),
+                  ),
+                  Visibility(
+                    visible: lastLocation.contains('IN'),
+                    child: Expanded(
+                      child: Text(lastLocation.replaceFirst('(IN)', '').trim(),
+                          style: TextStyle(
+                              fontSize: height * 0.015,
+                              color: AppColor.mainFGColor)),
+                    ),
+                  ),
+                  Visibility(
+                    visible: lastLocation.contains('UP'),
+                    child: Expanded(
+                      child: Text(lastLocation.replaceFirst('(UP)', '').trim(),
+                          style: TextStyle(
+                              fontSize: height * 0.015,
+                              color: AppColor.mainFGColor)),
+                    ),
                   ),
                 ],
               ),
