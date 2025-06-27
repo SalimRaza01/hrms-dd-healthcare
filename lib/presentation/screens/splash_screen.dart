@@ -5,7 +5,7 @@ import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/presentation/authentication/login_screen.dart';
-import 'onboarding_screen.dart';
+import 'package:hrms/presentation/screens/new_onbaording.dart';
 import 'bottom_navigation.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 

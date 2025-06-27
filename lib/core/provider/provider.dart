@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/model/models.dart';
 
 class TaskProvider extends ChangeNotifier {
   bool taskupdated = false;
@@ -41,11 +43,44 @@ class LeaveApplied extends ChangeNotifier {
 }
 
 class PunchedIN extends ChangeNotifier {
-  bool punchin = false;
-  bool get updatedpunchIn => punchin;
+  PunchRecordModel? _record;
+  PunchRecordModel? get record => _record;
 
-  void updatePunchInTime(bool updatedpunchIn) {
-    punchin = updatedpunchIn;
+  Future<void> fetchAndSetPunchRecord() async {
+    try {
+      final data = await fetchPunchRecord();
+      _record = data;
+      notifyListeners();
+    } catch (e) {
+      _record = null;
+      notifyListeners();
+    }
+  }
+}
+
+class PunchHistoryProvider with ChangeNotifier {
+  List<PunchHistoryModel> _records = [];
+  bool _isLoading = false;
+  String? _error;
+
+  List<PunchHistoryModel> get records => _records;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+
+  Future<void> fetchHistory() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final data = await fetchPunchHistory(); 
+      _records = data;
+    } catch (e) {
+      _error = "Failed to fetch history.";
+      _records = [];
+    }
+
+    _isLoading = false;
     notifyListeners();
   }
 }

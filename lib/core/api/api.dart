@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:hrms/core/api/api_config.dart';
 import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/provider/provider.dart';
@@ -49,7 +52,8 @@ Future<List<Attendance>> fetchAttendence(
   }
 }
 
-Future<LeaveBalance> fetchLeaves(String empID) async {
+Future<LeaveBalance> fetchLeaves() async {
+     String empID = _authBox.get('employeeId');
   String token = _authBox.get('token');
   try {
     final response = await dio.get('$getEmployeeData/$empID',
@@ -70,7 +74,8 @@ Future<LeaveBalance> fetchLeaves(String empID) async {
   }
 }
 
-Future<ShiftTimeModel> fetchShiftTime(String empID) async {
+Future<ShiftTimeModel> fetchShiftTime() async {
+    String empID = _authBox.get('employeeId');
   String token = _authBox.get('token');
   try {
     final response = await dio.get('$getEmployeeData/$empID',
@@ -223,6 +228,7 @@ Future<void> applyLeave(
 
 Future<EmployeeProfile> fetchEmployeeDetails(String empID) async {
   String token = _authBox.get('token');
+  
   Dio dio = Dio();
   try {
     final response = await dio.get('$getEmployeeData/$empID',
@@ -676,8 +682,9 @@ Future<void> changeTaskStage(
 }
 
 Future<List<LeaveHistory>> fetchLeaveHistory(
-    String status, String empID) async {
+    String status, ) async {
   String token = _authBox.get('token');
+    String empID = _authBox.get('employeeId');
 
   try {
     final response = await dio.get('$getLeaveHistory/$empID',
@@ -883,9 +890,12 @@ Future<void> manualPunchIn(
           "imageUrl": imageUrl64
         });
     if (response.statusCode == 201 || response.statusCode == 200) {
-      print(response.data);
+
+      _authBox.put('punchedIn', 'yes');
+   
       await _authBox.put('Punch-In-id', response.data['data']['_id']);
- Provider.of<PunchedIN>(context, listen: false).updatePunchInTime(true);
+         final punchProvider = Provider.of<PunchedIN>(context, listen: false);
+      await punchProvider.fetchAndSetPunchRecord(); 
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -903,38 +913,37 @@ Future<void> manualPunchIn(
     );
   }
 }
-
-Future<void> manualPunchOut(
-  BuildContext context,
-) async {
+Future<void> manualPunchOut(BuildContext context, String punchInId, String location) async {
   String token = _authBox.get('token');
 
   try {
     final response = await dio.post(
-      '$punchOutAction/${_authBox.get('Punch-In-id')}',
-      options: Options(headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
-      }),
-      // data: {
-      //   "location": location,
-      // }
-    );
-    if (response.statusCode == 201 || response.statusCode == 200) {
+      '$punchOutAction/$punchInId',
+       options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }),
+        data: {
+          "location": location,
+        });
 
-
+    if (response.statusCode == 200 || response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Punch-Out Success'),
           backgroundColor: Colors.green,
         ),
       );
-                  Provider.of<PunchedIN>(context, listen: false).updatePunchInTime(true);
+   
+      final punchProvider = Provider.of<PunchedIN>(context, listen: false);
+      await punchProvider.fetchAndSetPunchRecord(); 
+       _authBox.put('punchedIn', null);
     }
   } on DioException catch (e) {
+    final errorMessage = e.response?.data['message'] ?? 'Something went wrong';
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(e.response!.data['message']),
+        content: Text(errorMessage),
         backgroundColor: Colors.red,
       ),
     );
@@ -955,6 +964,8 @@ Future<void> updateLocation(
           backgroundColor: Colors.green,
         ),
       );
+          final punchProvider = Provider.of<PunchedIN>(context, listen: false);
+      await punchProvider.fetchAndSetPunchRecord(); 
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -964,26 +975,56 @@ Future<void> updateLocation(
       );
     }
   } on DioException catch (e) {
- print(e);
+    print(e);
   }
 }
 
-  Future<PunchRecordModel> fetchPunchRecord() async {
-    final String token = _authBox.get('token');
+Future<PunchRecordModel> fetchPunchRecord() async {
+  final String token = _authBox.get('token');
 
-    final response = await dio.get(
-      '$getPunchAttendence/${_authBox.get('employeeId')}',
-      options: Options(headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      }),
-    );
+  final response = await dio.get(
+    '$getPunchAttendence/${_authBox.get('employeeId')}',
+    options: Options(headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $token",
+    }),
+  );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      print(response.data);
-      final Map<String, dynamic> data = response.data['data'][0];
-      return PunchRecordModel.fromJson(data);
-    } else {
-      throw Exception("Failed to fetch punch data");
-    }
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    print(response.data);
+    final Map<String, dynamic> data = response.data['data'][0];
+    _authBox.put(
+        'selfie', decodeBase64Image(response.data['data'][0]['imageUrl']));
+    return PunchRecordModel.fromJson(data);
+  } else {
+    throw Exception("Failed to fetch punch data");
   }
+}
+
+Future<List<PunchHistoryModel>> fetchPunchHistory() async {
+  final String token = _authBox.get('token');
+
+  final response = await dio.get(
+    '$getPunchAttendence/${_authBox.get('employeeId')}',
+    options: Options(headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $token",
+    }),
+  );
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    final List dataList = response.data['data'];
+    print(response.data);
+
+    return dataList.map((json) => PunchHistoryModel.fromJson(json)).toList();
+  } else {
+    throw Exception("Failed to fetch punch history");
+  }
+}
+
+Uint8List decodeBase64Image(String base64String) {
+  final RegExp regex = RegExp(r'data:image/[^;]+;base64,');
+  base64String = base64String.replaceAll(regex, '');
+
+  return base64Decode(base64String);
+}

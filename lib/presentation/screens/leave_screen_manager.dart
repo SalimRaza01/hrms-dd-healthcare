@@ -48,7 +48,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
 
   @override
   void initState() {
-    _myLeaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+    _myLeaveHistory = fetchLeaveHistory(_selectedText);
     _teamCompOffRequest = fetchCompOffRequest(_selectedCompoffText);
     _teamLeaveRequest = fetchLeaveRequest(_selectedText);
     _myCompOffRequest = fetchOwnCompOffRequest(_selectedCompoffText);
@@ -67,7 +67,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
         case 0:
           updateUser = switchMode ? 'Team Leave' : 'Leaves';
           _teamLeaveRequest = fetchLeaveRequest(_selectedText);
-          _myLeaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+          _myLeaveHistory = fetchLeaveHistory(_selectedText);
           break;
         case 1:
           updateUser = switchMode ? 'Team Comp-off' : 'Comp-off';
@@ -174,7 +174,7 @@ void dispose() {
     return SafeArea(
       child: Consumer<LeaveApplied>(builder: (context, value, child) {
         if (value.leaveappied == true) {
-          _myLeaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+          _myLeaveHistory = fetchLeaveHistory(_selectedText);
           _myCompOffRequest = fetchOwnCompOffRequest(_selectedCompoffText);
           Future.delayed(Duration(milliseconds: 1500), () {
             Provider.of<LeaveApplied>(context, listen: false)
@@ -265,7 +265,7 @@ void dispose() {
                                     child: Padding(
                                       padding: const EdgeInsets.all(10),
                                       child: FutureBuilder<LeaveBalance>(
-                                          future: fetchLeaves(widget.empID),
+                                          future: fetchLeaves(),
                                           builder: (context, snapshot) {
                                             if (snapshot.connectionState ==
                                                 ConnectionState.waiting) {
@@ -688,7 +688,7 @@ void dispose() {
                                                                               onPressed: () async {
                                                                                 await ownLeaveActionDelete(context, leave.id);
                                                                                 setState(() {
-                                                                                  _myLeaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+                                                                                  _myLeaveHistory = fetchLeaveHistory(_selectedText);
                                                                                 });
                                                                                 Navigator.pop(context);
                                                                               },
@@ -2221,7 +2221,7 @@ void dispose() {
                       switchMode = !switchMode;
 
                       _myLeaveHistory =
-                          fetchLeaveHistory(_selectedText, widget.empID);
+                          fetchLeaveHistory(_selectedText);
                       _myCompOffRequest =
                           fetchOwnCompOffRequest(_selectedCompoffText);
                     });
@@ -2309,7 +2309,7 @@ void dispose() {
       onTap: () {
         setState(() {
           _selectedText = text;
-          _myLeaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+          _myLeaveHistory = fetchLeaveHistory(_selectedText);
         });
       },
       child: Container(

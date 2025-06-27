@@ -44,7 +44,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
   @override
   void initState() {
     _compOffRequest = fetchOwnCompOffRequest(_selectedText);
-    _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+    _leaveHistory = fetchLeaveHistory(_selectedText);
     _tabController = TabController(vsync: this, length: 2);
     _tabController.addListener(_handleTabSelection);
     super.initState();
@@ -59,7 +59,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
       switch (_tabController.index) {
         case 0:
           updateUser = 'Leave Request';
-          _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+          _leaveHistory = fetchLeaveHistory(_selectedText);
           break;
         case 1:
           updateUser = 'Comp-Off Request';
@@ -161,7 +161,7 @@ void dispose() {
       child: Consumer<LeaveApplied>(builder: (context, value, child) {
         if (value.leaveappied == true) {
           _compOffRequest = fetchOwnCompOffRequest(_selectedText);
-          _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+          _leaveHistory = fetchLeaveHistory(_selectedText);
           Future.delayed(Duration(milliseconds: 1500), () {
             Provider.of<LeaveApplied>(context, listen: false)
                 .leaveappiedStatus(false);
@@ -271,7 +271,7 @@ void dispose() {
             child: SizedBox(
               width: width,
               child: FutureBuilder<LeaveBalance>(
-                  future: fetchLeaves(widget.empID),
+                  future: fetchLeaves(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(
@@ -616,7 +616,7 @@ void dispose() {
                                                         _leaveHistory =
                                                             fetchLeaveHistory(
                                                                 _selectedText,
-                                                                widget.empID);
+                                                              );
                                                       });
                                                       Navigator.pop(context);
                                                     },
@@ -1047,7 +1047,7 @@ void dispose() {
       onTap: () {
         setState(() {
           _selectedText = text;
-          _leaveHistory = fetchLeaveHistory(_selectedText, widget.empID);
+          _leaveHistory = fetchLeaveHistory(_selectedText);
         });
       },
       child: Container(

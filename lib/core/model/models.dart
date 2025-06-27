@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class ShiftTimeModel {
   final String startTime;
   final String endTime;
@@ -157,7 +159,7 @@ class LeaveHistory {
       status: json['status'] ?? '',
       approvedBy: json['approvedBy'] ?? '',
       dateTime: json['dateTime'] ?? '',
-         remarks: json['remarks'] ?? '',
+      remarks: json['remarks'] ?? '',
       location: json['location'] ?? '',
     );
   }
@@ -173,7 +175,7 @@ class LeaveHistory {
       'status': status,
       'approvedBy': approvedBy,
       'dateTime': dateTime,
-       'remarks': remarks,
+      'remarks': remarks,
       'location': location
     };
   }
@@ -590,23 +592,34 @@ class CompOffRequest {
   }
 }
 
-
 class PunchRecordModel {
   final String inTime;
   final String outTime;
   final String location;
+  final String punchRecords;
+  final String imageUrl;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   PunchRecordModel({
     required this.inTime,
     required this.outTime,
     required this.location,
+    required this.punchRecords,
+    required this.imageUrl,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   factory PunchRecordModel.fromJson(Map<String, dynamic> json) {
     return PunchRecordModel(
       inTime: json['InTime'] ?? '',
       outTime: json['OutTime'] ?? '',
-      location: json['location'] ?? 'Not Available',
+      location: json['location'] ?? '',
+      punchRecords: json['PunchRecords'] ?? '',
+      imageUrl: json['imageUrl'] ?? '',
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
     );
   }
 
@@ -618,4 +631,141 @@ class PunchRecordModel {
       return '--/--';
     }
   }
+
+  String getLastLocation() {
+    final parts = location.split('||').map((e) => e.trim()).toList();
+    return parts.isNotEmpty ? parts.last : 'Location not available';
+  }
+
+  Map<String, String> getLastPunchTimes() {
+    final records = punchRecords
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.contains(':'))
+        .toList();
+
+    String? lastIn;
+    String? lastOut;
+
+    for (var i = records.length - 1; i >= 0; i--) {
+      final item = records[i];
+      if (lastIn == null && item.contains('(IN)')) {
+        lastIn = _extractTime(item); // e.g. 18:30
+      } else if (lastOut == null && item.contains('(OUT)')) {
+        lastOut = _extractTime(item);
+      }
+      if (lastIn != null && lastOut != null) break;
+    }
+
+    try {
+      if (lastIn != null && lastOut != null) {
+        final inTime = DateFormat("HH:mm").parse(lastIn);
+        final outTime = DateFormat("HH:mm").parse(lastOut);
+        if (outTime.isBefore(inTime)) {
+          lastOut = null;
+        }
+      }
+    } catch (_) {}
+
+    return {
+      'lastIn': lastIn ?? '--/--',
+      'lastOut': lastOut ?? '--/--',
+    };
+  }
+
+  String _extractTime(String entry) {
+    // e.g. "18:30:in(IN)" → "18:30"
+    final match = RegExp(r'^(\d{2}:\d{2})').firstMatch(entry);
+    return match?.group(1) ?? '--/--';
+  }
 }
+
+
+class PunchEntry {
+  final String time;
+  final String type;
+  final String location;
+
+  PunchEntry({
+    required this.time,
+    required this.type,
+    required this.location,
+  });
+}
+
+class PunchHistoryModel {
+  final DateTime date;
+  final String inTimeFormatted;
+  final String outTimeFormatted;
+  final String location;
+  final List<PunchEntry> punchRecords;
+
+  PunchHistoryModel({
+    required this.date,
+    required this.inTimeFormatted,
+    required this.outTimeFormatted,
+    required this.location,
+    required this.punchRecords,
+  });
+
+  factory PunchHistoryModel.fromJson(Map<String, dynamic> json) {
+    final locationStr = json['location'] ?? '';
+    return PunchHistoryModel(
+      date: DateTime.parse(json['AttendanceDate']),
+      inTimeFormatted: formatTime(json['InTime']),
+      outTimeFormatted: formatTime(json['OutTime']),
+      location: locationStr,
+      punchRecords: parsePunchRecords(json['PunchRecords'] ?? '', locationStr),
+    );
+  }
+
+  static String formatTime(String? time) {
+    if (time == null || time.isEmpty) return '--/--';
+    try {
+      final t = DateTime.parse(time);
+      return '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return '--/--';
+    }
+  }
+
+  static List<PunchEntry> parsePunchRecords(String punchData, String locationData) {
+    final punches = punchData.split(',').where((e) => e.trim().isNotEmpty).toList();
+    final locations = locationData.split('||').map((e) => e.trim()).toList();
+
+    String? inLocation;
+    String? outLocation;
+    List<String> upLocations = [];
+
+    for (var loc in locations) {
+      if (loc.startsWith('(IN)')) {
+        inLocation = loc.replaceFirst('(IN)', '').trim();
+      } else if (loc.startsWith('(OUT)')) {
+        outLocation = loc.replaceFirst('(OUT)', '').trim();
+      } else if (loc.startsWith('(UP)')) {
+        upLocations.add(loc.replaceFirst('(UP)', '').trim());
+      }
+    }
+
+    final inLocationFull = [
+      if (inLocation != null && inLocation.isNotEmpty) inLocation,
+      ...upLocations.where((e) => e.isNotEmpty)
+    ].join(' → ');
+
+    return List.generate(punches.length, (index) {
+      final parts = punches[index].split(':');
+      if (parts.length >= 3) {
+        final time = '${parts[0]}:${parts[1]}';
+        final type = parts[2].toLowerCase().contains("in") ? "IN" : "OUT";
+        final location = type == 'IN'
+            ? (inLocationFull.isNotEmpty ? inLocationFull : 'Unknown')
+            : (outLocation ?? 'Unknown');
+
+        return PunchEntry(time: time, type: type, location: location);
+      }
+      return PunchEntry(time: '--:--', type: 'UNKNOWN', location: 'Unknown');
+    });
+  }
+}
+
+

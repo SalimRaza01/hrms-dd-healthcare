@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/core/theme/app_colors.dart';
-import 'package:hrms/presentation/screens/clockin_screen.dart';
+import 'package:hrms/presentation/screens/attendance_screen.dart';
 import 'package:hrms/presentation/screens/dashboard_screen.dart';
 import 'package:hrms/presentation/screens/leave_screen_employee.dart';
 import 'package:hrms/presentation/screens/leave_screen_manager.dart';
@@ -102,8 +102,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
                     ];
 
               final labels = role == 'Manager' || role == 'Super-Admin'
-                  ? ['Dashboard', 'Leave', 'Attendence', 'Team', 'Profile']
-                  : ['Dashboard', 'Leave', 'Attendence', 'Profile'];
+                  ? ['Dashboard', 'Leave', 'Attendance', 'Team', 'Profile']
+                  : ['Dashboard', 'Leave', 'Attendance', 'Profile'];
 
               return GestureDetector(
                 onTap: () {

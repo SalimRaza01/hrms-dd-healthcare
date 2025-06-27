@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hrms/presentation/screens/new_onbaording.dart';
 import 'package:provider/provider.dart';
 import 'package:wiredash/wiredash.dart';
 import 'core/provider/provider.dart';
@@ -12,10 +13,9 @@ import 'presentation/authentication/login_screen.dart';
 import 'presentation/authentication/create_new_pass.dart';
 import 'presentation/odoo/create_task.dart';
 import 'presentation/odoo/task_details.dart';
-import 'presentation/screens/onboarding_screen.dart';
 import 'presentation/screens/apply_leave.dart';
 import 'presentation/screens/bottom_navigation.dart';
-import 'presentation/screens/clockin_screen.dart';
+import 'presentation/screens/attendance_screen.dart';
 import 'presentation/screens/dashboard_screen.dart';
 import 'presentation/screens/holiday_list.dart';
 import 'presentation/screens/leave_screen_manager.dart';
@@ -35,6 +35,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProjectProvider()),
         ChangeNotifierProvider(create: (_) => LeaveApplied()),
         ChangeNotifierProvider(create: (_) => PunchedIN()),
+                ChangeNotifierProvider(create: (_) => PunchHistoryProvider()),
 
       ],
       child: MyApp(),

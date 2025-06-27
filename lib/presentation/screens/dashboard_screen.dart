@@ -2,18 +2,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_stack/flutter_image_stack.dart';
-import 'package:hrms/core/api/api.dart';
-import 'package:hrms/core/model/models.dart';
 import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hrms/presentation/odoo/task_details.dart';
-import 'package:hrms/presentation/screens/punch_in_out_screen.dart';
-import 'package:hrms/widgets/manual_punch.dart';
+import 'package:hrms/presentation/screens/manual_punch_history.dart';
+import 'package:hrms/presentation/screens/manual_punchin_screen.dart';
+import 'package:hrms/widgets/annoucement_widget.dart';
+import 'package:hrms/widgets/holiday_widget.dart';
+import 'package:hrms/widgets/leave_balance_widget.dart';
+import 'package:hrms/widgets/manual_punch_card.dart';
+import 'package:hrms/widgets/no_task_widget.dart';
+import 'package:hrms/widgets/shift_time_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'holiday_list.dart';
 import 'package:calendar_timeline/calendar_timeline.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -24,7 +27,6 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  late Future<List<HolidayModel>> holidayList;
   final Box _authBox = Hive.box('authBox');
   List<Map<String, dynamic>> tasks = [];
   DateTime today = DateTime.now();
@@ -41,12 +43,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     // _fetchTasks();
-    
+
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    holidayList = fetchHolidayList('HomeScreen');
   }
 
   String _formatDate(String dateString) {
@@ -175,103 +176,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 padding: const EdgeInsets.all(15),
                 child: Column(
                   children: [
-                    FutureBuilder<ShiftTimeModel>(
-                        future: fetchShiftTime(widget.empID),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(
-                              child: LoadingAnimationWidget.threeArchedCircle(
-                                color: AppColor.mainTextColor2,
-                                size: height * 0.03,
-                              ),
-                            );
-                          } else if (snapshot.hasError) {
-                            return Card(
-                              color: AppColor.mainFGColor,
-                              elevation: 4,
-                              margin: EdgeInsets.all(0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              shadowColor: AppColor.shadowColor,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                    child: Text(
-                                  'No Data Found',
-                                  style:
-                                      TextStyle(color: AppColor.mainTextColor2),
-                                )),
-                              ),
-                            );
-                          } else if (snapshot.hasData) {
-                            final shift = snapshot.data!;
-
-                            return Card(
-                                color: AppColor.mainFGColor,
-                                elevation: 4,
-                                margin: EdgeInsets.all(0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                shadowColor: AppColor.shadowColor,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Shift Time',
-                                        style: TextStyle(
-                                            fontSize: height * 0.015,
-                                            color: AppColor.mainTextColor,
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            '${shift.startTime} AM ',
-                                            style: TextStyle(
-                                                fontSize: height * 0.015,
-                                                color: AppColor.mainTextColor),
-                                          ),
-                                          Text(
-                                            '- ',
-                                            style: TextStyle(
-                                                fontSize: height * 0.015,
-                                                color: AppColor.mainTextColor),
-                                          ),
-                                          Text(
-                                            '${shift.endTime} PM',
-                                            style: TextStyle(
-                                                fontSize: height * 0.015,
-                                                color: AppColor.mainTextColor),
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ));
-                          } else {
-                            return Text('No data Found');
-                          }
-                        }),
+                    ShiftTImeWidget(),
                     SizedBox(
                       height: height * 0.015,
                     ),
                     InkWell(
-                        onTap: 
-                          () => showCupertinoModalBottomSheet(
-                                expand: true,
-                                context: context,
-                                barrierColor:
-                                    const Color.fromARGB(130, 0, 0, 0),
-                                backgroundColor: Colors.transparent,
-                                builder: (context) => PunchInOutScreen(),
-                              ),
-                        
+                        onLongPress: () => showCupertinoModalBottomSheet(
+                              expand: true,
+                              context: context,
+                              barrierColor: const Color.fromARGB(130, 0, 0, 0),
+                              backgroundColor: Colors.transparent,
+                              builder: (context) => PunchHistoryScreen(),
+                            ),
+                        onTap: () => showCupertinoModalBottomSheet(
+                              expand: true,
+                              context: context,
+                              barrierColor: const Color.fromARGB(130, 0, 0, 0),
+                              backgroundColor: Colors.transparent,
+                              builder: (context) => ManualPunchInScreen(),
+                            ),
                         child: PunchCardWidget()),
 
                     SizedBox(
@@ -368,246 +291,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       height: height * 0.015,
                     ),
 
-                    SizedBox(
-                      width: width,
-                      child: Card(
-                        color: AppColor.mainFGColor,
-                        elevation: 4,
-                        margin: EdgeInsets.all(0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        shadowColor: AppColor.shadowColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Leave Balance',
-                                style: TextStyle(
-                                    fontSize: height * 0.015,
-                                    color: AppColor.mainTextColor,
-                                    fontWeight: FontWeight.w400),
-                              ),
-                              SizedBox(
-                                height: height * 0.01,
-                              ),
-                              FutureBuilder<LeaveBalance>(
-                                  future: fetchLeaves(widget.empID),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return Center(
-                                        child: LoadingAnimationWidget
-                                            .threeArchedCircle(
-                                          color: AppColor.mainTextColor2,
-                                          size: height * 0.03,
-                                        ),
-                                      );
-                                    } else if (snapshot.hasError) {
-                                      return Center(
-                                          child: Text('No Data Found'));
-                                    } else if (snapshot.hasData) {
-                                      final leave = snapshot.data!;
-
-                                      return Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          leaveWidget(height, width, 'Casual',
-                                              leave.casualLeave),
-                                          leaveWidget(height, width, 'Medical',
-                                              leave.medicalLeave),
-                                          leaveWidget(height, width, 'Earned',
-                                              leave.earnedLeave),
-                                        ],
-                                      );
-                                    } else {
-                                      return Text('No data Found');
-                                    }
-                                  }),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                    LeaveBalanceWidget(),
                     SizedBox(
                       height: height * 0.015,
                     ),
-                    Card(
-                      color: AppColor.mainFGColor,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadowColor: AppColor.shadowColor,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Upcoming Holiday',
-                              style: TextStyle(
-                                  fontSize: height * 0.015,
-                                  color: AppColor.mainTextColor,
-                                  fontWeight: FontWeight.w400),
-                            ),
-                            SizedBox(
-                              height: height * 0.01,
-                            ),
-                            FutureBuilder<List<HolidayModel>>(
-                              future: holidayList,
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Center(
-                                      child: LoadingAnimationWidget
-                                          .threeArchedCircle(
-                                    color: AppColor.mainTextColor2,
-                                    size: height * 0.03,
-                                  ));
-                                } else if (snapshot.hasError) {
-                                  return Center(
-                                      child: Text('No Holiday List Found'));
-                                } else if (!snapshot.hasData ||
-                                    snapshot.data!.isEmpty) {
-                                  return Center(
-                                      child: Text('No Holiday available.'));
-                                } else {
-                                  List<HolidayModel> items = snapshot.data!;
-
-                                  HolidayModel item = items[0];
-
-                                  final newDate =
-                                      DateTime.parse(item.holidayDate);
-
-                                  return InkWell(
-                                    onTap: () => showCupertinoModalBottomSheet(
-                                      expand: true,
-                                      context: context,
-                                      barrierColor: AppColor.barrierColor,
-                                      backgroundColor: Colors.transparent,
-                                      builder: (context) => HolidayList(),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                  color:
-                                                      AppColor.mainThemeColor,
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                    Radius.circular(10),
-                                                  )),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 15,
-                                                  vertical: 4,
-                                                ),
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceAround,
-                                                  children: [
-                                                    Text(
-                                                      DateFormat('dd')
-                                                          .format(newDate)
-                                                          .toString(),
-                                                      style: TextStyle(
-                                                        fontSize: height * 0.02,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: AppColor
-                                                            .mainFGColor,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      DateFormat('EEE')
-                                                          .format(newDate)
-                                                          .toString(),
-                                                      style: TextStyle(
-                                                          fontSize:
-                                                              height * 0.014,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: AppColor
-                                                              .mainFGColor),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 4,
-                                                      horizontal: 20),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  SizedBox(
-                                                    width: width / 2,
-                                                    child: Text(
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      item.holidayName,
-                                                      style: TextStyle(
-                                                          fontSize:
-                                                              height * 0.015,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: AppColor
-                                                              .mainTextColor),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    height: height * 0.005,
-                                                  ),
-                                                  Text(
-                                                    DateFormat('MMMM')
-                                                        .format(newDate)
-                                                        .toString(),
-                                                    style: TextStyle(
-                                                        fontSize:
-                                                            height * 0.014,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        color: AppColor
-                                                            .mainTextColor),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Icon(
-                                          Icons.arrow_forward_ios,
-                                          color: AppColor.mainTextColor,
-                                        )
-                                      ],
-                                    ),
-                                  );
-                                }
-                              },
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
+                    HolidayWidget(),
                     SizedBox(
                       height: height * 0.015,
                     ),
@@ -618,7 +306,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             size: height * 0.03,
                           ))
                         : tasks.isEmpty
-                            ? NoTaskWidget(height: height)
+                            ? NoTaskWidget()
                             : Container(
                                 width: width,
                                 height: height * 0.225,
@@ -950,47 +638,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   },
                                 ),
                               ),
-                    Card(
-                      color: AppColor.mainFGColor,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadowColor: AppColor.shadowColor,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Announcement',
-                              style: TextStyle(
-                                  fontSize: height * 0.015,
-                                  color: AppColor.mainTextColor,
-                                  fontWeight: FontWeight.w400),
-                            ),
-                            SizedBox(
-                              height: height * 0.005,
-                            ),
-                            Image.asset(
-                                fit: BoxFit.fitWidth,
-                                width: width,
-                                'assets/image/annoucementImage.png'),
-                            SizedBox(
-                              height: height * 0.005,
-                            ),
-                            Text(
-                              'No announcements have been published yet. Keep an eye out for future updates.',
-                              style: TextStyle(
-                                fontSize: height * 0.012,
-                                color: AppColor.mainTextColor2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    AnnoucememtWidget(),
                   ],
                 ),
               )
@@ -1001,124 +649,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  SizedBox leaveWidget(
-      double height, double width, String leave, String leaveCount) {
-    return SizedBox(
-      width: width * 0.27,
-      child: Container(
-        decoration: BoxDecoration(
-            border: Border.all(color: AppColor.borderColor),
-            color: AppColor.mainBGColor,
-            borderRadius: BorderRadius.circular(10)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-          child: Column(
-            children: [
-              Text(
-                leave,
-                style: TextStyle(color: AppColor.mainTextColor2),
-              ),
-              SizedBox(
-                height: 5,
-              ),
-              Text(
-                leaveCount,
-                style: TextStyle(
-                    color: AppColor.mainTextColor2, fontSize: height * 0.022),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
-class NoTaskWidget extends StatelessWidget {
-  const NoTaskWidget({
-    super.key,
-    required this.height,
-  });
 
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        color: AppColor.mainFGColor,
-        elevation: 4,
-        margin: EdgeInsets.all(0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        shadowColor: AppColor.shadowColor,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Today Task',
-                style: TextStyle(
-                    fontSize: height * 0.015,
-                    color: AppColor.mainTextColor,
-                    fontWeight: FontWeight.w400),
-              ),
-              SizedBox(
-                height: height * 0.005,
-              ),
-              Text(
-                'The tasks assigned to you for today',
-                style: TextStyle(
-                  fontSize: height * 0.012,
-                  color: AppColor.mainTextColor2,
-                ),
-              ),
-              SizedBox(
-                height: height * 0.01,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Center(
-                  child: ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: Image.asset(
-                        'assets/image/Frame.png',
-                        height: height * 0.08,
-                      )),
-                ),
-              ),
-              SizedBox(
-                height: height * 0.01,
-              ),
-              Center(
-                child: Text(
-                  'No Tasks Assigned',
-                  style: TextStyle(
-                      fontSize: height * 0.015,
-                      color: AppColor.mainTextColor,
-                      fontWeight: FontWeight.w500),
-                ),
-              ),
-              SizedBox(
-                height: height * 0.01,
-              ),
-              Text(
-                'It looks like you don’t have any tasks assigned to you right now. Don’t worry, this space will be updated as new tasks become available.',
-                style: TextStyle(
-                  fontSize: height * 0.012,
-                  color: AppColor.mainTextColor2,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class TaskWidgets extends StatelessWidget {
   TaskWidgets(
