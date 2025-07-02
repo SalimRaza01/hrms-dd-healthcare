@@ -2,20 +2,19 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:hrms/core/api/api_config.dart';
-import 'package:hrms/core/theme/app_colors.dart';
-import 'package:hrms/presentation/animations/profile_shimmer.dart';
+import '../../core/api/api_config.dart';
+import '../../core/theme/app_colors.dart';
+import '../animations/profile_shimmer.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:hrms/core/api/api.dart';
-import 'package:hrms/core/model/models.dart';
+import '../../core/api/api.dart';
+import '../../core/model/models.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hrms/presentation/screens/document_list.dart';
+import 'document_list.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:wiredash/wiredash.dart';
 import 'splash_screen.dart';
 
@@ -66,44 +65,90 @@ class _ProfileScreenState extends State<ProfileScreen> {
     box.put('role', null);
   }
 
+  // Future<void> _filepicker(ImageSource source) async {
+  //   final plugin = DeviceInfoPlugin();
+  //   final android = await plugin.androidInfo;
+  //   final permissionStatus = android.version.sdkInt < 33
+  //       ? await Permission.manageExternalStorage.request()
+  //       : PermissionStatus.granted;
+
+  //   if (permissionStatus.isGranted) {
+  //     isLoading = true;
+  //     final picker = ImagePicker();
+  //     final pickedFile = await picker.pickImage(source: source);
+
+  //     if (pickedFile != null) {
+  //       setState(() {
+  //         _image = File(pickedFile.path);
+  //         filepath = pickedFile.path;
+  //       });
+
+  //       final fileSize = await _image!.length();
+
+  //       uploadAvatar([
+  //         PlatformFile(
+  //           path: filepath,
+  //           name: pickedFile.name,
+  //           size: fileSize,
+  //         ),
+  //       ]);
+  //     } else {
+  //       setState(() {
+  //         isLoading = false;
+  //       });
+  //     }
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Permission not granted for storage')),
+  //     );
+  //   }
+  // }
   Future<void> _filepicker(ImageSource source) async {
+  bool hasPermission = false;
+
+  if (Platform.isAndroid) {
     final plugin = DeviceInfoPlugin();
     final android = await plugin.androidInfo;
     final permissionStatus = android.version.sdkInt < 33
         ? await Permission.manageExternalStorage.request()
-        : PermissionStatus.granted;
+      : PermissionStatus.granted;
 
-    if (permissionStatus.isGranted) {
-      isLoading = true;
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: source);
-
-      if (pickedFile != null) {
-        setState(() {
-          _image = File(pickedFile.path);
-          filepath = pickedFile.path;
-        });
-
-        final fileSize = await _image!.length();
-
-        uploadAvatar([
-          PlatformFile(
-            path: filepath,
-            name: pickedFile.name,
-            size: fileSize,
-          ),
-        ]);
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Permission not granted for storage')),
-      );
-    }
+    hasPermission = permissionStatus.isGranted;
+  } else if (Platform.isIOS) {
+    hasPermission = true; // image_picker handles the permission for PhotoLibrary automatically
   }
+
+  if (hasPermission) {
+    setState(() => isLoading = true);
+
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+        filepath = pickedFile.path;
+      });
+
+      final fileSize = await _image!.length();
+
+      await uploadAvatar([
+        PlatformFile(
+          path: filepath,
+          name: pickedFile.name,
+          size: fileSize,
+        ),
+      ]);
+    } else {
+      setState(() => isLoading = false);
+    }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Permission not granted for storage access.')),
+    );
+  }
+}
+
 
   String? get uploadURL => '$profileImageUpload/${widget.empID}';
   Future<void> uploadAvatar(List<PlatformFile> files) async {
@@ -224,7 +269,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: DefaultTabController(
         length: 3,
         child: Scaffold(
-          backgroundColor: AppColor.mainFGColor,
+          backgroundColor: Colors.transparent,
           body: FutureBuilder<EmployeeProfile>(
               future: employeeProfile,
               builder: (context, snapshot) {
@@ -236,528 +281,435 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return Center(child: Text('No data found'));
                 } else {
                   final employee = snapshot.data!;
-                  return Stack(
-                    children: [
-                      SingleChildScrollView(
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          AppColor.newgredient1,
+                          const Color.fromARGB(52, 124, 157, 174),
+                        ],
+                      ),
+                    ),
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
                         child: Column(
+                          spacing: 15.0,
                           children: [
-                            // Cover Image
-                        
-                            Image.asset(
-                              'assets/image/cover3.png',
-                              height: height * 0.21,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
+                            Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: Text(
+                                ' My Profile',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: height * 0.018,
+                                    color: Colors.black),
+                              ),
                             ),
-                        
-                            Column(
+                            Stack(
+                              alignment: AlignmentDirectional.bottomCenter,
                               children: [
-                                SizedBox(height: height * 0.08),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      employee.employeeName,
-                                      style: TextStyle(
-                                        fontSize: height * 0.021,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColor.mainTextColor2,
-                                      ),
-                                      textAlign: TextAlign.center,
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(28),
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: height * 0.28,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(28),
+                                        color: Color(0xFFC9D9D5)),
+                                    child: isLoading
+                                        ? Center(
+                                            child: LoadingAnimationWidget
+                                                .threeArchedCircle(
+                                              color: AppColor.mainBGColor,
+                                              size: height * 0.05,
+                                            ),
+                                          )
+                                        : employee.employeePhoto.contains("NA")
+                                            ? Image.asset(
+                                                employee.gender == 'Male'
+                                                    ? 'assets/image/maleAvatar2.png'
+                                                    : 'assets/image/femaleAvatar2.png',
+                                              )
+                                            : Image.network(
+                                                fit: BoxFit.fitWidth,
+                                                employee.employeePhoto),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 15),
+                                  child: Center(
+                                    child: Column(
+                       
+                                      children: [
+                                        Text(
+                                          employee.employeeName,
+                                          style: TextStyle(
+                                            fontSize: height * 0.021,
+                                            fontWeight: FontWeight.bold,
+                                            color:Colors.white
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+     
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(50),
+                                                  color: const Color.fromARGB(
+                                                      152, 0, 0, 0)),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(10),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.circle,
+                                                      color: employee
+                                                                  .employeeStatus ==
+                                                              'Working'
+                                                          ? const Color
+                                                              .fromARGB(
+                                                              255, 83, 238, 88)
+                                                          : Colors.red,
+                                                      size: height * .015,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Text(
+                                                      employee.employeeId ==
+                                                              '413'
+                                                          ? 'Flutter & UI/UX Developer'
+                                                          : employee
+                                                              .designation,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                          color: Colors.white),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 7,
+                                            ),
+                                            InkWell(
+                                              onTap: () {
+                                                _showPicker(context);
+                                              },
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            50),
+                                                    color: const Color.fromARGB(
+                                                        152, 0, 0, 0)),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(10),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                        CupertinoIcons.camera,
+                                                        color: Colors.white,
+                                                        size: height * .015,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                    SizedBox(
-                                      width: 5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(28),
+                                color: AppColor.mainBGColor,
+                              ),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0, vertical: 8.0),
+                                    child: TabBar(
+                                      labelStyle: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                      unselectedLabelColor:
+                                          AppColor.unselectedColor,
+                                      indicatorColor: Colors.black,
+                                      labelColor: Colors.black,
+                                      tabs: [
+                                        Tab(text: 'Personal'),
+                                        Tab(text: 'Contact'),
+                                        Tab(text: 'Work Info'),
+                                      ],
                                     ),
-                                    Icon(
-                                      Icons.circle,
-                                      color: employee.employeeStatus == 'Working'
-                                          ? Colors.green
-                                          : Colors.red,
-                                      size: height * .015,
-                                    )
-                                  ],
+                                  ),
+                                  SizedBox(
+                                    height: height * 0.28,
+                                    child: TabBarView(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _buildProfileInfo(
+                                                  'Gender',
+                                                  employee.gender,
+                                                  Icons.description_outlined,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'DOB',
+                                                  employee.dob,
+                                                  Icons.calendar_month,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Marital Status',
+                                                  employee.maritalStatus,
+                                                  Icons.favorite_border,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Address',
+                                                  employee.permanentAddress,
+                                                  Icons.location_on_outlined,
+                                                  height),
+                                            ],
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _buildProfileInfo(
+                                                  'Contact',
+                                                  employee.contactNo,
+                                                  Icons.phone_outlined,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Email',
+                                                  employee.email,
+                                                  Icons.email_outlined,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Emergency Contact',
+                                                  employee.emergencyContact,
+                                                  Icons.local_hospital_outlined,
+                                                  height),
+                                            ],
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _buildProfileInfo(
+                                                  'Emp-ID',
+                                                  employee.employeeId,
+                                                  Icons.badge_outlined,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'DOJ',
+                                                  employee.doj,
+                                                  Icons.work_outline,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Designation',
+                                                  employee.employeeId == '413'
+                                                      ? 'Flutter & UI/UX Developer'
+                                                      : employee.designation,
+                                                  Icons.assignment_outlined,
+                                                  height),
+                                              _buildProfileInfo(
+                                                  'Emp-Type',
+                                                  employee.employmentType,
+                                                  Icons.assignment_outlined,
+                                                  height),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            DocumentListScreen()));
+                              },
+                              child: Card(
+                                color: AppColor.mainBGColor,
+                                elevation: 0,
+                                margin: EdgeInsets.all(0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(38),
                                 ),
-                                Text(
-                                  employee.employeeId == '413'
-                                      ? 'Flutter & UI/UX Developer'
-                                      : employee.designation,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(color: AppColor.mainTextColor2),
-                                ),
-                            
-                                SizedBox(height: height * 0.015),
-                            
-                                // Tab Bar
-                                TabBar(
-                                  unselectedLabelColor: AppColor.unselectedColor,
-                                  indicatorColor: AppColor.mainThemeColor,
-                                  labelColor: AppColor.mainThemeColor,
-                                  tabs: [
-                                    Tab(text: 'Personal'),
-                                    Tab(text: 'Contact'),
-                                    Tab(text: 'Work Info'),
-                                  ],
-                                ),
-                                SizedBox(height: height * 0.015),
-                                SizedBox(
-                                  height: height * 0.22,
-                                  child: TabBarView(
+                                shadowColor: AppColor.shadowColor,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 13),
+                                  child: Row(
                                     children: [
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16),
-                                        child: Card(
-                                          color: AppColor.mainBGColor,
-                                          elevation: 0,
-                                          margin: EdgeInsets.all(0),
-                                          shape: RoundedRectangleBorder(
+                                      Container(
+                                        decoration: BoxDecoration(
+                                            color: const Color(0xFFD8E1E7),
                                             borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          shadowColor:
-                                            AppColor.shadowColor,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(12),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                _buildProfileInfo(
-                                                    'Gender :',
-                                                    employee.gender,
-                                                    Icons.person,
-                                                    height),
-                                                _buildProfileInfo(
-                                                    'Date of Birth :',
-                                                    employee.dob,
-                                                    Icons.calendar_today,
-                                                    height),
-                                                _buildProfileInfo(
-                                                    'Marital Status :',
-                                                    employee.maritalStatus,
-                                                    Icons.favorite,
-                                                    height),
-                                                _buildProfileInfo(
-                                                    'Address :',
-                                                    employee.permanentAddress,
-                                                    Icons.flag,
-                                                    height),
-                                              ],
-                                            ),
+                                                BorderRadius.circular(10)),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Icon(
+                                            Icons.file_copy_rounded,
+                                            color: AppColor.mainTextColor,
+                                            size: height * 0.016,
                                           ),
                                         ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16),
-                                        child: Card(
-                                          color: AppColor.mainBGColor,
-                                          elevation: 0,
-                                          margin: EdgeInsets.all(0),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          shadowColor:
-                                            AppColor.shadowColor,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(12),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                _buildProfileInfo(
-                                                    'Contact No :',
-                                                    employee.contactNo,
-                                                    Icons.phone,
-                                                    height),
-                                                _buildProfileInfo(
-                                                    'Email :',
-                                                    employee.email,
-                                                    Icons.email,
-                                                    height),
-                                                _buildProfileInfo(
-                                                    'Emergency Contact :',
-                                                    employee.emergencyContact,
-                                                    Icons.local_hospital,
-                                                    height),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
+                                      SizedBox(
+                                        width: width * 0.02,
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16),
-                                        child: Card(
-                                          color: AppColor.mainBGColor,
-                                          elevation: 0,
-                                          margin: EdgeInsets.all(0),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          shadowColor:
-                                            AppColor.shadowColor,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(12),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                _buildProfileInfo(
-                                                    'EmployeeID :',
-                                                    employee.employeeId,
-                                                    Icons.badge,
-                                                    height),
-                                                _buildProfileInfo(
-                                                    'Date of Joining :',
-                                                    employee.doj,
-                                                    Icons.work,
-                                                    height),
-                                                _buildProfileInfo(
-                                                    'Workplace :',
-                                                    employee.workPlace,
-                                                    Icons.business,
-                                                    height),
-                                                _buildProfileInfo(
-                                                    'Designation :',
-                                                    employee.employeeId == '413'
-                                                        ? 'Flutter & UI/UX Developer'
-                                                        : employee.designation,
-                                                    Icons.assignment,
-                                                    height),
-                                                _buildProfileInfo(
-                                                    'Employee Type :',
-                                                    employee.employmentType,
-                                                    Icons.assignment,
-                                                    height),
-                                              ],
-                                            ),
-                                          ),
+                                      Text(
+                                        'Documents',
+                                        style: TextStyle(
+                                          fontSize: height * 0.015,
+                                          color: AppColor.mainTextColor,
                                         ),
+                                        textAlign: TextAlign.end,
                                       ),
                                     ],
                                   ),
                                 ),
-                                SizedBox(
-                                  height: height * 0.01,
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                DocumentListScreen()));
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
-                                    child: Card(
-                                      color: AppColor.mainBGColor,
-                                      elevation: 0,
-                                      margin: EdgeInsets.all(0),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10),
-                                      ),
-                                      shadowColor:
-                                        AppColor.shadowColor,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16, vertical: 13),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.file_copy_rounded,
-                                              color:
-                                                  AppColor.mainThemeColor,
-                                              size: height * 0.02,
-                                            ),
-                                            SizedBox(
-                                              width: width * 0.02,
-                                            ),
-                                            Text(
-                                              'Documents',
-                                              style: TextStyle(
-                                                fontSize: height * 0.015,
-                                                color:
-                                                    AppColor.mainTextColor,
-                                              ),
-                                              textAlign: TextAlign.end,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: height * 0.01,
-                                ),
-                                InkWell(
-                                  onTap: () => Wiredash.of(context)
-                                      .show(inheritMaterialTheme: true),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
-                                    child: Card(
-                                      color: AppColor.mainBGColor,
-                                      elevation: 0,
-                                      margin: EdgeInsets.all(0),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10),
-                                      ),
-                                      shadowColor:
-                                        AppColor.shadowColor,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16, vertical: 13),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.support_agent,
-                                              color:
-                                                  AppColor.mainThemeColor,
-                                              size: height * 0.02,
-                                            ),
-                                            SizedBox(
-                                              width: width * 0.02,
-                                            ),
-                                            Text(
-                                              'Support & Feedback',
-                                              style: TextStyle(
-                                                fontSize: height * 0.015,
-                                                color:
-                                                    AppColor.mainTextColor,
-                                              ),
-                                              textAlign: TextAlign.end,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: height * 0.01,
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    showDialog<void>(
-                                      barrierColor: AppColor.barrierColor, // Darker background
-                                      context: context,
-                                      barrierDismissible: true,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          backgroundColor: AppColor.mainFGColor, // Dialog background color
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(
-                                                    20), // Rounded corners
-                                          ),
-                                          title: Text(
-                                            'Confirm Logout',
-                                            style: TextStyle(
-                                              fontSize: height * 0.015,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColor.mainTextColor,
-                                            ),
-                                          ),
-                                          content: Text(
-                                            'Are you sure you want to logout?',
-                                            style: TextStyle(
-                                              fontSize: height * 0.013,
-                                              color: AppColor.mainTextColor2,
-                                            ),
-                                          ),
-                                          actionsPadding:
-                                              EdgeInsets.symmetric(
-                                                  horizontal: 16,
-                                                  vertical:
-                                                      8), // Add spacing
-                                          actionsAlignment: MainAxisAlignment
-                                              .spaceBetween, // Spread the buttons
-                                          actions: [
-                                            ElevatedButton(
-                                              onPressed: () async {
-                                                Navigator.pop(context);
-                                                await logout();
-                                                Navigator.pushReplacement(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          SplashScreen()),
-                                                );
-                                              },
-                                              style:
-                                                  ElevatedButton.styleFrom(
-                                                backgroundColor: Colors
-                                                    .redAccent, // Button background color
-                                                padding:
-                                                    EdgeInsets.symmetric(
-                                                        horizontal: 24,
-                                                        vertical: 12),
-                                                shape:
-                                                    RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          12),
-                                                ),
-                                                elevation: 0,
-                                              ),
-                                              child: Text(
-                                                "Yes",
-                                                style: TextStyle(
-                                                  color: AppColor.mainFGColor,
-                                                  fontWeight:
-                                                      FontWeight.bold,
-                                                  letterSpacing: 0.5,
-                                                ),
-                                              ),
-                                            ),
-                                            OutlinedButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              style:
-                                                  OutlinedButton.styleFrom(
-                                                side: BorderSide(
-                                                    color: AppColor.borderColor),
-                                                shape:
-                                                    RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          12),
-                                                ),
-                                                padding:
-                                                    EdgeInsets.symmetric(
-                                                        horizontal: 24,
-                                                        vertical: 12),
-                                              ),
-                                              child: Text(
-                                                "No",
-                                                style: TextStyle(
-                                                  color: AppColor.mainTextColor,
-                                                  fontWeight:
-                                                      FontWeight.w500,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
-                                    child: Card(
-                                      color: AppColor.mainBGColor,
-                                      elevation: 0,
-                                      margin: EdgeInsets.all(0),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10),
-                                      ),
-                                      shadowColor:
-                                        AppColor.shadowColor,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16, vertical: 13),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.logout_rounded,
-                                              color:
-                                                  AppColor.mainThemeColor,
-                                              size: height * 0.02,
-                                            ),
-                                            SizedBox(
-                                              width: width * 0.02,
-                                            ),
-                                            Text(
-                                              'Log-Out',
-                                              style: TextStyle(
-                                                fontSize: height * 0.015,
-                                                color:
-                                                    AppColor.mainTextColor,
-                                              ),
-                                              textAlign: TextAlign.end,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
-                             SizedBox(
-                                  height: height * 0.02,
+                            InkWell(
+                              onTap: () => Wiredash.of(context)
+                                  .show(inheritMaterialTheme: true),
+                              child: Card(
+                                color: AppColor.mainBGColor,
+                                elevation: 0,
+                                margin: EdgeInsets.all(0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(38),
                                 ),
+                                shadowColor: AppColor.shadowColor,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 13),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                            color: const Color(0xFFD8E1E7),
+                                            borderRadius:
+                                                BorderRadius.circular(10)),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Icon(
+                                            Icons.support_agent,
+                                            color: AppColor.mainTextColor,
+                                            size: height * 0.016,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: width * 0.02,
+                                      ),
+                                      Text(
+                                        'Support & Feedback',
+                                        style: TextStyle(
+                                          fontSize: height * 0.015,
+                                          color: AppColor.mainTextColor,
+                                        ),
+                                        textAlign: TextAlign.end,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                logoutMethod(context, height);
+                              },
+                              child: Card(
+                                color: AppColor.mainBGColor,
+                                elevation: 0,
+                                margin: EdgeInsets.all(0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(38),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 13),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                            color: const Color(0xFFD8E1E7),
+                                            borderRadius:
+                                                BorderRadius.circular(10)),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Icon(
+                                            Icons.logout_rounded,
+                                            color: AppColor.mainTextColor,
+                                            size: height * 0.016,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: width * 0.02,
+                                      ),
+                                      Text(
+                                        'Log-Out',
+                                        style: TextStyle(
+                                          fontSize: height * 0.015,
+                                          color: AppColor.mainTextColor,
+                                        ),
+                                        textAlign: TextAlign.end,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: height * 0.1,
+                            )
                           ],
                         ),
                       ),
-                      Positioned(
-                        top: height * 0.135,
-                        left: MediaQuery.of(context).size.width / 2 - 75,
-                        child: InkWell(
-                          onTap: () {
-                            _showPicker(context);
-                          },
-                          onLongPress: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => PhotoView(
-                                          imageProvider: NetworkImage(
-                                              employee.employeePhoto),
-                                        )));
-                          },
-                          child: Container(
-                            width: 150,
-                            height: height * 0.14,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: width * 0.01,
-                                color: AppColor.mainBGColor,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  spreadRadius: 2,
-                                  blurRadius: 10,
-                                  color: AppColor.shadowColor,
-                                  offset: Offset(0, 10),
-                                ),
-                              ],
-                              shape: BoxShape.circle,
-                            ),
-                            child: isLoading
-                                ? Center(
-                                    child: LoadingAnimationWidget
-                                        .threeArchedCircle(
-                                      color: AppColor.mainBGColor,
-                                      size: height * 0.05,
-                                    ),
-                                  )
-                                : CircleAvatar(
-                                    backgroundImage: employee.employeePhoto
-                                            .contains("NA")
-                                        ? AssetImage(
-                                            employee.gender == 'Male'
-                                                ? 'assets/image/MaleAvatar.png'
-                                                : 'assets/image/FemaleAvatar.png',
-                                          )
-                                        : NetworkImage(employee.employeePhoto),
-                                    radius: 40,
-                                  ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   );
                 }
               }),
@@ -769,25 +721,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildProfileInfo(
       String label, String value, IconData icon, double height) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Container(
+            decoration: BoxDecoration(
+                color: const Color(0xFFD8E1E7),
+                borderRadius: BorderRadius.circular(10)),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(
+                icon,
+                size: height * 0.016,
+                color: AppColor.mainTextColor,
+              ),
+            ),
+          ),
+          SizedBox(width: 10),
           Text(
             label,
             style: TextStyle(
+              fontSize: height * 0.016,
               fontWeight: FontWeight.w500,
-              fontSize: height * 0.014,
-              color: AppColor.mainTextColor2,
+              color: AppColor.mainTextColor,
             ),
           ),
-          SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
               style: TextStyle(
-                fontSize: height * 0.014,
+                fontSize: height * 0.016,
                 color: AppColor.mainTextColor2,
               ),
               textAlign: TextAlign.end,
@@ -795,6 +760,95 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> logoutMethod(BuildContext context, double height) {
+    return showDialog<void>(
+      barrierColor: AppColor.barrierColor.withOpacity(0.8),
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppColor.mainFGColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Confirm Logout',
+            style: TextStyle(
+              fontSize: height * 0.024,
+              fontWeight: FontWeight.bold,
+              color: AppColor.mainTextColor,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to logout?',
+            style: TextStyle(
+              fontSize: height * 0.017,
+              color: AppColor.mainTextColor2,
+            ),
+          ),
+          actionsPadding:
+              const EdgeInsets.only(bottom: 12, left: 20, right: 20),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          actions: [
+            // YES button
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await logout();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => SplashScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  "Yes",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: height * 0.018,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            // NO button
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColor.borderColor),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Text(
+                  "No",
+                  style: TextStyle(
+                    color: AppColor.mainTextColor,
+                    fontWeight: FontWeight.w500,
+                    fontSize: height * 0.018,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

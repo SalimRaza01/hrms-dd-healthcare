@@ -3,9 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hrms/core/api/api.dart';
-import 'package:hrms/core/api/api_config.dart';
-import 'package:hrms/core/theme/app_colors.dart';
+import '../../core/api/api.dart';
+import '../../core/api/api_config.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 

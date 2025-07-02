@@ -1,56 +1,57 @@
-
 import 'package:flutter/material.dart';
-import 'package:hrms/core/theme/app_colors.dart';
 
 class AnnoucememtWidget extends StatelessWidget {
-  const AnnoucememtWidget({
-    super.key,
-
-  });
+  const AnnoucememtWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-         final height = MediaQuery.of(context).size.height;
+    final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-    return Card(
-      color: AppColor.mainFGColor,
-      elevation: 4,
-      margin: EdgeInsets.all(0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+
+    return Container(
+      width: width,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white, // Flat white background
+        borderRadius: BorderRadius.circular(28), // Smooth rounded edges
       ),
-      shadowColor: AppColor.shadowColor,
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Announcement',
-              style: TextStyle(
-                  fontSize: height * 0.015,
-                  color: AppColor.mainTextColor,
-                  fontWeight: FontWeight.w400),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Heading
+          Text(
+            'Announcement',
+            style: TextStyle(
+              fontSize: height * 0.016,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade900,
             ),
-            SizedBox(
-              height: height * 0.005,
+          ),
+
+          const SizedBox(height: 12),
+
+          // Image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              'assets/image/annoucementImage.png',
+              fit: BoxFit.fitWidth,
+              width: width,
             ),
-            Image.asset(
-                fit: BoxFit.fitWidth,
-                width: width,
-                'assets/image/annoucementImage.png'),
-            SizedBox(
-              height: height * 0.005,
+          ),
+
+          const SizedBox(height: 12),
+
+          // Announcement message
+          Text(
+            'No announcements have been published yet. Keep an eye out for future updates.',
+            style: TextStyle(
+              fontSize: height * 0.013,
+              color: Colors.grey.shade600,
+              height: 1.4,
             ),
-            Text(
-              'No announcements have been published yet. Keep an eye out for future updates.',
-              style: TextStyle(
-                fontSize: height * 0.012,
-                color: AppColor.mainTextColor2,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hrms/core/api/api.dart';
-import 'package:hrms/core/model/models.dart';
-import 'package:hrms/core/theme/app_colors.dart';
+import '../core/api/api.dart';
+import '../core/model/models.dart';
+import '../core/theme/app_colors.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class LeaveBalanceWidget extends StatefulWidget {
@@ -14,103 +14,118 @@ class LeaveBalanceWidget extends StatefulWidget {
 class _LeaveBalanceWidgetState extends State<LeaveBalanceWidget> {
   @override
   Widget build(BuildContext context) {
-     final height = MediaQuery.of(context).size.height;
+    final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
     return SizedBox(
-                    width: width,
-                    child: Card(
-                      color: AppColor.mainFGColor,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadowColor: AppColor.shadowColor,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Leave Balance',
-                              style: TextStyle(
-                                  fontSize: height * 0.015,
-                                  color: AppColor.mainTextColor,
-                                  fontWeight: FontWeight.w400),
-                            ),
-                            SizedBox(
-                              height: height * 0.01,
-                            ),
-                            FutureBuilder<LeaveBalance>(
-                                future: fetchLeaves(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return Center(
-                                      child: LoadingAnimationWidget
-                                          .threeArchedCircle(
-                                        color: AppColor.mainTextColor2,
-                                        size: height * 0.03,
-                                      ),
-                                    );
-                                  } else if (snapshot.hasError) {
-                                    return Center(
-                                        child: Text('No Data Found'));
-                                  } else if (snapshot.hasData) {
-                                    final leave = snapshot.data!;
+      width: width,
+      child: Container(
+ padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white, // Clean white like the card in image
+          borderRadius: BorderRadius.circular(30),
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: Colors.black12.withOpacity(0.05),
+          //     blurRadius: 20,
+          //     offset: const Offset(0, 8),
+          //   ),
+          // ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// Title
+            Text(
+              'Leave Balance',
+              style: TextStyle(
+                fontSize: height * 0.018,
+                fontWeight: FontWeight.w600,
+                color: AppColor.mainTextColor,
+              ),
+            ),
+            SizedBox(height: height * 0.02),
 
-                                    return Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        leaveWidget(height, width, 'Casual',
-                                            leave.casualLeave),
-                                        leaveWidget(height, width, 'Medical',
-                                            leave.medicalLeave),
-                                        leaveWidget(height, width, 'Earned',
-                                            leave.earnedLeave),
-                                      ],
-                                    );
-                                  } else {
-                                    return Text('No data Found');
-                                  }
-                                }),
-                          ],
-                        ),
-                      ),
+            /// Data
+            FutureBuilder<LeaveBalance>(
+              future: fetchLeaves(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: LoadingAnimationWidget.threeArchedCircle(
+                      color: AppColor.mainTextColor2,
+                      size: height * 0.035,
                     ),
                   );
+                } else if (snapshot.hasError || !snapshot.hasData) {
+            return Center(
+                  child: Text(
+                    'No Data Found',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: height * 0.014,
+                    ),
+                  ),
+                );
+                } else {
+                  final leave = snapshot.data!;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      buildLeaveTile(height, width, 'Casual',
+                          leave.casualLeave, const Color(0xFF27AE60)), // green
+                                 SizedBox(width: width * 0.04),
+                      buildLeaveTile(height, width, 'Medical',
+                          leave.medicalLeave, const Color(0xFF2D9CDB)), // blue
+                                 SizedBox(width: width * 0.04),
+                      buildLeaveTile(height, width, 'Earned',
+                          leave.earnedLeave, const Color(0xFFF2C94C)), // yellow
+                    ],
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-
-  SizedBox leaveWidget(
-      double height, double width, String leave, String leaveCount) {
-    return SizedBox(
-      width: width * 0.27,
+  Widget buildLeaveTile(double height, double width, String title,
+      String count, Color indicatorColor) {
+    return Expanded(
       child: Container(
+      
+        padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-            border: Border.all(color: AppColor.borderColor),
-            color: AppColor.mainBGColor,
-            borderRadius: BorderRadius.circular(10)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-          child: Column(
-            children: [
-              Text(
-                leave,
-                style: TextStyle(color: AppColor.mainTextColor2),
+          color: AppColor.newgredient2,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: indicatorColor.withOpacity(0.2)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            /// Count
+            Text(
+              count,
+              style: TextStyle(
+                fontSize: height * 0.024,
+                fontWeight: FontWeight.bold,
+                color: indicatorColor,
               ),
-              SizedBox(
-                height: 5,
+            ),
+            const SizedBox(height: 6),
+
+            /// Label
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: height * 0.015,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade700,
               ),
-              Text(
-                leaveCount,
-                style: TextStyle(
-                    color: AppColor.mainTextColor2, fontSize: height * 0.022),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

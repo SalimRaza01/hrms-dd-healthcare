@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:hrms/core/api/api_config.dart';
-import 'package:hrms/core/model/models.dart';
-import 'package:hrms/core/provider/provider.dart';
-import 'package:hrms/presentation/authentication/create_new_pass.dart';
-import 'package:hrms/presentation/authentication/login_screen.dart';
-import 'package:hrms/presentation/authentication/otp_screen.dart';
+import 'api_config.dart';
+import '../model/models.dart';
+import '../provider/provider.dart';
+import '../../presentation/authentication/create_new_pass.dart';
+import '../../presentation/authentication/login_screen.dart';
+import '../../presentation/authentication/otp_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -993,8 +993,8 @@ Future<PunchRecordModel> fetchPunchRecord() async {
   if (response.statusCode == 200 || response.statusCode == 201) {
     print(response.data);
     final Map<String, dynamic> data = response.data['data'][0];
-    _authBox.put(
-        'selfie', decodeBase64Image(response.data['data'][0]['imageUrl']));
+    // _authBox.put(
+    //     'selfie', decodeBase64Image(response.data['data'][0]['imageUrl']));
     return PunchRecordModel.fromJson(data);
   } else {
     throw Exception("Failed to fetch punch data");
@@ -1028,3 +1028,4 @@ Uint8List decodeBase64Image(String base64String) {
 
   return base64Decode(base64String);
 }
+

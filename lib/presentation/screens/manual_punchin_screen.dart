@@ -1,11 +1,17 @@
-// ignore_for_file: use_key_in_widget_constructors, depend_on_referenced_packages
+// // ignore_for_file: use_key_in_widget_ructors, depend_on_referenced_packages, must_be_immutable
+
+// ignore_for_file: use_key_in_widget_constructors
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
-import 'package:hrms/core/api/api.dart';
-import 'package:hrms/core/provider/provider.dart';
-import 'package:hrms/core/theme/app_colors.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:intl/intl.dart';
+import '../../core/api/api.dart';
+import '../../core/api/api_config.dart';
+import '../../core/provider/provider.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -30,22 +36,43 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   File? _selfie;
   LatLng? _currentLocation;
   bool _isLoading = false;
+  bool _isLoadingPO = false;
+  bool _isLoadingUP = false;
+  bool _isLoadingPI = false;
   List<Placemark>? placemarks;
   Placemark? place;
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
+    _requestPlatformPermissions();
+
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
   }
 
-  Future<String> convertImageToBase64(File imageFile) async {
-    final bytes = await imageFile.readAsBytes();
-    return base64Encode(bytes);
+  Future<void> _requestPlatformPermissions() async {
+    bool cameraGranted = false;
+    bool locationGranted = false;
+
+    if (Platform.isAndroid) {
+      cameraGranted = await Permission.camera.request().isGranted;
+      locationGranted = await Permission.location.request().isGranted;
+    } else if (Platform.isIOS) {
+      cameraGranted = await Permission.camera.request().isGranted;
+      locationGranted = await Permission.locationWhenInUse.request().isGranted;
+    }
+
+    if (cameraGranted && locationGranted) {
+      await _initializeCamera();
+      await _getCurrentLocation();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Camera or Location permission denied")),
+      );
+    }
   }
 
   Future<void> _initializeCamera() async {
@@ -56,54 +83,35 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      Future.delayed(Duration(seconds: 3), () {
-        setState(() {
-          _isLoading = false;
-        });
-      });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Location services are disabled.'),
-      ));
-      return;
-    }
-
-    PermissionStatus permissionStatus = await Permission.location.request();
-    _initializeCamera();
-    if (permissionStatus.isGranted) {
-      try {
-        Position position = await Geolocator.getCurrentPosition(
-          locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
-          // desiredAccuracy: LocationAccuracy.high,
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Location services are disabled.')),
         );
-        placemarks = await placemarkFromCoordinates(
-            position.latitude, position.longitude);
-        setState(() {
-          _currentLocation = LatLng(position.latitude, position.longitude);
-
-          place = placemarks![0];
-          _isLoading = false;
-        });
-      } catch (e) {
-        setState(() {
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error retrieving location'),
-        ));
+        return;
       }
-    } else {
+
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: LocationSettings(accuracy: LocationAccuracy.high),
+      );
+
+      placemarks =
+          await placemarkFromCoordinates(position.latitude, position.longitude);
+
       setState(() {
+        _currentLocation = LatLng(position.latitude, position.longitude);
+        place = placemarks![0];
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Location permission denied.'),
-      ));
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error retrieving location')),
+      );
     }
   }
 
@@ -117,6 +125,16 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
     }
   }
 
+  Future<String> compressAndConvertToBase64(File file) async {
+    final compressedBytes = await FlutterImageCompress.compressWithFile(
+      file.path,
+      minWidth: 360,
+      minHeight: 640,
+      quality: 60,
+    );
+    return base64Encode(compressedBytes!);
+  }
+
   Future<void> _punchIn() async {
     await _getCurrentLocation();
 
@@ -127,14 +145,13 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
     if (_selfie != null && _currentLocation != null) {
       setState(() => _isLoading = true);
 
-      String base64Image = await convertImageToBase64(_selfie!);
+      String base64Image = await compressAndConvertToBase64(_selfie!);
       String location = place!.subLocality!.isNotEmpty
           ? '(IN)${place!.subLocality}, ${place!.locality}'
           : '(IN)${place!.locality}';
+
       _authBox.put('punchLocation', location);
       await manualPunchIn(context, location, base64Image);
-
-      setState(() => _isLoading = false);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.red,
@@ -157,7 +174,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Location not available for Punch-Out'),
+          content: Text('Location not available for update'),
           backgroundColor: Colors.red,
         ),
       );
@@ -171,7 +188,6 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
       String location = place!.subLocality!.isNotEmpty
           ? '(OUT)${place!.subLocality}, ${place!.locality}'
           : '(OUT)${place!.locality}';
-
       String punchId = _authBox.get('Punch-In-id');
 
       await manualPunchOut(context, punchId, location);
@@ -185,6 +201,118 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
     }
   }
 
+  Future<void> manualPunchIn(
+    BuildContext context,
+    String location,
+    String imageUrl64,
+  ) async {
+    String empID = _authBox.get('employeeId');
+    String token = _authBox.get('token');
+    setState(() => _isLoadingPI = true);
+
+    try {
+      final response = await dio.post(punchinAction,
+          options: Options(headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer $token"
+          }),
+          data: {
+            "employeeId": empID,
+            "location": location,
+            "imageUrl": imageUrl64,
+          });
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        _authBox.put('punchedIn', 'yes');
+        await _authBox.put('Punch-In-id', response.data['data']['_id']);
+        await _authBox.put(
+            'selfie', decodeBase64Image(response.data['data']['imageUrl']));
+        final punchProvider = Provider.of<PunchedIN>(context, listen: false);
+        await punchProvider.fetchAndSetPunchRecord();
+
+        setState(() {
+          _isLoadingPI = false;
+          _isLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Punch-In Success'),
+          backgroundColor: Colors.green,
+        ));
+      }
+    } on DioException catch (e) {
+      setState(() => _isLoadingPI = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.response?.data['message'] ?? 'Punch-In failed'),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
+  Future<void> manualPunchOut(
+      BuildContext context, String punchInId, String location) async {
+    String token = _authBox.get('token');
+    setState(() => _isLoadingPO = true);
+
+    try {
+      final response = await dio.post('$punchOutAction/$punchInId',
+          options: Options(headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer $token"
+          }),
+          data: {"location": location});
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        _authBox.put('punchedIn', null);
+        _authBox.put('selfie', null);
+
+        final punchProvider = Provider.of<PunchedIN>(context, listen: false);
+        await punchProvider.fetchAndSetPunchRecord();
+
+        setState(() => _isLoadingPO = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Punch-Out Success'),
+          backgroundColor: Colors.green,
+        ));
+      }
+    } on DioException catch (e) {
+      setState(() => _isLoadingPO = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.response?.data['message'] ?? 'Punch-Out failed'),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
+  Future<void> updateLocation(
+      BuildContext context, String id, String location) async {
+    setState(() => _isLoadingUP = true);
+    try {
+      final response = await dio.put('$updatePunchLocation/$id', data: {
+        "location": location,
+      });
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final punchProvider = Provider.of<PunchedIN>(context, listen: false);
+        await punchProvider.fetchAndSetPunchRecord();
+
+        setState(() => _isLoadingUP = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Location Updated Successfully'),
+          backgroundColor: Colors.green,
+        ));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Update Failed'),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } on DioException catch (e) {
+      setState(() => _isLoadingUP = false);
+      print(e);
+    }
+  }
+
   @override
   void dispose() {
     _cameraController.dispose();
@@ -195,6 +323,8 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
+
+    //  final String? punchStatus = widget.alreadyPunchIn;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -223,445 +353,390 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                       style: LocationMarkerStyle(
                           markerSize: Size.fromRadius(10),
                           accuracyCircleColor:
-                              const Color.fromARGB(120, 153, 207, 232)),
+                              Color.fromARGB(120, 153, 207, 232)),
                     ),
                   ],
                 ),
                 Align(
                   alignment: Alignment.bottomCenter,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.topCenter,
-                    children: [
-                      Consumer<PunchedIN>(
-                        builder: (context, punchProvider, _) {
-                          final record = punchProvider.record;
+                  child: Consumer<PunchedIN>(
+                    builder: (context, punchProvider, _) {
+                      final record = punchProvider.record;
+                      // final now = DateTime.now();
+                      final times = record?.getLastPunchTimes();
+                      // final isToday = record != null &&
+                      //     DateUtils.isSameDay(now, record.createdAt);
+                      // final isPunchedIn = _authBox.get('punchedIn') != null;
 
-                          if (record == null) {
-                            return newMethod(height, width, context);
-                          }
-
-                          final now = DateTime.now();
-                          final times = record.getLastPunchTimes();
-
-                          if (!DateUtils.isSameDay(now, record.createdAt)) {
-                            return newMethod(height, width, context);
-                          }
-
-                          return Container(
-                            height: height / 3,
-                            width: width,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 20, horizontal: 20),
-                            decoration: BoxDecoration(
-                              color: AppColor.mainFGColor,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(30),
-                                topRight: Radius.circular(30),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColor.shadowColor,
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
-                                ),
-                              ],
+                      return Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(30),
+                            topRight: Radius.circular(30),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 15,
+                              spreadRadius: 3,
+                              offset: Offset(0, -3),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                SizedBox(height: height * 0.03),
-                                Text(
-                                  _authBox.get('employeeName'),
-                                  style: TextStyle(
-                                    fontSize: height * 0.02,
-                                    color: AppColor.mainTextColor,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Text(
-                                  place != null
-                                      ? place!.subLocality!.isNotEmpty
-                                          ? 'Location : ${place!.subLocality}, ${place!.locality}'
-                                          : 'Location : ${place!.locality}'
-                                      : 'Unable to track location',
-                                  style: TextStyle(
-                                    fontSize: height * 0.016,
-                                    color:
-                                        const Color.fromARGB(255, 57, 134, 60),
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                SizedBox(height: height * 0.01),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: AppColor.mainBGColor,
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 10, horizontal: 7),
-                                    child: IntrinsicHeight(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                '${times['lastIn']}',
-                                                style: TextStyle(
-                                                  fontSize: height * 0.02,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: AppColor.mainTextColor,
-                                                ),
-                                              ),
-                                              Text(
-                                                'Punch-in',
-                                                style: TextStyle(
-                                                  fontSize: height * 0.014,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: AppColor.mainTextColor,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          VerticalDivider(
-                                            color: AppColor.mainTextColor,
-                                            thickness: 0.3,
-                                          ),
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                '${times['lastOut']}',
-                                                style: TextStyle(
-                                                  fontSize: height * 0.02,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: AppColor.mainTextColor,
-                                                ),
-                                              ),
-                                              Text(
-                                                'Punch-Out',
-                                                style: TextStyle(
-                                                  fontSize: height * 0.014,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: AppColor.mainTextColor,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: height * 0.01),
-                                Visibility(
-                                  visible: _authBox.get('punchedIn') == null,
-                                  child: InkWell(
-                                    onTap: _punchIn,
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            /// Profile Section
+                            Container(
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                  color: Color(0xFFF8F8F8),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                      color:
+                                          Color.fromARGB(78, 123, 158, 177))),
+                              child: Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
                                     child: Container(
-                                      width: double.infinity,
+                                      width: width * .2,
+                                      height: height * 0.09,
                                       decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Colors.lightGreen,
-                                            Colors.green
-                                          ],
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 20, vertical: 12),
-                                      child: Center(
-                                        child: Text(
-                                          'Punch-In',
-                                          style: TextStyle(
-                                              fontSize: height * 0.015,
-                                              color: AppColor.mainFGColor),
-                                        ),
-                                      ),
+                                          border: Border.all(
+                                              color: Color.fromARGB(
+                                                  78, 123, 158, 177)),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          color: Color(0xFFC9D9D5)),
+                                      child: _authBox.get('selfie') == null
+                                          ? Image.asset(
+                                              'assets/image/MaleAvatar.png')
+                                          : Image.memory(
+                                              _authBox.get('selfie'),
+                                              fit: BoxFit.fitWidth,
+                                            ),
                                     ),
                                   ),
-                                ),
-                                Visibility(
-                                  visible: _authBox.get('punchedIn') != null,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                  SizedBox(width: 16),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      InkWell(
-                                        onTap: _updatePunchLocation,
-                                        child: Container(
-                                          width: width / 2.5,
-                                          decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              begin: Alignment.topCenter,
-                                              end: Alignment.bottomCenter,
-                                              colors: [
-                                                Colors.lightGreen,
-                                                Colors.green
-                                              ],
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 12),
-                                          child: Center(
-                                            child: Text(
-                                              'Update Location',
-                                              style: TextStyle(
-                                                  fontSize: height * 0.015,
-                                                  color: AppColor.mainFGColor),
-                                            ),
-                                          ),
+                                      Text(
+                                        _authBox.get('employeeName') ?? '',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
                                         ),
                                       ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        DateFormat('dd MMMM yyyy')
+                                            .format(DateTime.now())
+                                            .toString()
+                                            .toUpperCase(),
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color:
+                                              Color.fromARGB(255, 85, 85, 85),
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
                                       InkWell(
-                                        onTap: _punchOut,
-                                        child: Container(
-                                          width: width / 2.5,
-                                          decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              begin: Alignment.topCenter,
-                                              end: Alignment.bottomCenter,
-                                              colors: [
-                                                Colors.black45,
-                                                Colors.black
-                                              ],
+                                        onTap: _getCurrentLocation,
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.location_pin,
+                                              size: height * .016,
+                                              color: Colors.green,
                                             ),
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 12),
-                                          child: Center(
-                                            child: Text(
-                                              'Punch Out',
-                                              style: TextStyle(
-                                                  fontSize: height * 0.015,
-                                                  color: AppColor.mainFGColor),
+                                            SizedBox(width: 4),
+                                            SizedBox(
+                                              width: width * 0.45,
+                                              child: Text(
+                                                maxLines: 3,
+                                                overflow: TextOverflow.ellipsis,
+                                                place != null
+                                                    ? place!.subLocality!
+                                                            .isNotEmpty
+                                                        ? ' ${place!.subLocality}, ${place!.locality}'
+                                                        : place!.locality!
+                                                    : 'Tap to fetch location',
+                                                style: TextStyle(
+                                                  fontSize: height * .016,
+                                                  color: Color.fromARGB(
+                                                      255, 85, 85, 85),
+                                                ),
+                                              ),
                                             ),
-                                          ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                SizedBox(
-                                  height: height * 0.04,
-                                )
-                              ],
+                                ],
+                              ),
                             ),
-                          );
-                        },
-                      ),
-                      Positioned(
-                        top: -height * 0.10,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: AppColor.mainFGColor,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 50,
-                                color: AppColor.shadowColor,
-                                spreadRadius: 5,
-                              )
-                            ],
-                          ),
-                          child: _authBox.get('selfie') == null
-                              ? CircleAvatar(
-                                  backgroundColor: AppColor.mainBGColor,
-                                  radius: 70,
-                                  child: Image.asset(
-                                    'assets/image/MaleAvatar.png',
-                                    height: height * 0.135,
-                                    width: width * 0.3,
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                              : CircleAvatar(
-                                  radius: 70,
-                                  backgroundColor: AppColor.mainBGColor,
-                                  child: ClipOval(
-                                    child: Image.memory(
-                                      _authBox.get('selfie'),
-                                      height: height * 0.135,
-                                      width: width * 0.3,
-                                      fit: BoxFit.cover,
+
+                            SizedBox(
+                              height: height * .016,
+                            ),
+
+                            /// Schedule Tiles
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    // width: width,
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFFF5F5F5),
+                                      border: Border.all(
+                                          color: Color.fromARGB(
+                                              78, 123, 158, 177)),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          times == null
+                                              ? '--/--'
+                                              : '${times['lastIn']}',
+                                          // '',
+                                          style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          'Punch-In',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
+                                SizedBox(
+                                  width: width * .03,
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    // width: width,
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Color.fromARGB(
+                                              78, 123, 158, 177)),
+                                      color: Color(0xFFF5F5F5),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          times == null
+                                              ? '--/--'
+                                              : '${times['lastOut']}',
+                                          style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          'Punch-Out',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(
+                              height: height * .016,
+                            ),
+
+                            Visibility(
+                              visible: _authBox.get('punchedIn') == null,
+                              child: InkWell(
+                                onTap: _punchIn,
+                                child: Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [Colors.lightGreen, Colors.green],
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 12),
+                                  child: Center(
+                                    child: _isLoadingPI
+                                        ? SizedBox(
+                                            height: height * 0.02,
+                                            width: width * 0.05,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeCap: StrokeCap.round,
+                                              strokeWidth: 2,
+                                            ))
+                                        : Text(
+                                            'Punch-In',
+                                            style: TextStyle(
+                                                fontSize: height * 0.015,
+                                                color: AppColor.mainFGColor),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Visibility(
+                              visible: _authBox.get('punchedIn') != null,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: _updatePunchLocation,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: [
+                                              Colors.lightGreen,
+                                              Colors.green
+                                            ],
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 12),
+                                        child: Center(
+                                          child: _isLoadingUP
+                                              ? SizedBox(
+                                                  height: height * 0.02,
+                                                  width: width * 0.05,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    color: Colors.white,
+                                                    strokeCap: StrokeCap.round,
+                                                    strokeWidth: 2,
+                                                  ))
+                                              : Text(
+                                                  'Update Location',
+                                                  style: TextStyle(
+                                                      fontSize: height * 0.015,
+                                                      color:
+                                                          AppColor.mainFGColor),
+                                                ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: width * .03,
+                                  ),
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: _punchOut,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: [
+                                              Colors.black45,
+                                              Colors.black
+                                            ],
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 12),
+                                        child: Center(
+                                          child: _isLoadingPO
+                                              ? SizedBox(
+                                                  height: height * 0.02,
+                                                  width: width * 0.05,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    color: Colors.white,
+                                                    strokeCap: StrokeCap.round,
+                                                    strokeWidth: 2,
+                                                  ))
+                                              : Text(
+                                                  'Punch Out',
+                                                  style: TextStyle(
+                                                      fontSize: height * 0.015,
+                                                      color:
+                                                          AppColor.mainFGColor),
+                                                ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              height: height * 0.02,
+                            )
+                          ],
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
+                 Padding(
+                   padding: const EdgeInsets.only(top: 25, left: 15),
+                   child: InkWell(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color.fromARGB(178, 216, 225, 231),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.chevron_left,
+                              color: AppColor.mainTextColor,
+                              size: height * 0.02,
+                            ),
+                          ),
+                        ),
+                      ),
+                 ),
               ],
             ),
     );
   }
-
-  Container newMethod(double height, double width, BuildContext context) {
-    return Container(
-      height: height / 3,
-      width: width,
-      padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-      decoration: BoxDecoration(
-        color: AppColor.mainFGColor,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColor.shadowColor,
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          SizedBox(
-            height: height * 0.04,
-          ),
-          Text(
-            _authBox.get('employeeName'),
-            style: TextStyle(
-                fontSize: height * 0.02,
-                color: AppColor.mainTextColor,
-                fontWeight: FontWeight.w500),
-          ),
-          Text(
-            place != null
-                ? place!.subLocality!.isNotEmpty
-                    ? 'Location : ${place!.subLocality}, ${place!.locality}'
-                    : 'Location : ${place!.locality}'
-                : 'Unable to track location',
-            style: TextStyle(
-                fontSize: height * 0.016,
-                color: Colors.green,
-                fontWeight: FontWeight.w400),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: AppColor.mainBGColor,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 7),
-              child: IntrinsicHeight(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          '--/--',
-                          style: TextStyle(
-                              fontSize: height * 0.02,
-                              fontWeight: FontWeight.bold,
-                              color: AppColor.mainTextColor),
-                        ),
-                        Text(
-                          'Punch-in',
-                          style: TextStyle(
-                              fontSize: height * 0.014,
-                              fontWeight: FontWeight.w500,
-                              color: AppColor.mainTextColor),
-                        ),
-                      ],
-                    ),
-                    VerticalDivider(
-                      color: AppColor.mainTextColor,
-                      thickness: 0.3,
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          '--/--',
-                          style: TextStyle(
-                            fontSize: height * 0.02,
-                            fontWeight: FontWeight.bold,
-                            color: AppColor.mainTextColor,
-                          ),
-                        ),
-                        Text(
-                          'Punch-Out',
-                          style: TextStyle(
-                              fontSize: height * 0.014,
-                              fontWeight: FontWeight.w500,
-                              color: AppColor.mainTextColor),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          InkWell(
-            onTap: _punchIn,
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.lightGreen,
-                      Colors.green,
-                    ]),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                child: Center(
-                  child: Text(
-                    'Punch In',
-                    style: TextStyle(
-                        fontSize: height * 0.015, color: AppColor.mainFGColor),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
-
-// class ImageViewerScreen extends StatelessWidget {
-//   final File imageFile;
-
-//   const ImageViewerScreen({required this.imageFile});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: Text('Selfie Viewer')),
-//       body: Center(
-//         child: Image.file(imageFile),
-//       ),
-//     );
-//   }
-// }

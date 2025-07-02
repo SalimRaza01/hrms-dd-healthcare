@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hrms/core/api/api.dart';
-import 'package:hrms/core/model/models.dart';
-import 'package:hrms/core/theme/app_colors.dart';
-import 'package:hrms/presentation/screens/holiday_list.dart';
+import '../core/api/api.dart';
+import '../core/model/models.dart';
+import '../presentation/screens/holiday_list.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -15,193 +14,142 @@ class HolidayWidget extends StatefulWidget {
 }
 
 class _HolidayWidgetState extends State<HolidayWidget> {
- late Future<List<HolidayModel>> holidayList;
+  late Future<List<HolidayModel>> holidayList;
 
-@override
+  @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-        holidayList = fetchHolidayList('HomeScreen');
+    holidayList = fetchHolidayList('HomeScreen');
   }
-
 
   @override
   Widget build(BuildContext context) {
-             final height = MediaQuery.of(context).size.height;
+    final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-    
-    return Card(
-                    color: AppColor.mainFGColor,
-                    elevation: 4,
-                    margin: EdgeInsets.all(0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white, // flat white background
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Upcoming Holiday',
+            style: TextStyle(
+              fontSize: height * 0.016,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade900,
+            ),
+          ),
+          SizedBox(height: height * 0.015),
+          FutureBuilder<List<HolidayModel>>(
+            future: holidayList,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: LoadingAnimationWidget.threeArchedCircle(
+                    color: Colors.grey.shade400,
+                    size: height * 0.03,
+                  ),
+                );
+              } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+                  child: Text(
+                    'No Data Found',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: height * 0.014,
                     ),
-                    shadowColor: AppColor.shadowColor,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                );
+              } else {
+                final item = snapshot.data![0];
+                final date = DateTime.parse(item.holidayDate);
+
+                return InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => showCupertinoModalBottomSheet(
+                    expand: true,
+                    context: context,
+                    barrierColor: Colors.black26,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => const HolidayList(),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Left: Date Box + Holiday Info
+                      Row(
                         children: [
-                          Text(
-                            'Upcoming Holiday',
-                            style: TextStyle(
-                                fontSize: height * 0.015,
-                                color: AppColor.mainTextColor,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          SizedBox(
-                            height: height * 0.01,
-                          ),
-                          FutureBuilder<List<HolidayModel>>(
-                            future: holidayList,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return Center(
-                                    child: LoadingAnimationWidget
-                                        .threeArchedCircle(
-                                  color: AppColor.mainTextColor2,
-                                  size: height * 0.03,
-                                ));
-                              } else if (snapshot.hasError) {
-                                return Center(
-                                    child: Text('No Holiday List Found'));
-                              } else if (!snapshot.hasData ||
-                                  snapshot.data!.isEmpty) {
-                                return Center(
-                                    child: Text('No Holiday available.'));
-                              } else {
-                                List<HolidayModel> items = snapshot.data!;
-
-                                HolidayModel item = items[0];
-
-                                final newDate =
-                                    DateTime.parse(item.holidayDate);
-
-                                return InkWell(
-                                  onTap: () => showCupertinoModalBottomSheet(
-                                    expand: true,
-                                    context: context,
-                                    barrierColor: AppColor.barrierColor,
-                                    backgroundColor: Colors.transparent,
-                                    builder: (context) => HolidayList(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEAF1F5),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  DateFormat('dd').format(date),
+                                  style: TextStyle(
+                                    fontSize: height * 0.02,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
                                   ),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                                color:
-                                                    AppColor.mainThemeColor,
-                                                borderRadius:
-                                                    BorderRadius.all(
-                                                  Radius.circular(10),
-                                                )),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 15,
-                                                vertical: 4,
-                                              ),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceAround,
-                                                children: [
-                                                  Text(
-                                                    DateFormat('dd')
-                                                        .format(newDate)
-                                                        .toString(),
-                                                    style: TextStyle(
-                                                      fontSize: height * 0.02,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: AppColor
-                                                          .mainFGColor,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    DateFormat('EEE')
-                                                        .format(newDate)
-                                                        .toString(),
-                                                    style: TextStyle(
-                                                        fontSize:
-                                                            height * 0.014,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        color: AppColor
-                                                            .mainFGColor),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.symmetric(
-                                                    vertical: 4,
-                                                    horizontal: 20),
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                SizedBox(
-                                                  width: width / 2,
-                                                  child: Text(
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    item.holidayName,
-                                                    style: TextStyle(
-                                                        fontSize:
-                                                            height * 0.015,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: AppColor
-                                                            .mainTextColor),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  height: height * 0.005,
-                                                ),
-                                                Text(
-                                                  DateFormat('MMMM')
-                                                      .format(newDate)
-                                                      .toString(),
-                                                  style: TextStyle(
-                                                      fontSize:
-                                                          height * 0.014,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: AppColor
-                                                          .mainTextColor),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Icon(
-                                        Icons.arrow_forward_ios,
-                                        color: AppColor.mainTextColor,
-                                      )
-                                    ],
+                                ),
+                                Text(
+                                  DateFormat('EEE').format(date),
+                                  style: TextStyle(
+                                    fontSize: height * 0.014,
+                                    color: Colors.grey.shade600,
                                   ),
-                                );
-                              }
-                            },
-                          )
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: width * 0.5,
+                                child: Text(
+                                  item.holidayName,
+                                  style: TextStyle(
+                                    fontSize: height * 0.016,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                DateFormat('MMMM').format(date),
+                                style: TextStyle(
+                                  fontSize: height * 0.014,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
-                    ),
-                  );
+
+                      // Right: Arrow
+                      Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade500),
+                    ],
+                  ),
+                );
+              }
+            },
+          ),
+        ],
+      ),
+    );
   }
-  }
+}

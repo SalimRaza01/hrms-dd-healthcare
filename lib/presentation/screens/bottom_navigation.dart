@@ -1,14 +1,15 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hrms/core/theme/app_colors.dart';
-import 'package:hrms/presentation/screens/attendance_screen.dart';
-import 'package:hrms/presentation/screens/dashboard_screen.dart';
-import 'package:hrms/presentation/screens/leave_screen_employee.dart';
-import 'package:hrms/presentation/screens/leave_screen_manager.dart';
-import 'package:hrms/presentation/screens/profile_screen.dart';
-import 'package:hrms/presentation/screens/team_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hive/hive.dart';
+
+import 'attendance_screen.dart';
+import 'dashboard_screen.dart';
+import 'leave_screen_employee.dart';
+import 'leave_screen_manager.dart';
+import 'profile_screen.dart';
+import 'team_screen.dart';
 
 class BottomNavigation extends StatefulWidget {
   const BottomNavigation({super.key});
@@ -18,18 +19,15 @@ class BottomNavigation extends StatefulWidget {
 }
 
 class _BottomNavigationState extends State<BottomNavigation> {
-  int _selectedIndex = 0;
+  int _currentIndex = 0;
   String? role;
   String? empID;
 
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     checkEmployeeId();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
   }
 
   Future<void> checkEmployeeId() async {
@@ -37,130 +35,132 @@ class _BottomNavigationState extends State<BottomNavigation> {
     setState(() {
       role = box.get('role');
       empID = box.get('employeeId');
-      print(role);
     });
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColor.mainBGColor,
-      body: role == 'Manager' || role == 'Super-Admin'
-          ? <Widget>[
-              DashboardScreen(empID!),
-              LeaveScreenManager(empID!),
-              ClockInScreenSecond(empID!),
-              TeamScreen(),
-              ProfileScreen(empID!)
-            ][_selectedIndex]
-          : <Widget>[
-              DashboardScreen(empID!),
-              LeaveScreenEmployee(empID!),
-              ClockInScreenSecond(empID!),
-              ProfileScreen(empID!),
-            ][_selectedIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppColor.mainFGColor,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColor.shadowColor,
-              blurRadius: 10,
-            )
-          ],
+    final width = MediaQuery.of(context).size.width;
+
+    if (role == null || empID == null) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.amber),
         ),
-        padding: const EdgeInsets.only(bottom: 30, top: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(
-            (role == 'Manager' || role == 'Super-Admin') ? 5 : 4,
-            (index) {
-              final isSelected = _selectedIndex == index;
+      );
+    }
 
-              final icons = role == 'Manager' || role == 'Super-Admin'
-                  ? [
-                      CupertinoIcons.house_fill,
-                      CupertinoIcons.timelapse,
-                      CupertinoIcons.timer_fill,
-                      CupertinoIcons.person_2_fill,
-                      CupertinoIcons.person_crop_circle_fill
-                    ]
-                  : [
-                      CupertinoIcons.house_fill,
-                      CupertinoIcons.timelapse,
-                      CupertinoIcons.timer_fill,
-                      CupertinoIcons.person_crop_circle_fill
-                    ];
+    final isManager = role == 'Manager' || role == 'Super-Admin';
 
-              final labels = role == 'Manager' || role == 'Super-Admin'
-                  ? ['Dashboard', 'Leave', 'Attendance', 'Team', 'Profile']
-                  : ['Dashboard', 'Leave', 'Attendance', 'Profile'];
+    final List<Widget> pages = isManager
+        ? [
+            DashboardScreen(empID!),
+            LeaveScreenManager(empID!),
+            ClockInScreenSecond(empID!),
+            TeamScreen(),
+            ProfileScreen(empID!)
+          ]
+        : [
+            DashboardScreen(empID!),
+            LeaveScreenEmployee(empID!),
+            ClockInScreenSecond(empID!),
+            ProfileScreen(empID!)
+          ];
 
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = index;
-                  });
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 0),
-                  curve: Curves.easeOut,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColor.mainFGColor : Colors.transparent,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (child, animation) =>
-                        ScaleTransition(scale: animation, child: child),
-                    child: isSelected
-    ? Column(
-        key: ValueKey('label_$index'),
-        mainAxisSize: MainAxisSize.min,
+    final List<String> icons = isManager
+        ? [
+            'assets/image/home.svg',
+            'assets/image/leave.svg',
+            'assets/image/attendance.svg',
+            'assets/image/team.svg',
+            'assets/image/profile.svg'
+          ]
+        : [
+            'assets/image/home.svg',
+            'assets/image/leave.svg',
+            'assets/image/attendance.svg',
+            'assets/image/profile.svg'
+          ];
+
+    final List<String> labels = isManager
+        ? ['Dashboard', 'Leave', 'Attendance', 'Team', 'Profile']
+        : ['Dashboard', 'Leave', 'Attendance', 'Profile'];
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
         children: [
-          Text(
-            labels[index],
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: AppColor.mainThemeColor,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Container(
-            width: 20,
-            height: 3,
-            decoration: BoxDecoration(
-              color: AppColor.mainThemeColor,
-              borderRadius: BorderRadius.circular(2),
+          pages[_currentIndex],
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 50),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(50.0),
+                child: Container(
+                  height: 70,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(30.0),
+                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: List.generate(icons.length, (index) {
+                      return _buildNavItem(icons[index], labels[index], index, width);
+                    }),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
-      )
-    : Icon(
-        icons[index],
-        key: ValueKey('icon_$index'),
-        color: AppColor.unselectedColor,
-        size: 25,
       ),
+    );
+  }
 
-                  ),
-                ),
-              );
-            },
-          ),
+  Widget _buildNavItem(String icon, String label, int index, double width) {
+    bool isSelected = _currentIndex == index;
+
+    return GestureDetector(
+      onTap: () => setState(() => _currentIndex = index),
+      child: TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 300),
+        tween: Tween<double>(
+          begin: isSelected ? 1.0 : 0.95,
+          end: isSelected ? 1.15 : 1.0,
         ),
+        curve: Curves.easeInOut,
+        builder: (context, scale, child) {
+          return Transform.scale(
+            scale: scale,
+            child: Container(
+              width: width * 0.10,
+              height: width * 0.10,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? const Color(0xFF8CD193) : Colors.transparent,
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: Colors.greenAccent.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        )
+                      ]
+                    : [],
+              ),
+              child: Center(
+                child: SvgPicture.asset(
+                  icon,
+                  color: isSelected ? Colors.white : Colors.white54,
+                  height: isSelected ? 22 : 20,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

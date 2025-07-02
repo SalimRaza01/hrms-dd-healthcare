@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hrms/core/api/api.dart';
+import 'core/api/api.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hrms/presentation/screens/new_onbaording.dart';
+import 'presentation/screens/new_onbaording.dart';
 import 'package:provider/provider.dart';
 import 'package:wiredash/wiredash.dart';
 import 'core/provider/provider.dart';

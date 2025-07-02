@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hrms/core/api/api.dart';
-import 'package:hrms/core/model/models.dart';
+import '../api/api.dart';
+import '../model/models.dart';
 
 class TaskProvider extends ChangeNotifier {
   bool taskupdated = false;

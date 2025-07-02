@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hrms/core/provider/provider.dart';
-import 'package:hrms/core/theme/app_colors.dart';
+import '../core/provider/provider.dart';
+import '../core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart' show Consumer, Provider;
+import 'package:provider/provider.dart';
 
 class PunchCardWidget extends StatefulWidget {
   const PunchCardWidget({super.key});
@@ -14,7 +14,6 @@ class PunchCardWidget extends StatefulWidget {
 class _PunchCardWidgetState extends State<PunchCardWidget> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     Provider.of<PunchedIN>(context, listen: false).fetchAndSetPunchRecord();
   }
@@ -28,120 +27,107 @@ class _PunchCardWidgetState extends State<PunchCardWidget> {
       builder: (context, punchProvider, _) {
         final record = punchProvider.record;
 
-        if (record == null) {
+        if (record == null ||
+            !DateUtils.isSameDay(DateTime.now(), record.createdAt)) {
           return EmptyWidget(height: height, width: width);
         }
 
-        final now = DateTime.now();
         final times = record.getLastPunchTimes();
         final lastLocation = record.getLastLocation();
 
-        if (!DateUtils.isSameDay(now, record.createdAt)) {
-          return EmptyWidget(height: height, width: width);
-        }
-
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(15),
+           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            gradient: LinearGradient(
-              colors: [AppColor.mainThemeColor, AppColor.primaryThemeColor],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColor.shadowColor,
-                blurRadius: 10,
-                offset: const Offset(2, 2),
-              )
-            ],
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Last updated
               Text(
-                'Last Updated - ${DateFormat('hh:mm - dd-MM-yyyy').format(DateTime.parse(record.outTime))}',
+                'Last Updated - ${DateFormat('hh:mm a · dd MMM yyyy').format(DateTime.parse(record.outTime))}',
                 style: TextStyle(
                   fontSize: height * 0.014,
-                  color: AppColor.mainFGColor,
+                  color: Colors.blueGrey,
                 ),
               ),
-              SizedBox(height: height * 0.02),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Punch in',
-                          style: TextStyle(
-                              fontSize: height * 0.015,
-                              color: AppColor.mainFGColor)),
-                      Text('${times['lastIn']}',
-                          style: TextStyle(
-                            fontSize: height * 0.020,
-                            fontWeight: FontWeight.bold,
-                            color: AppColor.mainFGColor,
-                          )),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text('Punch out',
-                          style: TextStyle(
-                              fontSize: height * 0.015,
-                              color: AppColor.mainFGColor)),
-                      Text('${times['lastOut']}',
-                          style: TextStyle(
-                            fontSize: height * 0.020,
-                            fontWeight: FontWeight.bold,
-                            color: AppColor.mainFGColor,
-                          )),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: height * 0.02),
+        
+             
+        
+              SizedBox(height: height * 0.016),
+        
+              // Location
               Row(
                 children: [
                   Icon(Icons.location_on,
-                      size: height * 0.015, color: AppColor.mainFGColor),
-                  SizedBox(width: width * 0.02),
-                  Visibility(
-                    visible: lastLocation.contains('OUT'),
-                    child: Expanded(
-                      child: Text(lastLocation.replaceFirst('(OUT)', '').trim(),
-                          style: TextStyle(
-                              fontSize: height * 0.015,
-                              color: AppColor.mainFGColor)),
-                    ),
-                  ),
-                  Visibility(
-                    visible: lastLocation.contains('IN'),
-                    child: Expanded(
-                      child: Text(lastLocation.replaceFirst('(IN)', '').trim(),
-                          style: TextStyle(
-                              fontSize: height * 0.015,
-                              color: AppColor.mainFGColor)),
-                    ),
-                  ),
-                  Visibility(
-                    visible: lastLocation.contains('UP'),
-                    child: Expanded(
-                      child: Text(lastLocation.replaceFirst('(UP)', '').trim(),
-                          style: TextStyle(
-                              fontSize: height * 0.015,
-                              color: AppColor.mainFGColor)),
+                      color: Colors.deepPurple, size: height * 0.020),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      lastLocation.replaceAll(RegExp(r'\(.*?\)'), '').trim(),
+                      style: TextStyle(
+                        fontSize: height * 0.015,
+                        color: Colors.grey.shade800,
+                      ),
                     ),
                   ),
                 ],
+              ),
+               SizedBox(height: height * 0.016),
+        
+              // Punch times
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColor.newgredient2,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _punchTimeBlock(
+                          height, 'Punch in', times['lastIn']!, Colors.green),
+                      _punchTimeBlock(
+                          height, 'Punch out', times['lastOut']!, Colors.red),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _punchTimeBlock(
+      double height, String title, String value, Color accentColor) {
+    return Column(
+      crossAxisAlignment: title == 'Punch in'
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.end,
+      children: [
+        Text(
+          title.toUpperCase(),
+          style: TextStyle(
+            fontSize: height * 0.014,
+            color: Colors.black.withOpacity(0.8),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(height: height * 0.004),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: height * 0.021,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -159,85 +145,81 @@ class EmptyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        gradient: LinearGradient(
-          colors: [AppColor.mainThemeColor, AppColor.primaryThemeColor],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColor.shadowColor,
-            blurRadius: 10,
-            offset: const Offset(2, 2),
-          )
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Punch In
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Punch in',
-                    style: TextStyle(
-                        fontSize: height * 0.015, color: AppColor.mainFGColor),
-                  ),
-                  Text(
-                    '--/--',
-                    style: TextStyle(
-                      fontSize: height * 0.020,
-                      fontWeight: FontWeight.bold,
-                      color: AppColor.mainFGColor,
-                    ),
-                  ),
-                ],
-              ),
-              // Punch Out
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'Punch out',
-                    style: TextStyle(
-                        fontSize: height * 0.015, color: AppColor.mainFGColor),
-                  ),
-                  Text(
-                    '--/--',
-                    style: TextStyle(
-                      fontSize: height * 0.020,
-                      fontWeight: FontWeight.bold,
-                      color: AppColor.mainFGColor,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          width: double.infinity,
+   padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
           ),
-          SizedBox(height: height * 0.02),
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.location_on,
-                  size: height * 0.015, color: AppColor.mainFGColor),
-              SizedBox(width: width * 0.02),
-              Expanded(
-                child: Text(
-                  'Not Fetched',
-                  style: TextStyle(
-                      fontSize: height * 0.015, color: AppColor.mainFGColor),
+
+
+              // Location
+              Row(
+                children: [
+                  Icon(Icons.location_on,
+                      color: Colors.deepPurple, size: height * 0.020),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Location Not Fetched',
+                      style: TextStyle(
+                        fontSize: height * 0.015,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+               SizedBox(height: height * 0.016),
+
+              // Punch times
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColor.newgredient2,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _emptyPunchTile(
+                          height, 'Punch in', ),
+                      _emptyPunchTile(
+                          height, 'Punch out', ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-        ],
-      ),
+        );
+  }
+
+  Widget _emptyPunchTile(double height, String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: height * 0.015,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '--/--',
+          style: TextStyle(
+            fontSize: height * 0.020,
+            fontWeight: FontWeight.bold,
+            color: Colors.black38,
+          ),
+        ),
+      ],
     );
   }
 }

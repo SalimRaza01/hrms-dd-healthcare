@@ -7,16 +7,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_image_stack/flutter_image_stack.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 // import 'package:hrms/core/api/api_config.dart';
-import 'package:hrms/core/model/models.dart';
-import 'package:hrms/core/provider/provider.dart';
-import 'package:hrms/presentation/odoo/edit_project.dart';
+import '../../core/model/models.dart';
+import '../../core/provider/provider.dart';
+import 'edit_project.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:hrms/core/api/api.dart';
-import 'package:hrms/core/theme/app_colors.dart';
-import 'package:hrms/presentation/odoo/create_project.dart';
-import 'package:hrms/presentation/odoo/task_details.dart';
-import 'package:hrms/presentation/odoo/view_projects.dart';
+import '../../core/api/api.dart';
+import '../../core/theme/app_colors.dart';
+import 'create_project.dart';
+import 'task_details.dart';
+import 'view_projects.dart';
 import 'package:provider/provider.dart';
 
 class OdooDashboard extends StatefulWidget {

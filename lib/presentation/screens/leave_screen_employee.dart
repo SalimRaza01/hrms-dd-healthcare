@@ -1,13 +1,14 @@
 // ignore_for_file: sort_child_properties_last
 import 'dart:io';
+import '../../widgets/leave_balance_widget.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
-import 'package:hrms/core/api/api.dart';
-import 'package:hrms/core/model/models.dart';
-import 'package:hrms/core/provider/provider.dart';
-import 'package:hrms/core/theme/app_colors.dart';
+import '../../core/api/api.dart';
+import '../../core/model/models.dart';
+import '../../core/provider/provider.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -139,19 +140,18 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
     }
   }
 
-
-    @override
+  @override
   void setState(VoidCallback fn) {
     if (mounted) {
       super.setState(fn);
     }
   }
 
-  
-@override
-void dispose() {
-  super.dispose();
-}
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
@@ -170,85 +170,74 @@ void dispose() {
         return Scaffold(
             extendBodyBehindAppBar: true,
             backgroundColor: AppColor.mainBGColor,
-            body: Stack(
-              children: [
-                Container(
-                  height: updateUser == 'Leave Request'
-                      ? height * 0.28
-                      : height * 0.155,
-                  width: width,
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColor.primaryThemeColor,
-                          AppColor.secondaryThemeColor2,
-                        ],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                            spreadRadius: 2,
-                            blurRadius: 10,
-                            color: AppColor.shadowColor,
-                            offset: Offset(0, 10))
-                      ],
-                      color: AppColor.mainThemeColor,
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(20),
-                          bottomRight: Radius.circular(20))),
+            body: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColor.newgredient1,
+                    const Color.fromARGB(52, 124, 157, 174),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      
-                      TabBar(
-                          dividerColor: Colors.transparent,
-                          controller: _tabController,
-                          indicatorColor: AppColor.mainFGColor,
-                          labelColor: AppColor.mainFGColor,
-                          unselectedLabelColor:
-                             AppColor.unselectedColor,
-                          tabs: [
-                            Tab(
-                              child: Text('Leave Request'),
-                              // text: 'Leave Request',
-                            ),
-                            Tab(
-                              child: Text('Comp-Off Request'),
-                              // text: 'Leave Request',
-                            ),
-                          ]),
-                      SizedBox(
-                        height: height * 0.015,
-                      ),
-                      Expanded(
-                        child:
-                            TabBarView(controller: _tabController, children: [
-                          leaveSection(height, width),
-                          compOffSection(height, width),
-                        ]),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            floatingActionButton: FloatingActionButton.extended(
-              backgroundColor: AppColor.mainThemeColor,
-              onPressed: () => showCupertinoModalBottomSheet(
-                expand: true,
-                context: context,
-                barrierColor: AppColor.barrierColor,
-                backgroundColor: Colors.transparent,
-                builder: (context) => ApplyLeave(),
               ),
-              label: Text(
-                'Apply Leave',
-                style: TextStyle(color: AppColor.mainFGColor),
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TabBar(
+                        dividerColor: Colors.transparent,
+                        controller: _tabController,
+                        indicatorColor: AppColor.mainTextColor,
+                        labelColor: AppColor.mainTextColor,
+                        unselectedLabelColor: AppColor.unselectedColor,
+                        tabs: [
+                          Tab(
+                            child: Text(
+                              'Leave Request',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            // text: 'Leave Request',
+                          ),
+                          Tab(
+                            child: Text(
+                              'Comp-Off Request',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            // text: 'Leave Request',
+                          ),
+                        ]),
+                    SizedBox(
+                      height: height * 0.015,
+                    ),
+                    Expanded(
+                      child: TabBarView(controller: _tabController, children: [
+                        leaveSection(height, width),
+                        compOffSection(height, width),
+                      ]),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            floatingActionButton: Padding(
+              padding: const EdgeInsets.only(bottom: 90),
+              child: FloatingActionButton.extended(
+                backgroundColor: Colors.black,
+                onPressed: () => showCupertinoModalBottomSheet(
+                  expand: true,
+                  context: context,
+                  barrierColor: AppColor.barrierColor,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => ApplyLeave(),
+                ),
+                label: Text(
+                  'Apply Leave',
+                  style: TextStyle(color: AppColor.mainFGColor),
+                ),
               ),
             ));
       }),
@@ -258,51 +247,7 @@ void dispose() {
   leaveSection(double height, double width) {
     return Column(
       children: [
-        Card(
-          color: AppColor.mainFGColor,
-          elevation: 4,
-          margin: EdgeInsets.all(0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          shadowColor: AppColor.shadowColor,
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: SizedBox(
-              width: width,
-              child: FutureBuilder<LeaveBalance>(
-                  future: fetchLeaves(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: LoadingAnimationWidget.threeArchedCircle(
-                          color: AppColor.mainTextColor2,
-                          size: height * 0.03,
-                        ),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('No Data Found'));
-                    } else if (snapshot.hasData) {
-                      final leave = snapshot.data!;
-
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          leaveWidget(
-                              height, width, 'Casual', leave.casualLeave),
-                          leaveWidget(
-                              height, width, 'Medical', leave.medicalLeave),
-                          leaveWidget(
-                              height, width, 'Earned', leave.earnedLeave),
-                        ],
-                      );
-                    } else {
-                      return Center(child: Text('No Data Found'));
-                    }
-                  }),
-            ),
-          ),
-        ),
+        LeaveBalanceWidget(),
         SizedBox(
           height: height * 0.012,
         ),
@@ -311,7 +256,7 @@ void dispose() {
           elevation: 4,
           margin: EdgeInsets.all(0),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(28),
           ),
           shadowColor: AppColor.shadowColor,
           child: Padding(
@@ -341,40 +286,22 @@ void dispose() {
                   );
                 } else if (snapshot.hasError) {
                   return Center(
-                    child: Card(
-                      color: AppColor.mainFGColor,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'No Leave Request Found',
+                        style: TextStyle(fontSize: height * 0.014),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'No Leave Request Found',
-                          style: TextStyle(fontSize: height * 0.014),
-                        ),
-                      ),
-                      shadowColor: AppColor.shadowColor,
                     ),
                   );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(
-                    child: Card(
-                      color: AppColor.mainFGColor,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'No Leave Request Found',
+                        style: TextStyle(fontSize: height * 0.014),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'No Leave Request Found',
-                          style: TextStyle(fontSize: height * 0.014),
-                        ),
-                      ),
-                      shadowColor: AppColor.shadowColor,
                     ),
                   );
                 } else {
@@ -382,90 +309,75 @@ void dispose() {
 
                   return ListView.separated(
                     itemCount: items.length,
+                    separatorBuilder: (context, index) => SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final leave = items[index];
                       final startDate = DateTime.parse(leave.leaveStartDate);
                       final endDate = DateTime.parse(leave.leaveEndDate);
+                      final statusColor = leave.status == 'Pending'
+                          ? Colors.amber
+                          : leave.status == 'Approved'
+                              ? Colors.green
+                              : Colors.red;
+
+                      String getLeaveTitle(String type, String days) {
+                        final readableType = {
+                              'earnedLeave': 'Earned',
+                              'medicalLeave': 'Medical',
+                              'casualLeave': 'Casual',
+                              'paternityLeave': 'Paternity',
+                              'maternityLeave': 'Maternity',
+                              'regularized': 'Regularization',
+                              'shortLeave': 'Short-Leave',
+                            }[type] ??
+                            type;
+
+                        if (type == 'regularized' || type == 'shortLeave')
+                          return readableType;
+
+                        return days == '1'
+                            ? '$readableType - Full Day'
+                            : days == '0.5'
+                                ? '$readableType - Half-Day'
+                                : '$readableType - $days Days';
+                      }
+
                       return Card(
                         color: AppColor.mainFGColor,
-                        elevation: 8,
-                        margin: EdgeInsets.all(0),
+                        elevation: 0,
+                        margin: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                            borderRadius: BorderRadius.circular(28)),
                         shadowColor: AppColor.shadowColor,
                         child: Stack(
-                          alignment: AlignmentDirectional.topEnd,
+                          alignment: Alignment.topRight,
                           children: [
                             Padding(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 8),
+                                  horizontal: 16, vertical: 14),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  /// Leave Title + Date
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
+                                      /// Leave Type
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            leave.leaveType == 'earnedLeave'
-                                                ? leave.totalDays == '1'
-                                                    ? 'Earned - Full Day'
-                                                    : leave.totalDays == '0.5'
-                                                        ? 'Earned - Half-Day'
-                                                        : 'Earned - ${leave.totalDays} Days'
-                                                : leave.leaveType ==
-                                                        'medicalLeave'
-                                                    ? leave.totalDays == '1'
-                                                        ? 'Medical - Full Day'
-                                                        : leave.totalDays ==
-                                                                '0.5'
-                                                            ? 'Medical - Half-Day'
-                                                            : 'Medical - ${leave.totalDays} Days'
-                                                    : leave.leaveType ==
-                                                            'casualLeave'
-                                                        ? leave.totalDays == '1'
-                                                            ? 'Casual - Full Day'
-                                                            : leave.totalDays ==
-                                                                    '0.5'
-                                                                ? 'Casual - Half-Day'
-                                                                : 'Casual - ${leave.totalDays} Days'
-                                                        : leave.leaveType ==
-                                                                'paternityLeave'
-                                                            ? leave.totalDays ==
-                                                                    '1'
-                                                                ? 'Paternity - Full Day'
-                                                                : leave.totalDays ==
-                                                                        '0.5'
-                                                                    ? 'Paternity - Half-Day'
-                                                                    : 'Paternity - ${leave.totalDays} Days'
-                                                            : leave.leaveType ==
-                                                                    'maternityLeave'
-                                                                ? leave.totalDays ==
-                                                                        '1'
-                                                                    ? 'Maternity - Full Day'
-                                                                    : leave.totalDays ==
-                                                                            '0.5'
-                                                                        ? 'Maternity - Half-Day'
-                                                                        : 'Maternity - ${leave.totalDays} Days'
-                                                                : leave.leaveType ==
-                                                                        'regularized'
-                                                                    ? 'Regularization'
-                                                                    : leave.leaveType ==
-                                                                            'shortLeave'
-                                                                        ? 'Short-Leave'
-                                                                        : leave
-                                                                            .leaveType,
+                                            getLeaveTitle(leave.leaveType,
+                                                leave.totalDays),
                                             style: TextStyle(
-                                              fontSize: height * 0.013,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColor.mainThemeColor,
+                                              fontSize: height * 0.014,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(0xFF40738D),
                                             ),
                                           ),
+                                          const SizedBox(height: 4),
                                           Text(
                                             leave.totalDays == '1' ||
                                                     leave.totalDays == '0.5'
@@ -473,8 +385,7 @@ void dispose() {
                                                     .format(startDate)
                                                 : '${DateFormat('EEE, dd MMM').format(startDate)} - ${DateFormat('EEE, dd MMM').format(endDate)}',
                                             style: TextStyle(
-                                              fontSize: height * 0.015,
-                                              fontWeight: FontWeight.bold,
+                                              fontSize: height * 0.0135,
                                               color: AppColor.mainTextColor,
                                             ),
                                           ),
@@ -482,81 +393,70 @@ void dispose() {
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: height * 0.015),
+
+                                  SizedBox(height: height * 0.012),
+
+                                  /// Reason Box
                                   Container(
                                     width: width,
                                     decoration: BoxDecoration(
                                       color: AppColor.mainBGColor,
-                                      borderRadius: BorderRadius.circular(7),
-                                      // boxShadow: [
-                                      //   BoxShadow(
-                                      //     color: Colors.black12,
-                                      //     blurRadius: 4,
-                                      //     offset: Offset(0, 2),
-                                      //   ),
-                                      // ],
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Text(
-                                        leave.reason,
-                                        style: TextStyle(
-                                          fontSize: height * 0.014,
-                                          color: AppColor.mainTextColor2,
-                                          fontWeight: FontWeight.w400,
-                                        ),
+                                    padding: const EdgeInsets.all(10),
+                                    child: Text(
+                                      leave.reason,
+                                      style: TextStyle(
+                                        fontSize: height * 0.014,
+                                        fontWeight: FontWeight.w400,
+                                        color: AppColor.mainTextColor2,
                                       ),
                                     ),
                                   ),
-                                  Visibility(
-                                    visible: leave.location!.isNotEmpty,
-                                    child: Padding(
+
+                                  /// Prescription File
+                                  if (leave.location?.isNotEmpty == true)
+                                    Padding(
                                       padding: const EdgeInsets.only(top: 12),
                                       child: InkWell(
-                                        onTap: () {
-                                          _downloadDocument(leave.location!);
-                                        },
+                                        onTap: () =>
+                                            _downloadDocument(leave.location!),
                                         child: Container(
-                                          width: width,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 8),
                                           decoration: BoxDecoration(
                                             border: Border.all(
                                                 color: AppColor.mainBGColor,
                                                 width: 2),
                                             borderRadius:
-                                                BorderRadius.circular(12),
+                                                BorderRadius.circular(10),
                                             color: AppColor.mainFGColor,
                                           ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.file_copy_rounded,
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.file_copy_rounded,
                                                   color: Colors.blue,
-                                                  size: height * 0.013,
+                                                  size: height * 0.016),
+                                              const SizedBox(width: 10),
+                                              Text(
+                                                'View Prescription',
+                                                style: TextStyle(
+                                                  fontSize: height * 0.013,
+                                                  color:
+                                                      AppColor.mainTextColor2,
+                                                  fontWeight: FontWeight.w500,
                                                 ),
-                                                SizedBox(width: width * 0.03),
-                                                Text(
-                                                  'View Prescription',
-                                                  style: TextStyle(
-                                                    color:
-                                                        AppColor.mainTextColor2,
-                                                    fontSize: height * 0.012,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  Visibility(
-                                    visible: leave.status != "Pending",
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0),
+
+                                  /// Remarks if not pending
+                                  if (leave.status != "Pending")
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 12),
                                       child: Text(
                                         leave.remarks,
                                         style: TextStyle(
@@ -566,169 +466,59 @@ void dispose() {
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  Visibility(
-                                    visible: leave.status == 'Pending',
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(top: 15),
+
+                                  /// Delete Request if pending
+                                  if (leave.status == 'Pending')
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 14),
                                       child: Center(
                                         child: GestureDetector(
-                                          onTap: () => showDialog<void>(
-                                          barrierColor: AppColor.barrierColor, // Darker background
-                                            context: context,
-                                            barrierDismissible: true,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                backgroundColor: AppColor.mainFGColor, // Dialog background color
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          20), // Rounded corners
-                                                ),
-                                                title: Text(
-                                                  'Confirm Action',
-                                                  style: TextStyle(
-                                                    fontSize: height * 0.015,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: AppColor.mainTextColor,
-                                                  ),
-                                                ),
-                                                content: Text(
-                                                  'Are you sure you want to delete leave request',
-                                                  style: TextStyle(
-                                                    fontSize: height * 0.013,
-                                                    color: AppColor.mainTextColor2,
-                                                  ),
-                                                ),
-                                                actionsPadding:
-                                                    EdgeInsets.symmetric(
-                                                        horizontal: 16,
-                                                        vertical:
-                                                            8), // Add spacing
-                                                actionsAlignment: MainAxisAlignment
-                                                    .spaceBetween, // Spread the buttons
-                                                actions: [
-                                                  ElevatedButton(
-                                                    onPressed: () async {
-                                                      await ownLeaveActionDelete(
-                                                          context, leave.id);
-                                                      setState(() {
-                                                        _leaveHistory =
-                                                            fetchLeaveHistory(
-                                                                _selectedText,
-                                                              );
-                                                      });
-                                                      Navigator.pop(context);
-                                                    },
-                                                    style: ElevatedButton
-                                                        .styleFrom(
-                                                      backgroundColor: Colors
-                                                          .redAccent, // Button background color
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 40,
-                                                              vertical: 8),
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(12),
-                                                      ),
-                                                      elevation: 0,
-                                                    ),
-                                                    child: Text(
-                                                      "Yes",
-                                                      style: TextStyle(
-                                                        color: AppColor.mainFGColor,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        letterSpacing: 0.5,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  OutlinedButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                    style: OutlinedButton
-                                                        .styleFrom(
-                                                      side: BorderSide(
-                                                          color:AppColor.borderColor),
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(12),
-                                                      ),
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 40,
-                                                              vertical: 8),
-                                                    ),
-                                                    child: Text(
-                                                      "No",
-                                                      style: TextStyle(
-                                                        color: AppColor.mainTextColor,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          ),
+                                          onTap: () => _confirmDelete(
+                                              context, leave.id, height),
                                           child: Container(
                                             decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                color: Colors.redAccent),
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: width / 9,
-                                                  vertical: 8),
-                                              child: Text(
-                                                'Delete Request',
-                                                style: TextStyle(
-                                                  color: AppColor.mainFGColor,
-                                                  fontSize: height * 0.012,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
+                                              borderRadius:
+                                                  BorderRadius.circular(28),
+                                              color: Colors.redAccent,
+                                            ),
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: width * 0.2,
+                                                vertical: 8),
+                                            child: Text(
+                                              'Delete Request',
+                                              style: TextStyle(
+                                                color: AppColor.mainFGColor,
+                                                fontSize: height * 0.013,
+                                                fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  SizedBox(height: height * 0.005),
                                 ],
                               ),
                             ),
+
+                            /// Status Badge (Top Right)
                             Container(
                               decoration: BoxDecoration(
+                                color: statusColor,
+                                borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(16),
+                                  bottomLeft: Radius.circular(20),
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              child: Text(
+                                leave.status,
+                                style: TextStyle(
+                                  fontSize: height * 0.012,
+                                  fontWeight: FontWeight.w500,
                                   color: leave.status == 'Pending'
-                                      ? Colors.amber
-                                      : leave.status == 'Approved'
-                                          ? Colors.green
-                                          : Colors.red,
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(10),
-                                      bottomLeft: Radius.circular(20))),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 0, horizontal: 20),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(7.0),
-                                  child: Text(
-                                    leave.status,
-                                    style: TextStyle(
-                                        fontSize: height * 0.012,
-                                        fontWeight: FontWeight.w400,
-                                        color: leave.status == 'Pending'
-                                            ? Colors.black
-                                            : AppColor.mainFGColor),
-                                  ),
+                                      ? Colors.black
+                                      : AppColor.mainFGColor,
                                 ),
                               ),
                             ),
@@ -736,12 +526,77 @@ void dispose() {
                         ),
                       );
                     },
-                    separatorBuilder: (context, index) => SizedBox(height: 10),
                   );
                 }
               }),
         ),
       ],
+    );
+  }
+
+  void _confirmDelete(BuildContext context, String id, double height) {
+    showDialog(
+      barrierColor: AppColor.barrierColor,
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppColor.mainFGColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            'Confirm Action',
+            style: TextStyle(
+                fontSize: height * 0.02,
+                fontWeight: FontWeight.bold,
+                color: AppColor.mainTextColor),
+          ),
+          content: Text(
+            'Are you sure you want to delete leave request?',
+            style: TextStyle(
+                fontSize: height * 0.012, color: AppColor.mainTextColor2),
+          ),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          actions: [
+            ElevatedButton(
+              onPressed: () async {
+                await ownLeaveActionDelete(context, id);
+                setState(() {
+                  _leaveHistory = fetchLeaveHistory(_selectedText);
+                });
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+                elevation: 0,
+              ),
+              child: Text("Yes",
+                  style: TextStyle(
+                      color: AppColor.mainFGColor,
+                      fontWeight: FontWeight.bold)),
+            ),
+            OutlinedButton(
+              onPressed: () => Navigator.pop(context),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: AppColor.borderColor),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+              ),
+              child: Text("No",
+                  style: TextStyle(
+                      color: AppColor.mainTextColor,
+                      fontWeight: FontWeight.w500)),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -753,7 +608,7 @@ void dispose() {
           elevation: 4,
           margin: EdgeInsets.all(0),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(28),
           ),
           shadowColor: AppColor.shadowColor,
           child: Padding(
@@ -783,40 +638,22 @@ void dispose() {
                   );
                 } else if (snapshot.hasError) {
                   return Center(
-                    child: Card(
-                      color: AppColor.mainFGColor,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'No Comp-Off Request Found',
+                        style: TextStyle(fontSize: height * 0.014),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'No Comp-Off Request Found',
-                          style: TextStyle(fontSize: height * 0.014),
-                        ),
-                      ),
-                      shadowColor: AppColor.shadowColor,
                     ),
                   );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(
-                    child: Card(
-                      color: AppColor.mainFGColor,
-                      elevation: 4,
-                      margin: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'No Comp-Off Request Found',
+                        style: TextStyle(fontSize: height * 0.014),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'No Comp-Off Request Found',
-                          style: TextStyle(fontSize: height * 0.014),
-                        ),
-                      ),
-                      shadowColor: AppColor.shadowColor,
                     ),
                   );
                 } else {
@@ -824,31 +661,37 @@ void dispose() {
 
                   return ListView.separated(
                     itemCount: items.length,
+                    separatorBuilder: (context, index) => SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final leave = items[index];
-                      // final startDate = DateTime.parse(leave.appliedDate);
+                      final statusColor = leave.status == 'Pending'
+                          ? Colors.amber
+                          : leave.status == 'Approved'
+                              ? Colors.green
+                              : Colors.red;
 
                       return Card(
                         color: AppColor.mainFGColor,
-                        elevation: 8,
-                        margin: EdgeInsets.all(0),
+                        elevation: 6,
+                        margin: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                            borderRadius: BorderRadius.circular(28)),
                         shadowColor: AppColor.shadowColor,
                         child: Stack(
-                          alignment: AlignmentDirectional.topEnd,
+                          alignment: Alignment.topRight,
                           children: [
                             Padding(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 8),
+                                  horizontal: 16, vertical: 14),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  /// Title & Date
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
+                                      /// Comp-Off Type + Date
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -856,16 +699,16 @@ void dispose() {
                                           Text(
                                             'Comp-Off Request (${leave.totalDays})',
                                             style: TextStyle(
-                                              fontSize: height * 0.013,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColor.mainThemeColor,
+                                              fontSize: height * 0.014,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(0xFF40738D),
                                             ),
                                           ),
+                                          const SizedBox(height: 4),
                                           Text(
                                             leave.compOffDate,
                                             style: TextStyle(
-                                              fontSize: height * 0.015,
-                                              fontWeight: FontWeight.bold,
+                                              fontSize: height * 0.0135,
                                               color: AppColor.mainTextColor,
                                             ),
                                           ),
@@ -873,37 +716,31 @@ void dispose() {
                                       ),
                                     ],
                                   ),
+
                                   SizedBox(height: height * 0.012),
+
+                                  /// Reason
                                   Container(
                                     width: width,
                                     decoration: BoxDecoration(
                                       color: AppColor.mainBGColor,
-                                      borderRadius: BorderRadius.circular(7),
-                                      // boxShadow: [
-                                      //   BoxShadow(
-                                      //     color: Colors.black12,
-                                      //     blurRadius: 4,
-                                      //     offset: Offset(0, 2),
-                                      //   ),
-                                      // ],
+                                      borderRadius: BorderRadius.circular(15),
                                     ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Text(
-                                        leave.reason,
-                                        style: TextStyle(
-                                          fontSize: height * 0.014,
-                                          color: AppColor.mainTextColor2,
-                                          fontWeight: FontWeight.w400,
-                                        ),
+                                    padding: const EdgeInsets.all(10),
+                                    child: Text(
+                                      leave.reason,
+                                      style: TextStyle(
+                                        fontSize: height * 0.014,
+                                        fontWeight: FontWeight.w400,
+                                        color: AppColor.mainTextColor2,
                                       ),
                                     ),
                                   ),
-                                  Visibility(
-                                    visible: leave.status != "Pending",
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0),
+
+                                  /// Comments (if approved/rejected)
+                                  if (leave.status != "Pending")
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 12),
                                       child: Text(
                                         leave.comments,
                                         style: TextStyle(
@@ -913,72 +750,62 @@ void dispose() {
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  Visibility(
-                                    visible: leave.status == 'Pending',
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(top: 15),
+
+                                  /// Delete Button (only if pending)
+                                  if (leave.status == 'Pending')
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 14),
                                       child: Center(
                                         child: GestureDetector(
-                                          onTap: () async {
-                                            await ownCompOffActionDelete(
-                                                context, leave.id);
-                                            setState(() {
-                                              _compOffRequest =
-                                                  fetchOwnCompOffRequest('');
-                                            });
+                                          onTap: () {
+                                            _confirmCompOffDelete(
+                                                context, leave.id, height);
                                           },
                                           child: Container(
                                             decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                color: Colors.redAccent),
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: width / 9,
-                                                  vertical: 8),
-                                              child: Text(
-                                                'Delete Request',
-                                                style: TextStyle(
-                                                  color: AppColor.mainFGColor,
-                                                  fontSize: height * 0.012,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
+                                              borderRadius:
+                                                  BorderRadius.circular(28),
+                                              color: Colors.redAccent,
+                                            ),
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: width * 0.2,
+                                              vertical: 8,
+                                            ),
+                                            child: Text(
+                                              'Delete Request',
+                                              style: TextStyle(
+                                                color: AppColor.mainFGColor,
+                                                fontSize: height * 0.013,
+                                                fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  SizedBox(height: height * 0.005),
                                 ],
                               ),
                             ),
+
+                            /// Status Badge
                             Container(
                               decoration: BoxDecoration(
+                                color: statusColor,
+                                borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(16),
+                                  bottomLeft: Radius.circular(20),
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              child: Text(
+                                leave.status,
+                                style: TextStyle(
+                                  fontSize: height * 0.012,
+                                  fontWeight: FontWeight.w500,
                                   color: leave.status == 'Pending'
-                                      ? Colors.amber
-                                      : leave.status == 'Approved'
-                                          ? Colors.green
-                                          : Colors.red,
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(10),
-                                      bottomLeft: Radius.circular(20))),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 0, horizontal: 20),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(7.0),
-                                  child: Text(
-                                    leave.status,
-                                    style: TextStyle(
-                                        fontSize: height * 0.012,
-                                        fontWeight: FontWeight.w400,
-                                        color: leave.status == 'Pending'
-                                            ? Colors.black
-                                            : AppColor.mainFGColor),
-                                  ),
+                                      ? Colors.black
+                                      : AppColor.mainFGColor,
                                 ),
                               ),
                             ),
@@ -986,7 +813,6 @@ void dispose() {
                         ),
                       );
                     },
-                    separatorBuilder: (context, index) => SizedBox(height: 10),
                   );
                 }
               }),
@@ -995,39 +821,72 @@ void dispose() {
     );
   }
 
-  SizedBox leaveWidget(
-      double height, double width, String leave, String leaveCount) {
-    return SizedBox(
-      width: width * 0.27,
-      child: Card(
-        color: AppColor.mainBGColor,
-        elevation: 4,
-        margin: EdgeInsets.all(0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        shadowColor: AppColor.shadowColor,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
-          child: Column(
-            children: [
-              Text(
-                leave,
-                style: TextStyle(color: AppColor.mainTextColor2),
-              ),
-              SizedBox(
-                height: 5,
-              ),
-              Text(
-                leaveCount,
-                style: TextStyle(
-                    color: AppColor.mainTextColor2,
-                    fontSize: height * 0.022),
-              ),
-            ],
+  Future<void> _confirmCompOffDelete(
+      BuildContext context, String id, double height) async {
+    return showDialog<void>(
+      barrierColor: AppColor.barrierColor,
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppColor.mainFGColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            'Confirm Deletion',
+            style: TextStyle(
+              fontSize: height * 0.02,
+              fontWeight: FontWeight.bold,
+              color: AppColor.mainTextColor,
+            ),
           ),
-        ),
-      ),
+          content: Text(
+            'Are you sure you want to delete this comp-off request?',
+            style: TextStyle(
+              fontSize: height * 0.012,
+              color: AppColor.mainTextColor2,
+            ),
+          ),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          actions: [
+            ElevatedButton(
+              onPressed: () async {
+                await ownCompOffActionDelete(context, id);
+                setState(() {
+                  _compOffRequest = fetchOwnCompOffRequest('');
+                });
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+              ),
+              child: Text("Yes",
+                  style: TextStyle(
+                      color: AppColor.mainFGColor,
+                      fontWeight: FontWeight.bold)),
+            ),
+            OutlinedButton(
+              onPressed: () => Navigator.pop(context),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: AppColor.borderColor),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+              ),
+              child: Text("No",
+                  style: TextStyle(
+                      color: AppColor.mainTextColor,
+                      fontWeight: FontWeight.w500)),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -1036,11 +895,11 @@ void dispose() {
     Color activeText;
 
     if (_selectedText == text) {
-      activeColor = AppColor.mainThemeColor;
+      activeColor = const Color(0xFF40738D);
       activeText = AppColor.mainFGColor;
     } else {
       activeColor = Colors.transparent;
-      activeText =  AppColor.mainTextColor2;
+      activeText = AppColor.mainTextColor2;
     }
 
     return GestureDetector(
@@ -1052,7 +911,7 @@ void dispose() {
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(28),
           color: activeColor,
         ),
         child: Padding(
@@ -1074,11 +933,11 @@ void dispose() {
     Color activeText;
 
     if (_selectedCompoffText == text) {
-      activeColor = AppColor.mainThemeColor;
+      activeColor = const Color(0xFF40738D);
       activeText = AppColor.mainFGColor;
     } else {
       activeColor = Colors.transparent;
-      activeText =  AppColor.mainTextColor2;
+      activeText = AppColor.mainTextColor2;
     }
 
     return GestureDetector(
@@ -1090,7 +949,7 @@ void dispose() {
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(28),
           color: activeColor,
         ),
         child: Padding(

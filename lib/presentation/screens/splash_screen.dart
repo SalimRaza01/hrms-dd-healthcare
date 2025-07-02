@@ -1,11 +1,10 @@
 // ignore_for_file: unused_field
 
 import 'package:flutter/services.dart';
-import 'package:hrms/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hrms/presentation/authentication/login_screen.dart';
-import 'package:hrms/presentation/screens/new_onbaording.dart';
+import '../authentication/login_screen.dart';
+import 'new_onbaording.dart';
 import 'bottom_navigation.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
@@ -121,8 +120,8 @@ class _SplashScreenState extends State<SplashScreen>
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppColor.primaryThemeColor,
-                AppColor.secondaryThemeColor2,
+                Color(0xFF7B9EB1),
+                Color.fromARGB(255, 32, 52, 62),
               ],
             ),
           ),
@@ -131,12 +130,16 @@ class _SplashScreenState extends State<SplashScreen>
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                    SizedBox(height: height * 0.2,),
+                SizedBox(
+                  height: height * 0.2,
+                ),
                 Image.asset(
                   'assets/image/DDHRMS.png',
                   height: 100,
                 ),
-                SizedBox(height: height * 0.1,),
+                SizedBox(
+                  height: height * 0.1,
+                ),
                 Column(
                   children: [
                     Text(

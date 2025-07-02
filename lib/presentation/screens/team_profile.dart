@@ -1,9 +1,8 @@
 import 'package:flutter/services.dart';
-import 'package:hrms/core/theme/app_colors.dart';
-import 'package:flutter/cupertino.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:hrms/core/api/api.dart';
-import 'package:hrms/core/model/models.dart';
+import '../../core/api/api.dart';
+import '../../core/model/models.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class TeamProfile extends StatefulWidget {
@@ -15,269 +14,196 @@ class TeamProfile extends StatefulWidget {
 
 class _TeamProfileState extends State<TeamProfile> {
   late Future<EmployeeProfile> employeeProfile;
-  late String empID;
 
   @override
   void initState() {
     super.initState();
-     SystemChrome.setPreferredOrientations([
+    SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
     employeeProfile = fetchEmployeeDetails(widget.empID);
   }
 
-    @override
-  void setState(VoidCallback fn) {
-    if (mounted) {
-      super.setState(fn);
-    }
-  }
-
-  
-@override
-void dispose() {
-  super.dispose();
-}
   @override
   Widget build(BuildContext context) {
-        final height = MediaQuery.of(context).size.height;
+    final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: AppColor.mainBGColor,
-      body: FutureBuilder<EmployeeProfile>(
-        future: employeeProfile,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-                                        child: LoadingAnimationWidget
-                                            .threeArchedCircle(
-                                          color: AppColor.mainTextColor2,
-                                          size: height * 0.03,
-                                        ),
-                                      );
-          } else if (snapshot.hasError) {
-            return Center(
-                child:
-                    Text('No Data Found'));
-          } else if (!snapshot.hasData) {
-            return Center(child: Text('No data found'));
-          } else {
-            final employee = snapshot.data!;
-            return ListView(children: [
-              Container(
+      body: Container(
                 decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColor.primaryThemeColor,
-                        AppColor.secondaryThemeColor2,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(10),
-                        bottomLeft: Radius.circular(10))),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColor.newgredient1,
+              const Color.fromARGB(52, 124, 157, 174),
+            ],
+          ),
+        ),
+        child: FutureBuilder<EmployeeProfile>(
+          future: employeeProfile,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: LoadingAnimationWidget.threeArchedCircle(
+                  color: AppColor.mainTextColor2,
+                  size: height * 0.03,
+                ),
+              );
+            } else if (snapshot.hasError || !snapshot.hasData) {
+              return Center(child: Text('No Data Found', style: TextStyle(color: AppColor.mainTextColor2)));
+            }
+        
+            final employee = snapshot.data!;
+            return ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+              children: [
+                // --- Profile Header ---
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+     color:  const Color.fromARGB(52, 124, 157, 174),
+                    borderRadius: BorderRadius.circular(28),
+                  ),
                   child: Row(
                     children: [
                       CircleAvatar(
+                        radius: 30,
                         backgroundImage: employee.employeePhoto.contains('NA')
                             ? AssetImage(
                                 employee.gender == 'Male'
                                     ? 'assets/image/MaleAvatar.png'
                                     : 'assets/image/FemaleAvatar.png',
-                              )
+                              ) as ImageProvider
                             : NetworkImage(employee.employeePhoto),
-                        radius: 30,
                       ),
-                      SizedBox(width: 20),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            employee.employeeName,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: AppColor.mainFGColor,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              employee.employeeName,
+                              style: TextStyle(
+                                fontSize: height * 0.022,
+                                fontWeight: FontWeight.bold,
+                                color:AppColor.mainTextColor
+                              ),
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Text(
-                            employee.email,
-                            style: TextStyle(
-                                fontSize: 16,
-                                color:
-                                    AppColor.mainFGColor),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              employee.email,
+                              style: TextStyle(
+                                fontSize: height * 0.016,
+                                color:AppColor.mainTextColor
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Card(
-                  color: AppColor.mainFGColor,
-                  elevation: 4,
-                  margin: EdgeInsets.all(0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  shadowColor: AppColor.shadowColor,
-                  child: Padding(
-                    padding: const EdgeInsets.all(15),
-                    child: Column(children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          border:
-                              Border.all(color: AppColor.mainBGColor, width: 2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Personal Information',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: AppColor.mainTextColor2,
-                                ),
-                              ),
-                              SizedBox(height: 5),
-                              _buildProfileInfo(
-                                  'Gender :', employee.gender, Icons.person),
-                              _buildProfileInfo('Date of Birth :', employee.dob,
-                                  Icons.calendar_today),
-                              _buildProfileInfo('Marital Status :',
-                                  employee.maritalStatus, Icons.favorite),
-                              _buildProfileInfo('Address :',
-                                  employee.permanentAddress, Icons.flag),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: height * 0.015,
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          border:
-                              Border.all(color: AppColor.mainBGColor, width: 2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Contact Information',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: AppColor.mainTextColor2,
-                                ),
-                              ),
-                              SizedBox(height: 5),
-                              _buildProfileInfo('Contact No :',
-                                  employee.contactNo, Icons.phone),
-                              _buildProfileInfo(
-                                  'Email :', employee.email, Icons.email),
-                              _buildProfileInfo(
-                                  'Emergency Contact :',
-                                  employee.emergencyContact,
-                                  Icons.local_hospital),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: height * 0.015,
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          border:
-                              Border.all(color: AppColor.mainBGColor, width: 2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Work Information',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: AppColor.mainTextColor2,
-                                ),
-                              ),
-                              SizedBox(height: 5),
-                              _buildProfileInfo('EmployeeID :',
-                                  employee.employeeId, Icons.badge),
-                              _buildProfileInfo('Date of Joining :',
-                                  employee.doj, Icons.work),
-                              _buildProfileInfo('Workplace :',
-                                  employee.workPlace, Icons.business),
-                              _buildProfileInfo('Designation :',
-                                  employee.designation, Icons.assignment),
-                              _buildProfileInfo('Employee Type :',
-                                  employee.employmentType, Icons.assignment),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ]),
-                  ),
+        
+                 SizedBox(height: height * 0.012),
+                _sectionCard(
+                  title: "Personal Information",
+                  height: height,
+                  children: [
+                    _infoRow("Gender", employee.gender),
+                    _infoRow("Date of Birth", employee.dob),
+                    _infoRow("Marital Status", employee.maritalStatus),
+                    _infoRow("Address", employee.permanentAddress),
+                  ],
                 ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-            ]);
-          }
-        },
+                SizedBox(height: height * 0.012),
+                _sectionCard(
+                  title: "Contact Information",
+                  height: height,
+                  children: [
+                    _infoRow("Contact No", employee.contactNo),
+                    _infoRow("Email", employee.email),
+                    _infoRow("Emergency Contact", employee.emergencyContact),
+                  ],
+                ),
+                 SizedBox(height: height * 0.012),
+                _sectionCard(
+                  title: "Work Information",
+                  height: height,
+                  children: [
+                    _infoRow("Employee ID", employee.employeeId),
+                    _infoRow("Date of Joining", employee.doj),
+                    _infoRow("Workplace", employee.workPlace),
+                    _infoRow("Designation", employee.designation),
+                    _infoRow("Employee Type", employee.employmentType),
+                  ],
+                ),
+                  SizedBox(height: height * 0.012),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildProfileInfo(String label, String value, IconData icon) {
+  Widget _sectionCard({
+    required String title,
+    required double height,
+    required List<Widget> children,
+  }) {
+    return Card(
+      color:   const Color.fromARGB(224, 255, 255, 255),
+      elevation: 0,
+      shadowColor: AppColor.shadowColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: height * 0.018,
+                fontWeight: FontWeight.w600,
+                color: AppColor.mainTextColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _infoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label,
+            "$label: ",
             style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
               color: AppColor.mainTextColor2,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
               style: TextStyle(
-                fontSize: 14,
                 color: AppColor.mainTextColor2,
+                fontSize: 14,
               ),
-              textAlign: TextAlign.end,
+              textAlign: TextAlign.right,
             ),
           ),
         ],

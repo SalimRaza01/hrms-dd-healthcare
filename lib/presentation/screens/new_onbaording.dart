@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hrms/core/theme/app_colors.dart';
-import 'package:hrms/presentation/screens/bottom_navigation.dart';
+import '../authentication/login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
@@ -41,10 +40,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-         Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => BottomNavigation()),
-    );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
     }
   }
 
@@ -57,22 +56,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColor.primaryThemeColor,
-              AppColor.secondaryThemeColor2,
+              Color(0xFF7B9EB1),
+              Color.fromARGB(255, 32, 52, 62),
             ],
           ),
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Align(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 40, right: 20),
+              child: Align(
                 alignment: Alignment.topRight,
                 child: TextButton(
                   onPressed: () {
-               Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => BottomNavigation()),
-    );
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                    );
                   },
                   child: const Text(
                     'Skip',
@@ -80,45 +80,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
               ),
-              Expanded(
-                child: PageView.builder(
-                  controller: _controller,
-                  itemCount: onboardingData.length,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
-                  itemBuilder: (context, index) {
-                    return _buildPage(onboardingData[index]);
-                  },
-                ),
+            ),
+            Expanded(
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: onboardingData.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  return _buildPage(onboardingData[index]);
+                },
               ),
-              _buildDotIndicator(),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.purple,
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  onPressed: _nextPage,
-                  child: Text(
-                    "NEXT",
-                    style: TextStyle(
-                        color: AppColor.mainThemeColor,
-                        fontWeight: FontWeight.bold),
+            ),
+            _buildDotIndicator(),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF7B9EB1),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
+                onPressed: _nextPage,
+                child: Text(
+                  "NEXT",
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ),
               ),
-              const SizedBox(height: 30),
-            ],
-          ),
+            ),
+            const SizedBox(height: 30),
+          ],
         ),
       ),
     );

@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cupertino_datetime_picker/flutter_cupertino_datetime_picker.dart';
-import 'package:hrms/core/api/api.dart';
-import 'package:hrms/core/api/api_config.dart';
-import 'package:hrms/core/provider/provider.dart';
-import 'package:hrms/core/theme/app_colors.dart';
+import '../../core/api/api.dart';
+import '../../core/api/api_config.dart';
+import '../../core/provider/provider.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
