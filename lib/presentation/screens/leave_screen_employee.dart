@@ -308,6 +308,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
                   List<LeaveHistory> items = snapshot.data!;
 
                   return ListView.separated(
+                         physics:BouncingScrollPhysics(),
                     itemCount: items.length,
                     separatorBuilder: (context, index) => SizedBox(height: 12),
                     itemBuilder: (context, index) {
@@ -660,6 +661,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
                   List<CompOffRequest> items = snapshot.data!;
 
                   return ListView.separated(
+                         physics:BouncingScrollPhysics(),
                     itemCount: items.length,
                     separatorBuilder: (context, index) => SizedBox(height: 12),
                     itemBuilder: (context, index) {

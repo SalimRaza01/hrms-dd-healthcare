@@ -78,6 +78,7 @@ class _TeamPunchrecordsState extends State<TeamPunchrecords> {
               ),
               Expanded(
                 child: ListView.separated(
+                       physics:BouncingScrollPhysics(),
                   itemCount: punches.length ~/ 2,
                   itemBuilder: (context, index) {
                     String punchIn = punches[index * 2];

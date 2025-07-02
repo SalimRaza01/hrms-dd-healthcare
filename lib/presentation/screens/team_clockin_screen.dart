@@ -100,6 +100,7 @@ class _TeamClockinScreenState extends State<TeamClockinScreen> {
                         List<Attendance> items = snapshot.data!;
                   
                         return ListView.separated(
+                               physics:BouncingScrollPhysics(),
                           itemCount: items.length,
                           itemBuilder: (context, index) {
                             Attendance item = items[index];

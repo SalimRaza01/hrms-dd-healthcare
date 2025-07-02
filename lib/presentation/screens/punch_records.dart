@@ -255,6 +255,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
               SizedBox(height: height * 0.016),
               Expanded(
                 child: ListView.separated(
+                       physics:BouncingScrollPhysics(),
                   itemCount: punches.length ~/ 2,
                   itemBuilder: (context, index) {
                     String punchIn = punches[index * 2];

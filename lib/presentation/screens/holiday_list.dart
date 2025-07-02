@@ -139,6 +139,7 @@ class _HolidayListState extends State<HolidayList> {
                       List<HolidayModel> items = snapshot.data!;
 
                       return ListView.separated(
+                             physics:BouncingScrollPhysics(),
                         itemCount: items.length,
                         itemBuilder: (context, index) {
                           final item = items[index];

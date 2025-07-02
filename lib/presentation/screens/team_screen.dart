@@ -130,6 +130,7 @@ color:   const Color.fromARGB(52, 124, 157, 174),
 
                           return Expanded(
                             child: ListView.separated(
+                                   physics:BouncingScrollPhysics(),
                               itemCount: filteredEmployees.length,
                               itemBuilder: (context, index) {
                                 final employee = filteredEmployees[index];

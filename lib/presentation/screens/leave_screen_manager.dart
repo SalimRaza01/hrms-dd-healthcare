@@ -285,6 +285,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                       List<LeaveHistory> items = snapshot.data!;
 
                                       return ListView.separated(
+                                             physics:BouncingScrollPhysics(),
                                         itemCount: items.length,
                                         separatorBuilder: (context, index) =>
                                             SizedBox(height: 12),
@@ -686,6 +687,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                           snapshot.data!;
 
                                       return ListView.separated(
+                                             physics:BouncingScrollPhysics(),
                                         itemCount: items.length,
                                         separatorBuilder: (context, index) =>
                                             SizedBox(height: 12),
@@ -1218,6 +1220,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                             snapshot.data!;
 
                                         return ListView.separated(
+                                               physics:BouncingScrollPhysics(),
                                           itemCount: items.length,
                                           itemBuilder: (context, index) {
                                             final leave = items[index];
@@ -1703,6 +1706,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                           snapshot.data!;
 
                                       return ListView.separated(
+                                             physics:BouncingScrollPhysics(),
                                         itemCount: items.length,
                                         itemBuilder: (context, index) {
                                           final leave = items[index];

@@ -100,6 +100,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
     return SafeArea(
       child: Scaffold(
         body: Container(
+     
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -134,12 +135,13 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                     borderRadius: BorderRadius.circular(28),
                   ),
                   child: ListView.builder(
+                         physics:BouncingScrollPhysics(),
                     scrollDirection: Axis.horizontal,
                     itemCount: months.length,
                     itemBuilder: (context, index) {
                       final items = months[index];
                       bool isSelected = selectedIndex == index;
-      
+            
                       return Padding(
                         padding: const EdgeInsets.only(right: 5.0),
                         child: GestureDetector(
@@ -188,39 +190,40 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                             child: Text('No attendance records available.'));
                       } else {
                         List<Attendance> items = snapshot.data!;
-      
+                                
                         return ListView.separated(
+                          physics:BouncingScrollPhysics(),
                           itemCount: items.length,
                           itemBuilder: (context, index) {
                             Attendance item = items[index];
-      
+                                
                             DateTime dateTime = DateTime.parse(item.inTime);
                             DateTime dateTime2 = DateTime.parse(item.outTime);
-      
+                                
                             int hours = item.duration ~/ 60;
                             int minutes = item.duration % 60;
-      
+                                
                             String formattedDuration = hours == 0 &&
                                     minutes == 0
                                 ? '--/--'
                                 : (hours < 10 ? '0$hours' : '$hours') +
                                     ':' +
                                     (minutes < 10 ? '0$minutes' : '$minutes');
-      
+                                
                             DateTime date = DateTime.parse(item.attendanceDate);
-      
+                                
                             String attendDate = DateFormat('dd').format(date);
-      
+                                
                             String attendDay = DateFormat('EEE').format(date);
-      
+                                
                             String regularizationDate =
                                 DateFormat('yyyy-MM-dd').format(date);
-      
+                                
                             String punchIn =
                                 "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
                             String punchOut =
                                 "${dateTime2.hour.toString().padLeft(2, '0')}:${dateTime2.minute.toString().padLeft(2, '0')}";
-      
+                                
                             DateTime? scheduledTime;
                             scheduledTime = _authBox
                                     .get('lateby')
@@ -232,17 +235,17 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                 : DateTime.parse(
                                     DateFormat('yyyy-MM-dd').format(dateTime) +
                                         ' 0${_authBox.get('lateby')}');
-      
+                                
                             Duration lateByDuration =
                                 dateTime.difference(scheduledTime);
-      
+                                
                             int lateMinutes = (lateByDuration.inMinutes) - 15;
                             int reguTimeLimit = (lateMinutes -
                                 ((lateMinutes / 60).toInt()) * 60);
-      
+                                
                             print(
                                 'late min $lateMinutes and regutime $reguTimeLimit');
-      
+                                
                             return InkWell(
                                 onTap: () {
                                   if (item.punchRecords.isNotEmpty) {
@@ -336,7 +339,7 @@ class _ClockInScreenSecondState extends State<ClockInScreenSecond> {
                                                   ],
                                                 ),
                                               ),
-      
+                                
                                               // Clock-In
                                               Column(
                                                 mainAxisAlignment:
