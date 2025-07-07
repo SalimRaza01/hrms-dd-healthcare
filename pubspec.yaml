@@ -59,6 +59,8 @@ dependencies:
   lucide_icons: ^0.257.0
   flutter_svg: ^2.2.0
   flutter_image_compress:
+  mapbox_maps_flutter: ^2.9.0
+  location: ^8.0.1
 
 
 dev_dependencies:

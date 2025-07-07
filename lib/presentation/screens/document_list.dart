@@ -88,13 +88,13 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: Colors.transparent,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Icon(
                           Icons.chevron_left,
-                          color: Colors.white,
+                          color: Colors.transparent,
                           size: height * 0.018,
                         ),
                       ),

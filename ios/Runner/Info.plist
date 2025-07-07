@@ -45,14 +45,16 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-    <key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library to upload or save photos.</string>
+    <key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to take your selfie during attendance.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo library access is required to upload and save images.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>We need permission to save files and images to your photo library.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>This app requires camera access to take a selfie.</string>
+	<string>We need permission to save images to your gallery.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app requires location access to determine your current location.</string>
+	<string>This app uses your location to confirm attendance location.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app uses your location to confirm attendance accuracy.</string>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>UIFileSharingEnabled</key>

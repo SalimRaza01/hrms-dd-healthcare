@@ -1,13 +1,16 @@
 // // ignore_for_file: use_key_in_widget_ructors, depend_on_referenced_packages, must_be_immutable
 
-// ignore_for_file: use_key_in_widget_constructors
+// ignore_for_file: use_key_in_widget_constructors, prefer_if_null_operators, prefer_final_fields, prefer_conditional_assignment
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:intl/intl.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import '../../core/api/api.dart';
 import '../../core/api/api_config.dart';
 import '../../core/provider/provider.dart';
@@ -17,7 +20,7 @@ import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:geolocator/geolocator.dart' as geo;
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -31,22 +34,61 @@ class ManualPunchInScreen extends StatefulWidget {
 }
 
 class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
+
   final Box _authBox = Hive.box('authBox');
-  late CameraController _cameraController;
+CameraController? _cameraController;
+
   File? _selfie;
+  LatLng defaultLocation = LatLng(40.4168, -3.7038); 
   LatLng? _currentLocation;
-  bool _isLoading = false;
+  String selectedStyleUrl = 'outdoors-v12';
+  LatLng? _lastStationaryLocation;
+  DateTime? _stationaryStartTime;
+  DateTime? _lastStopTime;
+  bool _isStopped = false;
+      bool cameraGranted = false;
+    bool locationGranted = false;
+  LatLng? _previousLocation;
   bool _isLoadingPO = false;
+    bool _isLoading = false;
   bool _isLoadingUP = false;
   bool _isLoadingPI = false;
   List<Placemark>? placemarks;
   Placemark? place;
+  MapController mapController = MapController();
+  List<LatLng> _trackedPath = [];
+  List<Map<String, dynamic>> _movementHistory = [];
+  List<Marker> _markers = [];
+
+  final List<Map<String, String>> mapStyles = [
+    {
+      'name': 'Outdoors',
+      'url': 'outdoors-v12',
+      'image': 'assets/image/outdoors-v12.png'
+    },
+    {
+      'name': 'Satellite Streets',
+      'url': 'satellite-streets-v12',
+      'image': 'assets/image/satellite-streets-v12.png'
+    },
+    {
+      'name': 'Navigation Night',
+      'url': 'navigation-night-v1',
+      'image': 'assets/image/navigation-night-v1.png'
+    },
+    {
+      'name': 'Navigation Day',
+      'url': 'navigation-day-v1',
+      'image': 'assets/image/navigation-day-v1.png'
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
     _requestPlatformPermissions();
-
+  });
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -54,49 +96,64 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   }
 
   Future<void> _requestPlatformPermissions() async {
-    bool cameraGranted = false;
-    bool locationGranted = false;
+    setState(() {
+      _isLoading = true;
+    });
+
 
     if (Platform.isAndroid) {
       cameraGranted = await Permission.camera.request().isGranted;
       locationGranted = await Permission.location.request().isGranted;
     } else if (Platform.isIOS) {
       cameraGranted = await Permission.camera.request().isGranted;
-      locationGranted = await Permission.locationWhenInUse.request().isGranted;
+      locationGranted = await Permission.location.request().isGranted;
     }
 
     if (cameraGranted && locationGranted) {
+ 
       await _initializeCamera();
       await _getCurrentLocation();
+
+setState(() {
+  _isLoading == false;
+});
+
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Camera or Location permission denied")),
+        SnackBar(content: Text("permission denied, if Done tap on tap to fetch locaiton")),
       );
     }
   }
 
-  Future<void> _initializeCamera() async {
+Future<void> _initializeCamera() async {
+  try {
     final cameras = await availableCameras();
     final firstCamera = cameras.first;
+
     _cameraController = CameraController(firstCamera, ResolutionPreset.medium);
-    await _cameraController.initialize();
+    await _cameraController!.initialize();
+  } catch (e) {
+    print("Camera init failed: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Failed to initialize camera")),
+    );
   }
+}
+
 
   Future<void> _getCurrentLocation() async {
-    setState(() => _isLoading = true);
-
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      bool serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Location services are disabled.')),
         );
         return;
       }
 
-      Position position = await Geolocator.getCurrentPosition(
-        locationSettings: LocationSettings(accuracy: LocationAccuracy.high),
+      geo.Position position = await geo.Geolocator.getCurrentPosition(
+        locationSettings:
+            geo.LocationSettings(accuracy: geo.LocationAccuracy.high),
       );
 
       placemarks =
@@ -105,14 +162,169 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
       setState(() {
         _currentLocation = LatLng(position.latitude, position.longitude);
         place = placemarks![0];
-        _isLoading = false;
+
+        _trackedPath.add(_currentLocation!);
+     
       });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        mapController.move(_currentLocation!, 17.0);
+      });
+
+      _startLiveTracking();
     } catch (e) {
-      setState(() => _isLoading = false);
+      print('Location error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error retrieving location')),
+        SnackBar(content: Text('Error retrieving location: $e')),
       );
     }
+  }
+
+  void _startLiveTracking() {
+    geo.Geolocator.getPositionStream(
+      locationSettings: geo.LocationSettings(
+        accuracy: geo.LocationAccuracy.bestForNavigation,
+        distanceFilter: 2,
+      ),
+    ).listen((geo.Position position) async {
+      if (position.accuracy > 20) return;
+
+      LatLng newLocation = LatLng(position.latitude, position.longitude);
+
+      // First-time setup
+      if (_previousLocation == null) {
+        _previousLocation = newLocation;
+        _stationaryStartTime = DateTime.now();
+        _lastStationaryLocation = newLocation;
+        return;
+      }
+
+      final distance = Distance().as(
+        LengthUnit.Meter,
+        _previousLocation!,
+        newLocation,
+      );
+
+      print(
+          '📍 Location: $newLocation, Distance moved: ${distance.toStringAsFixed(2)}m');
+
+      _previousLocation = newLocation;
+
+      List<Placemark> marks = await placemarkFromCoordinates(
+        newLocation.latitude,
+        newLocation.longitude,
+      );
+      Placemark mark = marks.first;
+
+      final locationLabel =
+          mark.locality ?? mark.subAdministrativeArea ?? 'Unknown';
+      final sublocationLabel =
+          mark.subLocality ?? mark.subAdministrativeArea ?? 'Unknown';
+      final now = DateTime.now();
+
+      // 🛑 STOP: User within 25m radius
+      if (Distance()
+              .as(LengthUnit.Meter, _lastStationaryLocation!, newLocation) <=
+          25) {
+        if (_stationaryStartTime == null) {
+          _stationaryStartTime = now;
+        }
+
+        if (!_isStopped &&
+            now.difference(_stationaryStartTime!).inSeconds >= 10) {
+          _addStopTime(now, newLocation, locationLabel, sublocationLabel);
+          _isStopped = true;
+        }
+      } else {
+        // 🚶 MOVEMENT: Reset stop state
+        _stationaryStartTime = now;
+        _lastStationaryLocation = newLocation;
+
+        if (_isStopped) {
+          _addMovement(
+              now, newLocation, locationLabel, sublocationLabel, distance);
+          _addMovementMarker(newLocation);
+          _isStopped = false;
+        }
+      }
+
+      // 📌 UI Update
+      setState(() {
+        _currentLocation = newLocation;
+        _trackedPath.add(newLocation);
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          mapController.move(newLocation, 17.0);
+        });
+
+        _markers.removeWhere((m) => m.key == ValueKey('last'));
+        _markers.add(
+          Marker(
+            key: ValueKey('last'),
+            width: 40,
+            height: 40,
+            point: newLocation,
+            child: Icon(Icons.location_on, color: Colors.green, size: 30),
+          ),
+        );
+      });
+    });
+  }
+
+  void _addStopTime(
+      DateTime time, LatLng location, String locality, String subLocality) {
+    final stopDuration =
+        _lastStopTime != null ? time.difference(_lastStopTime!) : Duration.zero;
+
+    _lastStopTime = time;
+
+    _movementHistory.add({
+      'type': 'stopped',
+      'location': location,
+      'locality': locality,
+      'subLocality': subLocality,
+      'time': DateFormat.Hm().format(time),
+      'duration': '${stopDuration.inMinutes}m ${stopDuration.inSeconds % 60}s',
+    });
+
+    _markers.add(
+      Marker(
+        key: ValueKey('stop_${time.toIso8601String()}'),
+        width: 35,
+        height: 35,
+        point: location,
+        child: Icon(Icons.stop_circle, color: Colors.red, size: 28),
+      ),
+    );
+
+    print('🟥 Stopped at $location ($locality, $subLocality)');
+  }
+
+  void _addMovement(DateTime time, LatLng location, String locality,
+      String subLocality, double distanceMoved) {
+    _movementHistory.add({
+      'type': 'moving',
+      'location': location,
+      'locality': locality,
+      'subLocality': subLocality,
+      'distance': distanceMoved.toStringAsFixed(2),
+      'time': DateFormat.Hm().format(time),
+    });
+
+    print(
+        '🟦 Moving from $location ($locality, $subLocality) - ${distanceMoved.toStringAsFixed(2)}m');
+  }
+
+  void _addMovementMarker(LatLng location) {
+    _markers.add(
+      Marker(
+        key: ValueKey('move_${DateTime.now().toIso8601String()}'),
+        width: 30,
+        height: 30,
+        point: location,
+        child: Icon(Icons.directions_walk, color: Colors.blue, size: 26),
+      ),
+    );
   }
 
   Future<void> _takeSelfie() async {
@@ -130,12 +342,13 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
       file.path,
       minWidth: 360,
       minHeight: 640,
-      quality: 60,
+      quality: 50,
     );
     return base64Encode(compressedBytes!);
   }
 
   Future<void> _punchIn() async {
+    print('inside punchin');
     await _getCurrentLocation();
 
     if (_selfie == null) {
@@ -143,8 +356,6 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
     }
 
     if (_selfie != null && _currentLocation != null) {
-      setState(() => _isLoading = true);
-
       String base64Image = await compressAndConvertToBase64(_selfie!);
       String location = place!.subLocality!.isNotEmpty
           ? '(IN)${place!.subLocality}, ${place!.locality}'
@@ -225,14 +436,11 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         _authBox.put('punchedIn', 'yes');
         await _authBox.put('Punch-In-id', response.data['data']['_id']);
-        await _authBox.put(
-            'selfie', decodeBase64Image(response.data['data']['imageUrl']));
         final punchProvider = Provider.of<PunchedIN>(context, listen: false);
         await punchProvider.fetchAndSetPunchRecord();
 
         setState(() {
           _isLoadingPI = false;
-          _isLoading = false;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -264,7 +472,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         _authBox.put('punchedIn', null);
-        _authBox.put('selfie', null);
+        // _authBox.put('selfie', null);
 
         final punchProvider = Provider.of<PunchedIN>(context, listen: false);
         await punchProvider.fetchAndSetPunchRecord();
@@ -315,7 +523,9 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
 
   @override
   void dispose() {
-    _cameraController.dispose();
+    if (_cameraController?.value.isInitialized ?? false) {
+    _cameraController?.dispose();
+  }
     super.dispose();
   }
 
@@ -328,47 +538,308 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: _isLoading
-          ? Center(
-              child: LoadingAnimationWidget.fourRotatingDots(
-                color: AppColor.mainFGColor,
-                size: height * 0.05,
-              ),
-            )
-          : Stack(
-              children: [
-                FlutterMap(
-                  options: MapOptions(
-                      initialCenter: _currentLocation != null
-                          ? _currentLocation!
-                          : LatLng(50.5, 30.51),
-                      initialZoom: 16.0),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'dev.fleaflet.flutter_map.example',
+      body: Stack(
+        children: [
+          SizedBox(
+            height: height / 1.4,
+            child: _isLoading
+                ? Container(
+                    color: const Color.fromARGB(255, 198, 198, 198),
+                    height: height / 1.4,
+                    width: double.infinity,
+                    child: Center(
+                      child: LoadingAnimationWidget.threeArchedCircle(
+                        color: Colors.green,
+                        size: height * 0.03,
+                      ),
                     ),
-                    CurrentLocationLayer(
-                      style: LocationMarkerStyle(
+                  )
+                : FlutterMap(
+                    mapController: mapController,
+                    options: MapOptions(
+                      initialCenter: _currentLocation!,
+                      initialZoom: 13.0,
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            "https://api.mapbox.com/styles/v1/mapbox/${selectedStyleUrl}/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWVyb2ZpdCIsImEiOiJjbWNuNTNwMGcwcHE5MmlzN2ZydXNyNDBtIn0.zoBnsUnzL0C2PpQH1fMpXQ",
+                        userAgentPackageName: 'com.mapbox.token',
+                      ),
+                      PolylineLayer(
+                        // polylineCulling: false,
+                        polylines: [
+                          Polyline(
+                            points: _trackedPath,
+                            color: Colors.blueAccent,
+                            strokeWidth: 10.0,
+                          ),
+                        ],
+                      ),
+                      MarkerLayer(markers: _markers),
+                      CurrentLocationLayer(
+                        style: LocationMarkerStyle(
                           markerSize: Size.fromRadius(10),
                           accuracyCircleColor:
-                              Color.fromARGB(120, 153, 207, 232)),
-                    ),
-                  ],
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Consumer<PunchedIN>(
-                    builder: (context, punchProvider, _) {
-                      final record = punchProvider.record;
-                      // final now = DateTime.now();
-                      final times = record?.getLastPunchTimes();
-                      // final isToday = record != null &&
-                      //     DateUtils.isSameDay(now, record.createdAt);
-                      // final isPunchedIn = _authBox.get('punchedIn') != null;
+                              Color.fromARGB(120, 153, 207, 232),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Consumer<PunchedIN>(
+              builder: (context, punchProvider, _) {
+                final record = punchProvider.record;
+//notsameday data
+                if (record == null ||
+                    !DateUtils.isSameDay(DateTime.now(), record.createdAt)) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 15, horizontal: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color:
+                                      const Color.fromARGB(255, 255, 255, 255),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 15,
+                                      spreadRadius: 3,
+                                      offset: Offset(0, -3),
+                                    ),
+                                  ],
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Icon(
+                                    Icons.chevron_left,
+                                    color: AppColor.mainTextColor,
+                                    size: height * 0.023,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () => showCupertinoModalBottomSheet(
+                                expand: true,
+                                context: context,
+                                barrierColor:
+                                    const Color.fromARGB(130, 0, 0, 0),
+                                backgroundColor: Colors.transparent,
+                                builder: (context) => Scaffold(
+                                  body: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          AppColor.newgredient1,
+                                          const Color.fromARGB(
+                                              52, 96, 125, 139),
+                                        ],
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(20),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Map Style",
+                                            style: TextStyle(
+                                                fontSize: height * .018,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          SizedBox(height: height * 0.015),
+                                          SizedBox(
+                                            height: height * 0.1,
+                                            child: ListView.separated(
+                                              scrollDirection: Axis.horizontal,
+                                              itemCount: mapStyles.length,
+                                              separatorBuilder: (_, __) =>
+                                                  SizedBox(
+                                                      width: width * 0.022),
+                                              itemBuilder: (context, index) {
+                                                final style = mapStyles[index];
+                                                final isSelected =
+                                                    style['url'] ==
+                                                        selectedStyleUrl;
 
-                      return Container(
+                                                return GestureDetector(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      selectedStyleUrl =
+                                                          style['url']!;
+                                                    });
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Column(
+                                                    children: [
+                                                      Container(
+                                                        // width: 80,
+                                                        height: height * 0.08,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(12),
+                                                          border: Border.all(
+                                                            color: isSelected
+                                                                ? Colors.blue
+                                                                : Colors
+                                                                    .transparent,
+                                                            width: 2,
+                                                          ),
+                                                        ),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                          child: Image.asset(
+                                                            style['image']!,
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      SizedBox(height: 4),
+                                                      Text(
+                                                        style['name']!,
+                                                        style: TextStyle(
+                                                          fontSize: 8,
+                                                          fontWeight: isSelected
+                                                              ? FontWeight.bold
+                                                              : FontWeight
+                                                                  .normal,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                          SizedBox(height: height * 0.024),
+                                          Text(
+                                            "Navigations",
+                                            style: TextStyle(
+                                                fontSize: height * .018,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          SizedBox(height: height * 0.012),
+                                          Expanded(
+                                            child: ListView.builder(
+                                              itemCount:
+                                                  _movementHistory.length,
+                                              itemBuilder: (context, index) {
+                                                final entry =
+                                                    _movementHistory[index];
+                                                final isMoving =
+                                                    entry['type'] == 'moving';
+
+                                                return Container(
+                                                  margin: const EdgeInsets
+                                                      .symmetric(vertical: 6),
+                                                  padding:
+                                                      const EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade100,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16),
+                                                  ),
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        isMoving
+                                                            ? Icons
+                                                                .directions_walk
+                                                            : Icons.stop_circle,
+                                                        color: isMoving
+                                                            ? Colors.green
+                                                            : Colors.red,
+                                                        size: 28,
+                                                      ),
+                                                      SizedBox(width: 12),
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            isMoving
+                                                                ? 'Moving ${entry['time']}'
+                                                                : 'Stopped ${entry['time']}',
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              fontSize: 14,
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            'Location : ${entry['locality']} ${entry['subLocality']}',
+                                                            style: TextStyle(
+                                                              fontSize: 13,
+                                                              color: Colors
+                                                                  .black54,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color:
+                                      const Color.fromARGB(255, 255, 255, 255),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 15,
+                                      spreadRadius: 3,
+                                      offset: Offset(0, -3),
+                                    ),
+                                  ],
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Icon(
+                                    CupertinoIcons.timelapse,
+                                    color: AppColor.mainTextColor,
+                                    size: height * 0.023,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
                         padding:
                             EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                         width: double.infinity,
@@ -404,23 +875,17 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(20),
                                     child: Container(
-                                      width: width * .2,
-                                      height: height * 0.09,
-                                      decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: Color.fromARGB(
-                                                  78, 123, 158, 177)),
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                          color: Color(0xFFC9D9D5)),
-                                      child: _authBox.get('selfie') == null
-                                          ? Image.asset(
-                                              'assets/image/MaleAvatar.png')
-                                          : Image.memory(
-                                              _authBox.get('selfie'),
-                                              fit: BoxFit.fitWidth,
-                                            ),
-                                    ),
+                                        width: width * .2,
+                                        height: height * 0.09,
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Color.fromARGB(
+                                                    78, 123, 158, 177)),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            color: Color(0xFFC9D9D5)),
+                                        child: Image.asset(
+                                            'assets/image/MaleAvatar.png')),
                                   ),
                                   SizedBox(width: 16),
                                   Column(
@@ -507,9 +972,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                     child: Column(
                                       children: [
                                         Text(
-                                          times == null
-                                              ? '--/--'
-                                              : '${times['lastIn']}',
+                                          '--/--',
                                           // '',
                                           style: TextStyle(
                                             fontSize: 22,
@@ -547,9 +1010,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                     child: Column(
                                       children: [
                                         Text(
-                                          times == null
-                                              ? '--/--'
-                                              : '${times['lastOut']}',
+                                          '--/--',
                                           style: TextStyle(
                                             fontSize: 22,
                                             fontWeight: FontWeight.bold,
@@ -576,12 +1037,291 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                               height: height * .016,
                             ),
 
-                            Visibility(
-                              visible: _authBox.get('punchedIn') == null,
+                            InkWell(
+                              onTap: _punchIn,
+                              child: Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [Colors.lightGreen, Colors.green],
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                child: Center(
+                                  child: _isLoadingPI
+                                      ? SizedBox(
+                                          height: height * 0.02,
+                                          width: width * 0.05,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeCap: StrokeCap.round,
+                                            strokeWidth: 2,
+                                          ))
+                                      : Text(
+                                          'Punch-In',
+                                          style: TextStyle(
+                                              fontSize: height * 0.015,
+                                              color: AppColor.mainFGColor),
+                                        ),
+                                ),
+                              ),
+                            ),
+
+                            SizedBox(
+                              height: height * 0.02,
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
+                final times = record.getLastPunchTimes();
+
+//sameday data
+                return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 15,
+                        spreadRadius: 3,
+                        offset: Offset(0, -3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      /// Profile Section
+                      Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                            color: Color(0xFFF8F8F8),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                                color: Color.fromARGB(78, 123, 158, 177))),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                width: width * .2,
+                                height: height * 0.09,
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color:
+                                            Color.fromARGB(78, 123, 158, 177)),
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: Color(0xFFC9D9D5)),
+                                child: Image.memory(
+                                  decodeBase64Image(record.imageUrl),
+                                  fit: BoxFit.fitWidth,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _authBox.get('employeeName') ?? '',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  DateFormat('dd MMMM yyyy')
+                                      .format(DateTime.now())
+                                      .toString()
+                                      .toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color.fromARGB(255, 85, 85, 85),
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                InkWell(
+                                  onTap: _getCurrentLocation,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_pin,
+                                        size: height * .016,
+                                        color: Colors.green,
+                                      ),
+                                      SizedBox(width: 4),
+                                      SizedBox(
+                                        width: width * 0.45,
+                                        child: Text(
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                          place != null
+                                              ? place!.subLocality!.isNotEmpty
+                                                  ? ' ${place!.subLocality}, ${place!.locality}'
+                                                  : place!.locality!
+                                              : 'Tap to fetch location',
+                                          style: TextStyle(
+                                            fontSize: height * .016,
+                                            color:
+                                                Color.fromARGB(255, 85, 85, 85),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(
+                        height: height * .016,
+                      ),
+
+                      /// Schedule Tiles
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              // width: width,
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFF5F5F5),
+                                border: Border.all(
+                                    color: Color.fromARGB(78, 123, 158, 177)),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    '${times['lastIn']}',
+                                    // '',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    'Punch-In',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: width * .03,
+                          ),
+                          Expanded(
+                            child: Container(
+                              // width: width,
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: Color.fromARGB(78, 123, 158, 177)),
+                                color: Color(0xFFF5F5F5),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    '${times['lastOut']}',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    'Punch-Out',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(
+                        height: height * .016,
+                      ),
+
+                      Visibility(
+                        visible: _authBox.get('punchedIn') == null,
+                        child: InkWell(
+                          onTap: _punchIn,
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Colors.lightGreen, Colors.green],
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            child: Center(
+                              child: _isLoadingPI
+                                  ? SizedBox(
+                                      height: height * 0.02,
+                                      width: width * 0.05,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeCap: StrokeCap.round,
+                                        strokeWidth: 2,
+                                      ))
+                                  : Text(
+                                      'Punch-In',
+                                      style: TextStyle(
+                                          fontSize: height * 0.015,
+                                          color: AppColor.mainFGColor),
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Visibility(
+                        visible: _authBox.get('punchedIn') != null,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Expanded(
                               child: InkWell(
-                                onTap: _punchIn,
+                                onTap: _updatePunchLocation,
                                 child: Container(
-                                  width: double.infinity,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       begin: Alignment.topCenter,
@@ -593,7 +1333,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 20, vertical: 12),
                                   child: Center(
-                                    child: _isLoadingPI
+                                    child: _isLoadingUP
                                         ? SizedBox(
                                             height: height * 0.02,
                                             width: width * 0.05,
@@ -603,7 +1343,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                               strokeWidth: 2,
                                             ))
                                         : Text(
-                                            'Punch-In',
+                                            'Update Location',
                                             style: TextStyle(
                                                 fontSize: height * 0.015,
                                                 color: AppColor.mainFGColor),
@@ -612,131 +1352,57 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                 ),
                               ),
                             ),
-                            Visibility(
-                              visible: _authBox.get('punchedIn') != null,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Expanded(
-                                    child: InkWell(
-                                      onTap: _updatePunchLocation,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Colors.lightGreen,
-                                              Colors.green
-                                            ],
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 20, vertical: 12),
-                                        child: Center(
-                                          child: _isLoadingUP
-                                              ? SizedBox(
-                                                  height: height * 0.02,
-                                                  width: width * 0.05,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    color: Colors.white,
-                                                    strokeCap: StrokeCap.round,
-                                                    strokeWidth: 2,
-                                                  ))
-                                              : Text(
-                                                  'Update Location',
-                                                  style: TextStyle(
-                                                      fontSize: height * 0.015,
-                                                      color:
-                                                          AppColor.mainFGColor),
-                                                ),
-                                        ),
-                                      ),
+                            SizedBox(
+                              width: width * .03,
+                            ),
+                            Expanded(
+                              child: InkWell(
+                                onTap: _punchOut,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [Colors.black45, Colors.black],
                                     ),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  SizedBox(
-                                    width: width * .03,
-                                  ),
-                                  Expanded(
-                                    child: InkWell(
-                                      onTap: _punchOut,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Colors.black45,
-                                              Colors.black
-                                            ],
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 12),
+                                  child: Center(
+                                    child: _isLoadingPO
+                                        ? SizedBox(
+                                            height: height * 0.02,
+                                            width: width * 0.05,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeCap: StrokeCap.round,
+                                              strokeWidth: 2,
+                                            ))
+                                        : Text(
+                                            'Punch Out',
+                                            style: TextStyle(
+                                                fontSize: height * 0.015,
+                                                color: AppColor.mainFGColor),
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 20, vertical: 12),
-                                        child: Center(
-                                          child: _isLoadingPO
-                                              ? SizedBox(
-                                                  height: height * 0.02,
-                                                  width: width * 0.05,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    color: Colors.white,
-                                                    strokeCap: StrokeCap.round,
-                                                    strokeWidth: 2,
-                                                  ))
-                                              : Text(
-                                                  'Punch Out',
-                                                  style: TextStyle(
-                                                      fontSize: height * 0.015,
-                                                      color:
-                                                          AppColor.mainFGColor),
-                                                ),
-                                        ),
-                                      ),
-                                    ),
                                   ),
-                                ],
+                                ),
                               ),
                             ),
-                            SizedBox(
-                              height: height * 0.02,
-                            )
                           ],
                         ),
-                      );
-                    },
-                  ),
-                ),
-                 Padding(
-                   padding: const EdgeInsets.only(top: 25, left: 15),
-                   child: InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color.fromARGB(178, 216, 225, 231),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Icon(
-                              Icons.chevron_left,
-                              color: AppColor.mainTextColor,
-                              size: height * 0.02,
-                            ),
-                          ),
-                        ),
                       ),
-                 ),
-              ],
+                      SizedBox(
+                        height: height * 0.02,
+                      )
+                    ],
+                  ),
+                );
+              },
             ),
+          ),
+        ],
+      ),
     );
   }
 }

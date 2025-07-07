@@ -993,6 +993,7 @@ Future<PunchRecordModel> fetchPunchRecord() async {
   if (response.statusCode == 200 || response.statusCode == 201) {
     print(response.data);
     final Map<String, dynamic> data = response.data['data'][0];
+    
     // _authBox.put(
     //     'selfie', decodeBase64Image(response.data['data'][0]['imageUrl']));
     return PunchRecordModel.fromJson(data);

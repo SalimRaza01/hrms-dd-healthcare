@@ -205,14 +205,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 backgroundColor: Colors.transparent,
                                 builder: (context) => PunchHistoryScreen(),
                               ),
-                          onTap: () => showCupertinoModalBottomSheet(
-                                expand: true,
-                                context: context,
-                                barrierColor:
-                                    const Color.fromARGB(130, 0, 0, 0),
-                                backgroundColor: Colors.transparent,
-                                builder: (context) => ManualPunchInScreen(),
-                              ),
+                          // onTap: () => showCupertinoModalBottomSheet(
+                          //       expand: true,
+                          //       context: context,
+                          //       barrierColor:
+                          //           const Color.fromARGB(130, 0, 0, 0),
+                          //       backgroundColor: Colors.transparent,
+                          //       builder: (context) => ManualPunchInScreen(),
+                          //     ),
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=> ManualPunchInScreen()));
+                          },
                         child: PunchCardWidget()),
 
                       SizedBox(
