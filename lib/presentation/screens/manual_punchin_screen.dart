@@ -3,12 +3,11 @@
 // ignore_for_file: use_key_in_widget_constructors, prefer_if_null_operators, prefer_final_fields, prefer_conditional_assignment, unused_local_variable
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import '../../core/api/api.dart';
@@ -45,6 +44,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   DateTime? _stationaryStartTime;
   DateTime? _lastStopTime;
   bool _isStopped = false;
+  String? filepath;
   bool cameraGranted = false;
   bool locationGranted = false;
   LatLng? _previousLocation;
@@ -101,10 +101,8 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
 
     var status = await Permission.location.request();
 
-
     if (status.isGranted) {
       final pos = await geo.Geolocator.getCurrentPosition();
-  
 
       geo.Position position = await geo.Geolocator.getCurrentPosition(
         locationSettings:
@@ -128,7 +126,6 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
 
       _startLiveTracking();
     } else if (status.isPermanentlyDenied) {
-           
       await openAppSettings();
     } else {
       setState(() {
@@ -143,8 +140,11 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
       final cameras = await availableCameras();
       final firstCamera = cameras.first;
 
-      _cameraController =
-          CameraController(firstCamera, ResolutionPreset.medium, enableAudio: false,);
+      _cameraController = CameraController(
+        firstCamera,
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
       await _cameraController!.initialize();
     } catch (e) {
       print("Camera init failed: $e");
@@ -329,19 +329,56 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
     if (pickedFile != null) {
       setState(() {
         _selfie = File(pickedFile.path);
+        filepath = pickedFile.path;
       });
+      final fileSize = await _selfie!.length();
+
+      await uplaodSelfie([
+        PlatformFile(
+          path: filepath,
+          name: pickedFile.name,
+          size: fileSize,
+        ),
+      ]);
     }
   }
 
-  Future<String> compressAndConvertToBase64(File file) async {
-    final compressedBytes = await FlutterImageCompress.compressWithFile(
-      file.path,
-      minWidth: 360,
-      minHeight: 640,
-      quality: 50,
-    );
-    return base64Encode(compressedBytes!);
+  Future<void> uplaodSelfie(List<PlatformFile> files) async {
+    final dio = Dio();
+
+    for (var file in files) {
+      if (file.path != null) {
+        try {
+          var formData = FormData.fromMap({
+            'file':
+                await MultipartFile.fromFile(file.path!, filename: file.name),
+          });
+
+          Response response = await dio.post(selfieUplaod, data: formData);
+
+          if (response.statusCode == 200) {
+          
+            _authBox.put('selfie', response.data['location']);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text('Selfie Uplaoded'),
+                  backgroundColor: Colors.green),
+            );
+          }
+        } on DioException catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(e.response!.data['message']),
+                backgroundColor: Colors.red),
+          );
+        }
+      } else {
+        print("File path is null");
+      }
+    }
   }
+
+
 
   Future<void> _punchIn() async {
     var status = await Permission.camera.request();
@@ -355,13 +392,12 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
     }
 
     if (_selfie != null && _currentLocation != null) {
-      String base64Image = await compressAndConvertToBase64(_selfie!);
       String location = place!.subLocality!.isNotEmpty
           ? '(IN)${place!.subLocality}, ${place!.locality}'
           : '(IN)${place!.locality}';
 
       _authBox.put('punchLocation', location);
-      await manualPunchIn(context, location, base64Image);
+      await manualPunchIn(context, location, _authBox.get('selfie'));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.red,
@@ -1358,8 +1394,8 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                                 78, 123, 158, 177)),
                                         borderRadius: BorderRadius.circular(20),
                                         color: Color(0xFFC9D9D5)),
-                                    child: Image.memory(
-                                      decodeBase64Image(record.imageUrl),
+                                    child: Image.network(
+                                      _authBox.get('selfie'),
                                       fit: BoxFit.fitWidth,
                                     ),
                                   ),

@@ -20,6 +20,7 @@ class LeaveBalance {
   final String earnedLeave;
   final String paternityLeave;
   final String maternityLeave;
+    final String compOffLeave;
 
   LeaveBalance({
     required this.casualLeave,
@@ -27,6 +28,7 @@ class LeaveBalance {
     required this.earnedLeave,
     required this.paternityLeave,
     required this.maternityLeave,
+        required this.compOffLeave,
   });
 
   factory LeaveBalance.fromJson(Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class LeaveBalance {
       earnedLeave: json['earnedLeave'],
       paternityLeave: json['paternityLeave'],
       maternityLeave: json['maternityLeave'],
+       compOffLeave: json['compOffLeave'],
     );
   }
 }

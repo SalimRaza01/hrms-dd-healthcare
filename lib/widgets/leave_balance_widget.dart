@@ -22,7 +22,7 @@ class _LeaveBalanceWidgetState extends State<LeaveBalanceWidget> {
       child: Container(
  padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white, // Clean white like the card in image
+          color: Colors.white, 
           borderRadius: BorderRadius.circular(30),
           // boxShadow: [
           //   BoxShadow(
@@ -74,12 +74,15 @@ class _LeaveBalanceWidgetState extends State<LeaveBalanceWidget> {
                     children: [
                       buildLeaveTile(height, width, 'Casual',
                           leave.casualLeave, const Color(0xFF27AE60)), // green
-                                 SizedBox(width: width * 0.04),
+                                 SizedBox(width: width * 0.02),
                       buildLeaveTile(height, width, 'Medical',
                           leave.medicalLeave, const Color(0xFF2D9CDB)), // blue
-                                 SizedBox(width: width * 0.04),
+                                  SizedBox(width: width * 0.02),
                       buildLeaveTile(height, width, 'Earned',
                           leave.earnedLeave, const Color(0xFFF2C94C)), // yellow
+                             SizedBox(width: width * 0.02),
+                                        buildLeaveTile(height, width, 'Comp-Off',
+                          leave.compOffLeave, const Color.fromARGB(255, 242, 90, 76)), // redAcent
                     ],
                   );
                 }
@@ -96,7 +99,7 @@ class _LeaveBalanceWidgetState extends State<LeaveBalanceWidget> {
     return Expanded(
       child: Container(
       
-        padding: const EdgeInsets.symmetric(vertical: 18),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: AppColor.newgredient2,
           borderRadius: BorderRadius.circular(20),

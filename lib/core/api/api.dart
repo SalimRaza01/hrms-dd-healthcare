@@ -85,8 +85,11 @@ Future<ShiftTimeModel> fetchShiftTime() async {
         }));
 
     if (response.statusCode == 200) {
+   
       await _authBox.put(
           'casual', response.data['data']['leaveBalance']['casualLeave']);
+                await _authBox.put(
+          'compOff', response.data['data']['leaveBalance']['compOffLeave']);
       await _authBox.put(
           'medical', response.data['data']['leaveBalance']['medicalLeave']);
       await _authBox.put(
