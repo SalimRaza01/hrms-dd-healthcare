@@ -58,7 +58,6 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
-
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -71,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   SizedBox(height: height * 0.01),
-                     Align(
+                  Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       "Enter your email and password to log in",
@@ -83,61 +82,62 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   SizedBox(height: height * 0.03),
                   TextField(
-                    style: TextStyle(
-                      color: const Color.fromARGB(255, 201, 201, 201),
-                    ),
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelStyle: TextStyle(
+                      style: TextStyle(
                         color: const Color.fromARGB(255, 201, 201, 201),
                       ),
-                      errorStyle: TextStyle(
-                        color: const Color.fromARGB(255, 201, 201, 201),
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelStyle: TextStyle(
+                          color: const Color.fromARGB(255, 201, 201, 201),
+                        ),
+                        errorStyle: TextStyle(
+                          color: const Color.fromARGB(255, 201, 201, 201),
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.email_outlined,
+                          color: const Color.fromARGB(255, 201, 201, 201),
+                        ),
+                        labelText: "Email/Employee Code",
+                        errorText: _emailErrorText,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      prefixIcon: const Icon(
-                        Icons.email_outlined,
-                        color: const Color.fromARGB(255, 201, 201, 201),
-                      ),
-                      labelText: "Email/Employee Code",
-                      errorText: _emailErrorText,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-onChanged: (value) {
-  setState(() {
-    bool isDigit = int.tryParse(value) != null;
+                      onChanged: (value) {
+                        setState(() {
+                          bool isDigit = int.tryParse(value) != null;
 
-    if (isDigit) {
-      final employeeCode = RegExp(r'^\d{1,5}$');
-      if (value.isEmpty) {
-        _emailErrorText = 'Employee Code is required';
-      } else if (!employeeCode.hasMatch(value)) {
-        _emailErrorText = 'Invalid Employee Code';
-      } else {
-        _emailErrorText = null;
-      }
-    } else {
-      final hasEmail = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-      final hasSpace = RegExp(r'\s');
-      final containsDomain = RegExp(r'@agvahealthtech\.com$');
+                          if (isDigit) {
+                            final employeeCode = RegExp(r'^\d{1,5}$');
+                            if (value.isEmpty) {
+                              _emailErrorText = 'Employee Code is required';
+                            } else if (!employeeCode.hasMatch(value)) {
+                              _emailErrorText = 'Invalid Employee Code';
+                            } else {
+                              _emailErrorText = null;
+                            }
+                          } else {
+                            final hasEmail =
+                                RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                            final hasSpace = RegExp(r'\s');
+                            final containsDomain =
+                                RegExp(r'@agvahealthtech\.com$');
 
-      if (value.isEmpty) {
-        _emailErrorText = null;
-      } else if (!hasEmail.hasMatch(value)) {
-        _emailErrorText = 'Invalid Email';
-      } else if (hasSpace.hasMatch(value)) {
-        _emailErrorText = "Email can't contain spaces";
-      } else if (!containsDomain.hasMatch(value)) {
-        _emailErrorText = 'Email must belong to agvahealthtech.com';
-      } else {
-        _emailErrorText = null;
-      }
-    }
-  });
-}
-
-                  ),
+                            if (value.isEmpty) {
+                              _emailErrorText = null;
+                            } else if (!hasEmail.hasMatch(value)) {
+                              _emailErrorText = 'Invalid Email';
+                            } else if (hasSpace.hasMatch(value)) {
+                              _emailErrorText = "Email can't contain spaces";
+                            } else if (!containsDomain.hasMatch(value)) {
+                              _emailErrorText =
+                                  'Email must belong to agvahealthtech.com';
+                            } else {
+                              _emailErrorText = null;
+                            }
+                          }
+                        });
+                      }),
                   SizedBox(height: height * 0.02),
                   TextField(
                     style: TextStyle(
@@ -247,8 +247,8 @@ onChanged: (value) {
                           isloading = false;
                         });
                       }
-                      Future.delayed(Duration(seconds: 4),(){
-                                  setState(() {
+                      Future.delayed(Duration(seconds: 4), () {
+                        setState(() {
                           isloading = false;
                         });
                       });
@@ -278,7 +278,7 @@ onChanged: (value) {
                             ),
                     ),
                   ),
-                     SizedBox(height: height * 0.06),
+                  SizedBox(height: height * 0.06),
                 ],
               ),
             ),

@@ -27,6 +27,7 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('authBox');
 
+
   runApp(
     MultiProvider(
       providers: [
@@ -35,7 +36,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProjectProvider()),
         ChangeNotifierProvider(create: (_) => LeaveApplied()),
         ChangeNotifierProvider(create: (_) => PunchedIN()),
-                ChangeNotifierProvider(create: (_) => PunchHistoryProvider()),
+        ChangeNotifierProvider(create: (_) => PunchHistoryProvider()),
 
       ],
       child: MyApp(),

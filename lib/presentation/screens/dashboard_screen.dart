@@ -38,7 +38,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   @override
-  void initState() {
+  void initState()  {
     super.initState();
     // _fetchTasks();
 
