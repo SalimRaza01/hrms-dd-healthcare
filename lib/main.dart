@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'core/api/api.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:hrms/core/api/api.dart';
+import 'package:hrms/core/provider/provider.dart';
+import 'package:hrms/core/services.dart/background_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'presentation/screens/new_onbaording.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'presentation/screens/new_onbaording.dart';
 import 'package:wiredash/wiredash.dart';
-import 'core/provider/provider.dart';
 import 'presentation/odoo/odoo_dashboard.dart';
 import 'presentation/odoo/view_projects.dart';
 import 'presentation/screens/splash_screen.dart';
@@ -24,11 +27,16 @@ import 'presentation/screens/profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Hive.initFlutter();
   await Hive.openBox('authBox');
+  await Hive.openBox('trackingBox');
+  await requestPermissions();
+  await initializeNotifications();
+  await initializeService();
 
 
-  runApp(
+   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
@@ -37,12 +45,33 @@ void main() async {
         ChangeNotifierProvider(create: (_) => LeaveApplied()),
         ChangeNotifierProvider(create: (_) => PunchedIN()),
         ChangeNotifierProvider(create: (_) => PunchHistoryProvider()),
-
       ],
       child: MyApp(),
     ),
   );
 }
+
+Future<void> requestPermissions() async {
+  await [
+    Permission.location,
+    Permission.locationAlways,
+    Permission.notification,         // For Android 13+   // Required for Android 14+
+  ].request();
+}
+
+
+Future<void> initializeNotifications() async {
+  const androidSettings = AndroidInitializationSettings('@drawable/ic_notification');
+  const iosSettings = DarwinInitializationSettings();
+
+  const initSettings = InitializationSettings(
+    android: androidSettings,
+    iOS: iosSettings,
+  );
+
+  await plugin.initialize(initSettings);
+}
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

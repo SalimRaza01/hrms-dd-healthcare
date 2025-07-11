@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import '../../core/api/api.dart';
@@ -120,6 +121,8 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
         _isLoading = false;
       });
 
+FlutterBackgroundService().invoke('setAsForeground');
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         mapController.move(_currentLocation!, 17.0);
       });
@@ -169,6 +172,8 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
 
       _trackedPath.add(_currentLocation!);
     });
+
+
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       mapController.move(_currentLocation!, 17.0);
@@ -357,7 +362,6 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
           Response response = await dio.post(selfieUplaod, data: formData);
 
           if (response.statusCode == 200) {
-          
             _authBox.put('selfie', response.data['location']);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -377,8 +381,6 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
       }
     }
   }
-
-
 
   Future<void> _punchIn() async {
     var status = await Permission.camera.request();
@@ -575,7 +577,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
         children: [
           SizedBox(
             height: height / 1.4,
-            child: _isLoading && _currentLocation == null
+            child: _isLoading && _trackedPath.isNotEmpty
                 ? Container(
                     color: const Color.fromARGB(255, 198, 198, 198),
                     height: height / 1.4,
@@ -590,7 +592,9 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                 : FlutterMap(
                     mapController: mapController,
                     options: MapOptions(
-                      initialCenter: _currentLocation!,
+                 initialCenter: _trackedPath.isNotEmpty
+    ? _trackedPath.last
+    : LatLng(28.6139, 77.2090),
                       initialZoom: 13.0,
                     ),
                     children: [
