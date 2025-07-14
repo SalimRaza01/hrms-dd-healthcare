@@ -33,10 +33,8 @@ void main() async {
   await Hive.openBox('trackingBox');
   await requestPermissions();
   await initializeNotifications();
-  await initializeService();
 
-
-   runApp(
+  runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
@@ -52,16 +50,17 @@ void main() async {
 }
 
 Future<void> requestPermissions() async {
-  await [
-    Permission.location,
-    Permission.locationAlways,
-    Permission.notification,         // For Android 13+   // Required for Android 14+
-  ].request();
+  await Permission.notification.request();
+  // await [
+  //   Permission.location,
+  //   Permission.locationAlways,
+  //   Permission.notification, // For Android 13+   // Required for Android 14+
+  // ].request();
 }
 
-
 Future<void> initializeNotifications() async {
-  const androidSettings = AndroidInitializationSettings('@drawable/ic_notification');
+  const androidSettings =
+      AndroidInitializationSettings('@drawable/ic_notification');
   const iosSettings = DarwinInitializationSettings();
 
   const initSettings = InitializationSettings(
@@ -71,7 +70,6 @@ Future<void> initializeNotifications() async {
 
   await plugin.initialize(initSettings);
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

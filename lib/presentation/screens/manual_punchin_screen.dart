@@ -9,6 +9,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:hrms/core/services.dart/background_service.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import '../../core/api/api.dart';
@@ -84,16 +85,34 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   ];
 
   @override
-  void initState() {
+  void initState()  {
+
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _requestAndHandlePermissions();
     });
+       
+          _loadTrackedPathFromHive();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
   }
+
+void _loadTrackedPathFromHive() async {
+  final trackBox = Hive.box('trackBox');
+  List<LatLng> storedPath = [];
+
+  for (var i = 0; i < trackBox.length; i++) {
+    final point = trackBox.getAt(i);
+    storedPath.add(LatLng(point['lat'], point['lng']));
+  }
+
+  setState(() {
+    _trackedPath = storedPath;
+  });
+}
+
 
   Future<void> _requestAndHandlePermissions() async {
     setState(() {
@@ -394,12 +413,15 @@ FlutterBackgroundService().invoke('setAsForeground');
     }
 
     if (_selfie != null && _currentLocation != null) {
+      await initializeService();
       String location = place!.subLocality!.isNotEmpty
           ? '(IN)${place!.subLocality}, ${place!.locality}'
           : '(IN)${place!.locality}';
 
       _authBox.put('punchLocation', location);
       await manualPunchIn(context, location, _authBox.get('selfie'));
+        FlutterBackgroundService().invoke('setAsForeground');
+  FlutterBackgroundService().startService();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.red,
@@ -439,6 +461,7 @@ FlutterBackgroundService().invoke('setAsForeground');
       String punchId = _authBox.get('Punch-In-id');
 
       await manualPunchOut(context, punchId, location);
+      FlutterBackgroundService().invoke('stopService');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -570,6 +593,8 @@ FlutterBackgroundService().invoke('setAsForeground');
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
+
+
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -1261,7 +1286,7 @@ FlutterBackgroundService().invoke('setAsForeground');
                                         SizedBox(height: height * 0.012),
                                         Expanded(
                                           child: ListView.builder(
-                                            itemCount: _movementHistory.length,
+                                            itemCount: '_movementHistory'.length,
                                             itemBuilder: (context, index) {
                                               final entry =
                                                   _movementHistory[index];

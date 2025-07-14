@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 
-final FlutterLocalNotificationsPlugin plugin = FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin plugin =
+    FlutterLocalNotificationsPlugin();
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
@@ -57,6 +60,10 @@ Future<bool> onIosBackground(ServiceInstance service) async {
 void onStart(ServiceInstance service) async {
   DartPluginRegistrant.ensureInitialized();
 
+  final appDir = await getApplicationDocumentsDirectory();
+  Hive.init(appDir.path);
+  final trackBox = await Hive.openBox('trackBox');
+
   if (service is AndroidServiceInstance) {
     await service.setForegroundNotificationInfo(
       title: "DD HRMS",
@@ -89,6 +96,17 @@ void onStart(ServiceInstance service) async {
           content: 'Location: ${position.latitude}, ${position.longitude}',
         );
       }
+
+      debugPrint('Location: ${position.latitude}, ${position.longitude}');
+      // Save to Hive
+      final timestamp = DateTime.now().toIso8601String();
+      await trackBox.add({
+        'lat': position.latitude,
+        'lng': position.longitude,
+        'timestamp': timestamp,
+      });
+
+      
 
       service.invoke('update', {
         "lat": position.latitude,
