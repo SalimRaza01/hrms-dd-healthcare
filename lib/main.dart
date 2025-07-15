@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hrms/core/api/api.dart';
 import 'package:hrms/core/provider/provider.dart';
-import 'package:hrms/core/services.dart/background_service.dart';
+import 'package:hrms/core/services/background_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hrms/core/utils/clear_hivedb.dart';
+import 'package:hrms/core/utils/intialize_notificaiton.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'presentation/screens/new_onbaording.dart';
@@ -24,15 +25,22 @@ import 'presentation/screens/holiday_list.dart';
 import 'presentation/screens/leave_screen_manager.dart';
 import 'presentation/screens/notification_screen.dart';
 import 'presentation/screens/profile_screen.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Hive.initFlutter();
+  final appDir = await getApplicationDocumentsDirectory();
+  Hive.init(appDir.path);
   await Hive.openBox('authBox');
-  await Hive.openBox('trackingBox');
+  await Hive.openBox('trackBox');
+  await Hive.openBox('movementBox');
+  await Hive.openBox('markerBox');
   await requestPermissions();
   await initializeNotifications();
+  await initializeService();
+  await clearHive();
 
   runApp(
     MultiProvider(
@@ -58,18 +66,9 @@ Future<void> requestPermissions() async {
   // ].request();
 }
 
-Future<void> initializeNotifications() async {
-  const androidSettings =
-      AndroidInitializationSettings('@drawable/ic_notification');
-  const iosSettings = DarwinInitializationSettings();
 
-  const initSettings = InitializationSettings(
-    android: androidSettings,
-    iOS: iosSettings,
-  );
 
-  await plugin.initialize(initSettings);
-}
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

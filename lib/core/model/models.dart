@@ -641,6 +641,7 @@ class PunchRecordModel {
   }
 
   Map<String, String> getLastPunchTimes() {
+
     final records = punchRecords
         .split(',')
         .map((e) => e.trim())

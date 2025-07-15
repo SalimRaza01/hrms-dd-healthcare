@@ -26,6 +26,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
   @override
   void initState() {
     super.initState();
+
+
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     checkEmployeeId();
   }

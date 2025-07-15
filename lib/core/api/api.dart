@@ -188,14 +188,15 @@ Future<void> applyLeave(
         }),
         data: {
           "leaveType": leaveType == 'Casual Leave'
-              ? 'casualLeave'
+              ? 'casualLeave' 
               : leaveType == 'Medical Leave'
                   ? 'medicalLeave'
                   : leaveType == 'Earned Leave'
                       ? 'earnedLeave'
                       : leaveType == 'Short-Leave'
                           ? 'shortLeave'
-                          : null,
+                          : leaveType == 'Comp-Off Leave'
+              ? 'compOffLeave' : null,
           "leaveStartDate": startDate,
           "leaveEndDate": _selectedText.contains('1st Half') ||
                   _selectedText.contains('2nd Half')
@@ -204,7 +205,7 @@ Future<void> applyLeave(
           "totalDays": totalDays,
           "reason": reason,
           "approvedBy": mgrId,
-          "shift": leaveType == 'Casual Leave' || leaveType == 'Earned Leave'
+          "shift": leaveType == 'Casual Leave' || leaveType == 'Earned Leave' || leaveType == 'Comp-Off Leave'
               ? _selectedText
               : "",
           "location": leaveType == 'Medical Leave' ? _authBox.get('file') : ''
@@ -352,6 +353,7 @@ Future<void> applyCompoff(
   BuildContext context,
   String startDate,
   String reason,
+  String totaldays
 ) async {
   String empID = _authBox.get('employeeId');
   String token = _authBox.get('token');
@@ -364,6 +366,7 @@ Future<void> applyCompoff(
         }),
         data: {
           "compOffDate": startDate,
+          "totalDays": totaldays,
           "reason": reason,
         });
     if (response.statusCode == 201 || response.statusCode == 200) {

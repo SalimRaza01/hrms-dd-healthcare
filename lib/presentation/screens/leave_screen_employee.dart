@@ -326,6 +326,7 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
                               'earnedLeave': 'Earned',
                               'medicalLeave': 'Medical',
                               'casualLeave': 'Casual',
+                               'compOffLeave': 'Comp-Off',
                               'paternityLeave': 'Paternity',
                               'maternityLeave': 'Maternity',
                               'regularized': 'Regularization',

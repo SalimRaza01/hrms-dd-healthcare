@@ -63,6 +63,8 @@ dependencies:
   flutter_background_service_android: ^6.3.0
   permission_handler: ^11.3.1
   flutter_local_notifications: ^19.3.0
+  pdf: ^3.10.1
+  printing: ^5.12.0
 
 
  

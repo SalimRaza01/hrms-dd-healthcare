@@ -26,12 +26,12 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
   TextEditingController reasonController = TextEditingController();
   String? maxRegularization;
   DateTime? date;
-  String _selectedText = 'Regularization';
+  String _selectedLeaveType = 'Regularization';
+  String _selectedDuration = '1';
 
   @override
   void initState() {
     super.initState();
-    print(widget.lateMinutes);
 
     date = DateTime.parse(widget.regularizationDate!);
     checkEmployeeId();
@@ -130,7 +130,8 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                         color: Colors.black,
                       ),
                     ),
-                    const CircleAvatar(backgroundColor: Colors.white, radius: 18),
+                    const CircleAvatar(
+                        backgroundColor: Colors.white, radius: 18),
                   ],
                 ),
               ),
@@ -150,13 +151,50 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _selectButton('Regularization', height, width),
-                            _selectButton('Comp-Off', height, width),
+                            _selectLeaveButton('Regularization', height, width),
+                            _selectLeaveButton('Generate Comp-Off', height, width),
                           ],
                         ),
                       ),
                     ),
                     SizedBox(height: height * 0.015),
+                    Visibility(
+                      visible: _selectedLeaveType == 'Generate Comp-Off',
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Card(
+                          color: AppColor.mainFGColor,
+                          elevation: 4,
+                          margin: EdgeInsets.all(0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          shadowColor: AppColor.shadowColor,
+                          child: Padding(
+                            padding: EdgeInsets.all(3),
+                            child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 10),
+                                    child: Text(
+                                      'Select Duration',
+                                      style: TextStyle(
+                                        fontSize: height * 0.015,
+                                        fontWeight: FontWeight.w400,
+                                        color: AppColor.mainTextColor,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: width * 0.02),
+                                  _selectDurationButton('1', height, width),
+                                  _selectDurationButton('0.5', height, width),
+                                ]),
+                          ),
+                        ),
+                      ),
+                    ),
                     Container(
                       decoration: BoxDecoration(
                         color: AppColor.mainFGColor,
@@ -178,9 +216,12 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                               color: AppColor.mainTextColor,
                             ),
                             decoration: const InputDecoration(
-                              border: OutlineInputBorder(borderSide: BorderSide.none),
-                              enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
-                              focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide.none),
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide.none),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide.none),
                               label: Text('Describe Reason'),
                             ),
                           ),
@@ -189,7 +230,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                     ),
                     SizedBox(height: height * 0.02),
                     Visibility(
-                      visible: _selectedText == 'Regularization',
+                      visible: _selectedLeaveType == 'Regularization',
                       child: Center(
                         child: Text(
                           'Regularization Limit - $maxRegularization',
@@ -206,8 +247,9 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                       onTap: () async {
                         if (reasonController.text.isEmpty) {
                           showSnackBar('Please describe the reason');
-                        } else if (_selectedText == 'Regularization') {
-                          if (widget.lateMinutes > 0 && widget.lateMinutes <= 15) {
+                        } else if (_selectedLeaveType == 'Regularization') {
+                          if (widget.lateMinutes > 0 &&
+                              widget.lateMinutes <= 15) {
                             await applyRegularize(
                               context,
                               widget.regularizationDate!,
@@ -218,12 +260,12 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                               'Regularization can only be applied if late before ${_authBox.get('lateby') == '9:00' ? '09:30 AM' : _authBox.get('lateby') == '10:00' ? '10:30 AM' : _authBox.get('lateby') == '8:30' ? '09:00 AM' : ''}',
                             );
                           }
-                        } else if (_selectedText == 'Comp-Off') {
+                        } else if (_selectedLeaveType == 'Generate Comp-Off') {
                           await applyCompoff(
-                            context,
-                            widget.regularizationDate!,
-                            reasonController.text,
-                          );
+                              context,
+                              widget.regularizationDate!,
+                              reasonController.text,
+                              _selectedDuration);
                         }
                       },
                       child: Center(
@@ -234,7 +276,8 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
                             child: Center(
                               child: Text(
                                 'SUBMIT',
@@ -251,11 +294,10 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                   ],
                 ),
               ),
-
               SizedBox(height: height * 0.016),
               Expanded(
                 child: ListView.separated(
-                       physics:BouncingScrollPhysics(),
+                  physics: BouncingScrollPhysics(),
                   itemCount: punches.length ~/ 2,
                   itemBuilder: (context, index) {
                     String punchIn = punches[index * 2];
@@ -349,11 +391,48 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
     );
   }
 
-  Widget _selectButton(String text, double height, double width) {
+  Widget _selectDurationButton(String text, double height, double width) {
     Color activeColor;
     Color activeText;
 
-    if (_selectedText == text) {
+    if (_selectedDuration == text) {
+      activeColor = const Color(0xFF40738D);
+      activeText = AppColor.mainFGColor;
+    } else {
+      activeColor = Colors.transparent;
+      activeText = Colors.black87;
+    }
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedDuration = text;
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color: activeColor,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: width * 0.08, vertical: 6),
+          child: Text(
+            text,
+            style: TextStyle(
+              color: activeText,
+              fontSize: height * 0.015,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _selectLeaveButton(String text, double height, double width) {
+    Color activeColor;
+    Color activeText;
+
+    if (_selectedLeaveType == text) {
       activeColor = const Color(0xFF40738D);
       activeText = Colors.white;
     } else {
@@ -364,7 +443,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedText = text;
+          _selectedLeaveType = text;
         });
       },
       child: Container(

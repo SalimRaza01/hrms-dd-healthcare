@@ -37,6 +37,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
   String? empID;
   List<Leave> leaveList = [];
   String? casualLeave;
+  String? compoffLeave;
   String? earnedLeave;
   String? medicalLeave;
   String? shortLeave;
@@ -80,6 +81,16 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
 
       print("Quarter Ends: $quarterEndDate");
       print("Max Leave Date for Casual Leave: $maxDate");
+    } else if (_selectedLeaveType != null &&
+        _selectedLeaveType.contains('Comp-Off')) {
+      DateTime quarterEndDate = getQuarterEndDate(now);
+      DateTime next7Days = now.add(Duration(days: 2));
+      maxDate = next7Days.isBefore(quarterEndDate) ? next7Days : quarterEndDate;
+
+      minDate = startOfMonth;
+
+      print("Quarter Ends: $quarterEndDate");
+      print("Max Leave Date for Comp-Off Leave: $maxDate");
     } else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Earned')) {
       minDate = startOfMonth;
@@ -141,6 +152,13 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
 
       minDate = startOfMonth;
     } else if (_selectedLeaveType != null &&
+        _selectedLeaveType.contains('Comp-Off')) {
+      DateTime quarterEndDate = getQuarterEndDate(now);
+      DateTime next7Days = now.add(Duration(days: 2));
+      maxDate = next7Days.isBefore(quarterEndDate) ? next7Days : quarterEndDate;
+      DateTime selectedStartDate = DateTime.parse(startDateController.text);
+      minDate = selectedStartDate;
+    } else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Earned')) {
       if (startDateController.text.isNotEmpty) {
         DateTime selectedStartDate = DateTime.parse(startDateController.text);
@@ -191,7 +209,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         return;
       }
 
-      if (_selectedLeaveType!.contains('Casual')) {
+      if (_selectedLeaveType!.contains('Casual') ||
+          _selectedLeaveType!.contains('Comp-Off')) {
         if (_selectedText == 'Full Day' ||
             _selectedText == '1st Half' ||
             _selectedText == '2nd Half') {
@@ -321,6 +340,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     var authBox = await Hive.openBox('authBox');
 
     setState(() {
+      compoffLeave = authBox.get('compOff');
       casualLeave = authBox.get('casual');
       medicalLeave = authBox.get('medical');
       earnedLeave = authBox.get('earned');
@@ -331,6 +351,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         Leave('Casual Leave', casualLeave!),
         Leave('Medical Leave', medicalLeave!),
         Leave('Earned Leave', earnedLeave!),
+        Leave('Comp-Off Leave', compoffLeave!),
         Leave('Short-Leave', shortLeave!),
       ];
     });
@@ -478,7 +499,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                           children: [
                             Visibility(
                               visible: _selectedLeaveType == 'Casual Leave' ||
-                                  _selectedLeaveType == 'Earned Leave',
+                                  _selectedLeaveType == 'Earned Leave' ||
+                                  _selectedLeaveType == 'Comp-Off Leave',
                               child: Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 12),

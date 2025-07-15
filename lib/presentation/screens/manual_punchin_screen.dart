@@ -3,13 +3,14 @@
 // ignore_for_file: use_key_in_widget_constructors, prefer_if_null_operators, prefer_final_fields, prefer_conditional_assignment, unused_local_variable
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:hrms/core/services.dart/background_service.dart';
+import 'package:hrms/core/utils/export_track_report.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import '../../core/api/api.dart';
@@ -37,19 +38,14 @@ class ManualPunchInScreen extends StatefulWidget {
 class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   final Box _authBox = Hive.box('authBox');
   CameraController? _cameraController;
-
+  final locationService = FlutterBackgroundService();
   File? _selfie;
   LatLng defaultLocation = LatLng(40.4168, -3.7038);
   LatLng? _currentLocation;
-  String selectedStyleUrl = 'outdoors-v12';
-  LatLng? _lastStationaryLocation;
-  DateTime? _stationaryStartTime;
-  DateTime? _lastStopTime;
-  bool _isStopped = false;
+  String selectedStyleUrl = 'satellite-streets-v12';
   String? filepath;
   bool cameraGranted = false;
   bool locationGranted = false;
-  LatLng? _previousLocation;
   bool _isLoading = false;
   bool _isLoadingPO = false;
   bool _isLoadingUP = false;
@@ -57,9 +53,11 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   List<Placemark>? placemarks;
   Placemark? place;
   MapController mapController = MapController();
-  List<LatLng> _trackedPath = [];
-  List<Map<String, dynamic>> _movementHistory = [];
+  List<Map<String, dynamic>> trackList = [];
+  List<LatLng> _polylines = [];
   List<Marker> _markers = [];
+  List<Map<String, dynamic>> _movementHistory = [];
+  Timer? _hivePollingTimer;
 
   final List<Map<String, String>> mapStyles = [
     {
@@ -85,34 +83,176 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   ];
 
   @override
-  void initState()  {
-
+  void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _requestAndHandlePermissions();
     });
-       
-          _loadTrackedPathFromHive();
+
+    _loadTrackedPathFromHive();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
   }
 
-void _loadTrackedPathFromHive() async {
-  final trackBox = Hive.box('trackBox');
-  List<LatLng> storedPath = [];
+  void _loadTrackedPathFromHive() async {
+    print('Fetching Hive data...');
 
-  for (var i = 0; i < trackBox.length; i++) {
-    final point = trackBox.getAt(i);
-    storedPath.add(LatLng(point['lat'], point['lng']));
+    try {
+      final movementBox = Hive.box('movementBox');
+
+      _hivePollingTimer?.cancel();
+   
+      _hivePollingTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+        List<Map<String, dynamic>> hilist = [];
+
+        for (int i = 0; i < movementBox.length; i++) {
+          final rawEntry = movementBox.getAt(i);
+          if (rawEntry is Map) {
+            final entry = Map<String, dynamic>.from(rawEntry);
+            if (entry['lat'] != null &&
+                entry['lng'] != null &&
+                entry['type'] != null) {
+              print('Movement point: $entry');
+              hilist.add(entry);
+            }
+          }
+        }
+
+        hilist.sort((a, b) => DateTime.parse(a['timestamp'])
+            .compareTo(DateTime.parse(b['timestamp'])));
+
+        final trackedPath = hilist
+            .map((e) => LatLng(e['lat'] as double, e['lng'] as double))
+            .toList();
+
+        final markers = hilist.map((e) {
+          final isMoving = e['type'] == 'moving';
+          return Marker(
+            width: 30,
+            height: 30,
+            point: LatLng(e['lat'], e['lng']),
+            child: Icon(
+              isMoving ? Icons.directions_walk : Icons.stop_circle,
+              color: isMoving ? Colors.green : Colors.red,
+              size: 26,
+            ),
+          );
+        }).toList();
+
+        if (hilist.isNotEmpty) {
+          final last = hilist.last;
+          markers.add(
+            Marker(
+              width: 40,
+              height: 40,
+              point: LatLng(last['lat'], last['lng']),
+              child: Icon(Icons.location_on, color: Colors.black, size: 36),
+            ),
+          );
+        }
+
+        setState(() {
+          trackList = hilist;
+          _polylines = trackedPath;
+          _markers = markers;
+          _movementHistory = List.from(hilist.reversed);
+        });
+      });
+    } catch (e, stack) {
+      debugPrint('Failed loading Hive data: $e\n$stack');
+    }
   }
 
-  setState(() {
-    _trackedPath = storedPath;
-  });
-}
+// void _loadTrackedPathFromHive() async {
+//   print('Fetching Hive data...');
 
+//   try {
+//     final trackBox = Hive.box('trackBox');
+//     final movementBox = Hive.box('movementBox');
+//     final markerBox = Hive.box('markerBox');
+
+//     _hivePollingTimer?.cancel();
+
+//     _hivePollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+//       List<LatLng> storedPath = [];
+//       List<Map<String, dynamic>> storedHistory = [];
+//       List<Marker> storedMarkers = [];
+
+//       for (var i = 0; i < trackBox.length; i++) {
+//         final point = trackBox.getAt(i);
+//         if (point is Map &&
+//             point['lat'] != null &&
+//             point['lng'] != null &&
+//             point['lat'] is double &&
+//             point['lng'] is double) {
+//           print('Track point: $point');
+//           storedPath.add(LatLng(point['lat'], point['lng']));
+//         }
+//       }
+
+//       for (var i = 0; i < movementBox.length; i++) {
+//         final move = movementBox.getAt(i);
+//         if (move is Map) {
+//           print('Movement point: $move');
+//           storedHistory.add(Map<String, dynamic>.from(move));
+//         } else {
+//           print('Invalid movementBox entry at index $i: $move');
+//         }
+//       }
+
+//       for (var i = 0; i < markerBox.length; i++) {
+//         final m = markerBox.getAt(i);
+//         if (m is Map &&
+//             m['lat'] != null &&
+//             m['lng'] != null &&
+//             m['type'] != null &&
+//             m['lat'] is double &&
+//             m['lng'] is double &&
+//             m['type'] is String) {
+//           print('Marker point: $m');
+//           IconData icon;
+//           Color color;
+
+//           switch (m['type']) {
+//             case 'stop':
+//               icon = Icons.stop_circle;
+//               color = Colors.red;
+//               break;
+//             case 'move':
+//               icon = Icons.directions_walk;
+//               color = Colors.blue;
+//               break;
+//             default:
+//               icon = Icons.location_on;
+//               color = Colors.green;
+//           }
+
+//           storedMarkers.add(
+//             Marker(
+//               width: 30,
+//               height: 30,
+//               point: LatLng(m['lat'], m['lng']),
+//               child: Icon(icon, color: color, size: 26),
+//             ),
+//           );
+//         }
+//       }
+
+//       storedHistory.sort((a, b) =>
+//           DateTime.parse(b['timestamp']).compareTo(DateTime.parse(a['timestamp'])));
+
+//       setState(() {
+//         _polylines = storedPath;
+//         _movementHistory = storedHistory;
+//         _markers = storedMarkers;
+//       });
+//     });
+//   } catch (e, stack) {
+//     debugPrint('Failed loading Hive data: $e\n$stack');
+//   }
+// }
 
   Future<void> _requestAndHandlePermissions() async {
     setState(() {
@@ -135,23 +275,16 @@ void _loadTrackedPathFromHive() async {
       setState(() {
         _currentLocation = LatLng(position.latitude, position.longitude);
         place = placemarks![0];
-
-        _trackedPath.add(_currentLocation!);
         _isLoading = false;
       });
-
-FlutterBackgroundService().invoke('setAsForeground');
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         mapController.move(_currentLocation!, 17.0);
       });
-
-      _startLiveTracking();
     } else if (status.isPermanentlyDenied) {
       await openAppSettings();
     } else {
       setState(() {
-        print('here 9 ');
         _isLoading = true;
       });
     }
@@ -177,6 +310,7 @@ FlutterBackgroundService().invoke('setAsForeground');
   }
 
   Future<void> _getCurrentLocation() async {
+           setState(() => _isLoading = true);
     geo.Position position = await geo.Geolocator.getCurrentPosition(
       locationSettings:
           geo.LocationSettings(accuracy: geo.LocationAccuracy.high),
@@ -188,163 +322,12 @@ FlutterBackgroundService().invoke('setAsForeground');
     setState(() {
       _currentLocation = LatLng(position.latitude, position.longitude);
       place = placemarks![0];
-
-      _trackedPath.add(_currentLocation!);
+      _isLoading = false;
     });
-
-
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       mapController.move(_currentLocation!, 17.0);
     });
-
-    _startLiveTracking();
-  }
-
-  void _startLiveTracking() {
-    geo.Geolocator.getPositionStream(
-      locationSettings: geo.LocationSettings(
-        accuracy: geo.LocationAccuracy.bestForNavigation,
-        distanceFilter: 2,
-      ),
-    ).listen((geo.Position position) async {
-      if (position.accuracy > 20) return;
-
-      LatLng newLocation = LatLng(position.latitude, position.longitude);
-
-      // First-time setup
-      if (_previousLocation == null) {
-        _previousLocation = newLocation;
-        _stationaryStartTime = DateTime.now();
-        _lastStationaryLocation = newLocation;
-        return;
-      }
-
-      final distance = Distance().as(
-        LengthUnit.Meter,
-        _previousLocation!,
-        newLocation,
-      );
-
-      print(
-          '📍 Location: $newLocation, Distance moved: ${distance.toStringAsFixed(2)}m');
-
-      _previousLocation = newLocation;
-
-      List<Placemark> marks = await placemarkFromCoordinates(
-        newLocation.latitude,
-        newLocation.longitude,
-      );
-      Placemark mark = marks.first;
-
-      final locationLabel =
-          mark.locality ?? mark.subAdministrativeArea ?? 'Unknown';
-      final sublocationLabel =
-          mark.subLocality ?? mark.subAdministrativeArea ?? 'Unknown';
-      final now = DateTime.now();
-
-      //  STOP: User within 25m radius
-      if (Distance()
-              .as(LengthUnit.Meter, _lastStationaryLocation!, newLocation) <=
-          25) {
-        if (_stationaryStartTime == null) {
-          _stationaryStartTime = now;
-        }
-
-        if (!_isStopped &&
-            now.difference(_stationaryStartTime!).inSeconds >= 10) {
-          _addStopTime(now, newLocation, locationLabel, sublocationLabel);
-          _isStopped = true;
-        }
-      } else {
-        // Reset stop state
-        _stationaryStartTime = now;
-        _lastStationaryLocation = newLocation;
-
-        if (_isStopped) {
-          _addMovement(
-              now, newLocation, locationLabel, sublocationLabel, distance);
-          _addMovementMarker(newLocation);
-          _isStopped = false;
-        }
-      }
-
-      setState(() {
-        _currentLocation = newLocation;
-        _trackedPath.add(newLocation);
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          mapController.move(newLocation, 17.0);
-        });
-
-        _markers.removeWhere((m) => m.key == ValueKey('last'));
-        _markers.add(
-          Marker(
-            key: ValueKey('last'),
-            width: 40,
-            height: 40,
-            point: newLocation,
-            child: Icon(Icons.location_on, color: Colors.green, size: 30),
-          ),
-        );
-      });
-    });
-  }
-
-  void _addStopTime(
-      DateTime time, LatLng location, String locality, String subLocality) {
-    final stopDuration =
-        _lastStopTime != null ? time.difference(_lastStopTime!) : Duration.zero;
-
-    _lastStopTime = time;
-
-    _movementHistory.add({
-      'type': 'stopped',
-      'location': location,
-      'locality': locality,
-      'subLocality': subLocality,
-      'time': DateFormat.Hm().format(time),
-      'duration': '${stopDuration.inMinutes}m ${stopDuration.inSeconds % 60}s',
-    });
-
-    _markers.add(
-      Marker(
-        key: ValueKey('stop_${time.toIso8601String()}'),
-        width: 35,
-        height: 35,
-        point: location,
-        child: Icon(Icons.stop_circle, color: Colors.red, size: 28),
-      ),
-    );
-
-    print('Stopped at $location ($locality, $subLocality)');
-  }
-
-  void _addMovement(DateTime time, LatLng location, String locality,
-      String subLocality, double distanceMoved) {
-    _movementHistory.add({
-      'type': 'moving',
-      'location': location,
-      'locality': locality,
-      'subLocality': subLocality,
-      'distance': distanceMoved.toStringAsFixed(2),
-      'time': DateFormat.Hm().format(time),
-    });
-
-    print(
-        ' Moving from $location ($locality, $subLocality) - ${distanceMoved.toStringAsFixed(2)}m');
-  }
-
-  void _addMovementMarker(LatLng location) {
-    _markers.add(
-      Marker(
-        key: ValueKey('move_${DateTime.now().toIso8601String()}'),
-        width: 30,
-        height: 30,
-        point: location,
-        child: Icon(Icons.directions_walk, color: Colors.blue, size: 26),
-      ),
-    );
   }
 
   Future<void> _takeSelfie() async {
@@ -413,15 +396,15 @@ FlutterBackgroundService().invoke('setAsForeground');
     }
 
     if (_selfie != null && _currentLocation != null) {
-      await initializeService();
       String location = place!.subLocality!.isNotEmpty
           ? '(IN)${place!.subLocality}, ${place!.locality}'
           : '(IN)${place!.locality}';
 
       _authBox.put('punchLocation', location);
       await manualPunchIn(context, location, _authBox.get('selfie'));
-        FlutterBackgroundService().invoke('setAsForeground');
-  FlutterBackgroundService().startService();
+
+      locationService.invoke('setAsForeground');
+      locationService.startService();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.red,
@@ -461,7 +444,7 @@ FlutterBackgroundService().invoke('setAsForeground');
       String punchId = _authBox.get('Punch-In-id');
 
       await manualPunchOut(context, punchId, location);
-      FlutterBackgroundService().invoke('stopService');
+      locationService.invoke('stopService');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -581,11 +564,17 @@ FlutterBackgroundService().invoke('setAsForeground');
     }
   }
 
+  String exportMovementHistoryToJson(
+      List<Map<String, dynamic>> movementHistory) {
+    return jsonEncode(movementHistory);
+  }
+
   @override
   void dispose() {
     if (_cameraController?.value.isInitialized ?? false) {
       _cameraController?.dispose();
     }
+    _hivePollingTimer?.cancel();
     super.dispose();
   }
 
@@ -594,7 +583,7 @@ FlutterBackgroundService().invoke('setAsForeground');
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
-
+    print('Tracklist : $trackList');
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -602,7 +591,7 @@ FlutterBackgroundService().invoke('setAsForeground');
         children: [
           SizedBox(
             height: height / 1.4,
-            child: _isLoading && _trackedPath.isNotEmpty
+            child: _isLoading
                 ? Container(
                     color: const Color.fromARGB(255, 198, 198, 198),
                     height: height / 1.4,
@@ -614,1107 +603,1122 @@ FlutterBackgroundService().invoke('setAsForeground');
                       ),
                     ),
                   )
-                : FlutterMap(
-                    mapController: mapController,
-                    options: MapOptions(
-                 initialCenter: _trackedPath.isNotEmpty
-    ? _trackedPath.last
-    : LatLng(28.6139, 77.2090),
-                      initialZoom: 13.0,
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                            "https://api.mapbox.com/styles/v1/mapbox/$selectedStyleUrl/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWVyb2ZpdCIsImEiOiJjbWNuNTNwMGcwcHE5MmlzN2ZydXNyNDBtIn0.zoBnsUnzL0C2PpQH1fMpXQ",
-                        userAgentPackageName: 'com.mapbox.token',
-                      ),
-                      PolylineLayer(
-                        // polylineCulling: false,
-                        polylines: [
-                          Polyline(
-                            points: _trackedPath,
-                            color: Colors.blueAccent,
-                            strokeWidth: 10.0,
-                          ),
-                        ],
-                      ),
-                      MarkerLayer(markers: _markers),
-                      CurrentLocationLayer(
-                        style: LocationMarkerStyle(
-                          markerSize: Size.fromRadius(10),
-                          accuracyCircleColor:
-                              Color.fromARGB(120, 153, 207, 232),
-                        ),
+     : FlutterMap(
+              mapController: mapController,
+              options: MapOptions(
+                initialCenter: _currentLocation != null
+                    ? _currentLocation!
+                    : LatLng(28.6139, 77.2090),
+                initialZoom: 50.0,
+              ),
+              children: [
+                // TileLayer(
+                //   urlTemplate:
+                //       "https://api.mapbox.com/styles/v1/mapbox/$selectedStyleUrl/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiZGRoZWFsdGhjYXJlIiwiYSI6ImNtZDQzN2tmZTBiYXAyanNjczRuc2FrNjMifQ.VPt9SPPrjbQ72VOwhvL3aQ",
+                //   userAgentPackageName: 'com.mapbox.token',
+                // ),
+                TileLayer(
+                  urlTemplate:
+                      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                  subdomains: ['a', 'b', 'c', 'd'],
+                  userAgentPackageName: 'com.ddhealthcare.hrms_app',
+                ),
+                Visibility(
+                  visible: _polylines.isNotEmpty,
+                  child: PolylineLayer(
+                    // polylineCulling: false,
+                    polylines: [
+                      Polyline(
+                        points: _polylines,
+                        color: const Color.fromARGB(255, 10, 100, 255),
+                        strokeWidth: 10.0,
                       ),
                     ],
                   ),
+                ),
+                Visibility(
+                    visible: _markers.isNotEmpty,
+                    child: MarkerLayer(markers: _markers)),
+                CurrentLocationLayer(
+                  style: LocationMarkerStyle(
+                    markerSize: Size.fromRadius(10),
+                    accuracyCircleColor: Color.fromARGB(120, 153, 207, 232),
+                  ),
+                ),
+              ],
+            ),
           ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Consumer<PunchedIN>(
               builder: (context, punchProvider, _) {
                 final record = punchProvider.record;
-//notsameday data
+
+                final times = record?.getLastPunchTimes();
                 if (record == null ||
                     !DateUtils.isSameDay(DateTime.now(), record.createdAt)) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 15, horizontal: 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color:
-                                      const Color.fromARGB(255, 255, 255, 255),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 15,
-                                      spreadRadius: 3,
-                                      offset: Offset(0, -3),
-                                    ),
-                                  ],
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Icon(
-                                    Icons.chevron_left,
-                                    color: AppColor.mainTextColor,
-                                    size: height * 0.023,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () => showCupertinoModalBottomSheet(
-                                expand: true,
-                                context: context,
-                                barrierColor:
-                                    const Color.fromARGB(130, 0, 0, 0),
-                                backgroundColor: Colors.transparent,
-                                builder: (context) => Scaffold(
-                                  body: Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          AppColor.newgredient1,
-                                          const Color.fromARGB(
-                                              52, 96, 125, 139),
-                                        ],
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(20),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "Map Style",
-                                            style: TextStyle(
-                                                fontSize: height * .018,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          SizedBox(height: height * 0.015),
-                                          SizedBox(
-                                            height: height * 0.1,
-                                            child: ListView.separated(
-                                              scrollDirection: Axis.horizontal,
-                                              itemCount: mapStyles.length,
-                                              separatorBuilder: (_, __) =>
-                                                  SizedBox(
-                                                      width: width * 0.022),
-                                              itemBuilder: (context, index) {
-                                                final style = mapStyles[index];
-                                                final isSelected =
-                                                    style['url'] ==
-                                                        selectedStyleUrl;
-
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    setState(() {
-                                                      selectedStyleUrl =
-                                                          style['url']!;
-                                                    });
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        // width: 80,
-                                                        height: height * 0.08,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(12),
-                                                          border: Border.all(
-                                                            color: isSelected
-                                                                ? Colors.blue
-                                                                : Colors
-                                                                    .transparent,
-                                                            width: 2,
-                                                          ),
-                                                        ),
-                                                        child: ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(10),
-                                                          child: Image.asset(
-                                                            style['image']!,
-                                                            fit: BoxFit.cover,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      SizedBox(height: 4),
-                                                      Text(
-                                                        style['name']!,
-                                                        style: TextStyle(
-                                                          fontSize: 8,
-                                                          fontWeight: isSelected
-                                                              ? FontWeight.bold
-                                                              : FontWeight
-                                                                  .normal,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                          SizedBox(height: height * 0.024),
-                                          Text(
-                                            "Navigations",
-                                            style: TextStyle(
-                                                fontSize: height * .018,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          SizedBox(height: height * 0.012),
-                                          Expanded(
-                                            child: ListView.builder(
-                                              itemCount:
-                                                  _movementHistory.length,
-                                              itemBuilder: (context, index) {
-                                                final entry =
-                                                    _movementHistory[index];
-                                                final isMoving =
-                                                    entry['type'] == 'moving';
-
-                                                return Container(
-                                                  margin: const EdgeInsets
-                                                      .symmetric(vertical: 6),
-                                                  padding:
-                                                      const EdgeInsets.all(12),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.grey.shade100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            16),
-                                                  ),
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(
-                                                        isMoving
-                                                            ? Icons
-                                                                .directions_walk
-                                                            : Icons.stop_circle,
-                                                        color: isMoving
-                                                            ? Colors.green
-                                                            : Colors.red,
-                                                        size: 28,
-                                                      ),
-                                                      SizedBox(width: 12),
-                                                      Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            isMoving
-                                                                ? 'Moving ${entry['time']}'
-                                                                : 'Stopped ${entry['time']}',
-                                                            style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              fontSize: 14,
-                                                            ),
-                                                          ),
-                                                          Text(
-                                                            'Location : ${entry['locality']} ${entry['subLocality']}',
-                                                            style: TextStyle(
-                                                              fontSize: 13,
-                                                              color: Colors
-                                                                  .black54,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color:
-                                      const Color.fromARGB(255, 255, 255, 255),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 15,
-                                      spreadRadius: 3,
-                                      offset: Offset(0, -3),
-                                    ),
-                                  ],
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Icon(
-                                    CupertinoIcons.timelapse,
-                                    color: AppColor.mainTextColor,
-                                    size: height * 0.023,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 255, 255, 255),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(30),
-                            topRight: Radius.circular(30),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 15,
-                              spreadRadius: 3,
-                              offset: Offset(0, -3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            /// Profile Section
-                            Container(
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                  color: Color(0xFFF8F8F8),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                      color:
-                                          Color.fromARGB(78, 123, 158, 177))),
-                              child: Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: Container(
-                                        width: width * .2,
-                                        height: height * 0.09,
-                                        decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: Color.fromARGB(
-                                                    78, 123, 158, 177)),
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            color: Color(0xFFC9D9D5)),
-                                        child: Image.asset(
-                                            'assets/image/MaleAvatar.png')),
-                                  ),
-                                  SizedBox(width: 16),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        _authBox.get('employeeName') ?? '',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        DateFormat('dd MMMM yyyy')
-                                            .format(DateTime.now())
-                                            .toString()
-                                            .toUpperCase(),
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color:
-                                              Color.fromARGB(255, 85, 85, 85),
-                                        ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      InkWell(
-                                        onTap: _getCurrentLocation,
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.location_pin,
-                                              size: height * .016,
-                                              color: Colors.green,
-                                            ),
-                                            SizedBox(width: 4),
-                                            SizedBox(
-                                              width: width * 0.45,
-                                              child: Text(
-                                                maxLines: 3,
-                                                overflow: TextOverflow.ellipsis,
-                                                place != null
-                                                    ? place!.subLocality!
-                                                            .isNotEmpty
-                                                        ? ' ${place!.subLocality}, ${place!.locality}'
-                                                        : place!.locality!
-                                                    : 'Tap to fetch location',
-                                                style: TextStyle(
-                                                  fontSize: height * .016,
-                                                  color: Color.fromARGB(
-                                                      255, 85, 85, 85),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            SizedBox(
-                              height: height * .016,
-                            ),
-
-                            /// Schedule Tiles
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    // width: width,
-                                    padding: EdgeInsets.symmetric(vertical: 16),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFFF5F5F5),
-                                      border: Border.all(
-                                          color: Color.fromARGB(
-                                              78, 123, 158, 177)),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          '--/--',
-                                          // '',
-                                          style: TextStyle(
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          'Punch-In',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: width * .03,
-                                ),
-                                Expanded(
-                                  child: Container(
-                                    // width: width,
-                                    padding: EdgeInsets.symmetric(vertical: 16),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: Color.fromARGB(
-                                              78, 123, 158, 177)),
-                                      color: Color(0xFFF5F5F5),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          '--/--',
-                                          style: TextStyle(
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          'Punch-Out',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(
-                              height: height * .016,
-                            ),
-
-                            InkWell(
-                              onTap: _punchIn,
-                              child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [Colors.lightGreen, Colors.green],
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                child: Center(
-                                  child: _isLoadingPI
-                                      ? SizedBox(
-                                          height: height * 0.02,
-                                          width: width * 0.05,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeCap: StrokeCap.round,
-                                            strokeWidth: 2,
-                                          ))
-                                      : Text(
-                                          'Punch-In',
-                                          style: TextStyle(
-                                              fontSize: height * 0.015,
-                                              color: AppColor.mainFGColor),
-                                        ),
-                                ),
-                              ),
-                            ),
-
-                            SizedBox(
-                              height: height * 0.02,
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
+                  return _emptypunchinwidget(context, height, width);
+                } else {
+                  return _punchinWdiget(context, height, width, times!);
                 }
-
-                final times = record.getLastPunchTimes();
-
-//sameday data
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15, horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color.fromARGB(255, 255, 255, 255),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black12,
-                                    blurRadius: 15,
-                                    spreadRadius: 3,
-                                    offset: Offset(0, -3),
-                                  ),
-                                ],
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Icon(
-                                  Icons.chevron_left,
-                                  color: AppColor.mainTextColor,
-                                  size: height * 0.023,
-                                ),
-                              ),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () => showCupertinoModalBottomSheet(
-                              expand: true,
-                              context: context,
-                              barrierColor: const Color.fromARGB(130, 0, 0, 0),
-                              backgroundColor: Colors.transparent,
-                              builder: (context) => Scaffold(
-                                body: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        AppColor.newgredient1,
-                                        const Color.fromARGB(52, 96, 125, 139),
-                                      ],
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(20),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Map Style",
-                                          style: TextStyle(
-                                              fontSize: height * .018,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        SizedBox(height: height * 0.015),
-                                        SizedBox(
-                                          height: height * 0.1,
-                                          child: ListView.separated(
-                                            scrollDirection: Axis.horizontal,
-                                            itemCount: mapStyles.length,
-                                            separatorBuilder: (_, __) =>
-                                                SizedBox(width: width * 0.022),
-                                            itemBuilder: (context, index) {
-                                              final style = mapStyles[index];
-                                              final isSelected = style['url'] ==
-                                                  selectedStyleUrl;
-
-                                              return GestureDetector(
-                                                onTap: () {
-                                                  setState(() {
-                                                    selectedStyleUrl =
-                                                        style['url']!;
-                                                  });
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Column(
-                                                  children: [
-                                                    Container(
-                                                      // width: 80,
-                                                      height: height * 0.08,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(12),
-                                                        border: Border.all(
-                                                          color: isSelected
-                                                              ? Colors.blue
-                                                              : Colors
-                                                                  .transparent,
-                                                          width: 2,
-                                                        ),
-                                                      ),
-                                                      child: ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10),
-                                                        child: Image.asset(
-                                                          style['image']!,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 4),
-                                                    Text(
-                                                      style['name']!,
-                                                      style: TextStyle(
-                                                        fontSize: 8,
-                                                        fontWeight: isSelected
-                                                            ? FontWeight.bold
-                                                            : FontWeight.normal,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                        SizedBox(height: height * 0.024),
-                                        Text(
-                                          "Navigations",
-                                          style: TextStyle(
-                                              fontSize: height * .018,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        SizedBox(height: height * 0.012),
-                                        Expanded(
-                                          child: ListView.builder(
-                                            itemCount: '_movementHistory'.length,
-                                            itemBuilder: (context, index) {
-                                              final entry =
-                                                  _movementHistory[index];
-                                              final isMoving =
-                                                  entry['type'] == 'moving';
-
-                                              return Container(
-                                                margin:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 6),
-                                                padding:
-                                                    const EdgeInsets.all(12),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.grey.shade100,
-                                                  borderRadius:
-                                                      BorderRadius.circular(16),
-                                                ),
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      isMoving
-                                                          ? Icons
-                                                              .directions_walk
-                                                          : Icons.stop_circle,
-                                                      color: isMoving
-                                                          ? Colors.green
-                                                          : Colors.red,
-                                                      size: 28,
-                                                    ),
-                                                    SizedBox(width: 12),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          isMoving
-                                                              ? 'Moving ${entry['time']}'
-                                                              : 'Stopped ${entry['time']}',
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize: 14,
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          'Location : ${entry['locality']} ${entry['subLocality']}',
-                                                          style: TextStyle(
-                                                            fontSize: 13,
-                                                            color:
-                                                                Colors.black54,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color.fromARGB(255, 255, 255, 255),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black12,
-                                    blurRadius: 15,
-                                    spreadRadius: 3,
-                                    offset: Offset(0, -3),
-                                  ),
-                                ],
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Icon(
-                                  CupertinoIcons.timelapse,
-                                  color: AppColor.mainTextColor,
-                                  size: height * 0.023,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 255, 255, 255),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 15,
-                            spreadRadius: 3,
-                            offset: Offset(0, -3),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          /// Profile Section
-                          Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                                color: Color(0xFFF8F8F8),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                    color: Color.fromARGB(78, 123, 158, 177))),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Container(
-                                    width: width * .2,
-                                    height: height * 0.09,
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: Color.fromARGB(
-                                                78, 123, 158, 177)),
-                                        borderRadius: BorderRadius.circular(20),
-                                        color: Color(0xFFC9D9D5)),
-                                    child: Image.network(
-                                      _authBox.get('selfie'),
-                                      fit: BoxFit.fitWidth,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 16),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      _authBox.get('employeeName') ?? '',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      DateFormat('dd MMMM yyyy')
-                                          .format(DateTime.now())
-                                          .toString()
-                                          .toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Color.fromARGB(255, 85, 85, 85),
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    InkWell(
-                                      onTap: _getCurrentLocation,
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.location_pin,
-                                            size: height * .016,
-                                            color: Colors.green,
-                                          ),
-                                          SizedBox(width: 4),
-                                          SizedBox(
-                                            width: width * 0.45,
-                                            child: Text(
-                                              maxLines: 3,
-                                              overflow: TextOverflow.ellipsis,
-                                              place != null
-                                                  ? place!.subLocality!
-                                                          .isNotEmpty
-                                                      ? ' ${place!.subLocality}, ${place!.locality}'
-                                                      : place!.locality!
-                                                  : 'Tap to fetch location',
-                                              style: TextStyle(
-                                                fontSize: height * .016,
-                                                color: Color.fromARGB(
-                                                    255, 85, 85, 85),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          SizedBox(
-                            height: height * .016,
-                          ),
-
-                          /// Schedule Tiles
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  // width: width,
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFFF5F5F5),
-                                    border: Border.all(
-                                        color:
-                                            Color.fromARGB(78, 123, 158, 177)),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        '${times['lastIn']}',
-                                        // '',
-                                        style: TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        'Punch-In',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: width * .03,
-                              ),
-                              Expanded(
-                                child: Container(
-                                  // width: width,
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color:
-                                            Color.fromARGB(78, 123, 158, 177)),
-                                    color: Color(0xFFF5F5F5),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        '${times['lastOut']}',
-                                        style: TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        'Punch-Out',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          SizedBox(
-                            height: height * .016,
-                          ),
-
-                          Visibility(
-                            visible: _authBox.get('punchedIn') == null,
-                            child: InkWell(
-                              onTap: _punchIn,
-                              child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [Colors.lightGreen, Colors.green],
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                child: Center(
-                                  child: _isLoadingPI
-                                      ? SizedBox(
-                                          height: height * 0.02,
-                                          width: width * 0.05,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeCap: StrokeCap.round,
-                                            strokeWidth: 2,
-                                          ))
-                                      : Text(
-                                          'Punch-In',
-                                          style: TextStyle(
-                                              fontSize: height * 0.015,
-                                              color: AppColor.mainFGColor),
-                                        ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Visibility(
-                            visible: _authBox.get('punchedIn') != null,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: _updatePunchLocation,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Colors.lightGreen,
-                                            Colors.green
-                                          ],
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 20, vertical: 12),
-                                      child: Center(
-                                        child: _isLoadingUP
-                                            ? SizedBox(
-                                                height: height * 0.02,
-                                                width: width * 0.05,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  color: Colors.white,
-                                                  strokeCap: StrokeCap.round,
-                                                  strokeWidth: 2,
-                                                ))
-                                            : Text(
-                                                'Update Location',
-                                                style: TextStyle(
-                                                    fontSize: height * 0.015,
-                                                    color:
-                                                        AppColor.mainFGColor),
-                                              ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: width * .03,
-                                ),
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: _punchOut,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Colors.black45,
-                                            Colors.black
-                                          ],
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 20, vertical: 12),
-                                      child: Center(
-                                        child: _isLoadingPO
-                                            ? SizedBox(
-                                                height: height * 0.02,
-                                                width: width * 0.05,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  color: Colors.white,
-                                                  strokeCap: StrokeCap.round,
-                                                  strokeWidth: 2,
-                                                ))
-                                            : Text(
-                                                'Punch Out',
-                                                style: TextStyle(
-                                                    fontSize: height * 0.015,
-                                                    color:
-                                                        AppColor.mainFGColor),
-                                              ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: height * 0.02,
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                );
               },
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Column _punchinWdiget(BuildContext context, double height, double width,
+      Map<String, String> times) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 15,
+                        spreadRadius: 3,
+                        offset: Offset(0, -3),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Icon(
+                      Icons.chevron_left,
+                      color: AppColor.mainTextColor,
+                      size: height * 0.023,
+                    ),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  generateTrackingPdf(_movementHistory);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 15,
+                        spreadRadius: 3,
+                        offset: Offset(0, -3),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      children: [
+                        Text(
+                          "Export Track Record",
+                          style: TextStyle(
+                            fontSize: height * .015,
+                          ),
+                        ),
+                        SizedBox(width: width * 0.015),
+                        Icon(
+                          CupertinoIcons.paperclip,
+                          color: AppColor.mainTextColor,
+                          size: height * 0.018,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () => showCupertinoModalBottomSheet(
+                  expand: true,
+                  context: context,
+                  barrierColor: const Color.fromARGB(130, 0, 0, 0),
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => Scaffold(
+                    body: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppColor.newgredient1,
+                            const Color.fromARGB(52, 96, 125, 139),
+                          ],
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Map Style",
+                              style: TextStyle(
+                                  fontSize: height * .018,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: height * 0.015),
+                            SizedBox(
+                              height: height * 0.1,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: mapStyles.length,
+                                separatorBuilder: (_, __) =>
+                                    SizedBox(width: width * 0.022),
+                                itemBuilder: (context, index) {
+                                  final style = mapStyles[index];
+                                  final isSelected =
+                                      style['url'] == selectedStyleUrl;
+
+                                  return GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedStyleUrl = style['url']!;
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          // width: 80,
+                                          height: height * 0.08,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: isSelected
+                                                  ? Colors.blue
+                                                  : Colors.transparent,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: Image.asset(
+                                              style['image']!,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          style['name']!,
+                                          style: TextStyle(
+                                            fontSize: 8,
+                                            fontWeight: isSelected
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: height * 0.024),
+                            Text(
+                              "Navigations",
+                              style: TextStyle(
+                                  fontSize: height * .018,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: height * 0.012),
+                            Expanded(
+                              child: _movementHistory.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'No movement data yet ',
+                                        style: TextStyle(
+                                            fontSize: 12, color: Colors.grey),
+                                      ),
+                                    )
+                                  : ListView.builder(
+                                      itemCount: _movementHistory.length,
+                                      itemBuilder: (context, index) {
+                                        final entry = _movementHistory[index];
+                                        final isMoving =
+                                            entry['type'] == 'moving';
+                                        String jsonData =
+                                            exportMovementHistoryToJson(
+                                                _movementHistory);
+
+                                        print(entry['time']);
+                                        return Container(
+                                          margin: const EdgeInsets.symmetric(
+                                              vertical: 6),
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade100,
+                                            borderRadius:
+                                                BorderRadius.circular(16),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                isMoving
+                                                    ? Icons.directions_walk
+                                                    : Icons.stop_circle,
+                                                color: isMoving
+                                                    ? Colors.green
+                                                    : Colors.red,
+                                                size: 28,
+                                              ),
+                                              SizedBox(width: 12),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    isMoving
+                                                        ? 'Moving ${entry['time']}'
+                                                        : 'Stopped ${entry['time']}',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    'Location : ${entry['locality']} ${entry['subLocality']}',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.black54,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 15,
+                        spreadRadius: 3,
+                        offset: Offset(0, -3),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Icon(
+                      CupertinoIcons.timelapse,
+                      color: AppColor.mainTextColor,
+                      size: height * 0.023,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 255, 255, 255),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 15,
+                spreadRadius: 3,
+                offset: Offset(0, -3),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              /// Profile Section
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                    color: Color(0xFFF8F8F8),
+                    borderRadius: BorderRadius.circular(20),
+                    border:
+                        Border.all(color: Color.fromARGB(78, 123, 158, 177))),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        width: width * .2,
+                        height: height * 0.09,
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                                color: Color.fromARGB(78, 123, 158, 177)),
+                            borderRadius: BorderRadius.circular(20),
+                            color: Color(0xFFC9D9D5)),
+                        child: _authBox.get('selfie') != null
+                            ? Image.network(
+                                _authBox.get('selfie'),
+                                fit: BoxFit.fitWidth,
+                              )
+                            : Image.asset('assets/image/MaleAvatar.png'),
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _authBox.get('employeeName') ?? '',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          DateFormat('dd MMMM yyyy')
+                              .format(DateTime.now())
+                              .toString()
+                              .toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color.fromARGB(255, 85, 85, 85),
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        InkWell(
+                          onTap: _getCurrentLocation,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.location_pin,
+                                size: height * .016,
+                                color: Colors.green,
+                              ),
+                              SizedBox(width: 4),
+                              SizedBox(
+                                width: width * 0.45,
+                                child: Text(
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  place != null
+                                      ? place!.subLocality!.isNotEmpty
+                                          ? ' ${place!.subLocality}, ${place!.locality}'
+                                          : place!.locality!
+                                      :  'Tap to fetch location',
+                                  style: TextStyle(
+                                    fontSize: height * .016,
+                                    color: Color.fromARGB(255, 85, 85, 85),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(
+                height: height * .016,
+              ),
+
+              /// Schedule Tiles
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Container(
+                      // width: width,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF5F5F5),
+                        border: Border.all(
+                            color: Color.fromARGB(78, 123, 158, 177)),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '${times['lastIn']}',
+                            // '',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Punch-In',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: width * .03,
+                  ),
+                  Expanded(
+                    child: Container(
+                      // width: width,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                            color: Color.fromARGB(78, 123, 158, 177)),
+                        color: Color(0xFFF5F5F5),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '${times['lastOut']}',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Punch-Out',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(
+                height: height * .016,
+              ),
+
+              Visibility(
+                visible: _authBox.get('punchedIn') == null,
+                child: InkWell(
+                  onTap: _punchIn,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.lightGreen, Colors.green],
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: Center(
+                      child: _isLoadingPI
+                          ? SizedBox(
+                              height: height * 0.02,
+                              width: width * 0.05,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeCap: StrokeCap.round,
+                                strokeWidth: 2,
+                              ))
+                          : Text(
+                              'Punch-In',
+                              style: TextStyle(
+                                  fontSize: height * 0.015,
+                                  color: AppColor.mainFGColor),
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: _authBox.get('punchedIn') != null,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: _updatePunchLocation,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.lightGreen, Colors.green],
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          child: Center(
+                            child: _isLoadingUP
+                                ? SizedBox(
+                                    height: height * 0.02,
+                                    width: width * 0.05,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeCap: StrokeCap.round,
+                                      strokeWidth: 2,
+                                    ))
+                                : Text(
+                                    'Update Location',
+                                    style: TextStyle(
+                                        fontSize: height * 0.015,
+                                        color: AppColor.mainFGColor),
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: width * .03,
+                    ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: _punchOut,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.black45, Colors.black],
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          child: Center(
+                            child: _isLoadingPO
+                                ? SizedBox(
+                                    height: height * 0.02,
+                                    width: width * 0.05,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeCap: StrokeCap.round,
+                                      strokeWidth: 2,
+                                    ))
+                                : Text(
+                                    'Punch Out',
+                                    style: TextStyle(
+                                        fontSize: height * 0.015,
+                                        color: AppColor.mainFGColor),
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: height * 0.02,
+              )
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Column _emptypunchinwidget(
+      BuildContext context, double height, double width) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 15,
+                        spreadRadius: 3,
+                        offset: Offset(0, -3),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Icon(
+                      Icons.chevron_left,
+                      color: AppColor.mainTextColor,
+                      size: height * 0.023,
+                    ),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () => showCupertinoModalBottomSheet(
+                  expand: true,
+                  context: context,
+                  barrierColor: const Color.fromARGB(130, 0, 0, 0),
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => Scaffold(
+                    body: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppColor.newgredient1,
+                            const Color.fromARGB(52, 96, 125, 139),
+                          ],
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Map Style",
+                              style: TextStyle(
+                                  fontSize: height * .018,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: height * 0.015),
+                            SizedBox(
+                              height: height * 0.1,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: mapStyles.length,
+                                separatorBuilder: (_, __) =>
+                                    SizedBox(width: width * 0.022),
+                                itemBuilder: (context, index) {
+                                  final style = mapStyles[index];
+                                  final isSelected =
+                                      style['url'] == selectedStyleUrl;
+
+                                  return GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedStyleUrl = style['url']!;
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          // width: 80,
+                                          height: height * 0.08,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: isSelected
+                                                  ? Colors.blue
+                                                  : Colors.transparent,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: Image.asset(
+                                              style['image']!,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          style['name']!,
+                                          style: TextStyle(
+                                            fontSize: 8,
+                                            fontWeight: isSelected
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: height * 0.024),
+                            Text(
+                              "Navigations",
+                              style: TextStyle(
+                                  fontSize: height * .018,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: height * 0.012),
+                            Expanded(
+                              child: _movementHistory.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'No movement data yet ',
+                                        style: TextStyle(
+                                            fontSize: 16, color: Colors.grey),
+                                      ),
+                                    )
+                                  : ListView.builder(
+                                      itemCount: _movementHistory.length,
+                                      itemBuilder: (context, index) {
+                                        final entry = _movementHistory[index];
+                                        final isMoving =
+                                            entry['type'] == 'moving';
+
+                                        return Container(
+                                          margin: const EdgeInsets.symmetric(
+                                              vertical: 6),
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade100,
+                                            borderRadius:
+                                                BorderRadius.circular(16),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                isMoving
+                                                    ? Icons.directions_walk
+                                                    : Icons.stop_circle,
+                                                color: isMoving
+                                                    ? Colors.green
+                                                    : Colors.red,
+                                                size: 28,
+                                              ),
+                                              SizedBox(width: 12),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    isMoving
+                                                        ? 'Moving ${entry['time']}'
+                                                        : 'Stopped ${entry['time']}',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    'Location : ${entry['locality']} ${entry['subLocality']}',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.black54,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 15,
+                        spreadRadius: 3,
+                        offset: Offset(0, -3),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Icon(
+                      CupertinoIcons.timelapse,
+                      color: AppColor.mainTextColor,
+                      size: height * 0.023,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 255, 255, 255),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 15,
+                spreadRadius: 3,
+                offset: Offset(0, -3),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              /// Profile Section
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                    color: Color(0xFFF8F8F8),
+                    borderRadius: BorderRadius.circular(20),
+                    border:
+                        Border.all(color: Color.fromARGB(78, 123, 158, 177))),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                          width: width * .2,
+                          height: height * 0.09,
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: Color.fromARGB(78, 123, 158, 177)),
+                              borderRadius: BorderRadius.circular(20),
+                              color: Color(0xFFC9D9D5)),
+                          child: Image.asset('assets/image/MaleAvatar.png')),
+                    ),
+                    SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _authBox.get('employeeName') ?? '',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          DateFormat('dd MMMM yyyy')
+                              .format(DateTime.now())
+                              .toString()
+                              .toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color.fromARGB(255, 85, 85, 85),
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        InkWell(
+                          onTap: _getCurrentLocation,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.location_pin,
+                                size: height * .016,
+                                color: Colors.green,
+                              ),
+                              SizedBox(width: 4),
+                              SizedBox(
+                                width: width * 0.45,
+                                child: Text(
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  place != null
+                                      ? place!.subLocality!.isNotEmpty
+                                          ? ' ${place!.subLocality}, ${place!.locality}'
+                                          : place!.locality!
+                                      : 'Tap to fetch location',
+                                  style: TextStyle(
+                                    fontSize: height * .016,
+                                    color: Color.fromARGB(255, 85, 85, 85),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(
+                height: height * .016,
+              ),
+
+              /// Schedule Tiles
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Container(
+                      // width: width,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF5F5F5),
+                        border: Border.all(
+                            color: Color.fromARGB(78, 123, 158, 177)),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '--/--',
+                            // '',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Punch-In',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: width * .03,
+                  ),
+                  Expanded(
+                    child: Container(
+                      // width: width,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                            color: Color.fromARGB(78, 123, 158, 177)),
+                        color: Color(0xFFF5F5F5),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '--/--',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Punch-Out',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(
+                height: height * .016,
+              ),
+
+              InkWell(
+                onTap: _punchIn,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.lightGreen, Colors.green],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Center(
+                    child: _isLoadingPI
+                        ? SizedBox(
+                            height: height * 0.02,
+                            width: width * 0.05,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeCap: StrokeCap.round,
+                              strokeWidth: 2,
+                            ))
+                        : Text(
+                            'Punch-In',
+                            style: TextStyle(
+                                fontSize: height * 0.015,
+                                color: AppColor.mainFGColor),
+                          ),
+                  ),
+                ),
+              ),
+
+              SizedBox(
+                height: height * 0.02,
+              )
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

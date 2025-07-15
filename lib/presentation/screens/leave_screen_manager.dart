@@ -285,7 +285,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                       List<LeaveHistory> items = snapshot.data!;
 
                                       return ListView.separated(
-                                             physics:BouncingScrollPhysics(),
+                                        physics: BouncingScrollPhysics(),
                                         itemCount: items.length,
                                         separatorBuilder: (context, index) =>
                                             SizedBox(height: 12),
@@ -308,6 +308,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                   'earnedLeave': 'Earned',
                                                   'medicalLeave': 'Medical',
                                                   'casualLeave': 'Casual',
+                                                  'compOffLeave': 'Comp-Off',
                                                   'paternityLeave': 'Paternity',
                                                   'maternityLeave': 'Maternity',
                                                   'regularized':
@@ -687,7 +688,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                           snapshot.data!;
 
                                       return ListView.separated(
-                                             physics:BouncingScrollPhysics(),
+                                        physics: BouncingScrollPhysics(),
                                         itemCount: items.length,
                                         separatorBuilder: (context, index) =>
                                             SizedBox(height: 12),
@@ -1220,7 +1221,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                             snapshot.data!;
 
                                         return ListView.separated(
-                                               physics:BouncingScrollPhysics(),
+                                          physics: BouncingScrollPhysics(),
                                           itemCount: items.length,
                                           itemBuilder: (context, index) {
                                             final leave = items[index];
@@ -1300,23 +1301,29 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                                                                   : leave.totalDays == '0.5'
                                                                                       ? 'Casual - Half-Day'
                                                                                       : 'Casual - ${leave.totalDays} Days'
-                                                                              : leave.leaveType == 'paternityLeave'
+                                                                              : leave.leaveType == 'compOffLeave'
                                                                                   ? leave.totalDays == '1'
-                                                                                      ? 'Paternity - Full Day'
+                                                                                      ? 'Comp-Off - Full Day'
                                                                                       : leave.totalDays == '0.5'
-                                                                                          ? 'Paternity - Half-Day'
-                                                                                          : 'Paternity - ${leave.totalDays} Days'
-                                                                                  : leave.leaveType == 'maternityLeave'
+                                                                                          ? 'Comp-Off - Half-Day'
+                                                                                          : 'Comp-Off - ${leave.totalDays} Days'
+                                                                                  : leave.leaveType == 'paternityLeave'
                                                                                       ? leave.totalDays == '1'
-                                                                                          ? 'Maternity - Full Day'
+                                                                                          ? 'Paternity - Full Day'
                                                                                           : leave.totalDays == '0.5'
-                                                                                              ? 'Maternity - Half-Day'
-                                                                                              : 'Maternity - ${leave.totalDays} Days'
-                                                                                      : leave.leaveType == 'regularized'
-                                                                                          ? 'Regularization'
-                                                                                          : leave.leaveType == 'shortLeave'
-                                                                                              ? 'Short-Leave'
-                                                                                              : leave.leaveType,
+                                                                                              ? 'Paternity - Half-Day'
+                                                                                              : 'Paternity - ${leave.totalDays} Days'
+                                                                                      : leave.leaveType == 'maternityLeave'
+                                                                                          ? leave.totalDays == '1'
+                                                                                              ? 'Maternity - Full Day'
+                                                                                              : leave.totalDays == '0.5'
+                                                                                                  ? 'Maternity - Half-Day'
+                                                                                                  : 'Maternity - ${leave.totalDays} Days'
+                                                                                          : leave.leaveType == 'regularized'
+                                                                                              ? 'Regularization'
+                                                                                              : leave.leaveType == 'shortLeave'
+                                                                                                  ? 'Short-Leave'
+                                                                                                  : leave.leaveType,
                                                                   style:
                                                                       TextStyle(
                                                                     fontSize:
@@ -1706,7 +1713,7 @@ class _LeaveScreenState extends State<LeaveScreenManager>
                                           snapshot.data!;
 
                                       return ListView.separated(
-                                             physics:BouncingScrollPhysics(),
+                                        physics: BouncingScrollPhysics(),
                                         itemCount: items.length,
                                         itemBuilder: (context, index) {
                                           final leave = items[index];
