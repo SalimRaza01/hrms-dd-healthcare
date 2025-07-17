@@ -1034,30 +1034,4 @@ Uint8List decodeBase64Image(String base64String) {
   return base64Decode(base64String);
 }
 
-Future<void> addPunchTrackHistory(
-  BuildContext context,
-  List<Map<String, dynamic>> trackList,
-) async {
-  String empID = _authBox.get('employeeId');
 
-  try {
-    final response = await dio.post(postTrackHistory, queryParameters:{
-            "employeeId": empID,
-    },  data: trackList );
-    if (response.statusCode == 201 || response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Track Data Saved'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
-  } on DioException catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(e.response!.data['message']),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-}

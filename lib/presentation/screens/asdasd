@@ -53,6 +53,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   List<Placemark>? placemarks;
   Placemark? place;
   MapController mapController = MapController();
+  List<Map<String, dynamic>> trackList = [];
   List<LatLng> _polylines = [];
   List<Marker> _markers = [];
   List<Map<String, dynamic>> _movementHistory = [];
@@ -97,98 +98,68 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
 
   void _loadTrackedPathFromHive() async {
     try {
-      final trackBox = Hive.box('trackBox');
-      final markerBox = Hive.box('markerBox');
+      final movementBox = Hive.box('movementBox');
 
       _hivePollingTimer?.cancel();
 
       _hivePollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-        List<LatLng> polylinePoints = [];
-        for (int i = 0; i < trackBox.length; i++) {
-          final entry = trackBox.getAt(i);
-          if (entry is Map && entry['lat'] != null && entry['lng'] != null) {
-            polylinePoints.add(LatLng(entry['lat'], entry['lng']));
+        List<Map<String, dynamic>> hilist = [];
+
+        for (int i = 0; i < movementBox.length; i++) {
+          final rawEntry = movementBox.getAt(i);
+          if (rawEntry is Map) {
+            final entry = Map<String, dynamic>.from(rawEntry);
+            if (entry['lat'] != null &&
+                entry['lng'] != null &&
+                entry['type'] != null) {
+   
+              hilist.add(entry);
+            }
           }
         }
 
-        List<Map<String, dynamic>> markerList = [];
-        for (int i = 0; i < markerBox.length; i++) {
-          final entry = markerBox.getAt(i);
-          if (entry is Map && entry['type'] != null) {
-            markerList.add(Map<String, dynamic>.from(entry));
-          }
-        }
-
-        markerList.sort((a, b) => DateTime.parse(a['timestamp'])
+        hilist.sort((a, b) => DateTime.parse(a['timestamp'])
             .compareTo(DateTime.parse(b['timestamp'])));
 
-        if (markerList.isNotEmpty) {
-          markerList.last['type'] = 'last';
-        }
+        final trackedPath = hilist
+            .map((e) => LatLng(e['lat'] as double, e['lng'] as double))
+            .toList();
 
-        final markers = markerList.map((e) {
-          final type = e['type'];
-          IconData icon;
-          Color color;
-
-          switch (type) {
-            case 'start':
-              icon = Icons.flag;
-              color = Colors.blue;
-              break;
-            case 'moving':
-              icon = Icons.directions_walk;
-              color = Colors.green;
-              break;
-            case 'stopped':
-              icon = Icons.stop_circle;
-              color = Colors.red;
-              break;
-            default:
-              icon = Icons.location_on;
-              color = Colors.grey;
-          }
-
+        final markers = hilist.map((e) {
+          final isMoving = e['type'] == 'moving';
           return Marker(
-            width: 32,
-            height: 32,
+            width: 30,
+            height: 30,
             point: LatLng(e['lat'], e['lng']),
-            child: Icon(icon, color: color, size: 28),
+            child: Icon(
+              isMoving ? Icons.directions_walk : Icons.stop_circle,
+              color: isMoving ? Colors.green : Colors.red,
+              size: 26,
+            ),
           );
         }).toList();
 
-        if (polylinePoints.isNotEmpty) {
-          final last = polylinePoints.last;
-
+        if (hilist.isNotEmpty) {
+          final last = hilist.last;
           markers.add(
             Marker(
               width: 40,
               height: 40,
-              point: last,
+              point: LatLng(last['lat'], last['lng']),
               child: Icon(Icons.location_on, color: Colors.black, size: 36),
             ),
           );
         }
 
         setState(() {
-          _polylines = polylinePoints;
+          trackList = hilist;
+          _polylines = trackedPath;
           _markers = markers;
-          _movementHistory = List.from(markerList);
-
-          if (_polylines.isNotEmpty) {
-            final bounds = LatLngBounds.fromPoints(_polylines);
-
-            final cameraFit = CameraFit.bounds(
-              bounds: bounds,
-              padding: const EdgeInsets.all(60),
-            );
-
-            mapController.fitCamera(cameraFit);
-          }
+          _movementHistory = List.from(hilist.reversed);
         });
       });
     } catch (e, stack) {
-      debugPrint('❌ Failed loading Hive data: $e\n$stack');
+      debugPrint('Failed loading Hive data: $e\n$stack');
     }
   }
 
@@ -373,7 +344,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   }
 
   Future<void> _punchOut() async {
-    setState(() => _isLoadingPO = true);
+       setState(() => _isLoadingPO = true);
     await _getCurrentLocation();
 
     if (_currentLocation != null) {
@@ -381,13 +352,14 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
           ? '(OUT)${place!.subLocality}, ${place!.locality}'
           : '(OUT)${place!.locality}';
       String punchId = _authBox.get('Punch-In-id');
-      locationService.invoke('stopService');
-      await addPunchTrackHistory(context);
+    locationService.invoke('stopService');
+      // await addPunchTrackHistory(context, trackList);
+  
       await manualPunchOut(context, punchId, location);
-
-      setState(() => _isLoadingPO = false);
+ 
+        setState(() => _isLoadingPO = false);
     } else {
-      setState(() => _isLoadingPO = false);
+              setState(() => _isLoadingPO = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Location not available for Punch-Out'),
@@ -396,6 +368,23 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
       );
     }
   }
+
+  // Future<void> postAllTrackedData(BuildContext context) async {
+  //   for (var entry in trackList) {
+  //     await addPunchTrackHistory(
+  //       context,
+  //       entry['type'],
+  //       entry['lat'].toString(),
+  //       entry['lng'].toString(),
+  //       entry['time'],
+  //       entry['locality'],
+  //       entry['subLocality'],
+  //       entry['duration'].toString(),
+  //       entry['distance'].toString(),
+  //       entry['timestamp'],
+  //     );
+  //   }
+  // }
 
   Future<void> manualPunchIn(
     BuildContext context,
@@ -445,6 +434,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   Future<void> manualPunchOut(
       BuildContext context, String punchInId, String location) async {
     String token = _authBox.get('token');
+ 
 
     try {
       final response = await dio.post('$punchOutAction/$punchInId',
@@ -461,12 +451,14 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
         final punchProvider = Provider.of<PunchedIN>(context, listen: false);
         await punchProvider.fetchAndSetPunchRecord();
 
+
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Punch-Out Success'),
           backgroundColor: Colors.green,
         ));
       }
     } on DioException catch (e) {
+
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(e.response?.data['message'] ?? 'Punch-Out failed'),
         backgroundColor: Colors.red,
@@ -503,87 +495,6 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
     }
   }
 
-  Future<void> addPunchTrackHistory(BuildContext context) async {
-    final String empID = _authBox.get('employeeId');
-    final trackBox = Hive.box('trackBox');
-    final markerBox = Hive.box('markerBox');
-
-    List<Map<String, dynamic>> pathToSend = [];
-    List<Map<String, dynamic>> markersToSend = [];
-
-    // Prepare track path
-    for (int i = 0; i < trackBox.length; i++) {
-      final entry = trackBox.getAt(i);
-      if (entry is Map &&
-          entry['lat'] != null &&
-          entry['lng'] != null &&
-          entry['timestamp'] != null) {
-        pathToSend.add({
-          "lat": entry['lat'],
-          "lng": entry['lng'],
-          "timestamp": entry['timestamp'],
-        });
-      }
-    }
-
-    // Prepare markers
-    for (int i = 0; i < markerBox.length; i++) {
-      final entry = markerBox.getAt(i);
-      if (entry is Map &&
-          entry['lat'] != null &&
-          entry['lng'] != null &&
-          entry['type'] != null &&
-          entry['timestamp'] != null) {
-        markersToSend.add({
-          "type": entry['type'],
-          "lat": entry['lat'],
-          "lng": entry['lng'],
-          "time": entry['time'] ?? "",
-          "locality": entry['locality'] ?? "",
-          "subLocality": entry['subLocality'] ?? "",
-          "duration": entry['duration'] ?? "",
-          "timestamp": entry['timestamp'],
-        });
-      }
-    }
-
-    print('TrackPath Data : $pathToSend');
-    print('Markers Data : $markersToSend');
-
-    if (pathToSend.isEmpty && markersToSend.isEmpty) return;
-
-    try {
-      final response = await dio.post(
-        postTrackHistory,
-        queryParameters: {
-          "employeeId": empID,
-        },
-        data: {
-          "employeeId": empID,
-          "trackPath": pathToSend,
-          "markers": markersToSend,
-        },
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Track data uploaded successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } on DioException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              e.response?.data['message'] ?? 'Failed to upload track data'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
   String exportMovementHistoryToJson(List<Map<String, dynamic>> trackList) {
     return jsonEncode(trackList);
   }
@@ -601,11 +512,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-
-    // locationService.invoke('stopService');
-    //  Hive.box('movementBox').clear();
-    //   Hive.box('markerBox').clear();
-    //      Hive.box('trackBox').clear();
+    print('Tracklist : ${trackList}');
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -631,20 +538,20 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                       initialCenter: _currentLocation != null
                           ? _currentLocation!
                           : LatLng(28.6139, 77.2090),
-                      initialZoom: 10.0,
+                      initialZoom: 50.0,
                     ),
                     children: [
-                      TileLayer(
-                        urlTemplate:
-                            "https://api.mapbox.com/styles/v1/mapbox/$selectedStyleUrl/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWVyb2ZpdCIsImEiOiJjbWN5cWF3ZzMwcGVmMnJxeGM1OHY0OWljIn0.MdIEJmSfJFwcTElUoetFUA",
-                        userAgentPackageName: 'com.mapbox.token',
-                      ),
                       // TileLayer(
                       //   urlTemplate:
-                      //       'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                      //   subdomains: ['a', 'b', 'c', 'd'],
-                      //   userAgentPackageName: 'com.ddhealthcare.hrms_app',
+                      //       "https://api.mapbox.com/styles/v1/mapbox/$selectedStyleUrl/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiZGRoZWFsdGhjYXJlIiwiYSI6ImNtZDQzN2tmZTBiYXAyanNjczRuc2FrNjMifQ.VPt9SPPrjbQ72VOwhvL3aQ",
+                      //   userAgentPackageName: 'com.mapbox.token',
                       // ),
+                      TileLayer(
+                        urlTemplate:
+                            'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                        subdomains: ['a', 'b', 'c', 'd'],
+                        userAgentPackageName: 'com.ddhealthcare.hrms_app',
+                      ),
                       Visibility(
                         visible: _polylines.isNotEmpty,
                         child: PolylineLayer(
@@ -868,7 +775,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                               child: _movementHistory.isEmpty
                                   ? Center(
                                       child: Text(
-                                        'No movement data yet',
+                                        'No movement data yet ',
                                         style: TextStyle(
                                             fontSize: 12, color: Colors.grey),
                                       ),
@@ -877,37 +784,13 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                       itemCount: _movementHistory.length,
                                       itemBuilder: (context, index) {
                                         final entry = _movementHistory[index];
-                                        final String type = entry['type'];
-                                        final String time = entry['time'] ?? '';
-                                        final String locality =
-                                            entry['locality'] ?? '';
-                                        final String subLocality =
-                                            entry['subLocality'] ?? '';
-                                        final String duration =
-                                            entry['duration'] ?? '';
-                                        final bool isMoving = type == 'moving';
-                                        final bool isStopped =
-                                            type == 'stopped';
-                                        final bool isStart = type == 'start';
-                                        final bool isLast = type == 'last';
+                                        final isMoving =
+                                            entry['type'] == 'moving';
+                                        String jsonData =
+                                            exportMovementHistoryToJson(
+                                                _movementHistory);
 
-                                        IconData icon;
-                                        Color iconColor;
-
-                                        if (isStart) {
-                                          icon = Icons.flag;
-                                          iconColor = Colors.blue;
-                                        } else if (isMoving) {
-                                          icon = Icons.directions_walk;
-                                          iconColor = Colors.green;
-                                        } else if (isLast) {
-                                          icon = Icons.location_on;
-                                          iconColor = Colors.black;
-                                        } else {
-                                          icon = Icons.stop_circle;
-                                          iconColor = Colors.red;
-                                        }
-
+                                        print(entry['time']);
                                         return Container(
                                           margin: const EdgeInsets.symmetric(
                                               vertical: 6),
@@ -919,47 +802,38 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                           ),
                                           child: Row(
                                             children: [
-                                              Icon(icon,
-                                                  color: iconColor, size: 28),
+                                              Icon(
+                                                isMoving
+                                                    ? Icons.directions_walk
+                                                    : Icons.stop_circle,
+                                                color: isMoving
+                                                    ? Colors.green
+                                                    : Colors.red,
+                                                size: 28,
+                                              ),
                                               SizedBox(width: 12),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      isStart
-                                                          ? 'Started at $time'
-                                                          : isLast
-                                                              ? 'Ended at $time'
-                                                              : isMoving
-                                                                  ? 'Moving at $time'
-                                                                  : 'Stopped at $time',
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontSize: 14,
-                                                      ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    isMoving
+                                                        ? 'Moving ${entry['time']}'
+                                                        : 'Stopped ${entry['time']}',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 14,
                                                     ),
-                                                    Text(
-                                                      'Location: $locality $subLocality',
-                                                      style: TextStyle(
-                                                        fontSize: 13,
-                                                        color: Colors.black54,
-                                                      ),
+                                                  ),
+                                                  Text(
+                                                    'Location : ${entry['locality']} ${entry['subLocality']}',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.black54,
                                                     ),
-                                                    if (isStopped &&
-                                                        duration.isNotEmpty)
-                                                      Text(
-                                                        'Stopped for: $duration',
-                                                        style: TextStyle(
-                                                          fontSize: 13,
-                                                          color:
-                                                              Colors.deepPurple,
-                                                        ),
-                                                      ),
-                                                  ],
-                                                ),
+                                                  ),
+                                                ],
                                               ),
                                             ],
                                           ),

@@ -60,14 +60,13 @@ Future<bool> onIosBackground(ServiceInstance service) async {
   return true;
 }
 
-
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   DartPluginRegistrant.ensureInitialized();
   await Hive.initFlutter();
 
-  final Box trackBox = await Hive.openBox('trackBox');   
-  final Box markerBox = await Hive.openBox('markerBox');   
+  final Box trackBox = await Hive.openBox('trackBox');     // For polyline
+  final Box markerBox = await Hive.openBox('markerBox');   // For start/move/stop markers
 
   LatLng? _previousLocation;
   LatLng? _lastStationaryLocation;
@@ -82,22 +81,6 @@ void onStart(ServiceInstance service) async {
     final current = LatLng(position.latitude, position.longitude);
     final timestamp = now.toIso8601String();
 
-    final distance = _previousLocation != null
-        ? Distance().as(LengthUnit.Meter, _previousLocation!, current)
-        : 0.0;
-
-    if (_previousLocation != null && distance < 10) {
-      print('Ignored GPS jitter: $distance m');
-      return;
-    }
-
- 
-    await trackBox.add({
-      'lat': current.latitude,
-      'lng': current.longitude,
-      'timestamp': timestamp,
-    });
-
     final placemarks = await placemarkFromCoordinates(
       current.latitude,
       current.longitude,
@@ -106,10 +89,21 @@ void onStart(ServiceInstance service) async {
     final locality = mark.locality ?? mark.subAdministrativeArea ?? 'Unknown';
     final subLocality = mark.subLocality ?? mark.subAdministrativeArea ?? 'Unknown';
 
+    final distance = _previousLocation != null
+        ? Distance().as(LengthUnit.Meter, _previousLocation!, current)
+        : 0.0;
+
     final isStationary = _lastStationaryLocation != null &&
-        Distance().as(LengthUnit.Meter, _lastStationaryLocation!, current) <= 50;
+        Distance().as(LengthUnit.Meter, _lastStationaryLocation!, current) <= 15;
 
+    // ✅ Always save location point for polyline path
+    await trackBox.add({
+      'lat': current.latitude,
+      'lng': current.longitude,
+      'timestamp': timestamp,
+    });
 
+    // 🟢 First punch-in — log start marker
     if (!_hasLoggedStart) {
       await markerBox.add({
         'type': 'start',
@@ -120,7 +114,8 @@ void onStart(ServiceInstance service) async {
         'subLocality': subLocality,
         'timestamp': timestamp,
       });
-      print(' Start marker at $current');
+
+      print('✅ Start marker logged at $current');
       _hasLoggedStart = true;
       _previousLocation = current;
       _stationaryStartTime = now;
@@ -131,7 +126,7 @@ void onStart(ServiceInstance service) async {
     if (isStationary) {
       _stationaryStartTime ??= now;
 
-      if (!_isStopped && now.difference(_stationaryStartTime!).inMinutes >= 10) {
+      if (!_isStopped && now.difference(_stationaryStartTime!).inMinutes >= 2) {
         final stopDuration = _lastStopTime != null
             ? now.difference(_lastStopTime!)
             : Duration.zero;
@@ -147,16 +142,17 @@ void onStart(ServiceInstance service) async {
           'timestamp': timestamp,
         });
 
-        print(' Stopped marker at $current');
+        print('🛑 Stopped marker logged at $current');
         _lastStopTime = now;
         _isStopped = true;
-        _hasLoggedMovingAfterStop = false;
+        _hasLoggedMovingAfterStop = false; // reset for next move
       }
     } else {
       _stationaryStartTime = now;
       _lastStationaryLocation = current;
 
       if (_isStopped || !_hasLoggedMovingAfterStop) {
+        // Log only once per move phase
         await markerBox.add({
           'type': 'moving',
           'lat': current.latitude,
@@ -167,7 +163,8 @@ void onStart(ServiceInstance service) async {
           'distance': distance.toStringAsFixed(2),
           'timestamp': timestamp,
         });
-        print('🚶 Moving marker at $current');
+
+        print('🚶‍♂️ Moving marker logged at $current');
         _hasLoggedMovingAfterStop = true;
       }
 
@@ -176,6 +173,7 @@ void onStart(ServiceInstance service) async {
 
     _previousLocation = current;
 
+    // Optional: update live notification
     await plugin.show(
       0,
       'DD HRMS',
@@ -198,7 +196,7 @@ void onStart(ServiceInstance service) async {
     });
   }
 
-
+  // Service startup configuration
   if (service is AndroidServiceInstance) {
     await service.setForegroundNotificationInfo(
       title: "DD HRMS",
@@ -213,177 +211,15 @@ void onStart(ServiceInstance service) async {
   geo.Geolocator.getPositionStream(
     locationSettings: geo.LocationSettings(
       accuracy: geo.LocationAccuracy.bestForNavigation,
-      distanceFilter: 50,
+      distanceFilter: 15,
     ),
   ).listen((position) {
     handleLocationUpdate(position);
-    print(' New position: ${position.latitude}, ${position.longitude}');
+    print('📍 Location: ${position.latitude}, ${position.longitude}');
   }, onError: (e) {
-    debugPrint("❌ Location error: $e");
+    debugPrint("❌ Location stream error: $e");
   });
 }
-
-
-// @pragma('vm:entry-point')
-// void onStart(ServiceInstance service) async {
-//   DartPluginRegistrant.ensureInitialized();
-//   await Hive.initFlutter();
-
-//   final Box trackBox = await Hive.openBox('trackBox');     // For polyline
-//   final Box markerBox = await Hive.openBox('markerBox');   // For start/move/stop markers
-
-//   LatLng? _previousLocation;
-//   LatLng? _lastStationaryLocation;
-//   DateTime? _stationaryStartTime;
-//   DateTime? _lastStopTime;
-//   bool _isStopped = false;
-//   bool _hasLoggedStart = false;
-//   bool _hasLoggedMovingAfterStop = false;
-
-//   void handleLocationUpdate(geo.Position position) async {
-//     final now = DateTime.now();
-//     final current = LatLng(position.latitude, position.longitude);
-//     final timestamp = now.toIso8601String();
-
-//     final placemarks = await placemarkFromCoordinates(
-//       current.latitude,
-//       current.longitude,
-//     );
-//     final mark = placemarks.first;
-//     final locality = mark.locality ?? mark.subAdministrativeArea ?? 'Unknown';
-//     final subLocality = mark.subLocality ?? mark.subAdministrativeArea ?? 'Unknown';
-
-//     final distance = _previousLocation != null
-//         ? Distance().as(LengthUnit.Meter, _previousLocation!, current)
-//         : 0.0;
-
-//     final isStationary = _lastStationaryLocation != null &&
-//         Distance().as(LengthUnit.Meter, _lastStationaryLocation!, current) <= 50;
-
-//     // ✅ Always save location point for polyline path
-//     await trackBox.add({
-//       'lat': current.latitude,
-//       'lng': current.longitude,
-//       'timestamp': timestamp,
-//     });
-
-//     // 🟢 First punch-in — log start marker
-//     if (!_hasLoggedStart) {
-//       await markerBox.add({
-//         'type': 'start',
-//         'lat': current.latitude,
-//         'lng': current.longitude,
-//         'time': DateFormat.Hm().format(now),
-//         'locality': locality,
-//         'subLocality': subLocality,
-//         'timestamp': timestamp,
-//       });
-
-//       print('✅ Start marker logged at $current');
-//       _hasLoggedStart = true;
-//       _previousLocation = current;
-//       _stationaryStartTime = now;
-//       _lastStationaryLocation = current;
-//       return;
-//     }
-
-//     if (isStationary) {
-//       _stationaryStartTime ??= now;
-
-//       if (!_isStopped && now.difference(_stationaryStartTime!).inMinutes >= 10) {
-//         final stopDuration = _lastStopTime != null
-//             ? now.difference(_lastStopTime!)
-//             : Duration.zero;
-
-//         await markerBox.add({
-//           'type': 'stopped',
-//           'lat': current.latitude,
-//           'lng': current.longitude,
-//           'time': DateFormat.Hm().format(now),
-//           'locality': locality,
-//           'subLocality': subLocality,
-//           'duration': '${stopDuration.inMinutes}m ${stopDuration.inSeconds % 60}s',
-//           'timestamp': timestamp,
-//         });
-
-//         print('🛑 Stopped marker logged at $current');
-//         _lastStopTime = now;
-//         _isStopped = true;
-//         _hasLoggedMovingAfterStop = false; // reset for next move
-//       }
-//     } else {
-//       _stationaryStartTime = now;
-//       _lastStationaryLocation = current;
-
-//       if (_isStopped || !_hasLoggedMovingAfterStop) {
-//         // Log only once per move phase
-//         await markerBox.add({
-//           'type': 'moving',
-//           'lat': current.latitude,
-//           'lng': current.longitude,
-//           'time': DateFormat.Hm().format(now),
-//           'locality': locality,
-//           'subLocality': subLocality,
-//           'distance': distance.toStringAsFixed(2),
-//           'timestamp': timestamp,
-//         });
-
-//         print('🚶‍♂️ Moving marker logged at $current');
-//         _hasLoggedMovingAfterStop = true;
-//       }
-
-//       _isStopped = false;
-//     }
-
-//     _previousLocation = current;
-
-//     // Optional: update live notification
-//     await plugin.show(
-//       0,
-//       'DD HRMS',
-//       'Tracking: ${trackBox.length} points',
-//       NotificationDetails(
-//         android: AndroidNotificationDetails(
-//           'my_foreground',
-//           'Foreground Service',
-//           channelDescription: 'Used for background location tracking',
-//           importance: Importance.high,
-//           priority: Priority.high,
-//         ),
-//         iOS: DarwinNotificationDetails(),
-//       ),
-//     );
-
-//     service.invoke('update', {
-//       "lat": current.latitude,
-//       "lng": current.longitude,
-//     });
-//   }
-
-//   // Service startup configuration
-//   if (service is AndroidServiceInstance) {
-//     await service.setForegroundNotificationInfo(
-//       title: "DD HRMS",
-//       content: "Tracking location in background",
-//     );
-//   }
-
-//   service.on('stopService').listen((event) {
-//     service.stopSelf();
-//   });
-
-//   geo.Geolocator.getPositionStream(
-//     locationSettings: geo.LocationSettings(
-//       accuracy: geo.LocationAccuracy.bestForNavigation,
-//       distanceFilter: 50,
-//     ),
-//   ).listen((position) {
-//     handleLocationUpdate(position);
-//     print('📍 Location: ${position.latitude}, ${position.longitude}');
-//   }, onError: (e) {
-//     debugPrint("❌ Location stream error: $e");
-//   });
-// }
 
 
 // @pragma('vm:entry-point')
