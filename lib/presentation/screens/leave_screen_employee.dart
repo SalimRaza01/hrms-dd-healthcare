@@ -360,12 +360,12 @@ class _LeaveScreenState extends State<LeaveScreenEmployee>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  /// Leave Title + Date
+                                 
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      /// Leave Type
+                                 
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,

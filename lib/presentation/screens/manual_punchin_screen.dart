@@ -97,14 +97,12 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   }
 
   void _loadTrackedPathFromHive() async {
-    print('Fetching Hive data...');
-
     try {
       final movementBox = Hive.box('movementBox');
 
       _hivePollingTimer?.cancel();
-   
-      _hivePollingTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+
+      _hivePollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
         List<Map<String, dynamic>> hilist = [];
 
         for (int i = 0; i < movementBox.length; i++) {
@@ -114,7 +112,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
             if (entry['lat'] != null &&
                 entry['lng'] != null &&
                 entry['type'] != null) {
-              print('Movement point: $entry');
+   
               hilist.add(entry);
             }
           }
@@ -164,95 +162,6 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
       debugPrint('Failed loading Hive data: $e\n$stack');
     }
   }
-
-// void _loadTrackedPathFromHive() async {
-//   print('Fetching Hive data...');
-
-//   try {
-//     final trackBox = Hive.box('trackBox');
-//     final movementBox = Hive.box('movementBox');
-//     final markerBox = Hive.box('markerBox');
-
-//     _hivePollingTimer?.cancel();
-
-//     _hivePollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
-//       List<LatLng> storedPath = [];
-//       List<Map<String, dynamic>> storedHistory = [];
-//       List<Marker> storedMarkers = [];
-
-//       for (var i = 0; i < trackBox.length; i++) {
-//         final point = trackBox.getAt(i);
-//         if (point is Map &&
-//             point['lat'] != null &&
-//             point['lng'] != null &&
-//             point['lat'] is double &&
-//             point['lng'] is double) {
-//           print('Track point: $point');
-//           storedPath.add(LatLng(point['lat'], point['lng']));
-//         }
-//       }
-
-//       for (var i = 0; i < movementBox.length; i++) {
-//         final move = movementBox.getAt(i);
-//         if (move is Map) {
-//           print('Movement point: $move');
-//           storedHistory.add(Map<String, dynamic>.from(move));
-//         } else {
-//           print('Invalid movementBox entry at index $i: $move');
-//         }
-//       }
-
-//       for (var i = 0; i < markerBox.length; i++) {
-//         final m = markerBox.getAt(i);
-//         if (m is Map &&
-//             m['lat'] != null &&
-//             m['lng'] != null &&
-//             m['type'] != null &&
-//             m['lat'] is double &&
-//             m['lng'] is double &&
-//             m['type'] is String) {
-//           print('Marker point: $m');
-//           IconData icon;
-//           Color color;
-
-//           switch (m['type']) {
-//             case 'stop':
-//               icon = Icons.stop_circle;
-//               color = Colors.red;
-//               break;
-//             case 'move':
-//               icon = Icons.directions_walk;
-//               color = Colors.blue;
-//               break;
-//             default:
-//               icon = Icons.location_on;
-//               color = Colors.green;
-//           }
-
-//           storedMarkers.add(
-//             Marker(
-//               width: 30,
-//               height: 30,
-//               point: LatLng(m['lat'], m['lng']),
-//               child: Icon(icon, color: color, size: 26),
-//             ),
-//           );
-//         }
-//       }
-
-//       storedHistory.sort((a, b) =>
-//           DateTime.parse(b['timestamp']).compareTo(DateTime.parse(a['timestamp'])));
-
-//       setState(() {
-//         _polylines = storedPath;
-//         _movementHistory = storedHistory;
-//         _markers = storedMarkers;
-//       });
-//     });
-//   } catch (e, stack) {
-//     debugPrint('Failed loading Hive data: $e\n$stack');
-//   }
-// }
 
   Future<void> _requestAndHandlePermissions() async {
     setState(() {
@@ -310,7 +219,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
-           setState(() => _isLoading = true);
+    setState(() => _isLoading = true);
     geo.Position position = await geo.Geolocator.getCurrentPosition(
       locationSettings:
           geo.LocationSettings(accuracy: geo.LocationAccuracy.high),
@@ -435,6 +344,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   }
 
   Future<void> _punchOut() async {
+       setState(() => _isLoadingPO = true);
     await _getCurrentLocation();
 
     if (_currentLocation != null) {
@@ -442,10 +352,14 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
           ? '(OUT)${place!.subLocality}, ${place!.locality}'
           : '(OUT)${place!.locality}';
       String punchId = _authBox.get('Punch-In-id');
-
+    locationService.invoke('stopService');
+      // await addPunchTrackHistory(context, trackList);
+  
       await manualPunchOut(context, punchId, location);
-      locationService.invoke('stopService');
+ 
+        setState(() => _isLoadingPO = false);
     } else {
+              setState(() => _isLoadingPO = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Location not available for Punch-Out'),
@@ -454,6 +368,23 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
       );
     }
   }
+
+  // Future<void> postAllTrackedData(BuildContext context) async {
+  //   for (var entry in trackList) {
+  //     await addPunchTrackHistory(
+  //       context,
+  //       entry['type'],
+  //       entry['lat'].toString(),
+  //       entry['lng'].toString(),
+  //       entry['time'],
+  //       entry['locality'],
+  //       entry['subLocality'],
+  //       entry['duration'].toString(),
+  //       entry['distance'].toString(),
+  //       entry['timestamp'],
+  //     );
+  //   }
+  // }
 
   Future<void> manualPunchIn(
     BuildContext context,
@@ -503,7 +434,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   Future<void> manualPunchOut(
       BuildContext context, String punchInId, String location) async {
     String token = _authBox.get('token');
-    setState(() => _isLoadingPO = true);
+ 
 
     try {
       final response = await dio.post('$punchOutAction/$punchInId',
@@ -520,14 +451,14 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
         final punchProvider = Provider.of<PunchedIN>(context, listen: false);
         await punchProvider.fetchAndSetPunchRecord();
 
-        setState(() => _isLoadingPO = false);
+
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Punch-Out Success'),
           backgroundColor: Colors.green,
         ));
       }
     } on DioException catch (e) {
-      setState(() => _isLoadingPO = false);
+
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(e.response?.data['message'] ?? 'Punch-Out failed'),
         backgroundColor: Colors.red,
@@ -564,9 +495,8 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
     }
   }
 
-  String exportMovementHistoryToJson(
-      List<Map<String, dynamic>> movementHistory) {
-    return jsonEncode(movementHistory);
+  String exportMovementHistoryToJson(List<Map<String, dynamic>> trackList) {
+    return jsonEncode(trackList);
   }
 
   @override
@@ -582,8 +512,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-
-    print('Tracklist : $trackList');
+    print('Tracklist : ${trackList}');
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -603,50 +532,51 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                       ),
                     ),
                   )
-     : FlutterMap(
-              mapController: mapController,
-              options: MapOptions(
-                initialCenter: _currentLocation != null
-                    ? _currentLocation!
-                    : LatLng(28.6139, 77.2090),
-                initialZoom: 50.0,
-              ),
-              children: [
-                // TileLayer(
-                //   urlTemplate:
-                //       "https://api.mapbox.com/styles/v1/mapbox/$selectedStyleUrl/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiZGRoZWFsdGhjYXJlIiwiYSI6ImNtZDQzN2tmZTBiYXAyanNjczRuc2FrNjMifQ.VPt9SPPrjbQ72VOwhvL3aQ",
-                //   userAgentPackageName: 'com.mapbox.token',
-                // ),
-                TileLayer(
-                  urlTemplate:
-                      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                  subdomains: ['a', 'b', 'c', 'd'],
-                  userAgentPackageName: 'com.ddhealthcare.hrms_app',
-                ),
-                Visibility(
-                  visible: _polylines.isNotEmpty,
-                  child: PolylineLayer(
-                    // polylineCulling: false,
-                    polylines: [
-                      Polyline(
-                        points: _polylines,
-                        color: const Color.fromARGB(255, 10, 100, 255),
-                        strokeWidth: 10.0,
+                : FlutterMap(
+                    mapController: mapController,
+                    options: MapOptions(
+                      initialCenter: _currentLocation != null
+                          ? _currentLocation!
+                          : LatLng(28.6139, 77.2090),
+                      initialZoom: 50.0,
+                    ),
+                    children: [
+                      // TileLayer(
+                      //   urlTemplate:
+                      //       "https://api.mapbox.com/styles/v1/mapbox/$selectedStyleUrl/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiZGRoZWFsdGhjYXJlIiwiYSI6ImNtZDQzN2tmZTBiYXAyanNjczRuc2FrNjMifQ.VPt9SPPrjbQ72VOwhvL3aQ",
+                      //   userAgentPackageName: 'com.mapbox.token',
+                      // ),
+                      TileLayer(
+                        urlTemplate:
+                            'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                        subdomains: ['a', 'b', 'c', 'd'],
+                        userAgentPackageName: 'com.ddhealthcare.hrms_app',
+                      ),
+                      Visibility(
+                        visible: _polylines.isNotEmpty,
+                        child: PolylineLayer(
+                          // polylineCulling: false,
+                          polylines: [
+                            Polyline(
+                              points: _polylines,
+                              color: const Color.fromARGB(255, 10, 100, 255),
+                              strokeWidth: 10.0,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Visibility(
+                          visible: _markers.isNotEmpty,
+                          child: MarkerLayer(markers: _markers)),
+                      CurrentLocationLayer(
+                        style: LocationMarkerStyle(
+                          markerSize: Size.fromRadius(10),
+                          accuracyCircleColor:
+                              Color.fromARGB(120, 153, 207, 232),
+                        ),
                       ),
                     ],
                   ),
-                ),
-                Visibility(
-                    visible: _markers.isNotEmpty,
-                    child: MarkerLayer(markers: _markers)),
-                CurrentLocationLayer(
-                  style: LocationMarkerStyle(
-                    markerSize: Size.fromRadius(10),
-                    accuracyCircleColor: Color.fromARGB(120, 153, 207, 232),
-                  ),
-                ),
-              ],
-            ),
           ),
           Align(
             alignment: Alignment.bottomCenter,
@@ -1035,7 +965,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                       ? place!.subLocality!.isNotEmpty
                                           ? ' ${place!.subLocality}, ${place!.locality}'
                                           : place!.locality!
-                                      :  'Tap to fetch location',
+                                      : 'Tap to fetch location',
                                   style: TextStyle(
                                     fontSize: height * .016,
                                     color: Color.fromARGB(255, 85, 85, 85),

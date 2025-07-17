@@ -61,5 +61,11 @@
 		<string>This app collects location data even when the app is closed or not in use (in the background) to continuously track your work location during your shift, from punch-in until punch-out. This is essential for accurate attendance, compliance, and employee safety.</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>This app uses the microphone as part of camera access during attendance.</string>
+		<key>NSUserTrackingUsageDescription</key>
+		<string>We use tracking to improve user experience.</string>
+		<key>UIBackgroundModes</key>
+		<array>
+    		<string>location</string>
+		</array>
 	</dict>
 </plist>

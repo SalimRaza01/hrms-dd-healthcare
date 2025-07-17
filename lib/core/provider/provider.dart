@@ -46,6 +46,16 @@ class LeaveApplied extends ChangeNotifier {
   }
 }
 
+class PostTrackData extends ChangeNotifier {
+  bool trackdataStatus = false;
+  bool get updatePostTrackData => trackdataStatus;
+
+  void trackdataStatusStatus(bool updatePostTrackData) {
+    trackdataStatus = updatePostTrackData;
+    notifyListeners();
+  }
+}
+
 class PunchedIN extends ChangeNotifier {
   PunchRecordModel? _record;
   PunchRecordModel? get record => _record;

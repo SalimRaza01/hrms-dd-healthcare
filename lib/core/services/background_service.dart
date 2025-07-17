@@ -1,13 +1,15 @@
-// import 'dart:async';
+
+
 import 'dart:async';
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -29,6 +31,7 @@ Future<void> initializeService() async {
         importance: Importance.high,
         priority: Priority.high,
       ),
+      iOS: DarwinNotificationDetails(),
     ),
   );
 
@@ -57,13 +60,14 @@ Future<bool> onIosBackground(ServiceInstance service) async {
   return true;
 }
 
+
+
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   DartPluginRegistrant.ensureInitialized();
-
-  final appDir = await getApplicationDocumentsDirectory();
-  Hive.init(appDir.path);
-
+  // final appDir = await getApplicationDocumentsDirectory();
+  // Hive.init(appDir.path);
+  await Hive.initFlutter();
   final Box movementBox = await Hive.openBox('movementBox');
 
   LatLng? _previousLocation;
@@ -71,7 +75,110 @@ void onStart(ServiceInstance service) async {
   DateTime? _stationaryStartTime;
   DateTime? _lastStopTime;
   bool _isStopped = false;
-  Timer? _timer;
+
+
+  void handleLocationUpdate(geo.Position position) async {
+  final now = DateTime.now();
+  final current = LatLng(position.latitude, position.longitude);
+  final timestamp = now.toIso8601String();
+  print('Update at $timestamp: $current');
+
+  final placemarks = await placemarkFromCoordinates(
+    current.latitude,
+    current.longitude,
+  );
+  final mark = placemarks.first;
+  final locality = mark.locality ?? mark.subAdministrativeArea ?? 'Unknown';
+  final subLocality = mark.subLocality ?? mark.subAdministrativeArea ?? 'Unknown';
+
+  final distance = _previousLocation != null
+      ? Distance().as(LengthUnit.Meter, _previousLocation!, current)
+      : 0.0;
+
+  final isStationary = _lastStationaryLocation != null &&
+      Distance().as(LengthUnit.Meter, _lastStationaryLocation!, current) <= 15;
+
+  print(' Distance: ${distance.toStringAsFixed(2)}m | Stationary: $isStationary');
+
+  if (_previousLocation == null) {
+
+    _previousLocation = current;
+    _stationaryStartTime = now;
+    _lastStationaryLocation = current;
+    return;
+  }
+
+  if (isStationary) {
+    _stationaryStartTime ??= now;
+
+    if (!_isStopped &&
+        now.difference(_stationaryStartTime!).inMinutes >= 2) {
+      final stopDuration = _lastStopTime != null
+          ? now.difference(_lastStopTime!)
+          : Duration.zero;
+
+      await movementBox.add({
+        'type': 'stopped',
+        'lat': current.latitude,
+        'lng': current.longitude,
+        'time': DateFormat.Hm().format(now),
+        'locality': locality,
+        'subLocality': subLocality,
+        'duration': '${stopDuration.inMinutes}m ${stopDuration.inSeconds % 60}s',
+        'timestamp': timestamp,
+      });
+
+      print('Stopped logged at $current');
+      _lastStopTime = now;
+      _isStopped = true;
+    }
+  } else {
+
+    _stationaryStartTime = now;
+    _lastStationaryLocation = current;
+
+  
+    await movementBox.add({
+      'type': 'moving',
+      'lat': current.latitude,
+      'lng': current.longitude,
+      'time': DateFormat.Hm().format(now),
+      'locality': locality,
+      'subLocality': subLocality,
+      'distance': distance.toStringAsFixed(2),
+      'timestamp': timestamp,
+    });
+
+    print('Movement logged at $current');
+    _isStopped = false;
+  }
+
+  _previousLocation = current;
+
+
+  await plugin.show(
+    0,
+    'DD HRMS',
+    'Auto Location Update at ${movementBox.length}',
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        'my_foreground',
+        'Foreground Service',
+        channelDescription: 'Used for background location tracking',
+        importance: Importance.high,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(),
+    ),
+  );
+
+  service.invoke('update', {
+    "lat": current.latitude,
+    "lng": current.longitude,
+  });
+}
+
+
 
   if (service is AndroidServiceInstance) {
     await service.setForegroundNotificationInfo(
@@ -81,254 +188,23 @@ void onStart(ServiceInstance service) async {
   }
 
   service.on('stopService').listen((event) {
-    _timer?.cancel();
     service.stopSelf();
   });
 
-  _timer = Timer.periodic(const Duration(minutes: 5), (timer) async {
-    try {
-      final position = await geo.Geolocator.getCurrentPosition(
-        desiredAccuracy: geo.LocationAccuracy.bestForNavigation,
-      );
+  geo.Geolocator.getPositionStream(
+    locationSettings: geo.LocationSettings(
+      accuracy: geo.LocationAccuracy.bestForNavigation,
+      distanceFilter: 15,
+      timeLimit: null
+    ),
+  ).listen((position) {
+        
+    handleLocationUpdate(position);
+    print(' Update received at ${DateTime.now()}: ${position.latitude}, ${position.longitude}');
 
-      final now = DateTime.now();
-      final current = LatLng(position.latitude, position.longitude);
-      final timestamp = now.toIso8601String();
-
-      final placemarks = await placemarkFromCoordinates(
-        current.latitude,
-        current.longitude,
-      );
-      final mark = placemarks.first;
-      final locality = mark.locality ?? mark.subAdministrativeArea ?? 'Unknown';
-      final subLocality = mark.subLocality ?? mark.subAdministrativeArea ?? 'Unknown';
-
-      if (_previousLocation == null) {
-        _previousLocation = current;
-        _stationaryStartTime = now;
-        _lastStationaryLocation = current;
-        return;
-      }
-
-      final distance = Distance().as(
-        LengthUnit.Meter,
-        _previousLocation!,
-        current,
-      );
-
-      final isStationary = Distance().as(
-            LengthUnit.Meter,
-            _lastStationaryLocation!,
-            current,
-          ) <=
-          25;
-
-      if (isStationary) {
-        _stationaryStartTime ??= now;
-
-        if (!_isStopped &&
-            now.difference(_stationaryStartTime!).inMinutes >= 2) {
-          final stopDuration = _lastStopTime != null
-              ? now.difference(_lastStopTime!)
-              : Duration.zero;
-
-          _lastStopTime = now;
-
-          await movementBox.add({
-            'type': 'stopped',
-            'lat': current.latitude,
-            'lng': current.longitude,
-            'time': DateFormat.Hm().format(now),
-            'locality': locality,
-            'subLocality': subLocality,
-            'duration':
-                '${stopDuration.inMinutes}m ${stopDuration.inSeconds % 60}s',
-            'timestamp': timestamp,
-          });
-
-          _isStopped = true;
-        }
-      } else {
-        _stationaryStartTime = now;
-        _lastStationaryLocation = current;
-
-        if (_isStopped) {
-          await movementBox.add({
-            'type': 'moving',
-            'lat': current.latitude,
-            'lng': current.longitude,
-            'time': DateFormat.Hm().format(now),
-            'locality': locality,
-            'subLocality': subLocality,
-            'distance': distance.toStringAsFixed(2),
-            'timestamp': timestamp,
-          });
-
-          _isStopped = false;
-        }
-      }
-
-      _previousLocation = current;
-
-      if (service is AndroidServiceInstance &&
-          await service.isForegroundService()) {
-        await service.setForegroundNotificationInfo(
-          title: "DD HRMS",
-          content: "Auto Location Update",
-        );
-      }
-
-      service.invoke('update', {
-        "lat": current.latitude,
-        "lng": current.longitude,
-      });
-    } catch (e) {
-      debugPrint("Error in background tracking with Timer: $e");
-    }
+  }, onError: (e) {
+    debugPrint(" Position Stream Error: $e");
   });
 }
 
 
-// @pragma('vm:entry-point')
-// void onStart(ServiceInstance service) async {
-//   DartPluginRegistrant.ensureInitialized();
-
-//   final appDir = await getApplicationDocumentsDirectory();
-//   Hive.init(appDir.path);
-
-//   final Box trackBox = await Hive.openBox('trackBox');
-//   final Box movementBox = await Hive.openBox('movementBox');
-//   final Box markerBox = await Hive.openBox('markerBox');
-
-//   LatLng? _previousLocation;
-//   LatLng? _lastStationaryLocation;
-//   DateTime? _stationaryStartTime;
-//   DateTime? _lastStopTime;
-//   bool _isStopped = false;
-//   Timer? _timer;
-
-//   if (service is AndroidServiceInstance) {
-//     await service.setForegroundNotificationInfo(
-//       title: "DD HRMS",
-//       content: "Tracking location in background",
-//     );
-//   }
-
-//   service.on('stopService').listen((event) {
-//     _timer?.cancel();
-//     service.stopSelf();
-//   });
-
-//   _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
-//     try {
-//       final position = await geo.Geolocator.getCurrentPosition(
-//         desiredAccuracy: geo.LocationAccuracy.bestForNavigation,
-//       );
-
-//       LatLng current = LatLng(position.latitude, position.longitude);
-//       DateTime now = DateTime.now();
-//       String timestamp = now.toIso8601String();
-
-//       if (_previousLocation == null) {
-//         _previousLocation = current;
-//         _stationaryStartTime = now;
-//         _lastStationaryLocation = current;
-//         return;
-//       }
-
-//       final distance = Distance().as(
-//         LengthUnit.Meter,
-//         _previousLocation!,
-//         current,
-//       );
-
-//       final placemarks = await placemarkFromCoordinates(
-//         current.latitude,
-//         current.longitude,
-//       );
-//       final mark = placemarks.first;
-//       final locality = mark.locality ?? mark.subAdministrativeArea ?? 'Unknown';
-//       final subLocality = mark.subLocality ?? mark.subAdministrativeArea ?? 'Unknown';
-
-//       await trackBox.add({
-//         'lat': current.latitude,
-//         'lng': current.longitude,
-//         'timestamp': timestamp,
-//       });
-
-//       final isStationary = Distance().as(LengthUnit.Meter, _lastStationaryLocation!, current) <= 0.5;
-
-//       if (isStationary) {
-//         _stationaryStartTime ??= now;
-
-//         if (!_isStopped && now.difference(_stationaryStartTime!).inSeconds >= 10) {
-//           if (_lastStopTime != null) {
-//             final stopDuration = now.difference(_lastStopTime!);
-
-//             await movementBox.add({
-//               'type': 'stopped',
-//               'lat': current.latitude,
-//               'lng': current.longitude,
-//               'time': DateFormat.Hm().format(now),
-//               'locality': locality,
-//               'subLocality': subLocality,
-//               'duration': '${stopDuration.inMinutes}m ${stopDuration.inSeconds % 60}s',
-//               'timestamp': timestamp,
-//             });
-
-//             await markerBox.add({
-//               'type': 'stop',
-//               'lat': current.latitude,
-//               'lng': current.longitude,
-//               'timestamp': timestamp,
-//             });
-//           }
-
-//           _lastStopTime = now;
-//           _isStopped = true;
-//         }
-//       } else {
-//         _stationaryStartTime = now;
-//         _lastStationaryLocation = current;
-
-//         if (_isStopped) {
-//           await movementBox.add({
-//             'type': 'moving',
-//             'lat': current.latitude,
-//             'lng': current.longitude,
-//             'time': DateFormat.Hm().format(now),
-//             'locality': locality,
-//             'subLocality': subLocality,
-//             'distance': distance.toStringAsFixed(2),
-//             'timestamp': timestamp,
-//           });
-
-//           await markerBox.add({
-//             'type': 'move',
-//             'lat': current.latitude,
-//             'lng': current.longitude,
-//             'timestamp': timestamp,
-//           });
-
-//           _isStopped = false;
-//         }
-//       }
-
-//       _previousLocation = current;
-
-//       if (service is AndroidServiceInstance && await service.isForegroundService()) {
-//         await service.setForegroundNotificationInfo(
-//           title: "DD HRMS",
-//           content: "Location: ${current.latitude}, ${current.longitude}",
-//         );
-//       }
-
-//       service.invoke('update', {
-//         "lat": current.latitude,
-//         "lng": current.longitude,
-//       });
-//     } catch (e) {
-//       debugPrint("Error in background tracking with Timer: $e");
-//     }
-//   });
-// }

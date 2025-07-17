@@ -53,7 +53,7 @@ Future<List<Attendance>> fetchAttendence(
 }
 
 Future<LeaveBalance> fetchLeaves() async {
-     String empID = _authBox.get('employeeId');
+  String empID = _authBox.get('employeeId');
   String token = _authBox.get('token');
   try {
     final response = await dio.get('$getEmployeeData/$empID',
@@ -75,7 +75,7 @@ Future<LeaveBalance> fetchLeaves() async {
 }
 
 Future<ShiftTimeModel> fetchShiftTime() async {
-    String empID = _authBox.get('employeeId');
+  String empID = _authBox.get('employeeId');
   String token = _authBox.get('token');
   try {
     final response = await dio.get('$getEmployeeData/$empID',
@@ -85,10 +85,9 @@ Future<ShiftTimeModel> fetchShiftTime() async {
         }));
 
     if (response.statusCode == 200) {
-   
       await _authBox.put(
           'casual', response.data['data']['leaveBalance']['casualLeave']);
-                await _authBox.put(
+      await _authBox.put(
           'compOff', response.data['data']['leaveBalance']['compOffLeave']);
       await _authBox.put(
           'medical', response.data['data']['leaveBalance']['medicalLeave']);
@@ -188,7 +187,7 @@ Future<void> applyLeave(
         }),
         data: {
           "leaveType": leaveType == 'Casual Leave'
-              ? 'casualLeave' 
+              ? 'casualLeave'
               : leaveType == 'Medical Leave'
                   ? 'medicalLeave'
                   : leaveType == 'Earned Leave'
@@ -196,7 +195,8 @@ Future<void> applyLeave(
                       : leaveType == 'Short-Leave'
                           ? 'shortLeave'
                           : leaveType == 'Comp-Off Leave'
-              ? 'compOffLeave' : null,
+                              ? 'compOffLeave'
+                              : null,
           "leaveStartDate": startDate,
           "leaveEndDate": _selectedText.contains('1st Half') ||
                   _selectedText.contains('2nd Half')
@@ -205,7 +205,9 @@ Future<void> applyLeave(
           "totalDays": totalDays,
           "reason": reason,
           "approvedBy": mgrId,
-          "shift": leaveType == 'Casual Leave' || leaveType == 'Earned Leave' || leaveType == 'Comp-Off Leave'
+          "shift": leaveType == 'Casual Leave' ||
+                  leaveType == 'Earned Leave' ||
+                  leaveType == 'Comp-Off Leave'
               ? _selectedText
               : "",
           "location": leaveType == 'Medical Leave' ? _authBox.get('file') : ''
@@ -232,7 +234,7 @@ Future<void> applyLeave(
 
 Future<EmployeeProfile> fetchEmployeeDetails(String empID) async {
   String token = _authBox.get('token');
-  
+
   Dio dio = Dio();
   try {
     final response = await dio.get('$getEmployeeData/$empID',
@@ -349,12 +351,8 @@ Future<void> applyShortLeave(
   }
 }
 
-Future<void> applyCompoff(
-  BuildContext context,
-  String startDate,
-  String reason,
-  String totaldays
-) async {
+Future<void> applyCompoff(BuildContext context, String startDate, String reason,
+    String totaldays) async {
   String empID = _authBox.get('employeeId');
   String token = _authBox.get('token');
 
@@ -688,9 +686,10 @@ Future<void> changeTaskStage(
 }
 
 Future<List<LeaveHistory>> fetchLeaveHistory(
-    String status, ) async {
+  String status,
+) async {
   String token = _authBox.get('token');
-    String empID = _authBox.get('employeeId');
+  String empID = _authBox.get('employeeId');
 
   try {
     final response = await dio.get('$getLeaveHistory/$empID',
@@ -896,12 +895,11 @@ Future<void> manualPunchIn(
           "imageUrl": imageUrl64
         });
     if (response.statusCode == 201 || response.statusCode == 200) {
-
       _authBox.put('punchedIn', 'yes');
-   
+
       await _authBox.put('Punch-In-id', response.data['data']['_id']);
-         final punchProvider = Provider.of<PunchedIN>(context, listen: false);
-      await punchProvider.fetchAndSetPunchRecord(); 
+      final punchProvider = Provider.of<PunchedIN>(context, listen: false);
+      await punchProvider.fetchAndSetPunchRecord();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -919,13 +917,14 @@ Future<void> manualPunchIn(
     );
   }
 }
-Future<void> manualPunchOut(BuildContext context, String punchInId, String location) async {
+
+Future<void> manualPunchOut(
+    BuildContext context, String punchInId, String location) async {
   String token = _authBox.get('token');
 
   try {
-    final response = await dio.post(
-      '$punchOutAction/$punchInId',
-       options: Options(headers: {
+    final response = await dio.post('$punchOutAction/$punchInId',
+        options: Options(headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token"
         }),
@@ -940,10 +939,10 @@ Future<void> manualPunchOut(BuildContext context, String punchInId, String locat
           backgroundColor: Colors.green,
         ),
       );
-   
+
       final punchProvider = Provider.of<PunchedIN>(context, listen: false);
-      await punchProvider.fetchAndSetPunchRecord(); 
-       _authBox.put('punchedIn', null);
+      await punchProvider.fetchAndSetPunchRecord();
+      _authBox.put('punchedIn', null);
     }
   } on DioException catch (e) {
     final errorMessage = e.response?.data['message'] ?? 'Something went wrong';
@@ -955,7 +954,6 @@ Future<void> manualPunchOut(BuildContext context, String punchInId, String locat
     );
   }
 }
-
 
 Future<void> updateLocation(
     BuildContext context, String id, String location) async {
@@ -970,8 +968,8 @@ Future<void> updateLocation(
           backgroundColor: Colors.green,
         ),
       );
-          final punchProvider = Provider.of<PunchedIN>(context, listen: false);
-      await punchProvider.fetchAndSetPunchRecord(); 
+      final punchProvider = Provider.of<PunchedIN>(context, listen: false);
+      await punchProvider.fetchAndSetPunchRecord();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -999,7 +997,7 @@ Future<PunchRecordModel> fetchPunchRecord() async {
   if (response.statusCode == 200 || response.statusCode == 201) {
     print(response.data);
     final Map<String, dynamic> data = response.data['data'][0];
-    
+
     // _authBox.put(
     //     'selfie', decodeBase64Image(response.data['data'][0]['imageUrl']));
     return PunchRecordModel.fromJson(data);
@@ -1036,3 +1034,30 @@ Uint8List decodeBase64Image(String base64String) {
   return base64Decode(base64String);
 }
 
+Future<void> addPunchTrackHistory(
+  BuildContext context,
+  List<Map<String, dynamic>> trackList,
+) async {
+  String empID = _authBox.get('employeeId');
+
+  try {
+    final response = await dio.post(postTrackHistory, queryParameters:{
+            "employeeId": empID,
+    },  data: trackList );
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Track Data Saved'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  } on DioException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.response!.data['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
