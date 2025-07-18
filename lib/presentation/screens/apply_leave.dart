@@ -154,10 +154,10 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     } else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Comp-Off')) {
       DateTime quarterEndDate = getQuarterEndDate(now);
-      DateTime next7Days = now.add(Duration(days: 2));
+      DateTime next7Days = now.add(Duration(days: 7));
       maxDate = next7Days.isBefore(quarterEndDate) ? next7Days : quarterEndDate;
-      DateTime selectedStartDate = DateTime.parse(startDateController.text);
-      minDate = selectedStartDate;
+
+      minDate = startOfMonth;
     } else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Earned')) {
       if (startDateController.text.isNotEmpty) {
@@ -592,7 +592,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                               width),
                                           if (_selectedText == 'Full Day' &&
                                               _selectedLeaveType !=
-                                                  'Casual Leave')
+                                                  'Casual Leave' && _selectedLeaveType != 'Comp-Off Leave')
                                             _buildDateSelection2(
                                                 endDateController
                                                         .text.isNotEmpty

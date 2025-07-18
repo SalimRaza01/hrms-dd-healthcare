@@ -10,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:hrms/core/utils/dialogbox_for_punchin.dart';
 import 'package:hrms/core/utils/export_track_report.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -42,11 +43,12 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   File? _selfie;
   LatLng defaultLocation = LatLng(40.4168, -3.7038);
   LatLng? _currentLocation;
-  String selectedStyleUrl = 'satellite-streets-v12';
+  String selectedStyleUrl = 'navigation-day-v1';
   String? filepath;
   bool cameraGranted = false;
   bool locationGranted = false;
   bool _isLoading = false;
+  bool _loadingTrackPath = false;
   bool _isLoadingPO = false;
   bool _isLoadingUP = false;
   bool _isLoadingPI = false;
@@ -56,7 +58,6 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   List<LatLng> _polylines = [];
   List<Marker> _markers = [];
   List<Map<String, dynamic>> _movementHistory = [];
-  Timer? _hivePollingTimer;
 
   final List<Map<String, String>> mapStyles = [
     {
@@ -87,105 +88,122 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _requestAndHandlePermissions();
     });
-
     _loadTrackedPathFromHive();
+    _fitMapView();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_authBox.get('bgActivityEnable') == false || _authBox.get('bgActivityEnable') == null) {
+      _authBox.put('bgActivityEnable', true);
+      Future.delayed(Duration.zero, () {
+        showBackgroundPermissionDialog(context);
+      });
+    }
+  }
+
+  void _fitMapView() {
+    Future.delayed(Duration(seconds: 10), () {
+      if (_polylines.isNotEmpty) {
+        final bounds = LatLngBounds.fromPoints(_polylines);
+
+        final cameraFit = CameraFit.bounds(
+          bounds: bounds,
+          padding: const EdgeInsets.all(60),
+        );
+
+        mapController.fitCamera(cameraFit);
+      }
+    });
+  }
+
   void _loadTrackedPathFromHive() async {
+    setState(() => _loadingTrackPath = true);
     try {
       final trackBox = Hive.box('trackBox');
       final markerBox = Hive.box('markerBox');
 
-      _hivePollingTimer?.cancel();
+      List<LatLng> polylinePoints = [];
+      for (int i = 0; i < trackBox.length; i++) {
+        final entry = trackBox.getAt(i);
+        if (entry is Map && entry['lat'] != null && entry['lng'] != null) {
+          polylinePoints.add(LatLng(entry['lat'], entry['lng']));
+        }
+      }
 
-      _hivePollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-        List<LatLng> polylinePoints = [];
-        for (int i = 0; i < trackBox.length; i++) {
-          final entry = trackBox.getAt(i);
-          if (entry is Map && entry['lat'] != null && entry['lng'] != null) {
-            polylinePoints.add(LatLng(entry['lat'], entry['lng']));
-          }
+      List<Map<String, dynamic>> markerList = [];
+      for (int i = 0; i < markerBox.length; i++) {
+        final entry = markerBox.getAt(i);
+        if (entry is Map && entry['type'] != null) {
+          markerList.add(Map<String, dynamic>.from(entry));
+        }
+      }
+
+      markerList.sort((a, b) => DateTime.parse(a['timestamp'])
+          .compareTo(DateTime.parse(b['timestamp'])));
+
+      if (markerList.isNotEmpty) {
+        markerList.last['type'] = 'last';
+      }
+
+      final markers = markerList.map((e) {
+        final type = e['type'];
+        IconData icon;
+        Color color;
+
+        switch (type) {
+          case 'start':
+            icon = CupertinoIcons.flag_fill;
+            color = Colors.green;
+            break;
+          case 'moving':
+            icon = Icons.directions_walk;
+            color = Colors.green;
+            break;
+          case 'stopped':
+            icon = CupertinoIcons.stop_circle_fill;
+            color = Colors.red;
+            break;
+          case 'last':
+            icon = CupertinoIcons.location_solid;
+            color = Colors.red;
+            break;
+          default:
+            icon = CupertinoIcons.location_solid;
+            color = Colors.red;
         }
 
-        List<Map<String, dynamic>> markerList = [];
-        for (int i = 0; i < markerBox.length; i++) {
-          final entry = markerBox.getAt(i);
-          if (entry is Map && entry['type'] != null) {
-            markerList.add(Map<String, dynamic>.from(entry));
-          }
-        }
+        return Marker(
+          width: 32,
+          height: 32,
+          point: LatLng(e['lat'], e['lng']),
+          child: Icon(icon, color: color, size: 28),
+        );
+      }).toList();
 
-        markerList.sort((a, b) => DateTime.parse(a['timestamp'])
-            .compareTo(DateTime.parse(b['timestamp'])));
+      // if (polylinePoints.isNotEmpty) {
+      //   final last = polylinePoints.last;
 
-        if (markerList.isNotEmpty) {
-          markerList.last['type'] = 'last';
-        }
+      //   markers.add(
+      //     Marker(
+      //       width: 40,
+      //       height: 40,
+      //       point: last,
+      //       child: Icon(Icons.location_on, color: Colors.red, size: 36),
+      //     ),
+      //   );
+      // }
 
-        final markers = markerList.map((e) {
-          final type = e['type'];
-          IconData icon;
-          Color color;
-
-          switch (type) {
-            case 'start':
-              icon = Icons.flag;
-              color = Colors.blue;
-              break;
-            case 'moving':
-              icon = Icons.directions_walk;
-              color = Colors.green;
-              break;
-            case 'stopped':
-              icon = Icons.stop_circle;
-              color = Colors.red;
-              break;
-            default:
-              icon = Icons.location_on;
-              color = Colors.grey;
-          }
-
-          return Marker(
-            width: 32,
-            height: 32,
-            point: LatLng(e['lat'], e['lng']),
-            child: Icon(icon, color: color, size: 28),
-          );
-        }).toList();
-
-        if (polylinePoints.isNotEmpty) {
-          final last = polylinePoints.last;
-
-          markers.add(
-            Marker(
-              width: 40,
-              height: 40,
-              point: last,
-              child: Icon(Icons.location_on, color: Colors.black, size: 36),
-            ),
-          );
-        }
-
-        setState(() {
-          _polylines = polylinePoints;
-          _markers = markers;
-          _movementHistory = List.from(markerList);
-
-          if (_polylines.isNotEmpty) {
-            final bounds = LatLngBounds.fromPoints(_polylines);
-
-            final cameraFit = CameraFit.bounds(
-              bounds: bounds,
-              padding: const EdgeInsets.all(60),
-            );
-
-            mapController.fitCamera(cameraFit);
-          }
-        });
+      setState(() {
+        _polylines = polylinePoints;
+        _markers = markers;
+        _movementHistory = List.from(markerList);
+        _loadingTrackPath = false;
       });
     } catch (e, stack) {
       debugPrint('❌ Failed loading Hive data: $e\n$stack');
@@ -220,7 +238,22 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
         mapController.move(_currentLocation!, 17.0);
       });
     } else if (status.isPermanentlyDenied) {
-      await openAppSettings();
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Please Enable Location'),
+          content: Text('Enable Location or set it to always'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                openAppSettings();
+              },
+              child: const Text('Open Settings'),
+            ),
+          ],
+        ),
+      );
     } else {
       setState(() {
         _isLoading = true;
@@ -381,6 +414,21 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
           ? '(OUT)${place!.subLocality}, ${place!.locality}'
           : '(OUT)${place!.locality}';
       String punchId = _authBox.get('Punch-In-id');
+
+      final now = DateTime.now();
+      final timestamp = now.toIso8601String();
+
+      final markerBox = Hive.box('markerBox');
+      await markerBox.add({
+        'type': 'last',
+        'lat': _currentLocation!.latitude,
+        'lng': _currentLocation!.longitude,
+        'time': DateFormat.Hm().format(now),
+        'locality': place?.locality ?? '',
+        'subLocality': place?.subLocality ?? '',
+        'timestamp': timestamp,
+      });
+
       locationService.invoke('stopService');
       await addPunchTrackHistory(context);
       await manualPunchOut(context, punchId, location);
@@ -593,7 +641,6 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
     if (_cameraController?.value.isInitialized ?? false) {
       _cameraController?.dispose();
     }
-    _hivePollingTimer?.cancel();
     super.dispose();
   }
 
@@ -601,7 +648,6 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-
     // locationService.invoke('stopService');
     //  Hive.box('movementBox').clear();
     //   Hive.box('markerBox').clear();
@@ -729,40 +775,43 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                   ),
                 ),
               ),
-              InkWell(
-                onTap: () {
-                  generateTrackingPdf(_movementHistory);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: const Color.fromARGB(255, 255, 255, 255),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 15,
-                        spreadRadius: 3,
-                        offset: Offset(0, -3),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      children: [
-                        Text(
-                          "Export Track Record",
-                          style: TextStyle(
-                            fontSize: height * .015,
-                          ),
-                        ),
-                        SizedBox(width: width * 0.015),
-                        Icon(
-                          CupertinoIcons.paperclip,
-                          color: AppColor.mainTextColor,
-                          size: height * 0.018,
+              Visibility(
+                visible: _movementHistory.isNotEmpty,
+                child: InkWell(
+                  onTap: () {
+                    generateTrackingPdf(_movementHistory);
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: const Color.fromARGB(255, 255, 255, 255),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 15,
+                          spreadRadius: 3,
+                          offset: Offset(0, -3),
                         ),
                       ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        children: [
+                          Text(
+                            "Export Track Record",
+                            style: TextStyle(
+                              fontSize: height * .015,
+                            ),
+                          ),
+                          SizedBox(width: width * 0.015),
+                          Icon(
+                            CupertinoIcons.paperclip,
+                            color: AppColor.mainTextColor,
+                            size: height * 0.018,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -895,16 +944,17 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                         Color iconColor;
 
                                         if (isStart) {
-                                          icon = Icons.flag;
-                                          iconColor = Colors.blue;
+                                          icon = CupertinoIcons.flag_fill;
+                                          iconColor = Colors.green;
                                         } else if (isMoving) {
                                           icon = Icons.directions_walk;
                                           iconColor = Colors.green;
                                         } else if (isLast) {
-                                          icon = Icons.location_on;
-                                          iconColor = Colors.black;
+                                          icon = CupertinoIcons.location_solid;
+                                          iconColor = Colors.red;
                                         } else {
-                                          icon = Icons.stop_circle;
+                                          icon =
+                                              CupertinoIcons.stop_circle_fill;
                                           iconColor = Colors.red;
                                         }
 
@@ -1073,7 +1123,10 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                         ),
                         SizedBox(height: 4),
                         InkWell(
-                          onTap: _getCurrentLocation,
+                          onTap: () {
+                            _getCurrentLocation();
+                            _loadTrackedPathFromHive();
+                          },
                           child: Row(
                             children: [
                               Icon(
@@ -1089,9 +1142,9 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                   overflow: TextOverflow.ellipsis,
                                   place != null
                                       ? place!.subLocality!.isNotEmpty
-                                          ? ' ${place!.subLocality}, ${place!.locality}'
-                                          : place!.locality!
-                                      : 'Tap to fetch location',
+                                          ? ' ${place!.subLocality}, ${place!.locality} (Tap to Refresh)'
+                                          : '${place!.locality!} (Tap to Refresh)'
+                                      : 'Tap to Refresh',
                                   style: TextStyle(
                                     fontSize: height * .016,
                                     color: Color.fromARGB(255, 85, 85, 85),
@@ -1208,7 +1261,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     child: Center(
-                      child: _isLoadingPI
+                      child: _isLoadingPI || _loadingTrackPath
                           ? SizedBox(
                               height: height * 0.02,
                               width: width * 0.05,
@@ -1247,7 +1300,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                           padding: EdgeInsets.symmetric(
                               horizontal: 20, vertical: 12),
                           child: Center(
-                            child: _isLoadingUP
+                            child: _isLoadingUP || _loadingTrackPath
                                 ? SizedBox(
                                     height: height * 0.02,
                                     width: width * 0.05,
@@ -1284,7 +1337,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                           padding: EdgeInsets.symmetric(
                               horizontal: 20, vertical: 12),
                           child: Center(
-                            child: _isLoadingPO
+                            child: _isLoadingPO || _loadingTrackPath
                                 ? SizedBox(
                                     height: height * 0.02,
                                     width: width * 0.05,
@@ -1349,6 +1402,47 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                       Icons.chevron_left,
                       color: AppColor.mainTextColor,
                       size: height * 0.023,
+                    ),
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: _movementHistory.isNotEmpty,
+                child: InkWell(
+                  onTap: () {
+                    generateTrackingPdf(_movementHistory);
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: const Color.fromARGB(255, 255, 255, 255),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 15,
+                          spreadRadius: 3,
+                          offset: Offset(0, -3),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        children: [
+                          Text(
+                            "Export Track Record",
+                            style: TextStyle(
+                              fontSize: height * .015,
+                            ),
+                          ),
+                          SizedBox(width: width * 0.015),
+                          Icon(
+                            CupertinoIcons.paperclip,
+                            color: AppColor.mainTextColor,
+                            size: height * 0.018,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -1616,7 +1710,10 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                         ),
                         SizedBox(height: 4),
                         InkWell(
-                          onTap: _getCurrentLocation,
+                          onTap: () {
+                            _getCurrentLocation();
+                            _loadTrackedPathFromHive();
+                          },
                           child: Row(
                             children: [
                               Icon(
@@ -1632,9 +1729,9 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                                   overflow: TextOverflow.ellipsis,
                                   place != null
                                       ? place!.subLocality!.isNotEmpty
-                                          ? ' ${place!.subLocality}, ${place!.locality}'
-                                          : place!.locality!
-                                      : 'Tap to fetch location',
+                                          ? ' ${place!.subLocality}, ${place!.locality} (Tap to Refresh)'
+                                          : '${place!.locality!} (Tap to Refresh)'
+                                      : 'Tap to Refresh',
                                   style: TextStyle(
                                     fontSize: height * .016,
                                     color: Color.fromARGB(255, 85, 85, 85),

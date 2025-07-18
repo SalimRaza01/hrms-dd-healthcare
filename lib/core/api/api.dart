@@ -364,7 +364,7 @@ Future<void> applyCompoff(BuildContext context, String startDate, String reason,
         }),
         data: {
           "compOffDate": startDate,
-          "totalDays": totaldays,
+          "totalDayss": totaldays,
           "reason": reason,
         });
     if (response.statusCode == 201 || response.statusCode == 200) {

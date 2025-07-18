@@ -452,7 +452,7 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
           color: activeColor,
         ),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: width / 9, vertical: 6),
+          padding: EdgeInsets.symmetric(horizontal: 25, vertical: 6),
           child: Text(
             text,
             style: TextStyle(
