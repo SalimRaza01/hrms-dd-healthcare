@@ -115,7 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     hasPermission = permissionStatus.isGranted;
   } else if (Platform.isIOS) {
-    hasPermission = true; // image_picker handles the permission for PhotoLibrary automatically
+    hasPermission = true;
   }
 
   if (hasPermission) {
@@ -762,93 +762,96 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+Future<void> logoutMethod(BuildContext context, double height) {
+  return showDialog<void>(
+    barrierColor: AppColor.barrierColor.withOpacity(0.8),
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: AppColor.mainFGColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          'Confirm Logout',
+          style: TextStyle(
+            fontSize: height * 0.024,
+            fontWeight: FontWeight.bold,
+            color: AppColor.mainTextColor,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to logout?',
+          style: TextStyle(
+            fontSize: height * 0.017,
+            color: AppColor.mainTextColor2,
+          ),
+        ),
+        actionsPadding: const EdgeInsets.only(bottom: 12, left: 20, right: 20),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          Row(
+            children: [
+              // YES button
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await logout();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => SplashScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    "Yes",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: height * 0.018,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              // NO button
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppColor.borderColor),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Text(
+                    "No",
+                    style: TextStyle(
+                      color: AppColor.mainTextColor,
+                      fontWeight: FontWeight.w500,
+                      fontSize: height * 0.018,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          )
+        ],
+      );
+    },
+  );
+}
 
-  Future<void> logoutMethod(BuildContext context, double height) {
-    return showDialog<void>(
-      barrierColor: AppColor.barrierColor.withOpacity(0.8),
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: AppColor.mainFGColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Text(
-            'Confirm Logout',
-            style: TextStyle(
-              fontSize: height * 0.024,
-              fontWeight: FontWeight.bold,
-              color: AppColor.mainTextColor,
-            ),
-          ),
-          content: Text(
-            'Are you sure you want to logout?',
-            style: TextStyle(
-              fontSize: height * 0.017,
-              color: AppColor.mainTextColor2,
-            ),
-          ),
-          actionsPadding:
-              const EdgeInsets.only(bottom: 12, left: 20, right: 20),
-          actionsAlignment: MainAxisAlignment.spaceBetween,
-          actions: [
-            // YES button
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () async {
-                  Navigator.pop(context);
-                  await logout();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => SplashScreen()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  "Yes",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: height * 0.018,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            // NO button
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: AppColor.borderColor),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: Text(
-                  "No",
-                  style: TextStyle(
-                    color: AppColor.mainTextColor,
-                    fontWeight: FontWeight.w500,
-                    fontSize: height * 0.018,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

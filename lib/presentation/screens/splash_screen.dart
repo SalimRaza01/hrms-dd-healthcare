@@ -1,8 +1,12 @@
 // ignore_for_file: unused_field
 
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hrms/core/services/background_service.dart';
 import '../authentication/login_screen.dart';
 import 'new_onbaording.dart';
 import 'bottom_navigation.dart';
@@ -21,6 +25,7 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _fadeAnim;
   late AnimationController _controller;
   late AnimationController _animationController;
+  final locationService = FlutterBackgroundService();
 
   @override
   void initState() {
@@ -30,6 +35,15 @@ class _SplashScreenState extends State<SplashScreen>
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+
+    if (_authBox.get('ServiceRunning') != null &&  _authBox.get('ServiceRunning') == true) {
+      if (Platform.isAndroid) {
+        locationService.invoke('setAsForeground');
+        locationService.startService();
+      } else {
+        startIosForegroundTracking();
+      }
+    }
 
     _controller = AnimationController(
       vsync: this,

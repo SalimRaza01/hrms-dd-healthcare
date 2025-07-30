@@ -13,6 +13,8 @@ import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geocoding/geocoding.dart';
 
+StreamSubscription<geo.Position>? _iosPositionStream;
+
 final FlutterLocalNotificationsPlugin plugin =
     FlutterLocalNotificationsPlugin();
 
@@ -213,7 +215,7 @@ void onStart(ServiceInstance service) async {
   geo.Geolocator.getPositionStream(
     locationSettings: geo.LocationSettings(
       accuracy: geo.LocationAccuracy.bestForNavigation,
-      distanceFilter: 50,
+      distanceFilter: 30,
     ),
   ).listen((position) {
     handleLocationUpdate(position);
@@ -221,4 +223,130 @@ void onStart(ServiceInstance service) async {
   }, onError: (e) {
     debugPrint("❌ Location error: $e");
   });
+}
+
+
+void startIosForegroundTracking() async {
+  final trackBox = await Hive.openBox('trackBox');
+  final markerBox = await Hive.openBox('markerBox');
+
+  LatLng? _previousLocation;
+  LatLng? _lastStationaryLocation;
+  DateTime? _stationaryStartTime;
+  DateTime? _lastStopTime;
+  bool _isStopped = false;
+  bool _hasLoggedStart = false;
+  bool _hasLoggedMovingAfterStop = false;
+
+  _iosPositionStream = geo.Geolocator.getPositionStream(
+    locationSettings: geo.LocationSettings(
+      accuracy: geo.LocationAccuracy.bestForNavigation,
+      distanceFilter: 50,
+    ),
+  ).listen((position) async {
+    final now = DateTime.now();
+    final current = LatLng(position.latitude, position.longitude);
+    final timestamp = now.toIso8601String();
+
+    final distance = _previousLocation != null
+        ? Distance().as(LengthUnit.Meter, _previousLocation!, current)
+        : 0.0;
+
+    if (_previousLocation != null && distance < 10) {
+      print('📉 Ignored jitter: $distance m');
+      return;
+    }
+
+    await trackBox.add({
+      'lat': current.latitude,
+      'lng': current.longitude,
+      'timestamp': timestamp,
+    });
+
+    final placemarks = await placemarkFromCoordinates(
+      current.latitude,
+      current.longitude,
+    );
+    final mark = placemarks.first;
+    final locality = mark.locality ?? mark.subAdministrativeArea ?? 'Unknown';
+    final subLocality =
+        mark.subLocality ?? mark.subAdministrativeArea ?? 'Unknown';
+
+    final isStationary = _lastStationaryLocation != null &&
+        Distance().as(LengthUnit.Meter, _lastStationaryLocation!, current) <= 50;
+
+    if (!_hasLoggedStart) {
+      await markerBox.add({
+        'type': 'start',
+        'lat': current.latitude,
+        'lng': current.longitude,
+        'time': DateFormat.Hm().format(now),
+        'locality': locality,
+        'subLocality': subLocality,
+        'timestamp': timestamp,
+      });
+      print('📍 iOS Start marker at $current');
+      _hasLoggedStart = true;
+      _previousLocation = current;
+      _stationaryStartTime = now;
+      _lastStationaryLocation = current;
+      return;
+    }
+
+    if (isStationary) {
+      _stationaryStartTime ??= now;
+      if (!_isStopped && now.difference(_stationaryStartTime!).inMinutes >= 5) {
+        final stopDuration = _lastStopTime != null
+            ? now.difference(_lastStopTime!)
+            : Duration.zero;
+
+        await markerBox.add({
+          'type': 'stopped',
+          'lat': current.latitude,
+          'lng': current.longitude,
+          'time': DateFormat.Hm().format(now),
+          'locality': locality,
+          'subLocality': subLocality,
+          'duration':
+              '${stopDuration.inMinutes}m ${stopDuration.inSeconds % 60}s',
+          'timestamp': timestamp,
+        });
+
+        print('🛑 iOS Stopped marker at $current');
+        _lastStopTime = now;
+        _isStopped = true;
+        _hasLoggedMovingAfterStop = false;
+      }
+    } else {
+      _stationaryStartTime = now;
+      _lastStationaryLocation = current;
+
+      if (_isStopped || !_hasLoggedMovingAfterStop) {
+        await markerBox.add({
+          'type': 'moving',
+          'lat': current.latitude,
+          'lng': current.longitude,
+          'time': DateFormat.Hm().format(now),
+          'locality': locality,
+          'subLocality': subLocality,
+          'distance': distance.toStringAsFixed(2),
+          'timestamp': timestamp,
+        });
+        print('🚶 iOS Moving marker at $current');
+        _hasLoggedMovingAfterStop = true;
+      }
+
+      _isStopped = false;
+    }
+
+    _previousLocation = current;
+  }, onError: (e) {
+    debugPrint("❌ iOS tracking error: $e");
+  });
+}
+
+void stopIosForegroundTracking() {
+  _iosPositionStream?.cancel();
+  _iosPositionStream = null;
+  print("🛑 iOS foreground tracking stopped");
 }

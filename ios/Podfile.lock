@@ -1,6 +1,4 @@
 PODS:
-  - app_settings (5.1.1):
-    - Flutter
   - camera_avfoundation (0.0.1):
     - Flutter
   - device_info_plus (0.0.1):
@@ -71,6 +69,8 @@ PODS:
     - Flutter
   - open_file_ios (0.0.1):
     - Flutter
+  - open_settings_plus (0.0.1):
+    - Flutter
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -90,7 +90,6 @@ PODS:
   - Turf (4.0.0)
 
 DEPENDENCIES:
-  - app_settings (from `.symlinks/plugins/app_settings/ios`)
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
@@ -105,6 +104,7 @@ DEPENDENCIES:
   - mapbox_maps_flutter (from `.symlinks/plugins/mapbox_maps_flutter/ios`)
   - native_device_orientation (from `.symlinks/plugins/native_device_orientation/ios`)
   - open_file_ios (from `.symlinks/plugins/open_file_ios/ios`)
+  - open_settings_plus (from `.symlinks/plugins/open_settings_plus/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
@@ -123,8 +123,6 @@ SPEC REPOS:
     - Turf
 
 EXTERNAL SOURCES:
-  app_settings:
-    :path: ".symlinks/plugins/app_settings/ios"
   camera_avfoundation:
     :path: ".symlinks/plugins/camera_avfoundation/ios"
   device_info_plus:
@@ -153,6 +151,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/native_device_orientation/ios"
   open_file_ios:
     :path: ".symlinks/plugins/open_file_ios/ios"
+  open_settings_plus:
+    :path: ".symlinks/plugins/open_settings_plus/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
@@ -165,7 +165,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
 
 SPEC CHECKSUMS:
-  app_settings: 58017cd26b604ae98c3e65acbdd8ba173703cc82
   camera_avfoundation: adb0207d868b2d873e895371d88448399ab78d87
   device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
@@ -185,6 +184,7 @@ SPEC CHECKSUMS:
   MapboxMaps: c553f390b0e0eed0cc68710a6cee7ba5fa3143b3
   native_device_orientation: 348b10c346a60ebbc62fb235a4fdb5d1b61a8f55
   open_file_ios: 461db5853723763573e140de3193656f91990d9e
+  open_settings_plus: 4bd848866fea2becc124581d868a6164cf768831
   package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2

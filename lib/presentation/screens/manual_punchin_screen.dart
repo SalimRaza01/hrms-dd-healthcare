@@ -10,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:hrms/core/services/background_service.dart';
 import 'package:hrms/core/utils/dialogbox_for_punchin.dart';
 import 'package:hrms/core/utils/export_track_report.dart';
 import 'package:intl/intl.dart';
@@ -39,7 +40,7 @@ class ManualPunchInScreen extends StatefulWidget {
 class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   final Box _authBox = Hive.box('authBox');
   CameraController? _cameraController;
-  final locationService = FlutterBackgroundService();
+
   File? _selfie;
   LatLng defaultLocation = LatLng(40.4168, -3.7038);
   LatLng? _currentLocation;
@@ -99,7 +100,8 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_authBox.get('bgActivityEnable') == false || _authBox.get('bgActivityEnable') == null) {
+    if (_authBox.get('bgActivityEnable') == false ||
+        _authBox.get('bgActivityEnable') == null) {
       _authBox.put('bgActivityEnable', true);
       Future.delayed(Duration.zero, () {
         showBackgroundPermissionDialog(context);
@@ -185,19 +187,6 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
           child: Icon(icon, color: color, size: 28),
         );
       }).toList();
-
-      // if (polylinePoints.isNotEmpty) {
-      //   final last = polylinePoints.last;
-
-      //   markers.add(
-      //     Marker(
-      //       width: 40,
-      //       height: 40,
-      //       point: last,
-      //       child: Icon(Icons.location_on, color: Colors.red, size: 36),
-      //     ),
-      //   );
-      // }
 
       setState(() {
         _polylines = polylinePoints;
@@ -356,6 +345,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   }
 
   Future<void> _punchIn() async {
+    setState(() => _isLoadingPI = true);
     var status = await Permission.camera.request();
     if (status.isGranted) {
       await _initializeCamera();
@@ -374,8 +364,13 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
       _authBox.put('punchLocation', location);
       await manualPunchIn(context, location, _authBox.get('selfie'));
 
-      locationService.invoke('setAsForeground');
-      locationService.startService();
+      if (Platform.isAndroid) {
+        print('android detected');
+        FlutterBackgroundService().invoke('setAsForeground');
+        FlutterBackgroundService().startService();
+      } else {
+        startIosForegroundTracking();
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.red,
@@ -429,7 +424,11 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
         'timestamp': timestamp,
       });
 
-      locationService.invoke('stopService');
+      if (Platform.isAndroid) {
+        FlutterBackgroundService().invoke('stopService');
+      } else {
+        stopIosForegroundTracking();
+      }
       await addPunchTrackHistory(context);
       await manualPunchOut(context, punchId, location);
 
@@ -452,7 +451,6 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
   ) async {
     String empID = _authBox.get('employeeId');
     String token = _authBox.get('token');
-    setState(() => _isLoadingPI = true);
 
     try {
       final response = await dio.post(punchinAction,
@@ -683,14 +681,13 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                       TileLayer(
                         urlTemplate:
                             "https://api.mapbox.com/styles/v1/mapbox/$selectedStyleUrl/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWVyb2ZpdCIsImEiOiJjbWN5cWF3ZzMwcGVmMnJxeGM1OHY0OWljIn0.MdIEJmSfJFwcTElUoetFUA",
-                        userAgentPackageName: 'com.mapbox.token',
+                        userAgentPackageName: 'com.ddhealthcare.hrms_app',
+                        tileDimension: 512,
+                        additionalOptions: {
+                          'accessToken':
+                              'pk.eyJ1IjoiYWVyb2ZpdCIsImEiOiJjbWN5cWF3ZzMwcGVmMnJxeGM1OHY0OWljIn0.MdIEJmSfJFwcTElUoetFUA',
+                        },
                       ),
-                      // TileLayer(
-                      //   urlTemplate:
-                      //       'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                      //   subdomains: ['a', 'b', 'c', 'd'],
-                      //   userAgentPackageName: 'com.ddhealthcare.hrms_app',
-                      // ),
                       Visibility(
                         visible: _polylines.isNotEmpty,
                         child: PolylineLayer(

@@ -126,6 +126,7 @@ class AuthProvider with ChangeNotifier {
         "password": passController,
       });
 
+print(response.data);
       if (response.statusCode == 200) {
         final responseData = response.data;
 
@@ -157,6 +158,7 @@ class AuthProvider with ChangeNotifier {
             MaterialPageRoute(builder: (context) => BottomNavigation()));
       } else {}
     } on DioException catch (e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.response!.data['message']),
