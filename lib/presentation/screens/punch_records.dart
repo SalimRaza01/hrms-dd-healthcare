@@ -123,7 +123,9 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                       ),
                     ),
                     Text(
-                      'Punch Records',
+                      date != null && date!.month != DateTime.now().month
+                          ? 'Generate Comp-Off'
+                          : 'Punch Records',
                       style: TextStyle(
                         fontSize: height * 0.018,
                         fontWeight: FontWeight.bold,
@@ -135,13 +137,13 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                   ],
                 ),
               ),
-              Visibility(
-                visible: date != null &&
-                    date!.month == DateTime.now().month &&
-                    date!.year == DateTime.now().year,
-                child: Column(
-                  children: [
-                    Container(
+              Column(
+                children: [
+                  Visibility(
+                    visible: date != null &&
+                        date!.month == DateTime.now().month &&
+                        date!.year == DateTime.now().year,
+                    child: Container(
                       decoration: BoxDecoration(
                         color: AppColor.mainFGColor,
                         borderRadius: BorderRadius.circular(5),
@@ -152,147 +154,152 @@ class _PunchRecordScreenState extends State<PunchRecordScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             _selectLeaveButton('Regularization', height, width),
-                            _selectLeaveButton('Generate Comp-Off', height, width),
+                            _selectLeaveButton(
+                                'Generate Comp-Off', height, width),
                           ],
                         ),
                       ),
                     ),
-                    SizedBox(height: height * 0.015),
-                    Visibility(
-                      visible: _selectedLeaveType == 'Generate Comp-Off',
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Card(
-                          color: AppColor.mainFGColor,
-                          elevation: 4,
-                          margin: EdgeInsets.all(0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          shadowColor: AppColor.shadowColor,
-                          child: Padding(
-                            padding: EdgeInsets.all(3),
-                            child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 10),
-                                    child: Text(
-                                      'Select Duration',
-                                      style: TextStyle(
-                                        fontSize: height * 0.015,
-                                        fontWeight: FontWeight.w400,
-                                        color: AppColor.mainTextColor,
-                                      ),
+                  ),
+                  SizedBox(height: height * 0.015),
+                  Visibility(
+                    visible: _selectedLeaveType == 'Generate Comp-Off' ||
+                        date != null && date!.month != DateTime.now().month,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Card(
+                        color: AppColor.mainFGColor,
+                        elevation: 4,
+                        margin: EdgeInsets.all(0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        shadowColor: AppColor.shadowColor,
+                        child: Padding(
+                          padding: EdgeInsets.all(3),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    'Select Duration',
+                                    style: TextStyle(
+                                      fontSize: height * 0.015,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppColor.mainTextColor,
                                     ),
                                   ),
-                                  SizedBox(width: width * 0.02),
-                                  _selectDurationButton('1', height, width),
-                                  _selectDurationButton('0.5', height, width),
-                                ]),
-                          ),
+                                ),
+                                SizedBox(width: width * 0.02),
+                                _selectDurationButton('1', height, width),
+                                _selectDurationButton('0.5', height, width),
+                              ]),
                         ),
                       ),
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColor.mainFGColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        child: SizedBox(
-                          height: height * 0.12,
-                          width: width,
-                          child: TextFormField(
-                            textAlignVertical: TextAlignVertical.top,
-                            keyboardType: TextInputType.multiline,
-                            maxLines: null,
-                            expands: true,
-                            controller: reasonController,
-                            style: TextStyle(
-                              overflow: TextOverflow.ellipsis,
-                              color: AppColor.mainTextColor,
-                            ),
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none),
-                              enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none),
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none),
-                              label: Text('Describe Reason'),
-                            ),
-                          ),
-                        ),
-                      ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColor.mainFGColor,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    SizedBox(height: height * 0.02),
-                    Visibility(
-                      visible: _selectedLeaveType == 'Regularization',
-                      child: Center(
-                        child: Text(
-                          'Regularization Limit - $maxRegularization',
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: SizedBox(
+                        height: height * 0.12,
+                        width: width,
+                        child: TextFormField(
+                          textAlignVertical: TextAlignVertical.top,
+                          keyboardType: TextInputType.multiline,
+                          maxLines: null,
+                          expands: true,
+                          controller: reasonController,
                           style: TextStyle(
-                            fontSize: height * 0.015,
-                            fontWeight: FontWeight.w400,
+                            overflow: TextOverflow.ellipsis,
                             color: AppColor.mainTextColor,
                           ),
+                          decoration: const InputDecoration(
+                            border:
+                                OutlineInputBorder(borderSide: BorderSide.none),
+                            enabledBorder:
+                                OutlineInputBorder(borderSide: BorderSide.none),
+                            focusedBorder:
+                                OutlineInputBorder(borderSide: BorderSide.none),
+                            label: Text('Describe Reason'),
+                          ),
                         ),
                       ),
                     ),
-                    SizedBox(height: height * 0.02),
-                    InkWell(
-                      onTap: () async {
-                        if (reasonController.text.isEmpty) {
-                          showSnackBar('Please describe the reason');
-                        } else if (_selectedLeaveType == 'Regularization') {
-                          if (widget.lateMinutes > 0 &&
-                              widget.lateMinutes <= 15) {
-                            await applyRegularize(
-                              context,
-                              widget.regularizationDate!,
-                              reasonController.text,
-                            );
-                          } else {
-                            showSnackBar(
-                              'Regularization can only be applied if late before ${_authBox.get('lateby') == '9:00' ? '09:30 AM' : _authBox.get('lateby') == '10:00' ? '10:30 AM' : _authBox.get('lateby') == '8:30' ? '09:00 AM' : ''}',
-                            );
-                          }
-                        } else if (_selectedLeaveType == 'Generate Comp-Off') {
-                          await applyCompoff(
-                              context,
-                              widget.regularizationDate!,
-                              reasonController.text,
-                              _selectedDuration);
+                  ),
+                  SizedBox(height: height * 0.02),
+                  Visibility(
+                    visible: _selectedLeaveType == 'Regularization' &&
+                        date != null &&
+                        date!.month == DateTime.now().month,
+                    child: Center(
+                      child: Text(
+                        'Regularization Limit - $maxRegularization',
+                        style: TextStyle(
+                          fontSize: height * 0.015,
+                          fontWeight: FontWeight.w400,
+                          color: AppColor.mainTextColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: height * 0.02),
+                  InkWell(
+                    onTap: () async {
+                      if (reasonController.text.isEmpty) {
+                        showSnackBar('Please describe the reason');
+                      } else if (_selectedLeaveType == 'Regularization' && date != null &&
+                          date!.month == DateTime.now().month ) {
+                        if (widget.lateMinutes > 0 &&
+                            widget.lateMinutes <= 15) {
+                          await applyRegularize(
+                            context,
+                            widget.regularizationDate!,
+                            reasonController.text,
+                          );
+                        } else {
+                          showSnackBar(
+                            'Regularization can only be applied if late before ${_authBox.get('lateby') == '9:00' ? '09:30 AM' : _authBox.get('lateby') == '10:00' ? '10:30 AM' : _authBox.get('lateby') == '8:30' ? '09:00 AM' : ''}',
+                          );
                         }
-                      },
-                      child: Center(
-                        child: Container(
-                          width: width / 2,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF40738D),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            child: Center(
-                              child: Text(
-                                'SUBMIT',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                      } else if (_selectedLeaveType == 'Generate Comp-Off') {
+                        await applyCompoff(context, widget.regularizationDate!,
+                            reasonController.text, _selectedDuration);
+                      } else if (date != null &&
+                          date!.month != DateTime.now().month && _selectedLeaveType == 'Regularization') {
+                        await applyCompoff(context, widget.regularizationDate!,
+                            reasonController.text, _selectedDuration);
+                      }
+                    },
+                    child: Center(
+                      child: Container(
+                        width: width / 2,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF40738D),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          child: Center(
+                            child: Text(
+                              'SUBMIT',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
               SizedBox(height: height * 0.016),
               Expanded(
