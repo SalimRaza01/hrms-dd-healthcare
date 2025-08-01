@@ -682,7 +682,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                         urlTemplate:
                             "https://api.mapbox.com/styles/v1/mapbox/$selectedStyleUrl/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWVyb2ZpdCIsImEiOiJjbWN5cWF3ZzMwcGVmMnJxeGM1OHY0OWljIn0.MdIEJmSfJFwcTElUoetFUA",
                         userAgentPackageName: 'com.ddhealthcare.hrms_app',
-                        tileDimension: 512,
+                 
                         additionalOptions: {
                           'accessToken':
                               'pk.eyJ1IjoiYWVyb2ZpdCIsImEiOiJjbWN5cWF3ZzMwcGVmMnJxeGM1OHY0OWljIn0.MdIEJmSfJFwcTElUoetFUA',

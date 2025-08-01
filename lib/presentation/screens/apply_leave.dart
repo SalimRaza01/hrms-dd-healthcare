@@ -64,6 +64,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       BuildContext context, String? _selectedLeaveType, String _selectedText) {
     DateTime now = DateTime.now();
     DateTime startOfMonth = DateTime(now.year, now.month, 1);
+    DateTime endOfMonth = DateTime(now.year, now.month + 1, 0);
 
     DateTime minDate;
     DateTime maxDate;
@@ -73,28 +74,32 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       maxDate = now.subtract(Duration(days: 1));
     } else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Casual')) {
-      DateTime quarterEndDate = getQuarterEndDate(now);
-      DateTime next7Days = now.add(Duration(days: 7));
-      maxDate = next7Days.isBefore(quarterEndDate) ? next7Days : quarterEndDate;
+      // DateTime quarterEndDate = getQuarterEndDate(now);
+      // DateTime next7Days = now.add(Duration(days: 7));
+      // maxDate = next7Days.isBefore(quarterEndDate) ? next7Days : quarterEndDate;
+      maxDate = endOfMonth;
 
       minDate = startOfMonth;
+    } else if (_selectedLeaveType != null &&
+        _selectedLeaveType.contains('Vendor')) {
+      // DateTime quarterEndDate = getQuarterEndDate(now);
+      // DateTime next7Days = now.add(Duration(days: 30));
+      // maxDate = next7Days.isBefore(quarterEndDate) ? next7Days : quarterEndDate;
+      maxDate = endOfMonth;
 
-      print("Quarter Ends: $quarterEndDate");
-      print("Max Leave Date for Casual Leave: $maxDate");
+      minDate = startOfMonth;
     } else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Comp-Off')) {
-      DateTime quarterEndDate = getQuarterEndDate(now);
-      DateTime next7Days = now.add(Duration(days: 2));
-      maxDate = next7Days.isBefore(quarterEndDate) ? next7Days : quarterEndDate;
+      // DateTime quarterEndDate = getQuarterEndDate(now);
+      // DateTime next7Days = now.add(Duration(days: 2));
+      // maxDate = next7Days.isBefore(quarterEndDate) ? next7Days : quarterEndDate;
+      maxDate = endOfMonth;
 
       minDate = startOfMonth;
-
-      print("Quarter Ends: $quarterEndDate");
-      print("Max Leave Date for Comp-Off Leave: $maxDate");
     } else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Earned')) {
       minDate = startOfMonth;
-      maxDate = now.add(Duration(days: 14));
+      maxDate = endOfMonth;
     } else {
       minDate = now;
       maxDate = DateTime(3000);
@@ -115,8 +120,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
 
           startDateController.text =
               DateFormat('yyyy-MM-dd').format(selectedDate);
-
-          print('Selected Start Date: ${startDateController.text}');
         });
       },
     );
@@ -130,19 +133,15 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
     DateTime? minDate;
     DateTime? maxDate;
 
-    // if (_selectedLeaveType != null && _selectedLeaveType.contains('Medical')) {
-    //   minDate = now.subtract(Duration(days: 30));
-    //   maxDate = now.subtract(Duration(days: 1));
-    // }
     if (_selectedLeaveType != null && _selectedLeaveType.contains('Medical')) {
       DateTime selectedStart = DateTime.parse(startDateController.text);
 
       minDate = selectedStart;
       DateTime today = DateTime.now();
-      maxDate = today.subtract(Duration(days: 1)); // Only till yesterday
+      maxDate = today.subtract(Duration(days: 1));
 
       if (selectedStart.isAfter(maxDate)) {
-        maxDate = selectedStart; // Only one day allowed
+        maxDate = selectedStart; 
       }
     } else if (_selectedLeaveType != null &&
         _selectedLeaveType.contains('Casual')) {
@@ -210,7 +209,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
       }
 
       if (_selectedLeaveType!.contains('Casual') ||
-          _selectedLeaveType!.contains('Comp-Off')) {
+          _selectedLeaveType!.contains('Comp-Off') ||
+          _selectedLeaveType!.contains('Vendor')) {
         if (_selectedText == 'Full Day' ||
             _selectedText == '1st Half' ||
             _selectedText == '2nd Half') {
@@ -239,11 +239,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
             showSnackBar('Please Describe Reason');
             return;
           } else {}
-          //else if (startDate.day == DateTime.now().day &&
-          //     DateTime.now().hour >= 9) {
-          //   return showSnackBar(
-          //       'Earned leave must be applied before 9 AM for today.');
-          // }
 
           int leaveDuration = endDate.difference(startDate).inDays + 1;
 
@@ -275,12 +270,6 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
 
         DateTime startDate = DateTime.parse(startDateController.text);
         DateTime endDate = DateTime.parse(endDateController.text);
-
-        // if (startDate.isBefore(DateTime.now().subtract(Duration(days: 7)))) {
-        //   showSnackBar(
-        //       'Medical leave can only be applied within the last 7 days');
-        //   return;
-        // }
 
         totalDays = endDate.difference(startDate).inDays + 1;
       }
@@ -316,15 +305,22 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
             context,
             DateFormat('yyyy-MM-dd').format(DateTime.now()).toString(),
             reasonController.text)
-        : applyLeave(
-            context,
-            _selectedLeaveType!,
-            startDateController.text,
-            endDateController.text,
-            totalDays.toString(),
-            reasonController.text,
-            _selectedText,
-          );
+        : _selectedLeaveType == 'Vendor Meeting'
+            ? applyVendorMeeting(
+                context,
+                startDateController.text,
+                reasonController.text,
+                totalDays.toString(),
+              )
+            : applyLeave(
+                context,
+                _selectedLeaveType!,
+                startDateController.text,
+                endDateController.text,
+                totalDays.toString(),
+                reasonController.text,
+                _selectedText,
+              );
   }
 
   void showSnackBar(String message) {
@@ -353,6 +349,7 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
         Leave('Earned Leave', earnedLeave!),
         Leave('Comp-Off Leave', compoffLeave!),
         Leave('Short-Leave', shortLeave!),
+        Leave('Vendor Meeting', '10000000')
       ];
     });
   }
@@ -489,7 +486,9 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                         listItemBuilder:
                             (context, item, isSelected, onItemSelect) {
                           return ListTile(
-                            title: Text('${item.name} - ${item.balance}'),
+                            title: Text(item.name.contains('Vendor')
+                                ? '${item.name}'
+                                : '${item.name} - ${item.balance}'),
                           );
                         },
                       ),
@@ -500,7 +499,8 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                             Visibility(
                               visible: _selectedLeaveType == 'Casual Leave' ||
                                   _selectedLeaveType == 'Earned Leave' ||
-                                  _selectedLeaveType == 'Comp-Off Leave',
+                                  _selectedLeaveType == 'Comp-Off Leave' ||
+                                  _selectedLeaveType == 'Vendor Meeting',
                               child: Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 12),
@@ -592,7 +592,11 @@ class _ApplyLeaveState extends State<ApplyLeave> with TickerProviderStateMixin {
                                               width),
                                           if (_selectedText == 'Full Day' &&
                                               _selectedLeaveType !=
-                                                  'Casual Leave' && _selectedLeaveType != 'Comp-Off Leave')
+                                                  'Casual Leave' &&
+                                              _selectedLeaveType !=
+                                                  'Comp-Off Leave' &&
+                                              _selectedLeaveType !=
+                                                  'Vendor Meeting')
                                             _buildDateSelection2(
                                                 endDateController
                                                         .text.isNotEmpty

@@ -126,7 +126,7 @@ class AuthProvider with ChangeNotifier {
         "password": passController,
       });
 
-print(response.data);
+      print(response.data);
       if (response.statusCode == 200) {
         final responseData = response.data;
 
@@ -198,7 +198,9 @@ Future<void> applyLeave(
                           ? 'shortLeave'
                           : leaveType == 'Comp-Off Leave'
                               ? 'compOffLeave'
-                              : null,
+                              : leaveType == 'Vendor Meeting'
+                                  ? 'vendor-meeting'
+                                  : null,
           "leaveStartDate": startDate,
           "leaveEndDate": _selectedText.contains('1st Half') ||
                   _selectedText.contains('2nd Half')
@@ -209,7 +211,8 @@ Future<void> applyLeave(
           "approvedBy": mgrId,
           "shift": leaveType == 'Casual Leave' ||
                   leaveType == 'Earned Leave' ||
-                  leaveType == 'Comp-Off Leave'
+                  leaveType == 'Comp-Off Leave' ||
+                  leaveType == 'Vendor Meeting'
               ? _selectedText
               : "",
           "location": leaveType == 'Medical Leave' ? _authBox.get('file') : ''
@@ -225,6 +228,7 @@ Future<void> applyLeave(
       Navigator.pop(context);
     }
   } on DioException catch (e) {
+    print('backend error ${e.response!.data}');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(e.response!.data['message']),
@@ -341,6 +345,46 @@ Future<void> applyShortLeave(
         ),
       );
       Provider.of<LeaveApplied>(context, listen: false).leaveappiedStatus(true);
+      Navigator.pop(context);
+    }
+  } on DioException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.response!.data['message']),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+Future<void> applyVendorMeeting(
+  BuildContext context,
+  String startDate,
+  String reason,
+  String totalDays,
+) async {
+  String empID = _authBox.get('employeeId');
+  String token = _authBox.get('token');
+
+  try {
+    final response = await dio.post('$vendorMeetingApi/$empID',
+        options: Options(headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        }),
+        data: {
+          "leaveType": "vendor-meeting",
+          "leaveStartDate": startDate,
+          "reason": reason,
+          "duration": totalDays,
+        });
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Request submitted successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
       Navigator.pop(context);
     }
   } on DioException catch (e) {
@@ -1035,5 +1079,3 @@ Uint8List decodeBase64Image(String base64String) {
 
   return base64Decode(base64String);
 }
-
-
