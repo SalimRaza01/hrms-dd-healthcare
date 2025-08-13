@@ -679,14 +679,17 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                     ),
                     children: [
                       TileLayer(
+                        // urlTemplate:
+                        //     "https://api.mapbox.com/styles/v1/mapbox/$selectedStyleUrl/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWVyb2ZpdCIsImEiOiJjbWN5cWF3ZzMwcGVmMnJxeGM1OHY0OWljIn0.MdIEJmSfJFwcTElUoetFUA",
+                        // userAgentPackageName: 'com.ddhealthcare.hrms_app',
+
+                        // additionalOptions: {
+                        //   'accessToken':
+                        //       'pk.eyJ1IjoiYWVyb2ZpdCIsImEiOiJjbWN5cWF3ZzMwcGVmMnJxeGM1OHY0OWljIn0.MdIEJmSfJFwcTElUoetFUA',
+                        // },
                         urlTemplate:
-                            "https://api.mapbox.com/styles/v1/mapbox/$selectedStyleUrl/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYWVyb2ZpdCIsImEiOiJjbWN5cWF3ZzMwcGVmMnJxeGM1OHY0OWljIn0.MdIEJmSfJFwcTElUoetFUA",
-                        userAgentPackageName: 'com.ddhealthcare.hrms_app',
-                 
-                        additionalOptions: {
-                          'accessToken':
-                              'pk.eyJ1IjoiYWVyb2ZpdCIsImEiOiJjbWN5cWF3ZzMwcGVmMnJxeGM1OHY0OWljIn0.MdIEJmSfJFwcTElUoetFUA',
-                        },
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.example.app',
                       ),
                       Visibility(
                         visible: _polylines.isNotEmpty,
@@ -837,7 +840,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Map Style",
+                              "Map Style (unavailable)",
                               style: TextStyle(
                                   fontSize: height * .018,
                                   fontWeight: FontWeight.bold),
@@ -1468,7 +1471,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Map Style",
+                       "Map Style (unavailable)",
                               style: TextStyle(
                                   fontSize: height * .018,
                                   fontWeight: FontWeight.bold),
