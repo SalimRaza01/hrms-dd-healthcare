@@ -1,6 +1,6 @@
 # DD - HRMS APP
+<img width="960" height="540" alt="file cover - 3" src="https://github.com/user-attachments/assets/d12c7c9d-b8e4-45d5-82ff-374331e87fc3" />
 
-![Group 5](https://github.com/user-attachments/assets/5e1ac24f-330e-49ad-9833-730e8c84920b)
 
 HRMS (Human Resource Management System) is a mobile application built using Flutter that streamlines employee management for organizations.
 

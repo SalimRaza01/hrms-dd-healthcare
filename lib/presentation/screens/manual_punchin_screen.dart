@@ -1471,7 +1471,7 @@ class _ManualPunchInScreenState extends State<ManualPunchInScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                       "Map Style (unavailable)",
+                              "Map Style (unavailable)",
                               style: TextStyle(
                                   fontSize: height * .018,
                                   fontWeight: FontWeight.bold),
